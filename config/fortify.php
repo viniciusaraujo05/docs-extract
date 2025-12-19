@@ -73,7 +73,10 @@ return [
     |
     */
 
-    'home' => '/pt/dashboard',
+    'home' => function () {
+        $locale = session('locale', config('app.locale', 'pt'));
+        return "/{$locale}/dashboard";
+    },
 
     /*
     |--------------------------------------------------------------------------

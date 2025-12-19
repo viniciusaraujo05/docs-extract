@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ExtractionController;
+use App\Http\Controllers\Api\TranslationController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ReportConfigurationController;
@@ -10,6 +11,9 @@ use Illuminate\Support\Facades\Route;
 // Locale routes (public)
 Route::get('locale/current', [LocaleController::class, 'current']);
 Route::post('locale/update', [LocaleController::class, 'update']);
+
+// Translation routes (public, cached in Redis)
+Route::get('translations/{locale}', [TranslationController::class, 'show']);
 
 // Protected API routes (using web session authentication)
 Route::middleware(['auth'])->group(function () {

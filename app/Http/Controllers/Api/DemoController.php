@@ -7,6 +7,7 @@ use App\Services\ExtractionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -27,15 +28,16 @@ class DemoController extends Controller
      */
     public function extract(Request $request)
     {
-        // Get client IP
         $ip = $request->ip();
-        $cacheKey = "demo_used_{$ip}";
+        $usageKey = $this->usageKey($ip);
+        $maxRequests = (int) config('demo.max_requests_per_window', 1);
+        $windowSeconds = (int) config('demo.window_seconds', 86400);
 
-        // Check if IP already used demo
-        if (Cache::has($cacheKey)) {
+        if ($this->hasExceededLimit($usageKey, $maxRequests)) {
             return response()->json([
-                'error' => 'Demo already used',
-                'message' => 'You have already used the demo. Please register to continue.',
+                'error' => 'Demo limit reached',
+                'message' => 'You have reached the demo limit for today. Please register to continue.',
+                'retry_after_seconds' => $this->secondsUntilReset($usageKey),
             ], 429);
         }
 
@@ -70,8 +72,7 @@ class DemoController extends Controller
             // Delete temporary file
             Storage::disk('local')->delete($path);
 
-            // Mark IP as used (cache for 24 hours)
-            Cache::put($cacheKey, true, now()->addDay());
+            $this->incrementUsage($usageKey, $windowSeconds);
 
             // Log demo usage
             Log::info('Demo extraction used', [
@@ -154,10 +155,46 @@ class DemoController extends Controller
     public function checkAvailability(Request $request)
     {
         $ip = $request->ip();
-        $cacheKey = "demo_used_{$ip}";
+        $usageKey = $this->usageKey($ip);
+        $maxRequests = (int) config('demo.max_requests_per_window', 1);
+
+        $remaining = max(0, $maxRequests - $this->currentUsage($usageKey));
 
         return response()->json([
-            'available' => !Cache::has($cacheKey),
+            'available' => $remaining > 0,
+            'remaining_requests' => $remaining,
+            'reset_in_seconds' => $this->secondsUntilReset($usageKey),
         ]);
+    }
+
+    private function usageKey(string $ip): string
+    {
+        return "demo:usage:{$ip}";
+    }
+
+    private function currentUsage(string $key): int
+    {
+        return (int) Redis::get($key);
+    }
+
+    private function hasExceededLimit(string $key, int $maxRequests): bool
+    {
+        return $this->currentUsage($key) >= $maxRequests;
+    }
+
+    private function incrementUsage(string $key, int $windowSeconds): void
+    {
+        $count = Redis::incr($key);
+
+        if ($count === 1) {
+            Redis::expire($key, $windowSeconds);
+        }
+    }
+
+    private function secondsUntilReset(string $key): ?int
+    {
+        $ttl = Redis::ttl($key);
+
+        return $ttl >= 0 ? $ttl : null;
     }
 }
