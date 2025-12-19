@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Textarea } from '@/components/ui/textarea';
 import { ChartCard, StatsCard, type ChartType } from '@/components/charts';
 import { ReportConfigurator } from '@/components/reports/ReportConfigurator';
 import { CalculatedFieldBuilder, type CalculatedField } from '@/components/reports/CalculatedFieldBuilder';
@@ -14,6 +15,7 @@ import { Head } from '@inertiajs/react';
 import { Download, FileText, BarChart3, Calculator, Loader2, Settings2, Table2, PieChart, Palette, Sparkles } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import * as XLSX from 'xlsx';
 
 interface SchemaField {
@@ -64,9 +66,7 @@ interface ReportsIndexProps {
     documentTypes: DocumentType[];
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Relatórios', href: '/dashboard' },
-];
+// Breadcrumbs will be translated in component
 
 const COLOR_PRESETS = [
     { name: 'Azul', value: 'hsl(var(--chart-1))' },
@@ -114,6 +114,11 @@ interface ReportConfig {
 }
 
 export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
+    const { t } = useTranslation();
+    
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: t('Reports'), href: '/dashboard' },
+    ];
     const [selectedTypeId, setSelectedTypeId] = useState<string>('');
     const [reportData, setReportData] = useState<ReportData | null>(null);
     const [loading, setLoading] = useState(false);
@@ -130,6 +135,9 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
     const [showAIAnalysis, setShowAIAnalysis] = useState(false);
     const [aiAnalysis, setAiAnalysis] = useState<any>(null);
     const [analyzingAI, setAnalyzingAI] = useState(false);
+    const [aiInstructions, setAiInstructions] = useState('');
+    const [hasSavedAnalysis, setHasSavedAnalysis] = useState(false);
+    const [loadingAnalysis, setLoadingAnalysis] = useState(false);
 
     const selectedType = documentTypes.find(t => t.id.toString() === selectedTypeId);
 
@@ -169,25 +177,42 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
             newColors[fieldName] = globalColor;
         });
         setChartColors(newColors);
-        toast.success('Cor global aplicada a todos os gráficos');
+        toast.success(t('Global color applied to all charts'));
     }, [reportData, globalColor]);
 
+    // Open saved analysis or start new one
+    const handleOpenAnalysis = useCallback(() => {
+        if (hasSavedAnalysis && aiAnalysis) {
+            setShowAIAnalysis(true);
+        } else {
+            // Just open modal, user will provide instructions there
+            setShowAIAnalysis(true);
+        }
+    }, [hasSavedAnalysis, aiAnalysis]);
+
     // Analyze report with AI
-    const handleAnalyzeWithAI = useCallback(async () => {
+    const handleAnalyzeWithAI = useCallback(async (instructionsToUse?: string) => {
         if (!selectedTypeId || !reportData) return;
 
+        const finalInstructions = instructionsToUse !== undefined ? instructionsToUse : aiInstructions;
+
         setAnalyzingAI(true);
-        setShowAIAnalysis(true);
-        setAiAnalysis(null);
 
         try {
+            const csrfToken =
+                document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content ?? '';
+
             const response = await fetch(`/api/reports/${selectedTypeId}/analyze-ai`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken,
                 },
+                body: JSON.stringify({
+                    instructions: finalInstructions.trim() || null,
+                }),
             });
 
             if (!response.ok) {
@@ -198,17 +223,17 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
             
             if (result.success) {
                 setAiAnalysis(result.analysis);
-                toast.success('Análise IA concluída com sucesso!');
+                setHasSavedAnalysis(true);
+                toast.success(t('Analysis completed successfully!'));
             } else {
                 throw new Error(result.error || 'Erro desconhecido');
             }
         } catch (error: any) {
             toast.error(error.message || 'Erro ao analisar relatório com IA');
-            setShowAIAnalysis(false);
         } finally {
             setAnalyzingAI(false);
         }
-    }, [selectedTypeId, reportData]);
+    }, [selectedTypeId, reportData, aiInstructions]);
 
     // Get visible fields from config
     const visibleFields = useMemo(() => {
@@ -332,11 +357,44 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
     useEffect(() => {
         if (selectedTypeId) {
             fetchReportData(selectedTypeId);
+            fetchLatestAnalysis(selectedTypeId);
             setShowConfigurator(false);
         } else {
             setReportData(null);
+            setAiAnalysis(null);
+            setHasSavedAnalysis(false);
         }
     }, [selectedTypeId]);
+
+    const fetchLatestAnalysis = useCallback(async (typeId: string) => {
+        setLoadingAnalysis(true);
+        try {
+            const response = await fetch(`/api/reports/${typeId}/latest-analysis`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success && result.has_analysis) {
+                    setHasSavedAnalysis(true);
+                    setAiAnalysis(result.analysis);
+                    if (result.instructions) {
+                        setAiInstructions(result.instructions);
+                    }
+                } else {
+                    setHasSavedAnalysis(false);
+                    setAiAnalysis(null);
+                }
+            }
+        } catch (error) {
+            console.error(t('Error fetching saved analysis'), error);
+        } finally {
+            setLoadingAnalysis(false);
+        }
+    }, []);
 
     const handleConfigChange = useCallback((config: ReportConfig) => {
         setCurrentConfig(config);
@@ -429,31 +487,31 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Relatórios" />
+            <Head title={t('Reports')} />
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold">Relatórios</h1>
+                        <h1 className="text-2xl font-bold">{t('Reports')}</h1>
                         <p className="text-muted-foreground">
-                            Visualize e exporte dados dos seus documentos
+                            {t('Manage and view your processed documents')}
                         </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap justify-end">
                         {reportData && (
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button variant="outline" size="sm">
                                         <Palette className="mr-2 h-4 w-4" />
-                                        Cor
+                                        {t('Color')}
                                     </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-80" align="end">
                                     <div className="space-y-4">
                                         <div>
-                                            <h4 className="font-medium text-sm mb-2">Cor dos Gráficos</h4>
+                                            <h4 className="font-medium text-sm mb-2">{t('Chart Color')}</h4>
                                             <p className="text-xs text-muted-foreground mb-3">
-                                                Selecione uma cor para aplicar a todos os gráficos
+                                                {t('Select a color to apply to all charts')}
                                             </p>
                                         </div>
                                         <div className="grid grid-cols-4 gap-2">
@@ -481,7 +539,7 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                                             className="w-full"
                                             size="sm"
                                         >
-                                            Aplicar a Todos os Gráficos
+                                            {t('Apply to All Charts')}
                                         </Button>
                                     </div>
                                 </PopoverContent>
@@ -494,29 +552,29 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                                 onClick={() => setShowConfigurator(!showConfigurator)}
                             >
                                 <Settings2 className="mr-2 h-4 w-4" />
-                                Configurar
+                                {t('Configure')}
                             </Button>
                         )}
                         {reportData && (
-                            <>
+                            <div className="flex items-center gap-2">
                                 <Button 
                                     size="sm" 
                                     variant="outline"
-                                    onClick={handleAnalyzeWithAI}
-                                    disabled={analyzingAI}
+                                    onClick={handleOpenAnalysis}
+                                    disabled={analyzingAI || loadingAnalysis}
                                 >
-                                    {analyzingAI ? (
+                                    {analyzingAI || loadingAnalysis ? (
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     ) : (
                                         <Sparkles className="mr-2 h-4 w-4" />
                                     )}
-                                    Análise IA
+                                    {hasSavedAnalysis ? t('View AI Analysis') : t('AI Analysis')}
                                 </Button>
                                 <Button size="sm" onClick={handleExportExcel}>
                                     <Download className="mr-2 h-4 w-4" />
-                                    Exportar Excel
+                                    {t('Export Excel')}
                                 </Button>
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -524,15 +582,15 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                 {/* Type Selector */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-lg">Selecionar Tipo de Documento</CardTitle>
+                        <CardTitle className="text-lg">{t('Select Document Model')}</CardTitle>
                         <CardDescription>
-                            Escolha um tipo de documento para visualizar os relatórios
+                            {t('Choose a document type to view the report')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Select value={selectedTypeId} onValueChange={setSelectedTypeId}>
                             <SelectTrigger className="w-full max-w-md">
-                                <SelectValue placeholder="Selecione um tipo de documento..." />
+                                <SelectValue placeholder={t('Select a document model...')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {documentTypes.map((type) => (
@@ -541,7 +599,7 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                                             <FileText className="h-4 w-4" />
                                             {type.name}
                                             <span className="text-muted-foreground">
-                                                ({type.documents_count} documentos)
+                                                ({type.documents_count} {t('documents')})
                                             </span>
                                         </div>
                                     </SelectItem>
@@ -551,7 +609,7 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                         
                         {documentTypes.length === 0 && (
                             <p className="text-sm text-muted-foreground mt-4">
-                                Nenhum tipo de documento encontrado. Crie documentos primeiro para gerar relatórios.
+                                {t('No document types found. Create documents first to generate reports.')}
                             </p>
                         )}
                     </CardContent>
@@ -583,12 +641,12 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                         {/* Stats Overview */}
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                             <StatsCard
-                                title="Total de Documentos"
+                                title={t('Total Documents')}
                                 value={reportData.totalDocuments}
                                 icon={FileText}
                             />
                             <StatsCard
-                                title="Campos Visíveis"
+                                title={t('Visible Fields')}
                                 value={visibleFields.length}
                                 icon={BarChart3}
                             />
@@ -612,11 +670,11 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                                 <TabsList>
                                     <TabsTrigger value="charts" className="gap-2">
                                         <PieChart className="h-4 w-4" />
-                                        Gráficos
+                                        {t('Charts')}
                                     </TabsTrigger>
                                     <TabsTrigger value="table" className="gap-2">
                                         <Table2 className="h-4 w-4" />
-                                        Lista
+                                        {t('Table')}
                                     </TabsTrigger>
                                 </TabsList>
 
@@ -624,7 +682,7 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                                 {activeView === 'table' && selectedType && (
                                     <div className="text-sm text-muted-foreground">
                                         {calculatedFields.length > 0 && (
-                                            <span>{calculatedFields.length} campo(s) calculado(s)</span>
+                                            <span>{calculatedFields.length} {t('calculated field(s)')}</span>
                                         )}
                                     </div>
                                 )}
@@ -640,9 +698,9 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
 
                                             let description = '';
                                             if (field.type === 'number') {
-                                                description = `Soma: ${formatNumber(field.sum!)} | Média: ${formatNumber(field.avg!)}`;
+                                                description = `${t('Sum:')} ${formatNumber(field.sum!)} | ${t('Average')}: ${formatNumber(field.avg!)}`;
                                             } else if (field.uniqueCount) {
-                                                description = `${field.uniqueCount} valores únicos`;
+                                                description = `${field.uniqueCount} ${t('unique values')}`;
                                             }
 
                                             return (
@@ -664,7 +722,7 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                                         <CardContent className="flex flex-col items-center justify-center py-12">
                                             <BarChart3 className="h-12 w-12 text-muted-foreground/50 mb-4" />
                                             <p className="text-muted-foreground">
-                                                Nenhum dado disponível para gerar gráficos
+                                                {t('No data available to generate charts')}
                                             </p>
                                         </CardContent>
                                     </Card>
@@ -708,14 +766,14 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                     <Card>
                         <CardContent className="flex flex-col items-center justify-center py-16">
                             <BarChart3 className="h-16 w-16 text-muted-foreground/30 mb-4" />
-                            <h3 className="text-lg font-medium mb-2">Selecione um Tipo de Documento</h3>
+                            <h3 className="text-lg font-medium mb-2">{t('Select a document model')}</h3>
                             <p className="text-muted-foreground text-center max-w-md">
-                                Escolha um tipo de documento acima para visualizar relatórios detalhados 
-                                com gráficos interativos e estatísticas dos dados extraídos.
+                                {t('Choose a document type above to view detailed reports with interactive charts and statistics from extracted data.')}
                             </p>
                         </CardContent>
                     </Card>
                 )}
+
 
                 {/* AI Analysis Modal */}
                 <AIAnalysisModal
@@ -724,6 +782,14 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                     analysis={aiAnalysis}
                     documentTypeName={selectedType?.name || ''}
                     loading={analyzingAI}
+                    onReanalyze={() => {
+                        setAiAnalysis(null);
+                    }}
+                    onAnalyze={(instructions) => {
+                        setAiInstructions(instructions);
+                        handleAnalyzeWithAI(instructions);
+                    }}
+                    instructions={aiInstructions}
                 />
             </div>
         </AppLayout>

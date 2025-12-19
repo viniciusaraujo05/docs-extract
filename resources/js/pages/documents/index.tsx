@@ -33,20 +33,13 @@ import {
     CheckSquare,
     Square
 } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Documentos', href: '/documents' },
-];
+// Breadcrumbs will be translated in the component
 
-const statusConfig = {
-    pending: { label: 'Pendente', variant: 'secondary' as const, icon: Clock, color: 'text-amber-600 bg-amber-50 border-amber-200' },
-    processing: { label: 'A processar', variant: 'default' as const, icon: Loader2, color: 'text-blue-600 bg-blue-50 border-blue-200' },
-    completed: { label: 'Concluído', variant: 'default' as const, icon: CheckCircle, color: 'text-green-600 bg-green-50 border-green-200' },
-    failed: { label: 'Falhou', variant: 'destructive' as const, icon: XCircle, color: 'text-red-600 bg-red-50 border-red-200' },
-};
+// Status config will use translations
 
 function formatFileSize(bytes: number): string {
     if (bytes < 1024) return bytes + ' B';
@@ -72,7 +65,7 @@ function formatDateTime(dateString: string): string {
     });
 }
 
-function getRelativeTime(dateString: string): string {
+function getRelativeTime(dateString: string, t: (key: string) => string): string {
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -80,10 +73,10 @@ function getRelativeTime(dateString: string): string {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'Agora mesmo';
-    if (diffMins < 60) return `Há ${diffMins} min`;
-    if (diffHours < 24) return `Há ${diffHours}h`;
-    if (diffDays < 7) return `Há ${diffDays} dias`;
+    if (diffMins < 1) return t('Just now');
+    if (diffMins < 60) return `${diffMins} ${t('min ago')}`;
+    if (diffHours < 24) return `${diffHours} ${t('h ago')}`;
+    if (diffDays < 7) return `${diffDays} ${t('days ago')}`;
     return formatDate(dateString);
 }
 
@@ -100,9 +93,19 @@ interface DocumentCardProps {
     onSelect: (id: number) => void;
     onDelete: (id: number) => void;
     index: number;
+    locale: string;
 }
 
-function DocumentCard({ document, isSelected, onSelect, onDelete, index }: DocumentCardProps) {
+function DocumentCard({ document, isSelected, onSelect, onDelete, index, locale }: DocumentCardProps) {
+    const { t } = useTranslation();
+    
+    const statusConfig = {
+        pending: { label: t('Pending'), variant: 'secondary' as const, icon: Clock, color: 'text-amber-600 bg-amber-50 border-amber-200' },
+        processing: { label: t('Processing'), variant: 'default' as const, icon: Loader2, color: 'text-blue-600 bg-blue-50 border-blue-200' },
+        completed: { label: t('Completed'), variant: 'default' as const, icon: CheckCircle, color: 'text-green-600 bg-green-50 border-green-200' },
+        failed: { label: t('Failed'), variant: 'destructive' as const, icon: XCircle, color: 'text-red-600 bg-red-50 border-red-200' },
+    };
+    
     const status = statusConfig[document.status];
     const StatusIcon = status.icon;
     const FileIcon = getFileIcon(document.mime_type);
@@ -113,7 +116,7 @@ function DocumentCard({ document, isSelected, onSelect, onDelete, index }: Docum
         if (target.closest('button') || target.closest('[role="checkbox"]')) {
             return;
         }
-        router.visit(`/documents/${document.id}`);
+        router.visit(`/${locale}/documents/${document.id}`);
     };
 
     return (
@@ -190,7 +193,7 @@ function DocumentCard({ document, isSelected, onSelect, onDelete, index }: Docum
                 <div className="flex items-center justify-between">
                     <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        {getRelativeTime(document.created_at)}
+                        {getRelativeTime(document.created_at, t)}
                     </span>
                     <span className="text-[10px]">{formatFileSize(document.file_size)}</span>
                 </div>
@@ -205,12 +208,12 @@ function DocumentCard({ document, isSelected, onSelect, onDelete, index }: Docum
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                                <Link href={`/documents/${document.id}`}>
+                                <Link href={`/${locale}/documents/${document.id}`}>
                                     <Eye className="h-3.5 w-3.5" />
                                 </Link>
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Ver detalhes</TooltipContent>
+                        <TooltipContent>{t('View details')}</TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
                 
@@ -229,7 +232,7 @@ function DocumentCard({ document, isSelected, onSelect, onDelete, index }: Docum
                                 <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                         </TooltipTrigger>
-                        <TooltipContent>Eliminar</TooltipContent>
+                        <TooltipContent>{t('Delete')}</TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
             </div>
@@ -238,6 +241,31 @@ function DocumentCard({ document, isSelected, onSelect, onDelete, index }: Docum
 }
 
 export default function DocumentsIndex({ documents, documentTypes = [] }: DocumentsIndexProps) {
+    const { t } = useTranslation();
+    const [locale, setLocale] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('selected-locale') || 'pt';
+        }
+        return 'pt';
+    });
+
+    useEffect(() => {
+        const savedLocale = localStorage.getItem('selected-locale') || 'pt';
+        setLocale(savedLocale);
+    }, []);
+    
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: t('Dashboard'), href: `/${locale}/dashboard` },
+        { title: t('Documents'), href: `/${locale}/documents` },
+    ];
+    
+    const statusConfig = {
+        pending: { label: t('Pending'), variant: 'secondary' as const, icon: Clock, color: 'text-amber-600 bg-amber-50 border-amber-200' },
+        processing: { label: t('Processing'), variant: 'default' as const, icon: Loader2, color: 'text-blue-600 bg-blue-50 border-blue-200' },
+        completed: { label: t('Completed'), variant: 'default' as const, icon: CheckCircle, color: 'text-green-600 bg-green-50 border-green-200' },
+        failed: { label: t('Failed'), variant: 'destructive' as const, icon: XCircle, color: 'text-red-600 bg-red-50 border-red-200' },
+    };
+    
     // State
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedType, setSelectedType] = useState<string>('all');
@@ -325,45 +353,82 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
     }, [filteredDocuments, selectedIds.size]);
 
     const handleDelete = useCallback((id: number) => {
-        if (confirm('Tem a certeza que deseja eliminar este documento?')) {
-            router.delete(`/documents/${id}`, {
-                onSuccess: () => {
-                    toast.success('Documento eliminado com sucesso!');
-                    setSelectedIds(prev => {
-                        const next = new Set(prev);
-                        next.delete(id);
-                        return next;
-                    });
-                },
-                onError: () => {
-                    toast.error('Erro ao eliminar documento');
-                },
-            });
-        }
-    }, []);
+        toast((toastId) => (
+            <div className="flex flex-col gap-2">
+                <p>{t('Are you sure you want to delete this document?')}</p>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => {
+                            toast.dismiss(toastId);
+                            router.delete(`/${locale}/documents/${id}`, {
+                                onSuccess: () => {
+                                    toast.success(t('Document deleted successfully!'));
+                                    setSelectedIds(prev => {
+                                        const next = new Set(prev);
+                                        next.delete(id);
+                                        return next;
+                                    });
+                                },
+                                onError: () => {
+                                    toast.error(t('Error deleting document'));
+                                },
+                            });
+                        }}
+                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                    >
+                        {t('Delete')}
+                    </button>
+                    <button
+                        onClick={() => toast.dismiss(toastId)}
+                        className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                    >
+                        {t('Cancel')}
+                    </button>
+                </div>
+            </div>
+        ));
+    }, [locale, t]);
 
     const handleDeleteSelected = useCallback(() => {
         if (selectedIds.size === 0) return;
         
-        if (confirm(`Tem a certeza que deseja eliminar ${selectedIds.size} documento(s)?`)) {
-            // Delete one by one (could be optimized with batch endpoint)
-            const ids = Array.from(selectedIds);
-            let completed = 0;
-            
-            ids.forEach(id => {
-                router.delete(`/documents/${id}`, {
-                    preserveScroll: true,
-                    onSuccess: () => {
-                        completed++;
-                        if (completed === ids.length) {
-                            toast.success(`${ids.length} documento(s) eliminado(s)!`);
-                            setSelectedIds(new Set());
-                        }
-                    },
-                });
-            });
-        }
-    }, [selectedIds]);
+        toast((toastId) => (
+            <div className="flex flex-col gap-2">
+                <p>{t('Are you sure you want to delete {{count}} document(s)?', { count: selectedIds.size })}</p>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => {
+                            toast.dismiss(toastId);
+                            const ids = Array.from(selectedIds);
+                            let completed = 0;
+                            
+                            ids.forEach(id => {
+                                router.delete(`/${locale}/documents/${id}`, {
+                                    preserveScroll: true,
+                                    onSuccess: () => {
+                                        completed++;
+                                        if (completed === ids.length) {
+                                            toast.success(t('{{count}} document(s) deleted!', { count: ids.length }));
+                                            setSelectedIds(new Set());
+                                        }
+                                    },
+                                });
+                            });
+                        }}
+                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                    >
+                        {t('Delete')}
+                    </button>
+                    <button
+                        onClick={() => toast.dismiss(toastId)}
+                        className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                    >
+                        {t('Cancel')}
+                    </button>
+                </div>
+            </div>
+        ));
+    }, [selectedIds, locale, t]);
 
     const clearFilters = useCallback(() => {
         setSearchQuery('');
@@ -375,27 +440,27 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Documentos" />
+            <Head title={t('Documents')} />
             <div className="flex h-full flex-1 flex-col gap-6 p-4 lg:p-6">
                 {/* Header */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-in fade-in-0 slide-in-from-top-4 duration-500">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Documentos</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">{t('Documents')}</h1>
                         <p className="text-muted-foreground">
-                            Gerir e visualizar os seus documentos processados
+                            {t('Manage and view your processed documents')}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button variant="outline" size="sm" asChild className="hidden sm:flex">
-                            <Link href="/document-types">
+                            <Link href={`/${locale}/document-types`}>
                                 <Settings2 className="mr-2 h-4 w-4" />
-                                Modelos
+                                {t('Models')}
                             </Link>
                         </Button>
                         <Button asChild className="shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all">
-                            <Link href="/documents/create">
+                            <Link href={`/${locale}/documents/create`}>
                                 <Plus className="mr-2 h-4 w-4" />
-                                Novo Documento
+                                {t('New Document')}
                             </Link>
                         </Button>
                     </div>
@@ -410,7 +475,7 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{documents.data.length}</p>
-                                <p className="text-xs text-muted-foreground">Total</p>
+                                <p className="text-xs text-muted-foreground">{t('Total')}</p>
                             </div>
                         </div>
                     </Card>
@@ -421,7 +486,7 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{documents.data.filter(d => d.status === 'completed').length}</p>
-                                <p className="text-xs text-muted-foreground">Concluídos</p>
+                                <p className="text-xs text-muted-foreground">{t('Completed')}</p>
                             </div>
                         </div>
                     </Card>
@@ -432,7 +497,7 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{documents.data.filter(d => d.status === 'pending' || d.status === 'processing').length}</p>
-                                <p className="text-xs text-muted-foreground">Pendentes</p>
+                                <p className="text-xs text-muted-foreground">{t('Pending')}</p>
                             </div>
                         </div>
                     </Card>
@@ -443,7 +508,7 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{types.length}</p>
-                                <p className="text-xs text-muted-foreground">Modelos</p>
+                                <p className="text-xs text-muted-foreground">{t('Models')}</p>
                             </div>
                         </div>
                     </Card>
@@ -457,7 +522,7 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                             <div className="relative flex-1 max-w-md">
                                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                 <Input
-                                    placeholder="Pesquisar documentos..."
+                                    placeholder={t('Search documents...')}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="pl-9 pr-9"
@@ -478,10 +543,10 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                             <Select value={selectedType} onValueChange={setSelectedType}>
                                 <SelectTrigger className="w-full sm:w-[180px]">
                                     <Filter className="mr-2 h-4 w-4" />
-                                    <SelectValue placeholder="Modelo" />
+                                    <SelectValue placeholder={t('Model')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Todos os modelos</SelectItem>
+                                    <SelectItem value="all">{t('All models')}</SelectItem>
                                     {types.map(type => (
                                         <SelectItem key={type.id} value={type.id.toString()}>
                                             {type.name}
@@ -493,14 +558,14 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                             {/* Status Filter */}
                             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                                 <SelectTrigger className="w-full sm:w-[160px]">
-                                    <SelectValue placeholder="Estado" />
+                                    <SelectValue placeholder={t('State')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Todos os estados</SelectItem>
-                                    <SelectItem value="completed">Concluídos</SelectItem>
-                                    <SelectItem value="pending">Pendentes</SelectItem>
-                                    <SelectItem value="processing">A processar</SelectItem>
-                                    <SelectItem value="failed">Falhados</SelectItem>
+                                    <SelectItem value="all">{t('All states')}</SelectItem>
+                                    <SelectItem value="completed">{t('Completed')}</SelectItem>
+                                    <SelectItem value="pending">{t('Pending')}</SelectItem>
+                                    <SelectItem value="processing">{t('Processing')}</SelectItem>
+                                    <SelectItem value="failed">{t('Failed')}</SelectItem>
                                 </SelectContent>
                             </Select>
 
@@ -511,16 +576,16 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="date">Data</SelectItem>
-                                    <SelectItem value="name">Nome</SelectItem>
-                                    <SelectItem value="size">Tamanho</SelectItem>
+                                    <SelectItem value="date">{t('Date')}</SelectItem>
+                                    <SelectItem value="name">{t('Name')}</SelectItem>
+                                    <SelectItem value="size">{t('Size')}</SelectItem>
                                 </SelectContent>
                             </Select>
 
                             {hasActiveFilters && (
                                 <Button variant="ghost" size="sm" onClick={clearFilters} className="shrink-0">
                                     <X className="mr-2 h-4 w-4" />
-                                    Limpar
+                                    {t('Clear')}
                                 </Button>
                             )}
                         </div>
@@ -536,12 +601,12 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                                 {selectedIds.size === filteredDocuments.length && filteredDocuments.length > 0 ? (
                                     <>
                                         <CheckSquare className="mr-2 h-4 w-4" />
-                                        Desmarcar
+                                        {t('Deselect')}
                                     </>
                                 ) : (
                                     <>
                                         <Square className="mr-2 h-4 w-4" />
-                                        Selecionar
+                                        {t('Select')}
                                     </>
                                 )}
                             </Button>
@@ -554,7 +619,7 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                                     className="shrink-0 animate-in fade-in-0 zoom-in-95"
                                 >
                                     <Trash2 className="mr-2 h-4 w-4" />
-                                    Eliminar ({selectedIds.size})
+                                    {t('Delete')} ({selectedIds.size})
                                 </Button>
                             )}
                         </div>
@@ -565,13 +630,13 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                 <div className="flex items-center justify-between text-sm text-muted-foreground animate-in fade-in-0 duration-300" style={{ animationDelay: '300ms' }}>
                     <span>
                         {filteredDocuments.length === documents.data.length 
-                            ? `${documents.data.length} documento(s)`
-                            : `${filteredDocuments.length} de ${documents.data.length} documento(s)`
+                            ? `${documents.data.length} ${t('document(s)')}`
+                            : `${filteredDocuments.length} ${t('of')} ${documents.data.length} ${t('document(s)')}`
                         }
                     </span>
                     {selectedIds.size > 0 && (
                         <span className="text-primary font-medium">
-                            {selectedIds.size} selecionado(s)
+                            {selectedIds.size} {t('selected')}
                         </span>
                     )}
                 </div>
@@ -583,24 +648,23 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                             <FileText className="h-12 w-12 text-muted-foreground/50" />
                         </div>
                         <h3 className="text-lg font-semibold mb-2">
-                            {hasActiveFilters ? 'Nenhum resultado' : 'Sem documentos'}
+                            {hasActiveFilters ? t('No results') : t('No documents')}
                         </h3>
                         <p className="text-muted-foreground text-center max-w-sm mb-6">
                             {hasActiveFilters 
-                                ? 'Tente ajustar os filtros para encontrar o que procura.'
-                                : 'Comece por carregar o seu primeiro documento para extrair dados.'
-                            }
+                                ? t('Try adjusting the filters to find what you\'re looking for.')
+                                : t('Start by uploading your first document to extract data.')}
                         </p>
                         {hasActiveFilters ? (
                             <Button variant="outline" onClick={clearFilters}>
                                 <X className="mr-2 h-4 w-4" />
-                                Limpar filtros
+                                {t('Clear filters')}
                             </Button>
                         ) : (
                             <Button asChild>
-                                <Link href="/documents/create">
+                                <Link href={`/${locale}/documents/create`}>
                                     <Plus className="mr-2 h-4 w-4" />
-                                    Carregar Documento
+                                    {t('Upload Document')}
                                 </Link>
                             </Button>
                         )}
@@ -615,6 +679,7 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                                 onSelect={handleSelect}
                                 onDelete={handleDelete}
                                 index={index}
+                                locale={locale}
                             />
                         ))}
                     </div>

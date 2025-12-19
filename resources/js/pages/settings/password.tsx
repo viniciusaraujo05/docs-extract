@@ -11,32 +11,41 @@ import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { edit } from '@/routes/user-password';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Password settings',
-        href: edit().url,
-    },
-];
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function Password() {
+    const { t } = useTranslation();
+    const [locale, setLocale] = useState('pt');
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
 
+    useEffect(() => {
+        const savedLocale = localStorage.getItem('selected-locale') || 'pt';
+        setLocale(savedLocale);
+    }, []);
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: t('Password settings'),
+            href: `/${locale}/settings/password`,
+        },
+    ];
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Password settings" />
+            <Head title={t('Password settings')} />
 
             <SettingsLayout>
                 <div className="space-y-6">
                     <HeadingSmall
-                        title="Update password"
-                        description="Ensure your account is using a long, random password to stay secure"
+                        title={t('Update password')}
+                        description={t('Ensure your account is using a long, random password to stay secure')}
                     />
 
                     <Form
-                        {...PasswordController.update.form()}
+                        method="put"
+                        action="/settings/password"
                         options={{
                             preserveScroll: true,
                         }}

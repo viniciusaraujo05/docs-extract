@@ -13,6 +13,7 @@ import { Head, router } from '@inertiajs/react';
 import { ArrowLeft, Plus, Save, X } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const BREADCRUMBS: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -24,6 +25,7 @@ const BREADCRUMBS: BreadcrumbItem[] = [
  * Página de criação de tipo de documento
  */
 export default function DocumentTypesCreate() {
+    const { t } = useTranslation();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [fields, setFields] = useState<SchemaField[]>([]);
@@ -63,10 +65,10 @@ export default function DocumentTypesCreate() {
             fields: JSON.stringify(fields),
         }, {
             onSuccess: () => {
-                toast.success('Tipo de documento criado com sucesso!');
+                toast.success(t('Document type created successfully!'));
             },
             onError: () => {
-                toast.error('Erro ao criar tipo de documento');
+                toast.error(t('Error creating document type'));
             },
             onFinish: () => setSaving(false),
         });
@@ -74,13 +76,13 @@ export default function DocumentTypesCreate() {
 
     return (
         <AppLayout breadcrumbs={BREADCRUMBS}>
-            <Head title="Novo Tipo de Documento" />
+            <Head title={t('New Document Type')} />
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
                 {/* Header */}
                 <div>
-                    <h1 className="text-2xl font-bold">Novo Tipo de Documento</h1>
+                    <h1 className="text-2xl font-bold">{t('New Document Type')}</h1>
                     <p className="text-muted-foreground">
-                        Crie um template com campos pré-definidos para extrações mais rápidas
+                        {t('Create templates with pre-defined fields for faster extractions')}
                     </p>
                 </div>
 
@@ -88,27 +90,27 @@ export default function DocumentTypesCreate() {
                     {/* Basic Info */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Informações Básicas</CardTitle>
+                            <CardTitle>{t('Basic Information')}</CardTitle>
                             <CardDescription>
-                                Nome e descrição do tipo de documento
+                                {t('Name and description of the document type')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">Nome *</Label>
+                                <Label htmlFor="name">{t('Name *')}</Label>
                                 <Input
                                     id="name"
-                                    placeholder="Ex: Fatura de Fornecedor"
+                                    placeholder={t('e.g. Supplier Invoice')}
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     required
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="description">Descrição</Label>
+                                <Label htmlFor="description">{t('Description')}</Label>
                                 <Textarea
                                     id="description"
-                                    placeholder="Descreva quando usar este tipo de documento..."
+                                    placeholder={t('Optional description')}
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                     rows={3}
@@ -120,18 +122,18 @@ export default function DocumentTypesCreate() {
                     {/* Fields */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Campos a Extrair</CardTitle>
+                            <CardTitle>{t('Fields to Extract')}</CardTitle>
                             <CardDescription>
-                                Defina os campos que serão extraídos automaticamente
+                                {t('Define the fields that will be extracted automatically')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             {/* Current Fields */}
                             <div className="space-y-2">
-                                <Label>Campos Definidos ({fields.length})</Label>
+                                <Label>{t('Defined Fields')} ({fields.length})</Label>
                                 {fields.length === 0 ? (
                                     <p className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
-                                        Adicione pelo menos um campo abaixo
+                                        {t('Add at least one field below')}
                                     </p>
                                 ) : (
                                     <div className="flex flex-wrap gap-2">
@@ -164,15 +166,15 @@ export default function DocumentTypesCreate() {
 
                             {/* Add Field */}
                             <div className="space-y-3">
-                                <Label>Adicionar Campo</Label>
+                                <Label>{t('Add Field')}</Label>
                                 <div className="grid gap-2">
                                     <Input
-                                        placeholder="Nome interno (ex: total_vendas)"
+                                        placeholder={t('Internal name (e.g. total_sales)')}
                                         value={newFieldName}
                                         onChange={(e) => setNewFieldName(e.target.value)}
                                     />
                                     <Input
-                                        placeholder="Rótulo (ex: Total de Vendas)"
+                                        placeholder={t('Label (ex: Total de Vendas)')}
                                         value={newFieldLabel}
                                         onChange={(e) => setNewFieldLabel(e.target.value)}
                                     />
@@ -199,7 +201,7 @@ export default function DocumentTypesCreate() {
                                             className="flex-1"
                                         >
                                             <Plus className="mr-2 h-4 w-4" />
-                                            Adicionar
+                                            {t('Add')}
                                         </Button>
                                     </div>
                                 </div>
@@ -215,14 +217,14 @@ export default function DocumentTypesCreate() {
                             onClick={() => router.visit('/document-types')}
                         >
                             <ArrowLeft className="mr-2 h-4 w-4" />
-                            Cancelar
+                            {t('Cancel')}
                         </Button>
                         <Button
                             type="submit"
                             disabled={!name.trim() || fields.length === 0 || saving}
                         >
                             <Save className="mr-2 h-4 w-4" />
-                            {saving ? 'A guardar...' : 'Guardar Tipo'}
+                            {saving ? t('Creating...') : t('Create')}
                         </Button>
                     </div>
                 </form>

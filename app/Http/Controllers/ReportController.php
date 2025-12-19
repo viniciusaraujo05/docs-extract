@@ -8,6 +8,7 @@ use App\Actions\Reports\AggregateReportDataAction;
 use App\Actions\Reports\AnalyzeReportWithAIAction;
 use App\Actions\Reports\ExportReportAction;
 use App\Models\DocumentType;
+use App\Models\ReportAnalysis;
 use App\Models\User;
 use App\Repositories\DocumentRepository;
 use App\Repositories\DocumentTypeRepository;
@@ -112,6 +113,38 @@ final class ReportController extends Controller
     }
 
     /**
+     * Obtém a última análise IA salva para um tipo de documento.
+     */
+    public function getLatestAnalysis(Request $request, DocumentType $documentType): JsonResponse
+    {
+        $this->authorize('view', $documentType);
+
+        /** @var User $user */
+        $user = $request->user();
+
+        $latestAnalysis = ReportAnalysis::query()
+            ->where('user_id', $user->id)
+            ->where('document_type_id', $documentType->id)
+            ->latest()
+            ->first();
+
+        if (!$latestAnalysis) {
+            return response()->json([
+                'success' => true,
+                'has_analysis' => false,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'has_analysis' => true,
+            'analysis' => $latestAnalysis->analysis_data,
+            'instructions' => $latestAnalysis->instructions,
+            'created_at' => $latestAnalysis->created_at->toISOString(),
+        ]);
+    }
+
+    /**
      * Analisa os dados do relatório usando IA.
      */
     public function analyzeWithAI(Request $request, DocumentType $documentType): JsonResponse
@@ -119,6 +152,9 @@ final class ReportController extends Controller
         $this->authorize('view', $documentType);
 
         try {
+            /** @var User $user */
+            $user = $request->user();
+            $instructions = (string) $request->input('instructions', '');
             $documents = $this->documentRepository->getCompletedByDocumentType($documentType->id);
             $fields = $documentType->fields ?? [];
             $aggregatedData = $this->aggregateReportDataAction->execute($documents, $fields);
@@ -130,8 +166,19 @@ final class ReportController extends Controller
 
             $analysis = $this->analyzeReportWithAIAction->execute(
                 $reportData,
-                $documentType->name
+                $documentType->name,
+                $instructions !== '' ? $instructions : null,
+                $user->locale ?? app()->getLocale()
             );
+
+            // Salvar análise no banco de dados
+            ReportAnalysis::create([
+                'user_id' => $user->id,
+                'document_type_id' => $documentType->id,
+                'instructions' => $instructions !== '' ? $instructions : null,
+                'analysis_data' => $analysis,
+                'total_documents' => $documents->count(),
+            ]);
 
             return response()->json([
                 'success' => true,

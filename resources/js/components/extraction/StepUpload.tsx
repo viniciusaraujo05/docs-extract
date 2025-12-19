@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface StepUploadProps {
     file: File | null;
@@ -33,6 +34,7 @@ interface StepUploadProps {
     analysisCompleted: boolean;
     suggestedFieldsCount: number;
     error: string | null;
+    locale: string;
     onFileSelect: (file: File | null) => void;
     onTypeSelect: (typeId: number | null) => void;
     onNewTypeNameChange: (name: string) => void;
@@ -54,12 +56,14 @@ export function StepUpload({
     analysisCompleted,
     suggestedFieldsCount,
     error,
+    locale,
     onFileSelect,
     onTypeSelect,
     onNewTypeNameChange,
     onAnalyzeDocument,
     onNext,
 }: StepUploadProps) {
+    const { t } = useTranslation();
     const [dragActive, setDragActive] = useState(false);
     const [showNewType, setShowNewType] = useState(documentTypes.length === 0);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -121,10 +125,10 @@ export function StepUpload({
             <CardHeader className="text-center">
                 <CardTitle className="flex items-center justify-center gap-2 text-xl">
                     <Upload className="h-5 w-5" />
-                    Novo Documento
+                    {t('New Document')}
                 </CardTitle>
                 <CardDescription>
-                    Primeiro selecione o modelo, depois faça upload do documento
+                    {t('First select the template, then upload the document')}
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -145,11 +149,11 @@ export function StepUpload({
                             )}>
                                 {hasTypeSelected ? <CheckCircle2 className="h-4 w-4" /> : "1"}
                             </div>
-                            Modelo de Documento
+                            {t('Document Template')}
                         </Label>
                         {hasTypeSelected && (
                             <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
-                                {isNewType ? 'Novo Modelo' : `${selectedType?.fields?.length || 0} campos`}
+                                {isNewType ? t('New Template') : `${selectedType?.fields?.length || 0} ${t('fields')}`}
                             </Badge>
                         )}
                     </div>
@@ -166,7 +170,7 @@ export function StepUpload({
                                             "h-11",
                                             selectedTypeId && "border-green-500 bg-white dark:bg-background"
                                         )}>
-                                            <SelectValue placeholder="Selecione um modelo existente..." />
+                                            <SelectValue placeholder={t('Select an existing template...')} />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {documentTypes.map((type) => (
@@ -175,7 +179,7 @@ export function StepUpload({
                                                         <Tag className="h-4 w-4" />
                                                         {type.name}
                                                         <Badge variant="secondary" className="ml-2 text-xs">
-                                                            {type.fields?.length || 0} campos
+                                                            {type.fields?.length || 0} {t('fields')}
                                                         </Badge>
                                                     </div>
                                                 </SelectItem>
@@ -187,7 +191,7 @@ export function StepUpload({
                                         <div className="flex items-start gap-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 p-3 text-sm">
                                             <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
                                             <span className="text-blue-700 dark:text-blue-300">
-                                                Os campos já estão definidos. O documento será extraído usando esses campos.
+                                                {t('Fields are already defined. Document will be extracted using these fields.')}
                                             </span>
                                         </div>
                                     )}
@@ -209,13 +213,13 @@ export function StepUpload({
                                 className="w-full"
                             >
                                 <FolderPlus className="mr-2 h-4 w-4" />
-                                {documentTypes.length === 0 ? 'Criar Primeiro Modelo' : 'Criar Novo Modelo'}
+                                {documentTypes.length === 0 ? t('Create First Template') : t('Create New Template')}
                             </Button>
                         </div>
                     ) : (
                         <div className="space-y-3">
                             <Input
-                                placeholder="Nome do modelo (ex: Fatura, Recibo de Vencimento)"
+                                placeholder={t('Template name (e.g. Invoice, Payslip)')}
                                 value={newTypeName}
                                 onChange={(e) => onNewTypeNameChange(e.target.value)}
                                 className={cn(
@@ -228,7 +232,7 @@ export function StepUpload({
                                 <div className="flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 p-3 text-sm">
                                     <Sparkles className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
                                     <span className="text-amber-700 dark:text-amber-300">
-                                        A IA irá analisar o documento e detectar os campos automaticamente.
+                                        {t('AI will analyze the document and detect fields automatically.')}
                                     </span>
                                 </div>
                             )}
@@ -242,7 +246,7 @@ export function StepUpload({
                                         onNewTypeNameChange('');
                                     }}
                                 >
-                                    ← Usar modelo existente
+                                    ← {t('Use existing template')}
                                 </Button>
                             )}
                         </div>
@@ -308,9 +312,9 @@ export function StepUpload({
                                 <div className="space-y-1">
                                     <p className="text-sm font-medium">
                                         {hasTypeSelected ? (
-                                            <span className="text-primary">Clique ou arraste o documento</span>
+                                            <span className="text-primary">{t('Click or drag the document')}</span>
                                         ) : (
-                                            <span className="text-muted-foreground">Selecione o modelo primeiro</span>
+                                            <span className="text-muted-foreground">{t('Select the template first')}</span>
                                         )}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
@@ -338,7 +342,7 @@ export function StepUpload({
                                     }}
                                 >
                                     <X className="mr-2 h-4 w-4" />
-                                    Trocar ficheiro
+                                    {t('Change file')}
                                 </Button>
                             </div>
                         )}
@@ -354,11 +358,11 @@ export function StepUpload({
                                 className="gap-2"
                             >
                                 <Sparkles className="h-4 w-4" />
-                                Analisar documento com IA
+                                {t('Analyze document with AI')}
                             </Button>
                         </div>
                         <p className="text-center text-xs text-muted-foreground">
-                            Para novos modelos, é obrigatório analisar o documento para detectar os campos
+                            {t('For new templates, it is mandatory to analyze the document to detect fields')}
                         </p>
                     </div>
                 )}
@@ -368,7 +372,7 @@ export function StepUpload({
                     <div className="flex items-center justify-center gap-3 rounded-lg bg-green-50 dark:bg-green-950/30 p-4">
                         <CheckCircle2 className="h-5 w-5 text-green-600" />
                         <span className="text-sm font-medium text-green-700 dark:text-green-300">
-                            Análise concluída! {suggestedFieldsCount} campos detectados.
+                            {t('Analysis complete!')} {suggestedFieldsCount} {t('fields detected.')}
                         </span>
                     </div>
                 )}
@@ -389,7 +393,7 @@ export function StepUpload({
                     <div className="flex items-center justify-center gap-3 rounded-lg bg-primary/5 p-4">
                         <Loader2 className="h-5 w-5 animate-spin text-primary" />
                         <span className="text-sm font-medium text-primary">
-                            A analisar documento e detectar campos...
+                            {t('Analyzing document and detecting fields...')}
                         </span>
                     </div>
                 )}
@@ -400,9 +404,9 @@ export function StepUpload({
                 <div className="flex justify-between">
                     <Button
                         variant="outline"
-                        onClick={() => router.visit('/documents')}
+                        onClick={() => router.visit(`/${locale}/documents`)}
                     >
-                        Cancelar
+                        {t('Cancel')}
                     </Button>
                     <Button
                         onClick={onNext}
@@ -420,7 +424,7 @@ export function StepUpload({
                             </>
                         ) : (
                             <>
-                                Continuar
+                                {t('Continue')}
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </>
                         )}

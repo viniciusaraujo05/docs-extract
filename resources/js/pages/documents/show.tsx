@@ -22,19 +22,9 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
+import { usePage } from '@inertiajs/react';
 
-const statusConfig = {
-    pending: { label: 'Pendente', variant: 'secondary' as const, icon: Clock },
-    processing: { label: 'A processar', variant: 'default' as const, icon: Loader2 },
-    completed: { label: 'Concluído', variant: 'default' as const, icon: CheckCircle },
-    failed: { label: 'Falhou', variant: 'destructive' as const, icon: XCircle },
-};
-
-const typeLabels: Record<string, string> = {
-    invoice: 'Fatura',
-    receipt: 'Recibo',
-    custom: 'Personalizado',
-};
 
 function formatDate(dateString: string | null): string {
     if (!dateString) return '-';
@@ -63,15 +53,33 @@ function getInputType(fieldType: string): string {
 }
 
 export default function DocumentShow({ document, previewUrl }: DocumentShowProps) {
+    const { t } = useTranslation();
+    const { props } = usePage();
+    const locale = (props as any).locale || 'pt';
+
+    const statusConfig = {
+        pending: { label: t('Pending'), variant: 'secondary' as const, icon: Clock },
+        processing: { label: t('Processing'), variant: 'default' as const, icon: Loader2 },
+        completed: { label: t('Completed'), variant: 'default' as const, icon: CheckCircle },
+        failed: { label: t('Failed'), variant: 'destructive' as const, icon: XCircle },
+    };
+
+    const typeLabels: Record<string, string> = {
+        invoice: t('Invoice'),
+        receipt: t('Receipt'),
+        custom: t('Custom'),
+    };
+
     const status = statusConfig[document.status];
     const StatusIcon = status.icon;
     const [isPolling, setIsPolling] = useState(document.status === 'processing' || document.status === 'pending');
     const [isSaving, setIsSaving] = useState(false);
+    const [isZoomed, setIsZoomed] = useState(false);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Dashboard', href: '/dashboard' },
-        { title: 'Documentos', href: '/documents' },
-        { title: document.name, href: `/documents/${document.id}` },
+        { title: t('Dashboard'), href: `/${locale}/dashboard` },
+        { title: t('Documents'), href: `/${locale}/documents` },
+        { title: document.name, href: `/${locale}/documents/${document.id}` },
     ];
 
     const schemaFields: SchemaField[] = document.schema_used?.fields || [];
@@ -95,30 +103,49 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
 
     const handleSave = () => {
         setIsSaving(true);
-        router.put(`/documents/${document.id}/data`, {
+        router.put(`/${locale}/documents/${document.id}/data`, {
             extracted_data: formData,
         }, {
             onSuccess: () => {
-                toast.success('Dados guardados com sucesso!');
+                toast.success(t('Data saved successfully!'));
             },
             onError: () => {
-                toast.error('Erro ao guardar dados');
+                toast.error(t('Error saving data'));
             },
             onFinish: () => setIsSaving(false),
         });
     };
 
     const handleReprocess = () => {
-        if (confirm('Reprocessar o documento irá consumir 1 crédito. Continuar?')) {
-            router.post(`/documents/${document.id}/reprocess`, {}, {
-                onSuccess: () => {
-                    toast.success('Documento enviado para reprocessamento!');
-                },
-                onError: () => {
-                    toast.error('Erro ao reprocessar documento');
-                },
-            });
-        }
+        toast((toastId) => (
+            <div className="flex flex-col gap-2">
+                <p>{t('Reprocessing the document will consume 1 credit. Continue?')}</p>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => {
+                            toast.dismiss(toastId);
+                            router.post(`/${locale}/documents/${document.id}/reprocess`, {}, {
+                                onSuccess: () => {
+                                    toast.success(t('Document sent for reprocessing!'));
+                                },
+                                onError: () => {
+                                    toast.error(t('Error reprocessing document'));
+                                },
+                            });
+                        }}
+                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
+                        {t('Continue')}
+                    </button>
+                    <button
+                        onClick={() => toast.dismiss(toastId)}
+                        className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                    >
+                        {t('Cancel')}
+                    </button>
+                </div>
+            </div>
+        ));
     };
 
     useEffect(() => {
@@ -151,10 +178,8 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="icon" asChild>
-                            <a href="/documents">
-                                <ArrowLeft className="h-4 w-4" />
-                            </a>
+                        <Button variant="ghost" size="icon" onClick={() => router.visit(`/${locale}/documents`)}>
+                            <ArrowLeft className="h-4 w-4" />
                         </Button>
                         <div>
                             <h1 className="text-2xl font-bold">{document.name}</h1>
@@ -179,7 +204,7 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                 {document.error_message && (
                     <Alert variant="destructive">
                         <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Erro no processamento</AlertTitle>
+                        <AlertTitle>{t('Processing error')}</AlertTitle>
                         <AlertDescription>{document.error_message}</AlertDescription>
                     </Alert>
                 )}
@@ -191,33 +216,64 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <FileText className="h-5 w-5" />
-                                Pré-visualização
+                                {t('Preview')}
                             </CardTitle>
                             <CardDescription>
-                                Documento original carregado
+                                {t('Original uploaded document')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="flex-1">
                             {previewUrl ? (
-                                <div className="relative h-full min-h-[500px] overflow-hidden rounded-lg border bg-muted">
-                                    {document.mime_type === 'application/pdf' ? (
-                                        <iframe
-                                            src={previewUrl}
-                                            className="h-full w-full"
-                                            title="Document Preview"
-                                        />
-                                    ) : (
-                                        <img
-                                            src={previewUrl}
-                                            alt={document.name}
-                                            className="h-full w-full object-contain"
-                                        />
+                                <>
+                                    <div className="relative h-full min-h-[500px] overflow-auto rounded-lg border bg-muted">
+                                        {document.mime_type === 'application/pdf' ? (
+                                            <iframe
+                                                src={previewUrl}
+                                                className="h-full w-full"
+                                                title="Document Preview"
+                                            />
+                                        ) : (
+                                            <img
+                                                src={previewUrl}
+                                                alt={document.name}
+                                                className="w-full h-auto cursor-zoom-in hover:opacity-90 transition-opacity"
+                                                style={{ imageRendering: 'high-quality' }}
+                                                loading="eager"
+                                                onClick={() => setIsZoomed(true)}
+                                            />
+                                        )}
+                                    </div>
+                                    
+                                    {/* Modal de Zoom */}
+                                    {isZoomed && document.mime_type !== 'application/pdf' && (
+                                        <div 
+                                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+                                            onClick={() => setIsZoomed(false)}
+                                        >
+                                            <div className="relative max-h-[95vh] max-w-[95vw] overflow-auto">
+                                                <img
+                                                    src={previewUrl}
+                                                    alt={document.name}
+                                                    className="w-auto h-auto max-w-none cursor-zoom-out"
+                                                    style={{ imageRendering: 'high-quality' }}
+                                                />
+                                                <button
+                                                    className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 backdrop-blur-sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setIsZoomed(false);
+                                                    }}
+                                                >
+                                                    <XCircle className="h-6 w-6" />
+                                                </button>
+                                            </div>
+                                        </div>
                                     )}
-                                </div>
+                                </>
                             ) : (
                                 <div className="flex h-full min-h-[500px] items-center justify-center rounded-lg border bg-muted">
                                     <p className="text-muted-foreground">
-                                        Pré-visualização não disponível
+                                        {t('Preview not available')}
                                     </p>
                                 </div>
                             )}
@@ -229,15 +285,15 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle>Dados Extraídos</CardTitle>
+                                    <CardTitle>{t('Extracted Data')}</CardTitle>
                                     <CardDescription>
                                         {document.status === 'completed'
-                                            ? 'Edite os campos abaixo se necessário'
+                                            ? t('Edit the fields below if necessary')
                                             : document.status === 'processing'
-                                            ? 'A processar documento...'
+                                            ? t('Processing document...')
                                             : document.status === 'pending'
-                                            ? 'Aguardando processamento...'
-                                            : 'Processamento falhou'}
+                                            ? t('Waiting for processing...')
+                                            : t('Processing failed')}
                                     </CardDescription>
                                 </div>
                                 {document.status === 'completed' && (
@@ -248,7 +304,7 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                                         disabled={isSaving}
                                     >
                                         <RefreshCw className="mr-2 h-4 w-4" />
-                                        Reprocessar
+                                        {t('Reprocess')}
                                     </Button>
                                 )}
                             </div>
@@ -259,26 +315,26 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                                     <p className="text-muted-foreground">
                                         {document.status === 'processing'
-                                            ? 'A extrair dados do documento...'
-                                            : 'Na fila de processamento...'}
+                                            ? t('Extracting data from document...')
+                                            : t('In processing queue...')}
                                     </p>
                                 </div>
                             ) : document.status === 'failed' ? (
                                 <div className="flex h-full flex-col items-center justify-center gap-4">
                                     <XCircle className="h-12 w-12 text-destructive" />
                                     <p className="text-muted-foreground">
-                                        Não foi possível processar o documento
+                                        {t('Could not process the document')}
                                     </p>
                                     <Button onClick={handleReprocess}>
                                         <RefreshCw className="mr-2 h-4 w-4" />
-                                        Tentar Novamente
+                                        {t('Try Again')}
                                     </Button>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
                                     {schemaFields.length === 0 ? (
                                         <p className="text-muted-foreground">
-                                            Nenhum campo definido no schema
+                                            {t('No fields defined in schema')}
                                         </p>
                                     ) : (
                                         <>
@@ -309,7 +365,7 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                                                     disabled={isSaving}
                                                 >
                                                     <Save className="mr-2 h-4 w-4" />
-                                                    Guardar Alterações
+                                                    {t('Save Changes')}
                                                 </Button>
                                             </div>
                                         </>
@@ -323,24 +379,24 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                 {/* Metadata */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-base">Informações do Documento</CardTitle>
+                        <CardTitle className="text-base">{t('Document Information')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
                             <div>
-                                <p className="font-medium text-muted-foreground">Criado em</p>
+                                <p className="font-medium text-muted-foreground">{t('Created at')}</p>
                                 <p>{formatDate(document.created_at)}</p>
                             </div>
                             <div>
-                                <p className="font-medium text-muted-foreground">Processado em</p>
+                                <p className="font-medium text-muted-foreground">{t('Processed at')}</p>
                                 <p>{formatDate(document.processed_at)}</p>
                             </div>
                             <div>
-                                <p className="font-medium text-muted-foreground">Créditos usados</p>
+                                <p className="font-medium text-muted-foreground">{t('Credits used')}</p>
                                 <p>{document.credits_used}</p>
                             </div>
                             <div>
-                                <p className="font-medium text-muted-foreground">Tipo MIME</p>
+                                <p className="font-medium text-muted-foreground">{t('MIME type')}</p>
                                 <p>{document.mime_type}</p>
                             </div>
                         </div>

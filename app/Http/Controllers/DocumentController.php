@@ -112,78 +112,101 @@ final class DocumentController extends Controller
             : 'Documento enviado para processamento.';
 
         return redirect()
-            ->route('documents.show', $document)
+            ->route('documents.show', ['locale' => app()->getLocale(), 'document' => $document->id])
             ->with('success', $message);
     }
 
-    public function show(Document $document): Response
+    public function show(string $locale, string $document): Response
     {
-        $this->authorize('view', $document);
+        $documentModel = $this->documentRepository->findById($document);
+        
+        $this->authorize('view', $documentModel);
 
-        $previewUrl = Storage::disk('local')->exists($document->file_path)
-            ? route('documents.preview', $document)
+        $previewUrl = Storage::disk('local')->exists($documentModel->file_path)
+            ? route('documents.preview', ['locale' => app()->getLocale(), 'document' => $documentModel->id])
             : null;
 
         return Inertia::render('documents/show', [
-            'document' => $document->load('user'),
+            'document' => $documentModel->load('user'),
             'previewUrl' => $previewUrl,
         ]);
     }
 
-    public function preview(Document $document): BinaryFileResponse
+    public function update(Request $request, string $locale, string $document): RedirectResponse
     {
-        $this->authorize('view', $document);
+        $documentModel = $this->documentRepository->findById($document);
+        
+        $this->authorize('update', $documentModel);
 
-        $path = Storage::disk('local')->path($document->file_path);
+        $this->documentRepository->update($documentModel, $request->only(['name']));
+
+        return redirect()
+            ->route('documents.show', ['locale' => app()->getLocale(), 'document' => $documentModel->id])
+            ->with('success', 'Documento atualizado com sucesso.');
+    }
+
+    public function preview(string $locale, string $document): BinaryFileResponse
+    {
+        $documentModel = $this->documentRepository->findById($document);
+        
+        $this->authorize('view', $documentModel);
+
+        $path = Storage::disk('local')->path($documentModel->file_path);
 
         abort_unless(file_exists($path), 404, 'Ficheiro não encontrado');
 
         return response()->file($path, [
-            'Content-Type' => $document->mime_type,
+            'Content-Type' => $documentModel->mime_type,
         ]);
     }
 
-    public function updateData(UpdateDocumentDataRequest $request, Document $document): RedirectResponse
+    public function updateData(UpdateDocumentDataRequest $request, string $locale, string $document): RedirectResponse
     {
-        $this->authorize('update', $document);
+        $documentModel = $this->documentRepository->findById($document);
+        
+        $this->authorize('update', $documentModel);
 
-        $this->documentRepository->update($document, [
+        $this->documentRepository->update($documentModel, [
             'extracted_data' => $request->validated('extracted_data'),
         ]);
 
         return redirect()
-            ->route('documents.show', $document)
+            ->route('documents.show', ['locale' => app()->getLocale(), 'document' => $documentModel->id])
             ->with('success', 'Dados atualizados com sucesso.');
     }
 
-    public function reprocess(Request $request, Document $document): RedirectResponse
+    public function reprocess(Request $request, string $locale, string $document): RedirectResponse
     {
-        $this->authorize('update', $document);
+        $documentModel = $this->documentRepository->findById($document);
+        
+        $this->authorize('update', $documentModel);
 
         /** @var User $user */
         $user = $request->user();
 
         try {
-            $this->reprocessDocumentAction->execute($document, $user->organization);
+            $this->reprocessDocumentAction->execute($documentModel, $user->organization);
         } catch (\RuntimeException $e) {
             return redirect()
-                ->route('documents.show', $document)
+                ->route('documents.show', ['locale' => app()->getLocale(), 'document' => $documentModel->id])
                 ->with('error', $e->getMessage());
         }
 
         return redirect()
-            ->route('documents.show', $document)
+            ->route('documents.show', ['locale' => app()->getLocale(), 'document' => $documentModel->id])
             ->with('success', 'Documento enviado para reprocessamento.');
     }
 
-    public function destroy(Document $document): RedirectResponse
+    public function destroy(string $locale, string $document): RedirectResponse
     {
-        $this->authorize('delete', $document);
+        $documentModel = $this->documentRepository->findById($document);
+        
+        $this->authorize('delete', $documentModel);
 
-        $this->deleteDocumentAction->execute($document);
+        $this->deleteDocumentAction->execute($documentModel);
 
         return redirect()
-            ->route('documents.index')
+            ->route('documents.index', ['locale' => app()->getLocale()])
             ->with('success', 'Documento eliminado com sucesso.');
     }
 

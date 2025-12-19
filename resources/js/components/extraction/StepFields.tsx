@@ -20,6 +20,7 @@ import {
     Tag
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface StepFieldsProps {
     file: File | null;
@@ -58,10 +59,12 @@ export function StepFields({
     onBack,
     onExtract,
 }: StepFieldsProps) {
+    const { t } = useTranslation();
     const [newFieldName, setNewFieldName] = useState('');
     const [newFieldLabel, setNewFieldLabel] = useState('');
     const [newFieldType, setNewFieldType] = useState<FieldType>('string');
     const [zoomLevel, setZoomLevel] = useState(100);
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
     const isPdf = file?.type === 'application/pdf';
 
@@ -86,11 +89,19 @@ export function StepFields({
     }, [fields, newFieldName, newFieldLabel, newFieldType, onAddField]);
 
     const handleZoomIn = useCallback(() => {
-        setZoomLevel(prev => Math.min(prev + 25, 200));
+        setZoomLevel(prev => Math.min(prev + 25, 300));
     }, []);
 
     const handleZoomOut = useCallback(() => {
         setZoomLevel(prev => Math.max(prev - 25, 50));
+    }, []);
+
+    const handleWheel = useCallback((e: React.WheelEvent) => {
+        if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -10 : 10;
+            setZoomLevel(prev => Math.max(50, Math.min(300, prev + delta)));
+        }
     }, []);
 
     const renderPreview = useCallback(() => {
@@ -99,7 +110,7 @@ export function StepFields({
                 <div className="text-center">
                     <FileText className="mx-auto h-16 w-16 text-muted-foreground/50" />
                     <p className="mt-2 text-sm text-muted-foreground">
-                        Sem preview disponível
+                        {t('No preview available')}
                     </p>
                 </div>
             );
@@ -107,32 +118,31 @@ export function StepFields({
 
         if (isPdf) {
             return (
-                <div 
-                    className="h-full w-full origin-top-left transition-transform duration-200"
-                    style={{ 
-                        transform: `scale(${zoomLevel / 100})`,
-                        width: `${10000 / zoomLevel}%`,
-                        height: `${10000 / zoomLevel}%`
-                    }}
-                >
-                    <iframe
-                        src={`${filePreview}#toolbar=1&navpanes=0`}
-                        className="h-full w-full border-0"
-                        title="PDF Preview"
-                    />
-                </div>
+                <iframe
+                    src={`${filePreview}#toolbar=1&navpanes=1&zoom=${zoomLevel}`}
+                    className="h-full w-full border-0"
+                    title="PDF Preview"
+                    style={{ minHeight: '600px' }}
+                />
             );
         }
 
         return (
-            <img
-                src={filePreview}
-                alt="Preview"
-                className="max-h-full max-w-full object-contain transition-transform duration-200"
-                style={{ transform: `scale(${zoomLevel / 100})` }}
-            />
+            <div className="flex items-center justify-center h-full w-full overflow-auto">
+                <img
+                    src={filePreview}
+                    alt="Preview"
+                    className="cursor-zoom-in transition-transform duration-200"
+                    style={{ 
+                        transform: `scale(${zoomLevel / 100})`,
+                        imageRendering: 'high-quality',
+                        maxWidth: 'none'
+                    }}
+                    onClick={() => setIsFullscreen(true)}
+                />
+            </div>
         );
-    }, [filePreview, isPdf, zoomLevel]);
+    }, [filePreview, isPdf, zoomLevel, t]);
 
     return (
         <div className="mx-auto grid w-full max-w-5xl gap-6 animate-in fade-in-50 slide-in-from-right-4 duration-500 lg:grid-cols-2">
@@ -141,19 +151,19 @@ export function StepFields({
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Sparkles className="h-5 w-5" />
-                        Campos a Extrair
+                        {t('Fields to Extract')}
                     </CardTitle>
                     <CardDescription>
-                        Defina quais informações a IA deve buscar no documento
+                        {t('Define what information AI should extract from the document')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     {/* Selected Fields */}
                     <div className="space-y-2">
-                        <Label>Campos Selecionados ({fields.length})</Label>
+                        <Label>{t('Selected Fields')} ({fields.length})</Label>
                         {fields.length === 0 ? (
                             <p className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
-                                Adicione campos abaixo ou selecione das sugestões da IA
+                                {t('Add fields below or select from AI suggestions')}
                             </p>
                         ) : (
                             <div className="flex flex-wrap gap-2">
@@ -185,15 +195,15 @@ export function StepFields({
 
                     {/* Add Custom Field */}
                     <div className="space-y-3">
-                        <Label>Adicionar Campo Personalizado</Label>
+                        <Label>{t('Add Custom Field')}</Label>
                         <div className="grid gap-2">
                             <Input
-                                placeholder="Nome interno (ex: total_vendas)"
+                                placeholder={t('Internal name (e.g. total_sales)')}
                                 value={newFieldName}
                                 onChange={(e) => setNewFieldName(e.target.value)}
                             />
                             <Input
-                                placeholder="Rótulo (ex: Total de Vendas)"
+                                placeholder={t('Display name (e.g. Total Sales)')}
                                 value={newFieldLabel}
                                 onChange={(e) => setNewFieldLabel(e.target.value)}
                             />
@@ -219,7 +229,7 @@ export function StepFields({
                                     className="flex-1"
                                 >
                                     <Plus className="mr-2 h-4 w-4" />
-                                    Adicionar
+                                    {t('Add Field')}
                                 </Button>
                             </div>
                         </div>
@@ -232,7 +242,7 @@ export function StepFields({
                         <div className="flex items-center justify-between">
                             <Label className="flex items-center gap-2">
                                 <Wand2 className="h-4 w-4 text-primary" />
-                                {analyzing ? 'A analisar documento...' : 'Campos Detectados pela IA'}
+                                {analyzing ? t('Analyzing document...') : t('Fields Detected by AI')}
                             </Label>
                             {availableSuggested.length > 0 && (
                                 <Button
@@ -240,14 +250,14 @@ export function StepFields({
                                     size="sm"
                                     onClick={onAddAllSuggested}
                                 >
-                                    Adicionar Todos
+                                    {t('Add All')}
                                 </Button>
                             )}
                         </div>
                         {analyzing ? (
                             <div className="flex items-center justify-center rounded-lg border border-dashed p-4">
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                <span className="text-sm text-muted-foreground">A detectar campos...</span>
+                                <span className="text-sm text-muted-foreground">{t('Detecting fields...')}</span>
                             </div>
                         ) : availableSuggested.length > 0 ? (
                             <div className="flex flex-wrap gap-2">
@@ -266,11 +276,11 @@ export function StepFields({
                             </div>
                         ) : suggestedFields.length > 0 ? (
                             <p className="text-sm text-muted-foreground">
-                                Todos os campos detectados foram adicionados
+                                {t('All detected fields have been added')}
                             </p>
                         ) : (
                             <p className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
-                                Nenhum campo detectado automaticamente
+                                {t('No fields detected automatically')}
                             </p>
                         )}
                     </div>
@@ -280,13 +290,13 @@ export function StepFields({
                     {/* Document Type Info */}
                     <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
                         <Tag className="h-4 w-4 text-primary" />
-                        <span className="text-sm font-medium">Tipo:</span>
+                        <span className="text-sm font-medium">{t('Type')}:</span>
                         <span className="text-sm text-muted-foreground">
                             {selectedTypeId 
                                 ? documentTypes.find(t => t.id === selectedTypeId)?.name 
                                 : newTypeName 
-                                    ? `${newTypeName} (novo)` 
-                                    : 'Não definido'}
+                                    ? `${newTypeName} (${t('new')})` 
+                                    : t('Not defined')}
                         </span>
                     </div>
                 </CardContent>
@@ -297,7 +307,7 @@ export function StepFields({
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div>
-                            <CardTitle>Preview do Documento</CardTitle>
+                            <CardTitle>{t('Document Preview')}</CardTitle>
                             <CardDescription>
                                 {file?.name}
                             </CardDescription>
@@ -321,7 +331,7 @@ export function StepFields({
                                     size="icon"
                                     className="h-8 w-8"
                                     onClick={handleZoomIn}
-                                    disabled={zoomLevel >= 200}
+                                    disabled={zoomLevel >= 300}
                                 >
                                     <ZoomIn className="h-4 w-4" />
                                 </Button>
@@ -338,35 +348,43 @@ export function StepFields({
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex aspect-[3/4] items-center justify-center overflow-auto rounded-lg border bg-muted/30">
+                    <div 
+                        className="flex aspect-[3/4] items-center justify-center overflow-auto rounded-lg border bg-muted/30"
+                        onWheel={handleWheel}
+                    >
                         {renderPreview()}
                     </div>
+                    <p className="mt-2 text-xs text-center text-muted-foreground">
+                        {t('Hold Ctrl/Cmd + scroll to zoom')}
+                    </p>
                 </CardContent>
             </Card>
 
-            {/* Actions */}
-            <div className="flex justify-between lg:col-span-2">
-                <Button variant="outline" onClick={onBack}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Voltar
-                </Button>
-                <Button
-                    onClick={onExtract}
-                    disabled={fields.length === 0 || processing || (!selectedTypeId && !newTypeName)}
+            {/* Modal Fullscreen para Imagens */}
+            {isFullscreen && !isPdf && filePreview && (
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4"
+                    onClick={() => setIsFullscreen(false)}
                 >
-                    {processing ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Extraindo com IA...
-                        </>
-                    ) : (
-                        <>
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            Extrair Dados
-                        </>
-                    )}
-                </Button>
-            </div>
+                    <div className="relative max-h-[95vh] max-w-[95vw] overflow-auto">
+                        <img
+                            src={filePreview}
+                            alt="Preview"
+                            className="w-auto h-auto max-w-none cursor-zoom-out"
+                            style={{ imageRendering: 'high-quality' }}
+                        />
+                        <button
+                            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 backdrop-blur-sm"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsFullscreen(false);
+                            }}
+                        >
+                            <X className="h-6 w-6" />
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Plus, X, Calculator, Sigma } from 'lucide-react';
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface SchemaField {
     name: string;
@@ -29,11 +30,11 @@ interface CalculatedFieldBuilderProps {
 }
 
 const OPERATIONS = [
-    { value: 'sum', label: 'Soma (+)', symbol: '+' },
-    { value: 'subtract', label: 'Subtração (-)', symbol: '-' },
-    { value: 'multiply', label: 'Multiplicação (×)', symbol: '×' },
-    { value: 'divide', label: 'Divisão (÷)', symbol: '÷' },
-    { value: 'average', label: 'Média', symbol: 'μ' },
+    { value: 'sum', labelKey: 'Sum (+)', symbol: '+' },
+    { value: 'subtract', labelKey: 'Subtraction (-)', symbol: '-' },
+    { value: 'multiply', labelKey: 'Multiplication (×)', symbol: '×' },
+    { value: 'divide', labelKey: 'Division (÷)', symbol: '÷' },
+    { value: 'average', labelKey: 'Average', symbol: 'μ' },
 ];
 
 export function CalculatedFieldBuilder({
@@ -42,6 +43,7 @@ export function CalculatedFieldBuilder({
     onAdd,
     onRemove,
 }: CalculatedFieldBuilderProps) {
+    const { t } = useTranslation();
     const [isAdding, setIsAdding] = useState(false);
     const [newFieldLabel, setNewFieldLabel] = useState('');
     const [operation, setOperation] = useState<CalculatedField['operation']>('sum');
@@ -97,10 +99,10 @@ export function CalculatedFieldBuilder({
             <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                     <Calculator className="h-4 w-4" />
-                    Campos Calculados
+                    {t('Calculated Fields')}
                 </CardTitle>
                 <CardDescription className="text-xs">
-                    Crie fórmulas combinando campos numéricos
+                    {t('Create formulas combining numeric fields')}
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -147,9 +149,9 @@ export function CalculatedFieldBuilder({
                 {isAdding ? (
                     <div className="space-y-3 p-3 border rounded-lg bg-background">
                         <div>
-                            <Label className="text-xs">Nome do Campo</Label>
+                            <Label className="text-xs">{t('Field Name')}</Label>
                             <Input
-                                placeholder="Ex: Total Geral"
+                                placeholder={t('e.g. Grand Total')}
                                 value={newFieldLabel}
                                 onChange={(e) => setNewFieldLabel(e.target.value)}
                                 className="mt-1 h-8"
@@ -157,7 +159,7 @@ export function CalculatedFieldBuilder({
                         </div>
 
                         <div>
-                            <Label className="text-xs">Operação</Label>
+                            <Label className="text-xs">{t('Operation')}</Label>
                             <Select value={operation} onValueChange={(v: CalculatedField['operation']) => setOperation(v)}>
                                 <SelectTrigger className="mt-1 h-8">
                                     <SelectValue />
@@ -165,7 +167,7 @@ export function CalculatedFieldBuilder({
                                 <SelectContent>
                                     {OPERATIONS.map(op => (
                                         <SelectItem key={op.value} value={op.value}>
-                                            {op.label}
+                                            {t(op.labelKey)}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -173,7 +175,7 @@ export function CalculatedFieldBuilder({
                         </div>
 
                         <div>
-                            <Label className="text-xs">Campos a Combinar</Label>
+                            <Label className="text-xs">{t('Fields to Combine')}</Label>
                             <div className="flex flex-wrap gap-1 mt-1">
                                 {selectedFields.map(fieldName => (
                                     <Badge 
@@ -189,7 +191,7 @@ export function CalculatedFieldBuilder({
                             </div>
                             <Select onValueChange={handleAddField} value="">
                                 <SelectTrigger className="mt-2 h-8">
-                                    <SelectValue placeholder="Adicionar campo..." />
+                                    <SelectValue placeholder={t('Add field...')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {numericFields
@@ -210,14 +212,14 @@ export function CalculatedFieldBuilder({
                                 disabled={!newFieldLabel.trim() || selectedFields.length < 2}
                                 className="flex-1"
                             >
-                                Criar Campo
+                                {t('Create Field')}
                             </Button>
                             <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={handleCancel}
                             >
-                                Cancelar
+                                {t('Cancel')}
                             </Button>
                         </div>
                     </div>
@@ -230,13 +232,13 @@ export function CalculatedFieldBuilder({
                         disabled={numericFields.length < 2}
                     >
                         <Plus className="h-4 w-4 mr-2" />
-                        Adicionar Campo Calculado
+                        {t('Add Calculated Field')}
                     </Button>
                 )}
 
                 {numericFields.length < 2 && !isAdding && (
                     <p className="text-xs text-muted-foreground text-center">
-                        Precisa de pelo menos 2 campos numéricos
+                        {t('Need at least 2 numeric fields')}
                     </p>
                 )}
             </CardContent>

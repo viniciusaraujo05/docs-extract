@@ -73,7 +73,7 @@ return [
     |
     */
 
-    'home' => '/dashboard',
+    'home' => '/pt/dashboard',
 
     /*
     |--------------------------------------------------------------------------
@@ -89,6 +89,18 @@ return [
     'prefix' => '',
 
     'domain' => null,
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Fortify Routes Registration
+    |--------------------------------------------------------------------------
+    |
+    | Indicate if Fortify should register its routes. If set to false,
+    | you will need to manually register routes in your routes file.
+    |
+    */
+
+    'views' => true,
 
     /*
     |--------------------------------------------------------------------------

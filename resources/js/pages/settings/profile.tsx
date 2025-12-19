@@ -1,8 +1,8 @@
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
-import { send } from '@/routes/verification';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 
 import DeleteUser from '@/components/delete-user';
 import HeadingSmall from '@/components/heading-small';
@@ -12,14 +12,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import { edit } from '@/routes/profile';
+import { useTranslation } from 'react-i18next';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Profile settings',
-        href: edit().url,
-    },
-];
+// Breadcrumbs will be translated in component
 
 export default function Profile({
     mustVerifyEmail,
@@ -28,21 +23,35 @@ export default function Profile({
     mustVerifyEmail: boolean;
     status?: string;
 }) {
-    const { auth } = usePage<SharedData>().props;
+    const { t } = useTranslation();
+    const page = usePage<SharedData>();
+    const { auth } = page.props;
+    const [locale, setLocale] = useState('pt');
+
+    useEffect(() => {
+        const savedLocale = localStorage.getItem('selected-locale') || 'pt';
+        setLocale(savedLocale);
+    }, []);
+
+    const BREADCRUMBS: BreadcrumbItem[] = [
+        { title: t('Dashboard'), href: `/${locale}/dashboard` },
+        { title: t('Settings'), href: `/${locale}/settings/profile` },
+    ];
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Profile settings" />
+        <AppLayout breadcrumbs={BREADCRUMBS}>
+            <Head title={t('Profile Settings')} />
 
             <SettingsLayout>
                 <div className="space-y-6">
                     <HeadingSmall
-                        title="Profile information"
-                        description="Update your name and email address"
+                        title={t('Profile Information')}
+                        description={t('Update your name and email address')}
                     />
 
                     <Form
-                        {...ProfileController.update.form()}
+                        method="post"
+                        action="/settings/profile"
                         options={{
                             preserveScroll: true,
                         }}
@@ -51,7 +60,7 @@ export default function Profile({
                         {({ processing, recentlySuccessful, errors }) => (
                             <>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="name">Name</Label>
+                                    <Label htmlFor="name">{t('Name')}</Label>
 
                                     <Input
                                         id="name"
@@ -60,7 +69,7 @@ export default function Profile({
                                         name="name"
                                         required
                                         autoComplete="name"
-                                        placeholder="Full name"
+                                        placeholder={t('Full name')}
                                     />
 
                                     <InputError
@@ -70,7 +79,7 @@ export default function Profile({
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="email">Email address</Label>
+                                    <Label htmlFor="email">{t('Email Address')}</Label>
 
                                     <Input
                                         id="email"
@@ -80,7 +89,7 @@ export default function Profile({
                                         name="email"
                                         required
                                         autoComplete="username"
-                                        placeholder="Email address"
+                                        placeholder={t('Email Address')}
                                     />
 
                                     <InputError
@@ -93,24 +102,21 @@ export default function Profile({
                                     auth.user.email_verified_at === null && (
                                         <div>
                                             <p className="-mt-4 text-sm text-muted-foreground">
-                                                Your email address is
-                                                unverified.{' '}
+                                                {t('Your email address is unverified.')}{' '}
                                                 <Link
-                                                    href={send()}
+                                                    href="/email/verification-notification"
+                                                    method="post"
                                                     as="button"
                                                     className="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
                                                 >
-                                                    Click here to resend the
-                                                    verification email.
+                                                    {t('Click here to resend verification email.')}
                                                 </Link>
                                             </p>
 
                                             {status ===
                                                 'verification-link-sent' && (
                                                 <div className="mt-2 text-sm font-medium text-green-600">
-                                                    A new verification link has
-                                                    been sent to your email
-                                                    address.
+                                                    {t('A new verification link has been sent to your email address.')}
                                                 </div>
                                             )}
                                         </div>
@@ -132,7 +138,7 @@ export default function Profile({
                                         leaveTo="opacity-0"
                                     >
                                         <p className="text-sm text-neutral-600">
-                                            Saved
+                                            {t('Saved')}
                                         </p>
                                     </Transition>
                                 </div>

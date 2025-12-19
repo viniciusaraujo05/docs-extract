@@ -1,5 +1,6 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Icon } from '@/components/icon';
+import { LanguageSelector } from '@/components/LanguageSelector';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,35 +17,45 @@ import {
 } from '@/components/ui/sheet';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
+import { useTranslation } from 'react-i18next';
 import { cn, resolveUrl } from '@/lib/utils';
-import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { BarChart3, FileText, Menu, Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Relatórios',
-        href: dashboard(),
-        icon: BarChart3,
-    },
-    {
-        title: 'Documentos',
-        href: '/documents',
-        icon: FileText,
-    },
-];
+// Navigation items will be translated in component
 
 interface AppHeaderProps {
     breadcrumbs?: BreadcrumbItem[];
 }
 
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
+    const { t } = useTranslation();
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
+    const [locale, setLocale] = useState('pt');
+
+    useEffect(() => {
+        const savedLocale = localStorage.getItem('selected-locale') || 'pt';
+        setLocale(savedLocale);
+    }, []);
+    
+    const mainNavItems: NavItem[] = [
+        {
+            title: t('Reports'),
+            href: `/${locale}/dashboard`,
+            icon: BarChart3,
+        },
+        {
+            title: t('Documents'),
+            href: `/${locale}/documents`,
+            icon: FileText,
+        },
+    ];
 
     const isActive = (href: string | { url: string; method: string } | undefined) => {
         if (!href) return false;
@@ -69,7 +80,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                             <SheetContent side="left" className="w-72 p-0">
                                 <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
                                 <SheetHeader className="border-b p-4">
-                                    <Link href={dashboard()} className="flex items-center gap-2">
+                                    <Link href={`/${locale}/dashboard`} className="flex items-center gap-2">
                                         <AppLogoIcon className="h-6 w-6" />
                                         <span className="font-semibold">DocExtract</span>
                                     </Link>
@@ -92,10 +103,10 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                     ))}
                                 </nav>
                                 <div className="absolute bottom-0 left-0 right-0 border-t p-4">
-                                    <Link href="/documents/create">
+                                    <Link href={`/${locale}/documents/create`}>
                                         <Button className="w-full gap-2">
                                             <Plus className="h-4 w-4" />
-                                            Novo Documento
+                                            {t('New Document')}
                                         </Button>
                                     </Link>
                                 </div>
@@ -104,7 +115,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     </div>
 
                     {/* Logo */}
-                    <Link href={dashboard()} prefetch className="flex items-center gap-2 mr-6">
+                    <Link href={`/${locale}/dashboard`} prefetch className="flex items-center gap-2 mr-6">
                         <AppLogo />
                     </Link>
 
@@ -130,12 +141,15 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     {/* Right Side */}
                     <div className="ml-auto flex items-center gap-2">
                         {/* New Document Button - Desktop */}
-                        <Link href="/documents/create" className="hidden sm:block">
+                        <Link href={`/${locale}/documents/create`} className="hidden sm:block">
                             <Button size="sm" className="gap-2">
                                 <Plus className="h-4 w-4" />
-                                <span className="hidden md:inline">Novo Documento</span>
+                                <span className="hidden md:inline">{t('New Document')}</span>
                             </Button>
                         </Link>
+
+                        {/* Language Selector */}
+                        <LanguageSelector />
 
                         {/* User Menu */}
                         <DropdownMenu>

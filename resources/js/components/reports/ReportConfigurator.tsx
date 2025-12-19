@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface SchemaField {
     name: string;
@@ -105,36 +106,36 @@ const CHART_TYPES = [
     { value: 'area', label: 'Área', icon: AreaChart, description: 'Evolução com preenchimento' },
 ];
 
-const AGGREGATIONS = [
-    { value: 'sum', label: 'Soma', description: 'Soma todos os valores', icon: '∑' },
-    { value: 'avg', label: 'Média', description: 'Calcula a média', icon: 'μ' },
-    { value: 'count', label: 'Contagem', description: 'Conta quantos existem', icon: '#' },
-    { value: 'growth', label: 'Crescimento', description: 'Variação percentual', icon: '%' },
+const AGGREGATIONS_CONFIG = [
+    { value: 'sum', labelKey: 'Sum', descriptionKey: 'Sums all values', icon: '∑' },
+    { value: 'avg', labelKey: 'Average', descriptionKey: 'Calculates the average', icon: 'μ' },
+    { value: 'count', labelKey: 'Count', descriptionKey: 'Counts how many exist', icon: '#' },
+    { value: 'growth', labelKey: 'Growth', descriptionKey: 'Percentage variation', icon: '%' },
 ];
 
-const DATE_GROUPINGS = [
-    { value: 'day', label: 'Diário', description: 'Agrupa por dia' },
-    { value: 'month', label: 'Mensal', description: 'Agrupa por mês' },
-    { value: 'year', label: 'Anual', description: 'Agrupa por ano' },
+const DATE_GROUPINGS_CONFIG = [
+    { value: 'day', labelKey: 'Daily', descriptionKey: 'Groups by day' },
+    { value: 'month', labelKey: 'Monthly', descriptionKey: 'Groups by month' },
+    { value: 'year', labelKey: 'Yearly', descriptionKey: 'Groups by year' },
 ];
 
-const SELECTION_MODES = [
+const SELECTION_MODES_CONFIG = [
     { 
         value: 'all', 
-        label: 'Todos os Documentos', 
-        description: 'Inclui todos os documentos deste tipo',
+        labelKey: 'All Documents',
+        descriptionKey: 'Includes all documents of this type',
         icon: FolderOpen 
     },
     { 
         value: 'filtered', 
-        label: 'Filtrar por Data', 
-        description: 'Seleciona documentos de um período específico',
+        labelKey: 'Filter by Date',
+        descriptionKey: 'Select documents from a specific period',
         icon: CalendarDays 
     },
     { 
         value: 'manual', 
-        label: 'Seleção Manual', 
-        description: 'Escolha manualmente quais documentos incluir',
+        labelKey: 'Manual Selection',
+        descriptionKey: 'Manually choose which documents to include',
         icon: ListFilter 
     },
 ];
@@ -151,21 +152,21 @@ function getFieldTypeInfo(type: string) {
     switch (type) {
         case 'number': 
             return { 
-                label: 'Número', 
+                labelKey: 'Number', 
                 color: 'bg-blue-500/10 text-blue-600 border-blue-200',
-                description: 'Permite cálculos como soma e média'
+                descriptionKey: 'Allows calculations like sum and average'
             };
         case 'date': 
             return { 
-                label: 'Data', 
-                color: 'bg-purple-500/10 text-purple-600 border-purple-200',
-                description: 'Pode ser usado para agrupar por período'
+                labelKey: 'Date', 
+                color: 'bg-green-500/10 text-green-600 border-green-200',
+                descriptionKey: 'Can be grouped by period'
             };
         default: 
             return { 
-                label: 'Texto', 
+                labelKey: 'Text', 
                 color: 'bg-gray-500/10 text-gray-600 border-gray-200',
-                description: 'Mostra distribuição de valores'
+                descriptionKey: 'For labels and categories'
             };
     }
 }
@@ -179,7 +180,7 @@ export function ReportConfigurator({
     onPreviewRequest,
     loading = false,
 }: ReportConfiguratorProps) {
-    // Field configurations
+    const { t } = useTranslation();
     const [fieldConfig, setFieldConfig] = useState<Record<string, FieldConfig>>(() => {
         const initial: Record<string, FieldConfig> = {};
         fields.forEach(field => {
@@ -330,7 +331,7 @@ export function ReportConfigurator({
             setConfigDescription('');
             toast.success('Configuração salva com sucesso!');
         } catch (error) {
-            toast.error('Erro ao salvar configuração');
+            toast.error(t('Error saving configuration'));
         } finally {
             setSavingConfig(false);
         }
@@ -380,9 +381,9 @@ export function ReportConfigurator({
                             <Settings2 className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                            <CardTitle className="text-lg">Configurar Relatório</CardTitle>
+                            <CardTitle className="text-lg">{t('Configure Report')}</CardTitle>
                             <CardDescription className="text-sm">
-                                Personalize como os dados serão apresentados
+                                {t('Customize how data will be presented')}
                             </CardDescription>
                         </div>
                     </div>
@@ -395,10 +396,10 @@ export function ReportConfigurator({
                 {/* Navigation */}
                 <div className="flex border-b">
                     {[
-                        { id: 'fields', label: 'Campos', icon: Layers, description: 'Escolha o que mostrar' },
-                        { id: 'filters', label: 'Filtros', icon: Filter, description: 'Selecione documentos' },
-                        { id: 'grouping', label: 'Agrupamento', icon: Clock, description: 'Organize por período' },
-                        { id: 'saved', label: 'Salvos', icon: BookmarkPlus, description: 'Configurações salvas' },
+                        { id: 'fields', label: t('Fields'), icon: Layers, description: t('Choose what to show') },
+                        { id: 'filters', label: t('Filters'), icon: Filter, description: t('Select documents') },
+                        { id: 'grouping', label: t('Grouping'), icon: Clock, description: t('Organize by period') },
+                        { id: 'saved', label: t('Saved'), icon: BookmarkPlus, description: t('Saved configurations') },
                     ].map((tab) => (
                         <button
                             key={tab.id}
@@ -428,11 +429,10 @@ export function ReportConfigurator({
                                 <Info className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                                        Como funciona?
+                                        {t('How does it work?')}
                                     </p>
                                     <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                                        Ative os campos que deseja ver no relatório. Para campos numéricos, 
-                                        escolha como calcular (soma, média, etc.) e o tipo de gráfico.
+                                        {t('Enable the fields you want to see in the report. For numeric fields, choose how to calculate (sum, average, etc.) and chart type.')}
                                     </p>
                                 </div>
                             </div>
@@ -463,18 +463,18 @@ export function ReportConfigurator({
                                                                 <div className="flex items-center gap-2 flex-wrap">
                                                                     <span className="font-semibold">{field.label}</span>
                                                                     <Badge variant="outline" className={`text-xs ${typeInfo.color}`}>
-                                                                        {typeInfo.label}
+                                                                        {t(typeInfo.labelKey)}
                                                                     </Badge>
                                                                 </div>
                                                                 <p className="text-xs text-muted-foreground mt-1">
-                                                                    {typeInfo.description}
+                                                                    {t(typeInfo.descriptionKey)}
                                                                 </p>
                                                             </div>
                                                         </div>
 
                                                         <div className="flex items-center gap-2">
                                                             <span className="text-xs text-muted-foreground">
-                                                                {config?.visible ? 'Visível' : 'Oculto'}
+                                                                {config?.visible ? t('Visible') : t('Hidden')}
                                                             </span>
                                                             <Switch
                                                                 checked={config?.visible ?? true}
@@ -490,7 +490,7 @@ export function ReportConfigurator({
                                                             {field.type === 'number' && (
                                                                 <div className="flex-1 min-w-[140px]">
                                                                     <Label className="text-xs text-muted-foreground mb-1.5 block">
-                                                                        Cálculo
+                                                                        {t('Calculation')}
                                                                     </Label>
                                                                     <Select
                                                                         value={config?.aggregation || 'sum'}
@@ -502,14 +502,14 @@ export function ReportConfigurator({
                                                                             <SelectValue />
                                                                         </SelectTrigger>
                                                                         <SelectContent>
-                                                                            {AGGREGATIONS.map(agg => (
+                                                                            {AGGREGATIONS_CONFIG.map(agg => (
                                                                                 <SelectItem key={agg.value} value={agg.value}>
                                                                                     <div className="flex items-center gap-2">
                                                                                         <span className="w-5 h-5 rounded bg-muted flex items-center justify-center text-xs font-bold">
-                                                                                            {agg.icon}
+                                                                                            {t(agg.labelKey)}
                                                                                         </span>
                                                                                         <div>
-                                                                                            <span>{agg.label}</span>
+                                                                                            <span>{t(agg.label)}</span>
                                                                                         </div>
                                                                                     </div>
                                                                                 </SelectItem>
@@ -521,7 +521,7 @@ export function ReportConfigurator({
 
                                                             <div className="flex-1 min-w-[140px]">
                                                                 <Label className="text-xs text-muted-foreground mb-1.5 block">
-                                                                    Tipo de Gráfico
+                                                                    {t('Chart Type')}
                                                                 </Label>
                                                                 <Select
                                                                     value={config?.chartType || 'bar'}
@@ -562,16 +562,16 @@ export function ReportConfigurator({
                                 <Filter className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
-                                        Filtrar Documentos
+                                        {t('Filter Documents')}
                                     </p>
                                     <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                                        Escolha quais documentos incluir no relatório: todos, por período ou seleção manual.
+                                        {t('Choose which documents to include in the report: all, by period or manual selection.')}
                                     </p>
                                 </div>
                             </div>
 
                             <div className="grid gap-3">
-                                {SELECTION_MODES.map((mode) => (
+                                {SELECTION_MODES_CONFIG.map((mode) => (
                                     <button
                                         key={mode.value}
                                         onClick={() => setSelectionMode(mode.value as typeof selectionMode)}
@@ -590,13 +590,13 @@ export function ReportConfigurator({
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2">
-                                                <span className="font-medium">{mode.label}</span>
+                                                <span className="font-medium">{t(mode.labelKey)}</span>
                                                 {selectionMode === mode.value && (
                                                     <CheckCircle2 className="h-4 w-4 text-primary" />
                                                 )}
                                             </div>
                                             <p className="text-xs text-muted-foreground mt-1">
-                                                {mode.description}
+                                                {t(mode.descriptionKey)}
                                             </p>
                                         </div>
                                     </button>
@@ -730,13 +730,13 @@ export function ReportConfigurator({
                                         >
                                             <div className="flex items-center gap-2">
                                                 <EyeOff className="h-4 w-4" />
-                                                <span className="font-medium">Sem Agrupamento</span>
+                                                <span className="font-medium">{t('Sem Agrupamento')}</span>
                                             </div>
                                             <p className="text-xs text-muted-foreground mt-1">
                                                 Mostra todos os dados individualmente
                                             </p>
                                         </button>
-                                        {DATE_GROUPINGS.map((g) => (
+                                        {DATE_GROUPINGS_CONFIG.map((g) => (
                                             <button
                                                 key={g.value}
                                                 onClick={() => setDateGrouping(g.value as typeof dateGrouping)}
@@ -748,10 +748,10 @@ export function ReportConfigurator({
                                             >
                                                 <div className="flex items-center gap-2">
                                                     <Calendar className="h-4 w-4" />
-                                                    <span className="font-medium">{g.label}</span>
+                                                    <span className="font-medium">{t(g.labelKey)}</span>
                                                 </div>
                                                 <p className="text-xs text-muted-foreground mt-1">
-                                                    {g.description}
+                                                    {t(g.descriptionKey)}
                                                 </p>
                                             </button>
                                         ))}
@@ -768,7 +768,7 @@ export function ReportConfigurator({
                                             onValueChange={(v) => setDateField(v)}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Selecione um campo" />
+                                                <SelectValue placeholder={t('Select a field')} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="created_at">
@@ -781,7 +781,7 @@ export function ReportConfigurator({
                                                     <SelectItem key={f.name} value={f.name}>
                                                         <div className="flex items-center gap-2">
                                                             <Calendar className="h-4 w-4" />
-                                                            {f.label}
+                                                            {t(f.labelKey)}
                                                         </div>
                                                     </SelectItem>
                                                 ))}
@@ -815,7 +815,7 @@ export function ReportConfigurator({
                             <div className="p-4 bg-muted/30 rounded-xl space-y-4">
                                 <h4 className="font-medium flex items-center gap-2">
                                     <Save className="h-4 w-4" />
-                                    Salvar Configuração Atual
+                                    {t('Save Current Configuration')}
                                 </h4>
                                 <div className="space-y-3">
                                     <div>
@@ -922,12 +922,12 @@ export function ReportConfigurator({
                         {loading ? (
                             <>
                                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                A gerar relatório...
+                                {t('Generating report...')}
                             </>
                         ) : (
                             <>
                                 <Play className="mr-2 h-5 w-5" />
-                                Gerar Relatório
+                                {t('Generate Report')}
                             </>
                         )}
                     </Button>

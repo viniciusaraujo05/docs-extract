@@ -28,10 +28,11 @@ final class AnalyzeReportWithAIAction
      * @return array Análise estruturada com insights e recomendações
      * @throws RuntimeException Se a API falhar
      */
-    public function execute(array $reportData, string $documentTypeName): array
+    public function execute(array $reportData, string $documentTypeName, ?string $customInstructions = null, ?string $locale = null): array
     {
         $apiKey = $this->getApiKey();
-        $prompt = $this->buildPrompt($reportData, $documentTypeName);
+        $locale = $locale ?? app()->getLocale();
+        $prompt = $this->buildPrompt($reportData, $documentTypeName, $customInstructions, $locale);
 
         try {
             $response = Http::withHeaders([
@@ -42,7 +43,7 @@ final class AnalyzeReportWithAIAction
                 'messages' => [
                     [
                         'role' => 'system',
-                        'content' => 'Você é um analista de dados especializado em análise de documentos financeiros e empresariais. Sua função é analisar dados agregados de relatórios e fornecer insights valiosos, identificar padrões, tendências e fazer recomendações estratégicas baseadas nos dados.'
+                        'content' => $this->getSystemPrompt($locale)
                     ],
                     [
                         'role' => 'user',
@@ -72,14 +73,69 @@ final class AnalyzeReportWithAIAction
     }
 
     /**
+     * Obtém o prompt do sistema no idioma correto.
+     */
+    private function getSystemPrompt(string $locale): string
+    {
+        $prompts = [
+            'pt' => 'Você é um analista de dados especializado em análise de documentos financeiros e empresariais. Sua função é analisar dados agregados de relatórios e fornecer insights valiosos, identificar padrões, tendências e fazer recomendações estratégicas baseadas nos dados. IMPORTANTE: Responda SEMPRE em português (pt-BR).',
+            'en' => 'You are a data analyst specialized in analyzing financial and business documents. Your role is to analyze aggregated report data and provide valuable insights, identify patterns, trends, and make strategic recommendations based on the data. IMPORTANT: Always respond in English.',
+        ];
+
+        return $prompts[$locale] ?? $prompts['pt'];
+    }
+
+    /**
+     * Obtém a estrutura do prompt no idioma correto.
+     */
+    private function getStructurePrompt(string $locale, ?string $customInstructions = null): string
+    {
+        $structures = [
+            'pt' => [
+                'intro' => "\n\nForneça análise estruturada:\n\n",
+                'user_response' => "## RESPOSTA ÀS INSTRUÇÕES DO USUÁRIO\nO usuário solicitou: {instructions}\nResponda diretamente a esta solicitação com base nos dados fornecidos.\n\n",
+                'summary' => "## RESUMO EXECUTIVO\n[2-3 frases sobre os dados]\n\n",
+                'insights' => "## INSIGHTS PRINCIPAIS\n[Liste 4-6 insights importantes com dados específicos]\n\n",
+                'patterns' => "## PADRÕES E TENDÊNCIAS\n[Identifique padrões com números e percentuais]\n\n",
+                'recommendations' => "## RECOMENDAÇÕES ESTRATÉGICAS\n[4-6 ações práticas baseadas nos dados]\n\n",
+                'warnings' => "## PONTOS DE ATENÇÃO\n[Problemas críticos que requerem ação imediata]\n\n",
+            ],
+            'en' => [
+                'intro' => "\n\nProvide structured analysis:\n\n",
+                'user_response' => "## RESPONSE TO USER INSTRUCTIONS\nThe user requested: {instructions}\nRespond directly to this request based on the provided data.\n\n",
+                'summary' => "## EXECUTIVE SUMMARY\n[2-3 sentences about the data]\n\n",
+                'insights' => "## KEY INSIGHTS\n[List 4-6 important insights with specific data]\n\n",
+                'patterns' => "## PATTERNS AND TRENDS\n[Identify patterns with numbers and percentages]\n\n",
+                'recommendations' => "## STRATEGIC RECOMMENDATIONS\n[4-6 practical actions based on the data]\n\n",
+                'warnings' => "## ATTENTION POINTS\n[Critical problems that require immediate action]\n\n",
+            ],
+        ];
+
+        $structure = $structures[$locale] ?? $structures['pt'];
+        $prompt = $structure['intro'];
+
+        if ($customInstructions) {
+            $prompt .= str_replace('{instructions}', $customInstructions, $structure['user_response']);
+        }
+
+        $prompt .= $structure['summary'];
+        $prompt .= $structure['insights'];
+        $prompt .= $structure['patterns'];
+        $prompt .= $structure['recommendations'];
+        $prompt .= $structure['warnings'];
+
+        return $prompt;
+    }
+
+    /**
      * Constrói o prompt para a IA.
      */
-    private function buildPrompt(array $reportData, string $documentTypeName): string
+    private function buildPrompt(array $reportData, string $documentTypeName, ?string $customInstructions = null, string $locale = 'pt'): string
     {
         $totalDocuments = $reportData['totalDocuments'] ?? 0;
         $aggregated = $reportData['aggregated'] ?? [];
         
-        $prompt = "Analise os seguintes dados de relatório do tipo '{$documentTypeName}':\n\n";
+        $prompt = "Analise o relatório '{$documentTypeName}'. Use apenas os dados fornecidos, sem inventar campos.\n\n";
         $prompt .= "Total de documentos analisados: {$totalDocuments}\n\n";
         $prompt .= "Campos e dados agregados:\n";
 
@@ -115,12 +171,7 @@ final class AnalyzeReportWithAIAction
             }
         }
 
-        $prompt .= "\n\nPor favor, forneça uma análise estruturada nos seguintes formatos:\n\n";
-        $prompt .= "## RESUMO EXECUTIVO\n[Resumo geral dos dados em 2-3 frases]\n\n";
-        $prompt .= "## INSIGHTS PRINCIPAIS\n[Liste 3-5 insights mais importantes identificados nos dados]\n\n";
-        $prompt .= "## PADRÕES E TENDÊNCIAS\n[Descreva padrões, tendências ou anomalias observadas]\n\n";
-        $prompt .= "## RECOMENDAÇÕES ESTRATÉGICAS\n[Liste 3-5 recomendações acionáveis baseadas nos dados]\n\n";
-        $prompt .= "## PONTOS DE ATENÇÃO\n[Identifique possíveis problemas ou áreas que requerem atenção]\n\n";
+        $prompt .= $this->getStructurePrompt($locale, $customInstructions);
 
         return $prompt;
     }
@@ -132,6 +183,7 @@ final class AnalyzeReportWithAIAction
     {
         // Extrai seções do texto
         $sections = [
+            'user_response' => $this->extractSection($analysisText, 'RESPOSTA ÀS INSTRUÇÕES DO USUÁRIO', 'RESUMO EXECUTIVO'),
             'summary' => $this->extractSection($analysisText, 'RESUMO EXECUTIVO', 'INSIGHTS PRINCIPAIS'),
             'insights' => $this->extractSection($analysisText, 'INSIGHTS PRINCIPAIS', 'PADRÕES E TENDÊNCIAS'),
             'patterns' => $this->extractSection($analysisText, 'PADRÕES E TENDÊNCIAS', 'RECOMENDAÇÕES ESTRATÉGICAS'),

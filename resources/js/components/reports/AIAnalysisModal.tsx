@@ -2,19 +2,21 @@ import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sparkles, Download, Copy, CheckCircle2, AlertCircle, TrendingUp, Lightbulb, AlertTriangle } from 'lucide-react';
-import { useState } from 'react';
+import { Textarea } from '@/components/ui/textarea';
+import { Sparkles, Download, Copy, CheckCircle2, AlertCircle, TrendingUp, Lightbulb, AlertTriangle, SquarePen } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface AIAnalysis {
     raw_text: string;
     sections: {
+        user_response?: string;
         summary: string;
         insights: string;
         patterns: string;
@@ -34,7 +36,12 @@ interface AIAnalysisModalProps {
     analysis: AIAnalysis | null;
     documentTypeName: string;
     loading?: boolean;
+    onReanalyze?: () => void;
+    onAnalyze?: (instructions: string) => void;
+    instructions?: string;
 }
+
+const MAX_INSTRUCTIONS_LENGTH = 400;
 
 export function AIAnalysisModal({
     open,
@@ -42,27 +49,48 @@ export function AIAnalysisModal({
     analysis,
     documentTypeName,
     loading = false,
+    onReanalyze,
+    onAnalyze,
+    instructions = '',
 }: AIAnalysisModalProps) {
+    const { t } = useTranslation();
     const [copied, setCopied] = useState(false);
+    const [localInstructions, setLocalInstructions] = useState(instructions);
+    const [showInstructionsForm, setShowInstructionsForm] = useState(false);
+
+    useEffect(() => {
+        setLocalInstructions(instructions ?? '');
+    }, [instructions]);
+
+    useEffect(() => {
+        // Show instructions form if no analysis or if explicitly requested
+        setShowInstructionsForm(!analysis);
+    }, [analysis]);
+
+    const handleReanalyze = () => {
+        setShowInstructionsForm(true);
+        if (onReanalyze) {
+            onReanalyze();
+        }
+    };
 
     const handleCopy = async (text: string) => {
         try {
             await navigator.clipboard.writeText(text);
             setCopied(true);
-            toast.success('Copiado para a área de transferência');
+            toast.success(t('Copied to clipboard'));
             setTimeout(() => setCopied(false), 2000);
         } catch (error) {
-            toast.error('Erro ao copiar texto');
+            toast.error(t('Error copying text'));
         }
     };
 
     const handleExport = () => {
         if (!analysis) return;
 
-        const content = `# Análise IA - ${documentTypeName}
-Gerado em: ${new Date(analysis.metadata.analyzed_at).toLocaleString('pt-PT')}
-Total de documentos analisados: ${analysis.metadata.total_documents}
-Modelo: ${analysis.metadata.model}
+        const content = `# ${t('Intelligent Analysis')}: ${documentTypeName}
+${t('Updated on')}: ${new Date(analysis.metadata.analyzed_at).toLocaleString()}
+${analysis.metadata.total_documents} ${t('documents analyzed')}
 
 ---
 
@@ -79,45 +107,59 @@ ${analysis.raw_text}
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         
-        toast.success('Análise exportada com sucesso');
+        toast.success(t('Analysis exported successfully'));
     };
 
     const formatSection = (text: string) => {
         if (!text) return null;
         
-        // Split by lines and format
-        const lines = text.split('\n').filter(line => line.trim());
-        
-        return lines.map((line, index) => {
-            // Check if it's a list item
-            if (line.trim().startsWith('-') || line.trim().startsWith('*') || line.trim().match(/^\d+\./)) {
-                return (
-                    <li key={index} className="ml-4 text-sm text-muted-foreground leading-relaxed">
-                        {line.replace(/^[-*]\s*/, '').replace(/^\d+\.\s*/, '')}
-                    </li>
-                );
-            }
+        return text.split('\n').map((line, index) => {
+            if (!line.trim()) return null;
             
-            // Regular paragraph
+            // Convert markdown bold (**text**) to HTML
+            const formattedLine = line
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>');
+            
             return (
-                <p key={index} className="text-sm text-muted-foreground leading-relaxed">
-                    {line}
-                </p>
+                <p 
+                    key={index} 
+                    className="text-base text-foreground leading-relaxed mb-2"
+                    dangerouslySetInnerHTML={{ __html: formattedLine }}
+                />
             );
         });
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-2xl">
-                        <Sparkles className="h-6 w-6 text-purple-500" />
-                        Análise IA - {documentTypeName}
-                    </DialogTitle>
-                    <DialogDescription>
-                        Insights e recomendações geradas por inteligência artificial
-                    </DialogDescription>
+            <DialogContent className="max-w-[50vw] w-[50vw] h-[97vh] max-h-[97vh] overflow-hidden flex flex-col p-0 gap-0">
+                <DialogHeader className="px-10 pt-8 pb-6 border-b bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-950/30 dark:via-blue-950/30 dark:to-indigo-950/30 shadow-sm">
+                    <div className="flex items-start justify-between">
+                        <DialogTitle className="flex flex-col gap-2">
+                            <span className="flex items-center gap-3 text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                                <Sparkles className="h-8 w-8 text-purple-500" />
+                                {t('Intelligent Analysis')}
+                            </span>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-xl font-semibold text-foreground">{documentTypeName}</span>
+                                <span className="text-sm text-muted-foreground font-normal">
+                                    {t('Executive report generated by AI with strategic insights')}
+                                </span>
+                            </div>
+                        </DialogTitle>
+                        {onReanalyze && !loading && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleReanalyze}
+                                className="ml-4"
+                            >
+                                <Sparkles className="h-4 w-4 mr-2" />
+                                {t('New Analysis')}
+                            </Button>
+                        )}
+                    </div>
                 </DialogHeader>
 
                 {loading && (
@@ -128,140 +170,237 @@ ${analysis.raw_text}
                     </div>
                 )}
 
+                {!loading && showInstructionsForm && onAnalyze && (
+                    <div className="flex-1 overflow-y-auto px-10 py-8">
+                        <Card className="border-2 border-dashed border-purple-200 dark:border-purple-800 shadow-lg">
+                            <CardHeader className="space-y-3">
+                                <CardTitle className="flex items-center gap-3 text-2xl">
+                                    <Sparkles className="h-6 w-6 text-purple-500" />
+                                    {t('Direct AI Analysis')}
+                                </CardTitle>
+                                <CardDescription className="text-base leading-relaxed">
+                                    {t('Describe what you would like the AI to investigate')}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <Textarea
+                                    value={localInstructions}
+                                    onChange={(e) =>
+                                        setLocalInstructions(
+                                            e.target.value.slice(0, MAX_INSTRUCTIONS_LENGTH)
+                                        )
+                                    }
+                                    placeholder={t('Describe what you would like the AI to investigate')}
+                                    className="min-h-[240px] text-base leading-relaxed resize-none"
+                                    maxLength={MAX_INSTRUCTIONS_LENGTH}
+                                />
+                                <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
+                                    <p className="text-sm text-muted-foreground">
+                                        {t('Be specific to get more relevant insights')}
+                                    </p>
+                                    <span className="text-sm font-medium text-muted-foreground">
+                                        {localInstructions.length}/{MAX_INSTRUCTIONS_LENGTH}
+                                    </span>
+                                </div>
+                                <div className="flex justify-end gap-3 pt-6">
+                                    <Button
+                                        variant="outline"
+                                        size="lg"
+                                        onClick={() => onOpenChange(false)}
+                                    >
+                                        {t('Cancel')}
+                                    </Button>
+                                    <Button
+                                        size="lg"
+                                        onClick={() => onAnalyze(localInstructions.trim())}
+                                        className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 shadow-lg"
+                                    >
+                                        <Sparkles className="h-5 w-5 mr-2" />
+                                        {t('Start Intelligent Analysis')}
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
+
                 {!loading && analysis && (
-                    <div className="space-y-6">
+                    <div className="flex-1 overflow-y-auto px-10 py-8 space-y-8">
                         {/* Metadata */}
-                        <div className="flex items-center justify-between text-xs text-muted-foreground border-b pb-4">
-                            <div className="flex items-center gap-4">
-                                <span>📊 {analysis.metadata.total_documents} documentos</span>
-                                <span>🤖 {analysis.metadata.model}</span>
-                                <span>🕐 {new Date(analysis.metadata.analyzed_at).toLocaleString('pt-PT')}</span>
+                        <div className="flex flex-wrap items-center justify-between gap-6 text-sm bg-gradient-to-r from-muted/50 to-muted/30 rounded-xl p-6 shadow-sm border">
+                            <div className="flex flex-wrap items-center gap-6">
+                                <span className="inline-flex items-center gap-2 font-medium">
+                                    <SquarePen className="h-5 w-5 text-purple-500" />
+                                    {analysis.metadata.total_documents} {t('documents analyzed')}
+                                </span>
+                                <span className="text-muted-foreground">{t('Updated on')} {new Date(analysis.metadata.analyzed_at).toLocaleString('pt-PT')}</span>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3">
                                 <Button
                                     variant="outline"
-                                    size="sm"
                                     onClick={() => handleCopy(analysis.raw_text)}
+                                    className="shadow-sm"
                                 >
                                     {copied ? (
                                         <CheckCircle2 className="h-4 w-4 mr-2" />
                                     ) : (
                                         <Copy className="h-4 w-4 mr-2" />
                                     )}
-                                    Copiar
+                                    {t('Copy')}
                                 </Button>
                                 <Button
                                     variant="outline"
-                                    size="sm"
                                     onClick={handleExport}
+                                    className="shadow-sm"
                                 >
                                     <Download className="h-4 w-4 mr-2" />
-                                    Exportar
+                                    {t('Export')}
                                 </Button>
                             </div>
                         </div>
 
-                        <Tabs defaultValue="overview" className="w-full">
-                            <TabsList className="grid w-full grid-cols-5">
-                                <TabsTrigger value="overview">Resumo</TabsTrigger>
-                                <TabsTrigger value="insights">Insights</TabsTrigger>
-                                <TabsTrigger value="patterns">Padrões</TabsTrigger>
-                                <TabsTrigger value="recommendations">Recomendações</TabsTrigger>
-                                <TabsTrigger value="warnings">Atenção</TabsTrigger>
+                        <Tabs defaultValue={analysis.sections.user_response ? "user-response" : "overview"} className="w-full flex-1">
+                            <TabsList className={`grid w-full h-auto bg-muted/50 p-1.5 gap-1.5 ${analysis.sections.user_response ? 'grid-cols-6' : 'grid-cols-5'}`}>
+                                {analysis.sections.user_response && (
+                                    <TabsTrigger value="user-response" className="text-xs px-2 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm font-medium whitespace-nowrap">
+                                        🗨️ {t('Your Request')}
+                                    </TabsTrigger>
+                                )}
+                                <TabsTrigger value="overview" className="text-xs px-2 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm font-medium whitespace-nowrap">
+                                    📊 {t('Summary')}
+                                </TabsTrigger>
+                                <TabsTrigger value="insights" className="text-xs px-2 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm font-medium whitespace-nowrap">
+                                    💡 {t('Insights')}
+                                </TabsTrigger>
+                                <TabsTrigger value="patterns" className="text-xs px-2 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm font-medium whitespace-nowrap">
+                                    📈 {t('Patterns')}
+                                </TabsTrigger>
+                                <TabsTrigger value="recommendations" className="text-xs px-2 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm font-medium whitespace-nowrap">
+                                    ✅ {t('Actions')}
+                                </TabsTrigger>
+                                <TabsTrigger value="warnings" className="text-xs px-2 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm font-medium whitespace-nowrap">
+                                    ⚠️ {t('Attention')}
+                                </TabsTrigger>
                             </TabsList>
 
+                            {/* User Response Tab */}
+                            {analysis.sections.user_response && (
+                                <TabsContent value="user-response" className="space-y-6 mt-8">
+                                    <Card className="border-2 border-purple-200 dark:border-purple-800 shadow-lg">
+                                        <CardHeader className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
+                                            <CardTitle className="flex items-center gap-3 text-2xl">
+                                                <Sparkles className="h-6 w-6 text-purple-500" />
+                                                {t('Response to Your Request')}
+                                            </CardTitle>
+                                            <CardDescription className="text-base">
+                                                {t('Specific analysis based on your instructions')}
+                                            </CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="pt-6 space-y-4">
+                                            <div className="prose prose-sm max-w-none text-base leading-relaxed">
+                                                {formatSection(analysis.sections.user_response)}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </TabsContent>
+                            )}
+
                             {/* Overview Tab */}
-                            <TabsContent value="overview" className="space-y-4">
-                                <Card>
+                            <TabsContent value="overview" className="space-y-6 mt-8">
+                                <Card className="shadow-md">
                                     <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Sparkles className="h-5 w-5 text-purple-500" />
-                                            Resumo Executivo
+                                        <CardTitle className="flex items-center gap-3 text-xl">
+                                            <Sparkles className="h-6 w-6 text-purple-500" />
+                                            {t('Executive Summary')}
                                         </CardTitle>
-                                        <CardDescription>
-                                            Visão geral dos dados analisados
+                                        <CardDescription className="text-base">
+                                            {t('Overview of analyzed data')}
                                         </CardDescription>
                                     </CardHeader>
-                                    <CardContent className="space-y-3">
-                                        {formatSection(analysis.sections.summary)}
+                                    <CardContent className="pt-6 space-y-4">
+                                        <div className="prose prose-sm max-w-none text-base leading-relaxed">
+                                            {formatSection(analysis.sections.summary)}
+                                        </div>
                                     </CardContent>
                                 </Card>
                             </TabsContent>
 
                             {/* Insights Tab */}
-                            <TabsContent value="insights" className="space-y-4">
-                                <Card>
+                            <TabsContent value="insights" className="space-y-6 mt-8">
+                                <Card className="shadow-md">
                                     <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Lightbulb className="h-5 w-5 text-yellow-500" />
-                                            Insights Principais
+                                        <CardTitle className="flex items-center gap-3 text-xl">
+                                            <Lightbulb className="h-6 w-6 text-yellow-500" />
+                                            {t('Key Insights')}
                                         </CardTitle>
-                                        <CardDescription>
-                                            Descobertas importantes identificadas pela IA
+                                        <CardDescription className="text-base">
+                                            {t('Important discoveries identified by AI')}
                                         </CardDescription>
                                     </CardHeader>
-                                    <CardContent>
-                                        <ul className="space-y-2">
+                                    <CardContent className="pt-6 space-y-4">
+                                        <div className="prose prose-sm max-w-none text-base leading-relaxed">
                                             {formatSection(analysis.sections.insights)}
-                                        </ul>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             </TabsContent>
 
                             {/* Patterns Tab */}
-                            <TabsContent value="patterns" className="space-y-4">
-                                <Card>
+                            <TabsContent value="patterns" className="space-y-6 mt-8">
+                                <Card className="shadow-md">
                                     <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <TrendingUp className="h-5 w-5 text-blue-500" />
-                                            Padrões e Tendências
+                                        <CardTitle className="flex items-center gap-3 text-xl">
+                                            <TrendingUp className="h-6 w-6 text-blue-500" />
+                                            {t('Identified Patterns')}
                                         </CardTitle>
-                                        <CardDescription>
-                                            Comportamentos e tendências observadas nos dados
+                                        <CardDescription className="text-base">
+                                            {t('Trends and behaviors in the data')}
                                         </CardDescription>
                                     </CardHeader>
-                                    <CardContent className="space-y-3">
-                                        {formatSection(analysis.sections.patterns)}
+                                    <CardContent className="pt-6 space-y-4">
+                                        <div className="prose prose-sm max-w-none text-base leading-relaxed">
+                                            {formatSection(analysis.sections.patterns)}
+                                        </div>
                                     </CardContent>
                                 </Card>
                             </TabsContent>
 
                             {/* Recommendations Tab */}
-                            <TabsContent value="recommendations" className="space-y-4">
-                                <Card>
+                            <TabsContent value="recommendations" className="space-y-6 mt-8">
+                                <Card className="shadow-md">
                                     <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <CheckCircle2 className="h-5 w-5 text-green-500" />
-                                            Recomendações Estratégicas
+                                        <CardTitle className="flex items-center gap-3 text-xl">
+                                            <CheckCircle2 className="h-6 w-6 text-green-500" />
+                                            {t('Recommended Actions')}
                                         </CardTitle>
-                                        <CardDescription>
-                                            Ações sugeridas baseadas na análise dos dados
+                                        <CardDescription className="text-base">
+                                            {t('Actions suggested based on the analysis of the data')}
                                         </CardDescription>
                                     </CardHeader>
-                                    <CardContent>
-                                        <ul className="space-y-2">
+                                    <CardContent className="pt-6 space-y-4">
+                                        <div className="prose prose-sm max-w-none text-base leading-relaxed">
                                             {formatSection(analysis.sections.recommendations)}
-                                        </ul>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             </TabsContent>
 
                             {/* Warnings Tab */}
-                            <TabsContent value="warnings" className="space-y-4">
-                                <Card>
+                            <TabsContent value="warnings" className="space-y-6 mt-8">
+                                <Card className="shadow-md border-l-4 border-l-orange-500">
                                     <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <AlertTriangle className="h-5 w-5 text-orange-500" />
-                                            Pontos de Atenção
+                                        <CardTitle className="flex items-center gap-3 text-xl">
+                                            <AlertTriangle className="h-6 w-6 text-orange-500" />
+                                            {t('Points of Attention')}
                                         </CardTitle>
-                                        <CardDescription>
-                                            Áreas que requerem atenção ou possíveis problemas
+                                        <CardDescription className="text-base">
+                                            {t('Risks and anomalies that require attention')}
                                         </CardDescription>
                                     </CardHeader>
-                                    <CardContent>
-                                        <ul className="space-y-2">
+                                    <CardContent className="pt-6 space-y-4">
+                                        <div className="prose prose-sm max-w-none text-base leading-relaxed">
                                             {formatSection(analysis.sections.warnings)}
-                                        </ul>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             </TabsContent>
@@ -269,12 +408,6 @@ ${analysis.raw_text}
                     </div>
                 )}
 
-                {!loading && !analysis && (
-                    <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                        <AlertCircle className="h-12 w-12 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Nenhuma análise disponível</p>
-                    </div>
-                )}
             </DialogContent>
         </Dialog>
     );

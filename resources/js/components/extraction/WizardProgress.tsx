@@ -1,5 +1,6 @@
 import { Check, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface WizardProgressProps {
     currentStep: number;
@@ -11,6 +12,7 @@ interface WizardProgressProps {
  * Mostra os passos e o estado atual com animações suaves
  */
 export function WizardProgress({ currentStep, steps }: WizardProgressProps) {
+    const { t } = useTranslation();
     return (
         <div className="mx-auto w-full max-w-2xl px-4">
             <div className="relative">
@@ -91,7 +93,7 @@ export function WizardProgress({ currentStep, steps }: WizardProgressProps) {
                                             isPending && 'text-muted-foreground/60'
                                         )}
                                     >
-                                        {isCompleted ? '✓ Concluído' : isCurrent ? 'Em progresso' : 'Pendente'}
+                                        {isCompleted ? `✓ ${t('Completed')}` : isCurrent ? t('In progress') : t('Pending')}
                                     </span>
                                 </div>
                             </div>

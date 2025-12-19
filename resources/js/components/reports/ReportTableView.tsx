@@ -11,8 +11,9 @@ import {
     TableHeader, 
     TableRow 
 } from '@/components/ui/table';
-import { Download, Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { Download, Search, ChevronDown, ChevronUp, ChevronsUpDown, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { useMemo, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import type { CalculatedField } from './CalculatedFieldBuilder';
@@ -91,6 +92,7 @@ export function ReportTableView({
     calculatedFields,
     visibleFields,
 }: ReportTableViewProps) {
+    const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
     const [sortField, setSortField] = useState<string | null>(null);
@@ -267,15 +269,15 @@ export function ReportTableView({
             <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle className="text-lg">Vista de Lista</CardTitle>
+                        <CardTitle className="text-lg">{t('List View')}</CardTitle>
                         <CardDescription>
-                            {processedDocuments.length} documentos
-                            {selectedRows.size > 0 && ` (${selectedRows.size} selecionados)`}
+                            {processedDocuments.length} {t('documents')}
+                            {selectedRows.size > 0 && ` (${selectedRows.size} ${t('selected')})`}
                         </CardDescription>
                     </div>
                     <Button onClick={handleExportSelected} size="sm">
                         <Download className="h-4 w-4 mr-2" />
-                        {selectedRows.size > 0 ? `Exportar (${selectedRows.size})` : 'Exportar Todos'}
+                        {selectedRows.size > 0 ? `${t('Export')} (${selectedRows.size})` : t('Export All')}
                     </Button>
                 </div>
             </CardHeader>
@@ -284,7 +286,7 @@ export function ReportTableView({
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                        placeholder="Pesquisar..."
+                        placeholder={t('Search...')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-9"

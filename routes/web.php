@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\ExtractionController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentTypeController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ReportConfigurationController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
@@ -12,38 +13,83 @@ use Laravel\Fortify\Features;
 Route::get('/', function () {
     return Inertia::render('welcome', [
         'canRegister' => Features::enabled(Features::registration()),
+        'locale' => 'pt',
     ]);
 })->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+// Landing page with locale
+Route::get('/{locale}', function ($locale) {
+    return Inertia::render('welcome', [
+        'canRegister' => Features::enabled(Features::registration()),
+        'locale' => $locale,
+    ]);
+})->where(['locale' => 'pt|en'])->name('home.locale');
+
+// Pages with locale prefix
+Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {
     // Reports (was Dashboard)
     Route::get('dashboard', [ReportController::class, 'index'])->name('dashboard');
-    Route::get('api/reports/{documentType}/data', [ReportController::class, 'getData'])->name('reports.data');
-    Route::get('api/reports/{documentType}/export', [ReportController::class, 'export'])->name('reports.export');
-    Route::post('api/reports/{documentType}/analyze-ai', [ReportController::class, 'analyzeWithAI'])->name('reports.analyze-ai');
-    
-    // Report Configurations
-    Route::get('api/reports/{documentType}/configurations', [ReportConfigurationController::class, 'index']);
-    Route::post('api/reports/{documentType}/configurations', [ReportConfigurationController::class, 'store']);
-    Route::get('api/reports/{documentType}/documents', [ReportConfigurationController::class, 'documents']);
-    Route::post('api/reports/{documentType}/preview', [ReportConfigurationController::class, 'preview']);
-    Route::put('api/reports/configurations/{configuration}', [ReportConfigurationController::class, 'update']);
-    Route::delete('api/reports/configurations/{configuration}', [ReportConfigurationController::class, 'destroy']);
-    Route::get('api/reports/configurations/{configuration}/generate', [ReportConfigurationController::class, 'generate']);
 
     // Documents
-    Route::resource('documents', DocumentController::class)->except(['edit']);
+    Route::resource('documents', DocumentController::class)->except(['edit'])->names([
+        'index' => 'documents.index',
+        'create' => 'documents.create',
+        'store' => 'documents.store',
+        'show' => 'documents.show',
+        'update' => 'documents.update',
+        'destroy' => 'documents.destroy',
+    ])->parameters(['documents' => 'document']);
     Route::get('documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
-    Route::put('documents/{document}/data', [DocumentController::class, 'updateData'])->name('documents.update-data');
+    Route::put('documents/{document}/data', [DocumentController::class, 'updateData'])->name('documents.updateData');
     Route::post('documents/{document}/reprocess', [DocumentController::class, 'reprocess'])->name('documents.reprocess');
 
     // Document Types
-    Route::resource('document-types', DocumentTypeController::class);
+    Route::resource('document-types', DocumentTypeController::class)->names([
+        'index' => 'document-types.index',
+        'create' => 'document-types.create',
+        'store' => 'document-types.store',
+        'show' => 'document-types.show',
+        'edit' => 'document-types.edit',
+        'update' => 'document-types.update',
+        'destroy' => 'document-types.destroy',
+    ]);
+});
 
-    // API for extraction
-    Route::post('api/documents/analyze', [ExtractionController::class, 'analyze'])->name('api.documents.analyze');
-    Route::post('api/documents/extract', [ExtractionController::class, 'extract'])->name('api.documents.extract');
-    Route::get('api/documents/check-name', [DocumentController::class, 'checkName'])->name('api.documents.check-name');
+// Auth routes with locale (must be BEFORE authenticated routes to avoid conflicts)
+Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->group(function () {
+    // Login routes
+    Route::get('login', function ($locale) {
+        return Inertia::render('auth/login', [
+            'canRegister' => Features::enabled(Features::registration()),
+            'canResetPassword' => true,
+            'locale' => $locale,
+        ]);
+    })->name('login');
+    
+    Route::post('login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])
+        ->middleware(['guest:web', 'throttle:login']);
+    
+    // Register routes
+    Route::get('register', function ($locale) {
+        return Inertia::render('auth/register', [
+            'canRegister' => Features::enabled(Features::registration()),
+            'locale' => $locale,
+        ]);
+    })->name('register');
+    
+    Route::post('register', [\Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'store'])
+        ->middleware(['guest:web']);
+    
+    // Logout
+    Route::post('logout', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])
+        ->middleware(['auth:web'])
+        ->name('logout');
+});
+
+// Demo API routes (public, rate limited: 3 requests per hour)
+Route::prefix('api/demo')->middleware(['throttle:3,60'])->group(function () {
+    Route::post('extract', [\App\Http\Controllers\Api\DemoController::class, 'extract']);
+    Route::get('check', [\App\Http\Controllers\Api\DemoController::class, 'checkAvailability']);
 });
 
 require __DIR__.'/settings.php';

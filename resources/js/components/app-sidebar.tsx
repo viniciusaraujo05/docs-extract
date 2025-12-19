@@ -9,24 +9,32 @@ import {
     SidebarMenuItem,
     SidebarGroup,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
 import { Link, usePage } from '@inertiajs/react';
 import { FileText, BarChart3 } from 'lucide-react';
 import AppLogo from './app-logo';
 import { resolveUrl } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
+import { useEffect, useState } from 'react';
 
 export function AppSidebar() {
+    const { t } = useTranslation();
     const page = usePage();
+    const [locale, setLocale] = useState('pt');
+
+    useEffect(() => {
+        const savedLocale = localStorage.getItem('selected-locale') || 'pt';
+        setLocale(savedLocale);
+    }, []);
     
     const navItems = [
         {
-            title: 'Relatórios',
-            href: dashboard(),
+            title: t('Reports'),
+            href: `/${locale}/dashboard`,
             icon: BarChart3,
         },
         {
-            title: 'Documentos',
-            href: '/documents',
+            title: t('Documents'),
+            href: `/${locale}/documents`,
             icon: FileText,
         },
     ];
@@ -37,7 +45,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href={`/${locale}/dashboard`} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

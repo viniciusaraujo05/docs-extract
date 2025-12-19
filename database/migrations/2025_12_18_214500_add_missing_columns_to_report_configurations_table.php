@@ -65,6 +65,7 @@ return new class extends Migration
             if (
                 Schema::hasColumn('report_configurations', 'user_id')
                 && Schema::hasColumn('report_configurations', 'document_type_id')
+                && !Schema::hasIndex('report_configurations', 'report_configurations_user_id_document_type_id_index')
             ) {
                 $table->index(['user_id', 'document_type_id']);
             }
@@ -127,7 +128,9 @@ return new class extends Migration
                 $table->dropColumn('is_default');
             }
 
-            $table->dropIndex(['user_id', 'document_type_id']);
+            if (Schema::hasIndex('report_configurations', 'report_configurations_user_id_document_type_id_index')) {
+                $table->dropIndex(['user_id', 'document_type_id']);
+            }
         });
     }
 };

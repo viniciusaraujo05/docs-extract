@@ -17,6 +17,7 @@ import {
     Pencil
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface StepReviewProps {
     file: File | null;
@@ -53,6 +54,7 @@ export function StepReview({
     onSave,
     onDiscard,
 }: StepReviewProps) {
+    const { t } = useTranslation();
     const [zoomLevel, setZoomLevel] = useState(100);
     const [editingLabel, setEditingLabel] = useState<string | null>(null);
     const [tempLabel, setTempLabel] = useState('');
@@ -72,7 +74,7 @@ export function StepReview({
                 <div className="text-center">
                     <FileText className="mx-auto h-16 w-16 text-muted-foreground/50" />
                     <p className="mt-2 text-sm text-muted-foreground">
-                        Sem preview disponível
+                        {t('No preview available')}
                     </p>
                 </div>
             );
@@ -130,10 +132,10 @@ export function StepReview({
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Check className="h-5 w-5 text-green-500" />
-                        Dados Extraídos
+                        {t('Extracted Data')}
                     </CardTitle>
                     <CardDescription>
-                        Revise e edite os dados antes de salvar
+                        {t('Review and edit the extracted data before saving')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -208,13 +210,17 @@ export function StepReview({
                     {/* Document Type Info */}
                     <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
                         <Tag className="h-4 w-4 text-primary" />
+                        <Label>{t('Extracted Data')} ({fields.length} {t('fields')})</Label>
+                        <p className="text-xs text-muted-foreground">
+                            {t('Edit the extracted values if needed')}
+                        </p>
                         <span className="text-sm font-medium">Tipo:</span>
                         <span className="text-sm text-muted-foreground">
                             {selectedTypeId 
                                 ? documentTypes.find(t => t.id === selectedTypeId)?.name 
                                 : newTypeName 
                                     ? `${newTypeName} (novo)` 
-                                    : 'Não definido'}
+                                    : t('Not defined')}
                         </span>
                     </div>
                 </CardContent>
@@ -225,7 +231,7 @@ export function StepReview({
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div>
-                            <CardTitle>Preview do Documento</CardTitle>
+                            <CardTitle>{t('Document Preview')}</CardTitle>
                             <CardDescription>
                                 {file?.name}
                             </CardDescription>
@@ -276,19 +282,19 @@ export function StepReview({
             <div className="flex justify-between lg:col-span-2">
                 <Button variant="outline" onClick={onBack}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
-                    Voltar
+                    {t('Back')}
                 </Button>
                 <div className="flex gap-2">
                     <Button variant="outline" onClick={onDiscard}>
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Descartar
+                        {t('Discard')}
                     </Button>
                     <Button 
                         onClick={onSave}
                         disabled={!selectedTypeId && !newTypeName}
                     >
                         <Check className="mr-2 h-4 w-4" />
-                        Salvar Documento
+                        {t('Save Document')}
                     </Button>
                 </div>
             </div>

@@ -8,8 +8,9 @@ import {
     type ExtractionResponse 
 } from '@/types/extraction';
 import { Head, router } from '@inertiajs/react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Obtém o token CSRF do meta tag
@@ -26,13 +27,7 @@ function getFilePreviewUrl(file: File | null): string | null {
     return URL.createObjectURL(file);
 }
 
-const BREADCRUMBS: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Documentos', href: '/documents' },
-    { title: 'Novo', href: '/documents/create' },
-];
-
-const WIZARD_STEPS = ['Upload', 'Definir Campos', 'Revisar & Salvar'];
+// Breadcrumbs and steps will be translated in component
 
 interface Props {
     documentTypes?: DocumentType[];
@@ -45,6 +40,22 @@ interface Props {
  * Step 3: Revisão e salvamento dos dados
  */
 export default function DocumentsCreate({ documentTypes = [] }: Props) {
+    const { t } = useTranslation();
+    const [locale, setLocale] = useState('pt');
+
+    useEffect(() => {
+        const savedLocale = localStorage.getItem('selected-locale') || 'pt';
+        setLocale(savedLocale);
+    }, []);
+    
+    const BREADCRUMBS: BreadcrumbItem[] = [
+        { title: t('Dashboard'), href: `/${locale}/dashboard` },
+        { title: t('Documents'), href: `/${locale}/documents` },
+        { title: t('New'), href: `/${locale}/documents/create` },
+    ];
+
+    const WIZARD_STEPS = [t('Upload'), t('Define Fields'), t('Review & Save')];
+    
     // Estado do wizard
     const [step, setStep] = useState(1);
     const [file, setFile] = useState<File | null>(null);
@@ -330,7 +341,8 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
             formData.append('force_overwrite', 'true');
         }
         
-        router.post('/documents', formData, { 
+        const locale = localStorage.getItem('selected-locale') || 'pt';
+        router.post(`/${locale}/documents`, formData, { 
             forceFormData: true,
             onSuccess: () => {
                 toast.success('Documento salvo com sucesso!');
@@ -353,18 +365,18 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
      * Descarta e volta à lista
      */
     const handleDiscard = useCallback(() => {
-        router.visit('/documents');
-    }, []);
+        router.visit(`/${locale}/documents`);
+    }, [locale]);
 
     return (
         <AppLayout breadcrumbs={BREADCRUMBS}>
-            <Head title="Novo Documento" />
+            <Head title={t('New Document')} />
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
                 {/* Header */}
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold">Extrair Dados de Documento</h1>
+                    <h1 className="text-2xl font-bold">{t('Extract Document Data')}</h1>
                     <p className="text-muted-foreground">
-                        Upload, defina os campos e deixe a IA extrair os dados
+                        {t('Upload, define fields and let AI extract the data')}
                     </p>
                 </div>
 
@@ -391,6 +403,7 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
                         analysisCompleted={analysisCompleted}
                         suggestedFieldsCount={suggestedFields.length}
                         error={error}
+                        locale={locale}
                         onFileSelect={handleFileSelect}
                         onTypeSelect={handleTypeSelect}
                         onNewTypeNameChange={handleNewTypeNameChange}
