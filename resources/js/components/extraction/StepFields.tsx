@@ -360,6 +360,30 @@ export function StepFields({
                 </CardContent>
             </Card>
 
+            {/* Actions - Navigation Buttons */}
+            <div className="lg:col-span-2 flex justify-between">
+                <Button variant="outline" onClick={onBack}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    {t('Back')}
+                </Button>
+                <Button 
+                    onClick={onExtract}
+                    disabled={fields.length === 0 || processing}
+                >
+                    {processing ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            {t('Extracting...')}
+                        </>
+                    ) : (
+                        <>
+                            <Sparkles className="mr-2 h-4 w-4" />
+                            {t('Extract Data')}
+                        </>
+                    )}
+                </Button>
+            </div>
+
             {/* Modal Fullscreen para Imagens */}
             {isFullscreen && !isPdf && filePreview && (
                 <div 
