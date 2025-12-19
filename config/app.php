@@ -58,18 +58,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Force HTTPS
-    |--------------------------------------------------------------------------
-    |
-    | When your application is behind a proxy/load balancer that terminates
-    | TLS, you may need to force HTTPS scheme for generated URLs.
-    |
-    */
-
-    'force_https' => env('FORCE_HTTPS', false),
-
-    /*
-    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

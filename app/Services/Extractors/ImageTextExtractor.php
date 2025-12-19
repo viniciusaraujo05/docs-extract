@@ -29,9 +29,6 @@ final class ImageTextExtractor implements TextExtractorInterface
 
     private const MAX_TOKENS = 4096;
 
-    /**
-     * {@inheritdoc}
-     */
     public function extract(UploadedFile $file): string
     {
         $apiKey = $this->getApiKey();
@@ -102,9 +99,6 @@ final class ImageTextExtractor implements TextExtractorInterface
         throw new RuntimeException("OpenAI Vision API falhou: {$errorMessage}");
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function supports(UploadedFile $file): bool
     {
         return in_array($file->getMimeType(), self::SUPPORTED_MIMES, true);

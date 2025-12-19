@@ -25,7 +25,8 @@ final class DocumentTypeController extends Controller
         private readonly DocumentTypeRepository $documentTypeRepository,
         private readonly StoreDocumentTypeAction $storeDocumentTypeAction,
         private readonly UpdateDocumentTypeAction $updateDocumentTypeAction,
-    ) {}
+    ) {
+    }
 
     /**
      * Lista todos os tipos de documentos do utilizador.

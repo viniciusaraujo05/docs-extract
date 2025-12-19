@@ -28,6 +28,7 @@ final class AnalyzeReportWithAIAction
      *
      * @param  array  $reportData  Dados agregados do relatório
      * @param  string  $documentTypeName  Nome do tipo de documento
+     *
      * @return array Análise estruturada com insights e recomendações
      *
      * @throws RuntimeException Se a API falhar
@@ -68,7 +69,6 @@ final class AnalyzeReportWithAIAction
             $analysisText = $result['choices'][0]['message']['content'] ?? '';
 
             return $this->parseAnalysis($analysisText, $reportData);
-
         } catch (\Exception $e) {
             throw new RuntimeException(
                 'Falha ao analisar relatório com IA: '.$e->getMessage()
@@ -177,9 +177,7 @@ final class AnalyzeReportWithAIAction
             }
         }
 
-        $prompt .= $this->getStructurePrompt($locale, $customInstructions);
-
-        return $prompt;
+        return $prompt . $this->getStructurePrompt($locale, $customInstructions);
     }
 
     /**

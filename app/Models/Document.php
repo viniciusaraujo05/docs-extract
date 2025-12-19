@@ -37,17 +37,6 @@ class Document extends Model
         'processed_at',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'extracted_data' => 'array',
-            'schema_used' => 'array',
-            'file_size' => 'integer',
-            'credits_used' => 'integer',
-            'processed_at' => 'datetime',
-        ];
-    }
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -113,5 +102,16 @@ class Document extends Model
             'error_message' => $errorMessage,
             'processed_at' => now(),
         ]);
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'extracted_data' => 'array',
+            'schema_used' => 'array',
+            'file_size' => 'integer',
+            'credits_used' => 'integer',
+            'processed_at' => 'datetime',
+        ];
     }
 }

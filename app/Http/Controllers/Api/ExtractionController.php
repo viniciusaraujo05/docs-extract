@@ -30,12 +30,14 @@ final class ExtractionController extends Controller
         private readonly TextExtractorManager $textExtractor,
         private readonly FieldDetectorService $fieldDetector,
         private readonly ExtractionService $extractionService,
-    ) {}
+    ) {
+    }
 
     /**
      * Analisa um documento e detecta campos extraíveis.
      *
      * @param  Request  $request  Request com o ficheiro
+     *
      * @return JsonResponse Campos sugeridos e preview do texto
      */
     public function analyze(Request $request): JsonResponse
@@ -79,6 +81,7 @@ final class ExtractionController extends Controller
      * Extrai dados estruturados de um documento.
      *
      * @param  Request  $request  Request com ficheiro e campos
+     *
      * @return JsonResponse Dados extraídos
      */
     public function extract(Request $request): JsonResponse

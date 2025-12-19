@@ -22,6 +22,7 @@ final class FieldDetectorService
      * Detecta campos extraíveis no texto do documento.
      *
      * @param  string  $text  Texto do documento a analisar
+     *
      * @return array<array{name: string, label: string, type: string}> Campos detectados
      *
      * @throws RuntimeException Se a detecção falhar
@@ -121,6 +122,7 @@ PROMPT;
      * Faz parse da resposta da OpenAI.
      *
      * @param  string  $content  Conteúdo JSON da resposta
+     *
      * @return array<array{name: string, label: string, type: string}>
      */
     private function parseResponse(string $content): array

@@ -28,9 +28,6 @@ final class PdfTextExtractor implements TextExtractorInterface
 
     private const MAX_PAGES_FOR_OCR = 5;
 
-    /**
-     * {@inheritdoc}
-     */
     public function extract(UploadedFile $file): string
     {
         $path = $file->getRealPath();
@@ -56,12 +53,17 @@ final class PdfTextExtractor implements TextExtractorInterface
         return $this->extractWithOcr($path, $file->getClientOriginalName());
     }
 
+    public function supports(UploadedFile $file): bool
+    {
+        return $file->getMimeType() === 'application/pdf';
+    }
+
     /**
      * Extrai texto usando o parser de PDF.
      */
     private function extractWithParser(string $path, string $filename): string
     {
-        $parser = new Parser;
+        $parser = new Parser();
         $pdf = $parser->parseFile($path);
         $text = $pdf->getText();
 
@@ -158,7 +160,7 @@ final class PdfTextExtractor implements TextExtractorInterface
         $images = [];
 
         try {
-            $imagick = new Imagick;
+            $imagick = new Imagick();
             $imagick->setResolution(150, 150); // DPI para boa qualidade
             $imagick->readImage($path);
 
@@ -174,7 +176,6 @@ final class PdfTextExtractor implements TextExtractorInterface
 
             $imagick->clear();
             $imagick->destroy();
-
         } catch (Throwable $e) {
             Log::error('Failed to convert PDF to images', ['error' => $e->getMessage()]);
             throw new RuntimeException('Falha ao converter PDF para imagens: '.$e->getMessage());
@@ -220,13 +221,5 @@ final class PdfTextExtractor implements TextExtractorInterface
         }
 
         return $response->json('choices.0.message.content') ?? '';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function supports(UploadedFile $file): bool
-    {
-        return $file->getMimeType() === 'application/pdf';
     }
 }

@@ -40,6 +40,7 @@ final readonly class DocumentRepository
      * Busca documento pelo ID.
      *
      * @param  string  $id  ID do documento a ser buscado
+     *
      * @return Document|null O documento encontrado ou null se não existir
      */
     public function findById(string $id): ?Document

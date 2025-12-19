@@ -16,7 +16,8 @@ class CreateNewUser implements CreatesNewUsers
 
     public function __construct(
         private readonly Dispatcher $events
-    ) {}
+    ) {
+    }
 
     /**
      * Validate and create a newly registered user.

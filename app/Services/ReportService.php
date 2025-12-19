@@ -22,7 +22,8 @@ final class ReportService
 {
     public function __construct(
         private readonly DocumentRepository $documentRepository,
-    ) {}
+    ) {
+    }
 
     /**
      * Gera dados do relatório baseado na configuração.
@@ -247,8 +248,8 @@ final class ReportService
             $first = $sorted->first();
             $last = $sorted->last();
 
-            if ($first != 0) {
-                $result['growth'] = (($last - $first) / abs($first)) * 100;
+            if ($first !== 0) {
+                $result['growth'] = ($last - $first) / abs($first) * 100;
             } else {
                 $result['growth'] = $last > 0 ? 100 : 0;
             }

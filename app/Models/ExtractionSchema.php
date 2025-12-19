@@ -20,15 +20,6 @@ class ExtractionSchema extends Model
         'is_system',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'fields' => 'array',
-            'is_default' => 'boolean',
-            'is_system' => 'boolean',
-        ];
-    }
-
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
@@ -67,6 +58,15 @@ class ExtractionSchema extends Model
                 ['name' => 'payment_method', 'type' => 'string', 'label' => 'Método de Pagamento'],
                 ['name' => 'vat_amount', 'type' => 'number', 'label' => 'IVA'],
             ],
+        ];
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'fields' => 'array',
+            'is_default' => 'boolean',
+            'is_system' => 'boolean',
         ];
     }
 }

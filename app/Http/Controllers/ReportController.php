@@ -32,7 +32,8 @@ final class ReportController extends Controller
         private readonly AggregateReportDataAction $aggregateReportDataAction,
         private readonly ExportReportAction $exportReportAction,
         private readonly AnalyzeReportWithAIAction $analyzeReportWithAIAction,
-    ) {}
+    ) {
+    }
 
     public function index(Request $request): Response
     {

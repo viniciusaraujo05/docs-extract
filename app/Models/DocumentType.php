@@ -46,20 +46,6 @@ final class DocumentType extends Model
     ];
 
     /**
-     * Boot do modelo - gera slug automaticamente.
-     */
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        self::creating(function (DocumentType $documentType) {
-            if (empty($documentType->slug)) {
-                $documentType->slug = Str::slug($documentType->name).'-'.Str::random(6);
-            }
-        });
-    }
-
-    /**
      * Utilizador dono deste tipo de documento.
      */
     public function user(): BelongsTo
@@ -89,5 +75,19 @@ final class DocumentType extends Model
     public function scopeForUser(Builder $query, int $userId): Builder
     {
         return $query->where('user_id', $userId);
+    }
+
+    /**
+     * Boot do modelo - gera slug automaticamente.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        self::creating(function (DocumentType $documentType) {
+            if (empty($documentType->slug)) {
+                $documentType->slug = Str::slug($documentType->name).'-'.Str::random(6);
+            }
+        });
     }
 }

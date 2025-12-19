@@ -17,14 +17,6 @@ class Organization extends Model
         'settings',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'settings' => 'array',
-            'credits' => 'integer',
-        ];
-    }
-
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
@@ -54,5 +46,13 @@ class Organization extends Model
         $this->decrement('credits', $amount);
 
         return true;
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'settings' => 'array',
+            'credits' => 'integer',
+        ];
     }
 }

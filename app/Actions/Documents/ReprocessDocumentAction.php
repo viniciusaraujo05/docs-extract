@@ -18,7 +18,8 @@ final readonly class ReprocessDocumentAction
 {
     public function __construct(
         private DocumentRepository $documentRepository,
-    ) {}
+    ) {
+    }
 
     /**
      * Executa a ação de reprocessar documento.

@@ -39,7 +39,8 @@ final class DocumentController extends Controller
         private readonly StoreDocumentAction $storeDocumentAction,
         private readonly DeleteDocumentAction $deleteDocumentAction,
         private readonly ReprocessDocumentAction $reprocessDocumentAction,
-    ) {}
+    ) {
+    }
 
     public function index(Request $request): Response
     {
@@ -211,18 +212,6 @@ final class DocumentController extends Controller
     }
 
     /**
-     * @return array{fields: array<mixed>}
-     */
-    private function getDefaultSchema(string $type): array
-    {
-        return match ($type) {
-            'invoice' => ExtractionSchema::getDefaultInvoiceSchema(),
-            'receipt' => ExtractionSchema::getDefaultReceiptSchema(),
-            default => ['fields' => []],
-        };
-    }
-
-    /**
      * Verifica se já existe documento com o nome fornecido.
      */
     public function checkName(Request $request): JsonResponse
@@ -238,5 +227,17 @@ final class DocumentController extends Controller
             'exists' => $exists,
             'name' => $name,
         ]);
+    }
+
+    /**
+     * @return array{fields: array<mixed>}
+     */
+    private function getDefaultSchema(string $type): array
+    {
+        return match ($type) {
+            'invoice' => ExtractionSchema::getDefaultInvoiceSchema(),
+            'receipt' => ExtractionSchema::getDefaultReceiptSchema(),
+            default => ['fields' => []],
+        };
     }
 }

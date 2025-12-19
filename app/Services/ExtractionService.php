@@ -28,6 +28,7 @@ final class ExtractionService
      *
      * @param  string  $text  Texto do documento
      * @param  array{fields: array<array{name: string, type: string, label?: string}>}  $schema  Schema com campos a extrair
+     *
      * @return array{data: array<string, mixed>, confidence: int|null} Dados extraídos e confiança
      *
      * @throws RuntimeException Se a extração falhar
@@ -120,6 +121,7 @@ final class ExtractionService
      * Faz parse da resposta da OpenAI.
      *
      * @param  string|null  $content  Conteúdo JSON da resposta
+     *
      * @return array{data: array<string, mixed>, confidence: int|null}
      *
      * @throws RuntimeException Se o JSON for inválido

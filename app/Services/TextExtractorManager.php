@@ -37,6 +37,7 @@ final class TextExtractorManager
      * Extrai texto de um ficheiro usando o extractor apropriado.
      *
      * @param  UploadedFile  $file  Ficheiro a processar
+     *
      * @return string Texto extraído
      *
      * @throws RuntimeException Se nenhum extractor suportar o ficheiro

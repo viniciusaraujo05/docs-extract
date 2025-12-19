@@ -22,7 +22,8 @@ final class DocumentService
     public function __construct(
         private readonly DocumentRepository $documentRepository,
         private readonly ExtractionService $extractionService,
-    ) {}
+    ) {
+    }
 
     public function upload(UploadedFile $file, User $user, string $type = 'invoice', ?array $schema = null): Document
     {
@@ -31,7 +32,7 @@ final class DocumentService
 
         $schemaToUse = $schema ?? $this->getDefaultSchema($type);
 
-        $document = $this->documentRepository->create([
+        return $this->documentRepository->create([
             'user_id' => $user->id,
             'organization_id' => $user->organization_id,
             'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
@@ -43,8 +44,6 @@ final class DocumentService
             'status' => 'pending',
             'schema_used' => $schemaToUse,
         ]);
-
-        return $document;
     }
 
     public function getDefaultSchema(string $type): array
@@ -75,7 +74,6 @@ final class DocumentService
             );
 
             $document->increment('credits_used');
-
         } catch (\Exception $e) {
             $document->markAsFailed($e->getMessage());
         }
@@ -96,27 +94,6 @@ final class DocumentService
         }
 
         return '';
-    }
-
-    private function extractTextFromPdf(string $path): string
-    {
-        // MVP: Usar biblioteca simples ou mock
-        // Em produção, usar Smalot/PdfParser ou serviço OCR
-        if (class_exists(\Smalot\PdfParser\Parser::class)) {
-            $parser = new \Smalot\PdfParser\Parser;
-            $pdf = $parser->parseFile($path);
-
-            return $pdf->getText();
-        }
-
-        // Mock para desenvolvimento
-        return "Texto extraído do PDF (mock).\nFatura nº 2024/001\nData: 15/12/2024\nFornecedor: Empresa ABC Lda\nNIF: 123456789\nTotal: 1230.00 EUR\nIVA: 230.00 EUR";
-    }
-
-    private function extractTextFromImage(string $path): string
-    {
-        // MVP: Mock - em produção usar Tesseract OCR ou serviço cloud
-        return "Texto extraído da imagem (mock).\nRecibo de compra\nData: 15/12/2024\nTotal: 45.50 EUR";
     }
 
     public function updateExtractedData(Document $document, array $data): Document
@@ -142,5 +119,26 @@ final class DocumentService
         Storage::disk('local')->delete($document->file_path);
 
         return $this->documentRepository->delete($document);
+    }
+
+    private function extractTextFromPdf(string $path): string
+    {
+        // MVP: Usar biblioteca simples ou mock
+        // Em produção, usar Smalot/PdfParser ou serviço OCR
+        if (class_exists(\Smalot\PdfParser\Parser::class)) {
+            $parser = new \Smalot\PdfParser\Parser();
+            $pdf = $parser->parseFile($path);
+
+            return $pdf->getText();
+        }
+
+        // Mock para desenvolvimento
+        return "Texto extraído do PDF (mock).\nFatura nº 2024/001\nData: 15/12/2024\nFornecedor: Empresa ABC Lda\nNIF: 123456789\nTotal: 1230.00 EUR\nIVA: 230.00 EUR";
+    }
+
+    private function extractTextFromImage(string $path): string
+    {
+        // MVP: Mock - em produção usar Tesseract OCR ou serviço cloud
+        return "Texto extraído da imagem (mock).\nRecibo de compra\nData: 15/12/2024\nTotal: 45.50 EUR";
     }
 }

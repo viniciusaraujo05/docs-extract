@@ -26,7 +26,8 @@ final readonly class StoreDocumentAction
     public function __construct(
         private DocumentRepository $documentRepository,
         private DocumentTypeRepository $documentTypeRepository,
-    ) {}
+    ) {
+    }
 
     /**
      * Executa a ação de armazenar documento.

@@ -24,7 +24,8 @@ final class ReportConfigurationController extends Controller
         private readonly ReportConfigurationRepository $reportConfigurationRepository,
         private readonly DocumentRepository $documentRepository,
         private readonly ReportService $reportService,
-    ) {}
+    ) {
+    }
 
     /**
      * List all configurations for a document type.
