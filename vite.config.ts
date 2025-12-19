@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
+const shouldGenerateWayfinder = process.env.WAYFINDER_GENERATE === 'true';
+
 export default defineConfig({
     plugins: [
         laravel({
@@ -17,19 +19,22 @@ export default defineConfig({
             },
         }),
         tailwindcss(),
-        wayfinder({
-            /**
-             * Evita que o wayfinder gere tipos em produção (onde o build pode não ter Redis).
-             * Define SKIP_WAYFINDER_REDIS=true para desativar manualmente.
-             */
-            generate:
-                process.env.NODE_ENV !== 'production' ||
-                process.env.SKIP_WAYFINDER_REDIS === 'true',
-            config: {
-                // Durante o build, usa o cache array para não depender do Redis real.
-                cache_driver: process.env.WAYFINDER_CACHE_DRIVER || 'array',
-            },
-        }),
+        ...(shouldGenerateWayfinder
+            ? [
+                  wayfinder({
+                      /**
+                       * Só gera arquivos do Wayfinder quando explicitamente habilitado
+                       * (WAYFINDER_GENERATE=true). Isso evita dependência de Redis no build.
+                       */
+                      generate: true,
+                      config: {
+                          // Durante o build, usa o cache array para não depender do Redis real.
+                          cache_driver:
+                              process.env.WAYFINDER_CACHE_DRIVER || 'array',
+                      },
+                  }),
+              ]
+            : []),
     ],
     esbuild: {
         jsx: 'automatic',
