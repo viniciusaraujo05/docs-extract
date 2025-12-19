@@ -1,0 +1,5 @@
+{
+  "start": [
+    "php artisan wayfinder:generate"
+  ]
+}
