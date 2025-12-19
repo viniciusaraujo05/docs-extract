@@ -18,7 +18,17 @@ export default defineConfig({
         }),
         tailwindcss(),
         wayfinder({
-            formVariants: true,
+            /**
+             * Evita que o wayfinder gere tipos em produção (onde o build pode não ter Redis).
+             * Define SKIP_WAYFINDER_REDIS=true para desativar manualmente.
+             */
+            generate:
+                process.env.NODE_ENV !== 'production' ||
+                process.env.SKIP_WAYFINDER_REDIS === 'true',
+            config: {
+                // Durante o build, usa o cache array para não depender do Redis real.
+                cache_driver: process.env.WAYFINDER_CACHE_DRIVER || 'array',
+            },
         }),
     ],
     esbuild: {
