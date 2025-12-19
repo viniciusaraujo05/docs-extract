@@ -9,7 +9,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.5",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/fortify": "^1.30",
         "laravel/framework": "^12.0",
@@ -28,7 +28,8 @@
         "nunomaduro/collision": "^8.6",
         "nunomaduro/larastan": "^3.8",
         "nunomaduro/phpinsights": "^2.13",
-        "phpunit/phpunit": "^11.5.3"
+        "phpunit/phpunit": "^11.5.3",
+        "rector/rector": "^2.2"
     },
     "autoload": {
         "psr-4": {
