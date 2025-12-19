@@ -9,7 +9,7 @@ use App\Repositories\DocumentTypeRepository;
 
 /**
  * Action para criar um novo tipo de documento.
- * 
+ *
  * Encapsula a validação e criação de tipo de documento.
  */
 final readonly class StoreDocumentTypeAction
@@ -20,7 +20,7 @@ final readonly class StoreDocumentTypeAction
 
     /**
      * Executa a ação de criar tipo de documento.
-     * 
+     *
      * @throws \InvalidArgumentException Se os campos forem inválidos
      */
     public function execute(int $userId, string $name, ?string $description, array $fields): DocumentType

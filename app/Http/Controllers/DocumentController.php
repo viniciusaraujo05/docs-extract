@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Controller para gestão de documentos.
- * 
+ *
  * Refatorado para usar Repository Pattern e Actions,
  * seguindo princípios SOLID e Clean Code.
  */
@@ -119,7 +119,7 @@ final class DocumentController extends Controller
     public function show(string $locale, string $document): Response
     {
         $documentModel = $this->documentRepository->findById($document);
-        
+
         $this->authorize('view', $documentModel);
 
         $previewUrl = Storage::disk('local')->exists($documentModel->file_path)
@@ -135,7 +135,7 @@ final class DocumentController extends Controller
     public function update(Request $request, string $locale, string $document): RedirectResponse
     {
         $documentModel = $this->documentRepository->findById($document);
-        
+
         $this->authorize('update', $documentModel);
 
         $this->documentRepository->update($documentModel, $request->only(['name']));
@@ -148,7 +148,7 @@ final class DocumentController extends Controller
     public function preview(string $locale, string $document): BinaryFileResponse
     {
         $documentModel = $this->documentRepository->findById($document);
-        
+
         $this->authorize('view', $documentModel);
 
         $path = Storage::disk('local')->path($documentModel->file_path);
@@ -163,7 +163,7 @@ final class DocumentController extends Controller
     public function updateData(UpdateDocumentDataRequest $request, string $locale, string $document): RedirectResponse
     {
         $documentModel = $this->documentRepository->findById($document);
-        
+
         $this->authorize('update', $documentModel);
 
         $this->documentRepository->update($documentModel, [
@@ -178,7 +178,7 @@ final class DocumentController extends Controller
     public function reprocess(Request $request, string $locale, string $document): RedirectResponse
     {
         $documentModel = $this->documentRepository->findById($document);
-        
+
         $this->authorize('update', $documentModel);
 
         /** @var User $user */
@@ -200,7 +200,7 @@ final class DocumentController extends Controller
     public function destroy(string $locale, string $document): RedirectResponse
     {
         $documentModel = $this->documentRepository->findById($document);
-        
+
         $this->authorize('delete', $documentModel);
 
         $this->deleteDocumentAction->execute($documentModel);
@@ -209,7 +209,6 @@ final class DocumentController extends Controller
             ->route('documents.index', ['locale' => app()->getLocale()])
             ->with('success', 'Documento eliminado com sucesso.');
     }
-
 
     /**
      * @return array{fields: array<mixed>}
@@ -229,7 +228,7 @@ final class DocumentController extends Controller
     public function checkName(Request $request): JsonResponse
     {
         $name = $request->query('name', '');
-        
+
         /** @var User $user */
         $user = $request->user();
 

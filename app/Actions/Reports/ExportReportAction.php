@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Action para exportar relatório em CSV.
- * 
+ *
  * Encapsula a lógica de geração de arquivo CSV.
  */
 final readonly class ExportReportAction

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Modelo para documentos extraídos.
- * 
+ *
  * Armazena os dados extraídos de PDFs e imagens,
  * incluindo o schema usado e os dados para relatórios.
  */

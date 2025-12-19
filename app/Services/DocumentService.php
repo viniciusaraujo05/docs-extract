@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 
 /**
  * Serviço para processamento de documentos.
- * 
+ *
  * Refatorado para usar Repository Pattern.
  */
 final class DocumentService
@@ -26,8 +26,8 @@ final class DocumentService
 
     public function upload(UploadedFile $file, User $user, string $type = 'invoice', ?array $schema = null): Document
     {
-        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-        $path = $file->storeAs('documents/' . $user->id, $filename, 'local');
+        $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
+        $path = $file->storeAs('documents/'.$user->id, $filename, 'local');
 
         $schemaToUse = $schema ?? $this->getDefaultSchema($type);
 
@@ -86,7 +86,7 @@ final class DocumentService
     public function extractText(Document $document): string
     {
         $path = Storage::disk('local')->path($document->file_path);
-        
+
         if (str_contains($document->mime_type, 'pdf')) {
             return $this->extractTextFromPdf($path);
         }
@@ -103,8 +103,9 @@ final class DocumentService
         // MVP: Usar biblioteca simples ou mock
         // Em produção, usar Smalot/PdfParser ou serviço OCR
         if (class_exists(\Smalot\PdfParser\Parser::class)) {
-            $parser = new \Smalot\PdfParser\Parser();
+            $parser = new \Smalot\PdfParser\Parser;
             $pdf = $parser->parseFile($path);
+
             return $pdf->getText();
         }
 
@@ -139,6 +140,7 @@ final class DocumentService
     public function delete(Document $document): bool
     {
         Storage::disk('local')->delete($document->file_path);
+
         return $this->documentRepository->delete($document);
     }
 }

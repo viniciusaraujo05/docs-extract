@@ -12,7 +12,7 @@ use RuntimeException;
 
 /**
  * Extractor de texto para imagens usando OpenAI Vision API.
- * 
+ *
  * Utiliza a API de visão da OpenAI para fazer OCR
  * e extrair texto de imagens de documentos.
  */
@@ -20,12 +20,13 @@ final class ImageTextExtractor implements TextExtractorInterface
 {
     private const SUPPORTED_MIMES = [
         'image/jpeg',
-        'image/jpg', 
+        'image/jpg',
         'image/png',
         'image/webp',
     ];
 
     private const TIMEOUT = 120;
+
     private const MAX_TOKENS = 4096;
 
     /**
@@ -81,7 +82,7 @@ final class ImageTextExtractor implements TextExtractorInterface
 
         if ($response->successful()) {
             $text = $response->json('choices.0.message.content') ?? '';
-            
+
             Log::info('Vision API extracted text successfully', [
                 'file' => $file->getClientOriginalName(),
                 'text_length' => mb_strlen($text),

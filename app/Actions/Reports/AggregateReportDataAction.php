@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Action para agregar dados de relatório.
- * 
+ *
  * Encapsula a lógica de agregação de dados por campos.
  */
 final readonly class AggregateReportDataAction

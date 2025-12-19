@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Controller para gestão de relatórios.
- * 
+ *
  * Refatorado para usar Repository Pattern e Actions,
  * seguindo princípios SOLID e Clean Code.
  */
@@ -33,6 +33,7 @@ final class ReportController extends Controller
         private readonly ExportReportAction $exportReportAction,
         private readonly AnalyzeReportWithAIAction $analyzeReportWithAIAction,
     ) {}
+
     public function index(Request $request): Response
     {
         /** @var User $user */
@@ -80,14 +81,14 @@ final class ReportController extends Controller
 
         return response()->streamDownload(function () use ($documents, $fields) {
             $handle = fopen('php://output', 'w');
-            
+
             // Header row
             $headers = ['ID', 'Nome do Documento', 'Data de Criação'];
             foreach ($fields as $field) {
                 $headers[] = $field['label'] ?? $field['name'];
             }
             fputcsv($handle, $headers);
-            
+
             // Data rows
             foreach ($documents as $doc) {
                 $row = [
@@ -95,16 +96,16 @@ final class ReportController extends Controller
                     $doc->name,
                     $doc->created_at?->format('d/m/Y H:i'),
                 ];
-                
+
                 $extractedData = $doc->extracted_data ?? [];
                 foreach ($fields as $field) {
                     $value = $extractedData[$field['name']] ?? '';
                     $row[] = is_array($value) ? json_encode($value) : $value;
                 }
-                
+
                 fputcsv($handle, $row);
             }
-            
+
             fclose($handle);
         }, $filename, [
             'Content-Type' => 'text/csv',
@@ -128,7 +129,7 @@ final class ReportController extends Controller
             ->latest()
             ->first();
 
-        if (!$latestAnalysis) {
+        if (! $latestAnalysis) {
             return response()->json([
                 'success' => true,
                 'has_analysis' => false,
@@ -191,5 +192,4 @@ final class ReportController extends Controller
             ], 500);
         }
     }
-
 }

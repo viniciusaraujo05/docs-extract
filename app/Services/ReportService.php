@@ -12,10 +12,10 @@ use Illuminate\Support\Collection;
 
 /**
  * Serviço para processamento de relatórios.
- * 
+ *
  * Responsável por agregar dados, calcular métricas
  * e gerar visualizações baseadas nas configurações.
- * 
+ *
  * Refatorado para usar Repository Pattern.
  */
 final class ReportService
@@ -23,6 +23,7 @@ final class ReportService
     public function __construct(
         private readonly DocumentRepository $documentRepository,
     ) {}
+
     /**
      * Gera dados do relatório baseado na configuração.
      */
@@ -57,14 +58,14 @@ final class ReportService
             $fieldName = $field['name'];
             $fieldType = $field['type'] ?? 'string';
             $fieldLabel = $field['label'] ?? $fieldName;
-            
+
             $fieldSettings = $fieldConfig[$fieldName] ?? [
                 'visible' => true,
                 'aggregation' => null,
                 'chartType' => $this->getDefaultChartType($fieldType),
             ];
 
-            if (!($fieldSettings['visible'] ?? true)) {
+            if (! ($fieldSettings['visible'] ?? true)) {
                 continue;
             }
 
@@ -148,7 +149,7 @@ final class ReportService
     ): array {
         // Use repository to get completed documents
         $allDocuments = $this->documentRepository->getCompletedByDocumentType($documentType->id);
-        
+
         // Apply filters
         if ($selectionMode === 'filtered') {
             $allDocuments = $allDocuments->filter(function ($doc) use ($dateFrom, $dateTo) {
@@ -158,9 +159,10 @@ final class ReportService
                 if ($dateTo && $doc->created_at > $dateTo) {
                     return false;
                 }
+
                 return true;
             });
-        } elseif ($selectionMode === 'manual' && !empty($selectedDocumentIds)) {
+        } elseif ($selectionMode === 'manual' && ! empty($selectedDocumentIds)) {
             $allDocuments = $allDocuments->whereIn('id', $selectedDocumentIds);
         }
 
@@ -179,10 +181,10 @@ final class ReportService
             $fieldName = $field['name'];
             $fieldType = $field['type'] ?? 'string';
             $fieldLabel = $field['label'] ?? $fieldName;
-            
+
             $fieldSettings = $fieldConfig[$fieldName] ?? ['visible' => true];
 
-            if (!($fieldSettings['visible'] ?? true)) {
+            if (! ($fieldSettings['visible'] ?? true)) {
                 continue;
             }
 
@@ -244,7 +246,7 @@ final class ReportService
             $sorted = $values->values();
             $first = $sorted->first();
             $last = $sorted->last();
-            
+
             if ($first != 0) {
                 $result['growth'] = (($last - $first) / abs($first)) * 100;
             } else {
@@ -260,6 +262,7 @@ final class ReportService
         return $values->groupBy(function ($date) use ($grouping) {
             try {
                 $carbon = Carbon::parse($date);
+
                 return match ($grouping) {
                     'day' => $carbon->format('Y-m-d'),
                     'month' => $carbon->format('Y-m'),
@@ -283,6 +286,7 @@ final class ReportService
             $date = $doc->extracted_data[$dateField] ?? $doc->created_at;
             try {
                 $carbon = Carbon::parse($date);
+
                 return match ($grouping) {
                     'day' => $carbon->format('Y-m-d'),
                     'month' => $carbon->format('Y-m'),
@@ -297,20 +301,20 @@ final class ReportService
         $result = [];
         foreach ($grouped as $period => $docs) {
             $periodData = ['period' => $period, 'count' => $docs->count()];
-            
+
             foreach ($fields as $field) {
                 $fieldName = $field['name'];
                 $fieldType = $field['type'] ?? 'string';
                 $settings = $fieldConfig[$fieldName] ?? [];
-                
-                if (!($settings['visible'] ?? true)) {
+
+                if (! ($settings['visible'] ?? true)) {
                     continue;
                 }
 
                 if ($fieldType === 'number') {
                     $values = $docs->pluck('extracted_data')
                         ->map(fn ($data) => is_numeric($data[$fieldName] ?? null) ? (float) $data[$fieldName] : 0);
-                    
+
                     $aggregation = $settings['aggregation'] ?? 'sum';
                     $periodData[$fieldName] = match ($aggregation) {
                         'sum' => $values->sum(),
@@ -320,7 +324,7 @@ final class ReportService
                     };
                 }
             }
-            
+
             $result[] = $periodData;
         }
 

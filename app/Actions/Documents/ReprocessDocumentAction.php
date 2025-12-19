@@ -11,7 +11,7 @@ use App\Repositories\DocumentRepository;
 
 /**
  * Action para reprocessar um documento.
- * 
+ *
  * Encapsula a lógica de reprocessamento incluindo verificação de créditos.
  */
 final readonly class ReprocessDocumentAction
@@ -22,13 +22,13 @@ final readonly class ReprocessDocumentAction
 
     /**
      * Executa a ação de reprocessar documento.
-     * 
+     *
      * @throws \RuntimeException Se o documento não pode ser reprocessado
      * @throws \RuntimeException Se não há créditos suficientes
      */
     public function execute(Document $document, ?Organization $organization): void
     {
-        if (!$document->canReprocess()) {
+        if (! $document->canReprocess()) {
             throw new \RuntimeException('Este documento não pode ser reprocessado no momento.');
         }
 

@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         // Drop the old check constraint and add new one with updated values
-        DB::statement("ALTER TABLE documents DROP CONSTRAINT IF EXISTS documents_type_check");
+        DB::statement('ALTER TABLE documents DROP CONSTRAINT IF EXISTS documents_type_check');
         DB::statement("ALTER TABLE documents ADD CONSTRAINT documents_type_check CHECK (type::text = ANY (ARRAY['invoice'::text, 'receipt'::text, 'custom'::text, 'predefined'::text]))");
     }
 
@@ -20,7 +20,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE documents DROP CONSTRAINT IF EXISTS documents_type_check");
+        DB::statement('ALTER TABLE documents DROP CONSTRAINT IF EXISTS documents_type_check');
         DB::statement("ALTER TABLE documents ADD CONSTRAINT documents_type_check CHECK (type::text = ANY (ARRAY['invoice'::text, 'receipt'::text, 'custom'::text]))");
     }
 };

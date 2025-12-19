@@ -10,7 +10,7 @@ use RuntimeException;
 
 /**
  * Service para detecção automática de campos em documentos.
- * 
+ *
  * Utiliza a OpenAI para analisar o texto de um documento
  * e identificar campos que podem ser extraídos.
  */
@@ -21,8 +21,9 @@ final class FieldDetectorService
     /**
      * Detecta campos extraíveis no texto do documento.
      *
-     * @param string $text Texto do documento a analisar
+     * @param  string  $text  Texto do documento a analisar
      * @return array<array{name: string, label: string, type: string}> Campos detectados
+     *
      * @throws RuntimeException Se a detecção falhar
      */
     public function detect(string $text): array
@@ -49,7 +50,7 @@ final class FieldDetectorService
                 'response_format' => ['type' => 'json_object'],
             ]);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             Log::error('OpenAI field detection failed', [
                 'status' => $response->status(),
                 'body' => $response->body(),
@@ -119,7 +120,7 @@ PROMPT;
     /**
      * Faz parse da resposta da OpenAI.
      *
-     * @param string $content Conteúdo JSON da resposta
+     * @param  string  $content  Conteúdo JSON da resposta
      * @return array<array{name: string, label: string, type: string}>
      */
     private function parseResponse(string $content): array
@@ -128,17 +129,18 @@ PROMPT;
             $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
             $fields = $data['fields'] ?? $data;
 
-            if (!is_array($fields) || count($fields) === 0) {
+            if (! is_array($fields) || count($fields) === 0) {
                 return $this->getDefaultFields();
             }
 
-            return array_map(fn($f) => [
+            return array_map(fn ($f) => [
                 'name' => $f['name'] ?? 'field',
                 'label' => $f['label'] ?? $f['name'] ?? 'Campo',
                 'type' => $f['type'] ?? 'string',
             ], $fields);
         } catch (\JsonException $e) {
             Log::warning('Failed to parse field detection response', ['error' => $e->getMessage()]);
+
             return $this->getDefaultFields();
         }
     }

@@ -12,15 +12,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('organization_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->cascadeOnDelete();
-            
+
             $table->string('name');
             $table->string('document_type')->default('invoice');
             $table->json('fields');
             $table->boolean('is_default')->default(false);
             $table->boolean('is_system')->default(false);
-            
+
             $table->timestamps();
-            
+
             $table->index(['organization_id', 'document_type']);
         });
     }

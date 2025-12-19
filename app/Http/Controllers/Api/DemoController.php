@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\ExtractionService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
@@ -19,7 +18,7 @@ class DemoController extends Controller
 
     /**
      * Demo extraction endpoint - LIMITED TO 1 USE PER IP
-     * 
+     *
      * Security measures:
      * - Rate limiting: 1 request per IP per day
      * - File validation: MIME type, size, extension
@@ -60,7 +59,7 @@ class DemoController extends Controller
 
         try {
             $file = $request->file('file');
-            
+
             // Store file temporarily
             $path = $file->store('demo', 'local');
             $fullPath = Storage::disk('local')->path($path);
@@ -115,13 +114,13 @@ class DemoController extends Controller
         // Generate realistic sample data based on common document types
         $data = [
             'document_type' => 'Invoice',
-            'invoice_number' => 'INV-' . date('Y') . '-' . rand(1000, 9999),
+            'invoice_number' => 'INV-'.date('Y').'-'.rand(1000, 9999),
             'date' => date('Y-m-d'),
             'due_date' => date('Y-m-d', strtotime('+30 days')),
             'total_amount' => number_format(rand(100, 5000) + (rand(0, 99) / 100), 2, '.', ''),
             'currency' => 'EUR',
             'customer_name' => $this->getRandomCompanyName(),
-            'customer_email' => strtolower(str_replace(' ', '', $this->getRandomCompanyName())) . '@example.com',
+            'customer_email' => strtolower(str_replace(' ', '', $this->getRandomCompanyName())).'@example.com',
             'items_count' => rand(1, 10),
             'tax_amount' => number_format(rand(20, 500) + (rand(0, 99) / 100), 2, '.', ''),
             'confidence' => rand(85, 98),

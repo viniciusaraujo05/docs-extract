@@ -9,23 +9,27 @@ use RuntimeException;
 
 /**
  * Action para análise de dados de relatório usando IA.
- * 
+ *
  * Envia dados agregados para a OpenAI e recebe insights,
  * percepções e recomendações baseadas nos dados.
  */
 final class AnalyzeReportWithAIAction
 {
     private const API_URL = 'https://api.openai.com/v1/chat/completions';
+
     private const MODEL = 'gpt-4o-mini';
+
     private const MAX_TOKENS = 2000;
+
     private const TEMPERATURE = 0.7;
 
     /**
      * Analisa os dados do relatório usando IA.
      *
-     * @param array $reportData Dados agregados do relatório
-     * @param string $documentTypeName Nome do tipo de documento
+     * @param  array  $reportData  Dados agregados do relatório
+     * @param  string  $documentTypeName  Nome do tipo de documento
      * @return array Análise estruturada com insights e recomendações
+     *
      * @throws RuntimeException Se a API falhar
      */
     public function execute(array $reportData, string $documentTypeName, ?string $customInstructions = null, ?string $locale = null): array
@@ -36,27 +40,27 @@ final class AnalyzeReportWithAIAction
 
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
+                'Authorization' => 'Bearer '.$apiKey,
                 'Content-Type' => 'application/json',
             ])->timeout(60)->post(self::API_URL, [
                 'model' => self::MODEL,
                 'messages' => [
                     [
                         'role' => 'system',
-                        'content' => $this->getSystemPrompt($locale)
+                        'content' => $this->getSystemPrompt($locale),
                     ],
                     [
                         'role' => 'user',
-                        'content' => $prompt
-                    ]
+                        'content' => $prompt,
+                    ],
                 ],
                 'temperature' => self::TEMPERATURE,
                 'max_tokens' => self::MAX_TOKENS,
             ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 throw new RuntimeException(
-                    'Erro ao comunicar com OpenAI API: ' . $response->body()
+                    'Erro ao comunicar com OpenAI API: '.$response->body()
                 );
             }
 
@@ -67,7 +71,7 @@ final class AnalyzeReportWithAIAction
 
         } catch (\Exception $e) {
             throw new RuntimeException(
-                'Falha ao analisar relatório com IA: ' . $e->getMessage()
+                'Falha ao analisar relatório com IA: '.$e->getMessage()
             );
         }
     }
@@ -134,7 +138,7 @@ final class AnalyzeReportWithAIAction
     {
         $totalDocuments = $reportData['totalDocuments'] ?? 0;
         $aggregated = $reportData['aggregated'] ?? [];
-        
+
         $prompt = "Analise o relatório '{$documentTypeName}'. Use apenas os dados fornecidos, sem inventar campos.\n\n";
         $prompt .= "Total de documentos analisados: {$totalDocuments}\n\n";
         $prompt .= "Campos e dados agregados:\n";
@@ -142,29 +146,31 @@ final class AnalyzeReportWithAIAction
         foreach ($aggregated as $fieldName => $field) {
             $label = $field['label'] ?? $fieldName;
             $type = $field['type'] ?? 'string';
-            
+
             $prompt .= "\n**{$label}** (tipo: {$type}):\n";
-            
+
             if ($type === 'number') {
-                $prompt .= "- Soma total: " . ($field['sum'] ?? 0) . "\n";
-                $prompt .= "- Média: " . ($field['avg'] ?? 0) . "\n";
-                $prompt .= "- Mínimo: " . ($field['min'] ?? 0) . "\n";
-                $prompt .= "- Máximo: " . ($field['max'] ?? 0) . "\n";
-                $prompt .= "- Quantidade de valores: " . ($field['count'] ?? 0) . "\n";
+                $prompt .= '- Soma total: '.($field['sum'] ?? 0)."\n";
+                $prompt .= '- Média: '.($field['avg'] ?? 0)."\n";
+                $prompt .= '- Mínimo: '.($field['min'] ?? 0)."\n";
+                $prompt .= '- Máximo: '.($field['max'] ?? 0)."\n";
+                $prompt .= '- Quantidade de valores: '.($field['count'] ?? 0)."\n";
             } elseif ($type === 'date') {
-                if (!empty($field['byMonth'])) {
+                if (! empty($field['byMonth'])) {
                     $prompt .= "- Distribuição por mês:\n";
                     foreach ($field['byMonth'] as $month => $count) {
                         $prompt .= "  * {$month}: {$count} documentos\n";
                     }
                 }
             } else {
-                $prompt .= "- Valores únicos: " . ($field['uniqueCount'] ?? 0) . "\n";
-                if (!empty($field['distribution'])) {
+                $prompt .= '- Valores únicos: '.($field['uniqueCount'] ?? 0)."\n";
+                if (! empty($field['distribution'])) {
                     $prompt .= "- Top valores:\n";
                     $count = 0;
                     foreach ($field['distribution'] as $value => $freq) {
-                        if ($count++ >= 5) break;
+                        if ($count++ >= 5) {
+                            break;
+                        }
                         $prompt .= "  * {$value}: {$freq} ocorrências\n";
                     }
                 }
@@ -207,22 +213,22 @@ final class AnalyzeReportWithAIAction
      */
     private function extractSection(string $text, string $startMarker, ?string $endMarker): string
     {
-        $pattern = '/##\s*' . preg_quote($startMarker, '/') . '\s*\n(.*?)(?=##|$)/s';
-        
+        $pattern = '/##\s*'.preg_quote($startMarker, '/').'\s*\n(.*?)(?=##|$)/s';
+
         if (preg_match($pattern, $text, $matches)) {
             $content = trim($matches[1]);
-            
+
             // Se há um marcador de fim, corta até ele
             if ($endMarker !== null) {
-                $endPattern = '/##\s*' . preg_quote($endMarker, '/') . '/';
+                $endPattern = '/##\s*'.preg_quote($endMarker, '/').'/';
                 if (preg_match($endPattern, $content, $endMatch, PREG_OFFSET_CAPTURE)) {
                     $content = substr($content, 0, $endMatch[0][1]);
                 }
             }
-            
+
             return trim($content);
         }
-        
+
         return '';
     }
 

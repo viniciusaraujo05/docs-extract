@@ -12,7 +12,7 @@ use Illuminate\Support\ServiceProvider;
 
 /**
  * Service Provider para serviços de extração de documentos.
- * 
+ *
  * Regista os extractors de texto e serviços relacionados
  * no container de injeção de dependências.
  */
@@ -25,12 +25,12 @@ class ExtractionServiceProvider extends ServiceProvider
     {
         // Regista o TextExtractorManager como singleton
         $this->app->singleton(TextExtractorManager::class, function () {
-            $manager = new TextExtractorManager();
-            
+            $manager = new TextExtractorManager;
+
             // Regista os extractors disponíveis
-            $manager->addExtractor(new PdfTextExtractor());
-            $manager->addExtractor(new ImageTextExtractor());
-            
+            $manager->addExtractor(new PdfTextExtractor);
+            $manager->addExtractor(new ImageTextExtractor);
+
             return $manager;
         });
 

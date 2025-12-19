@@ -22,7 +22,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('reports/{documentType}/export', [ReportController::class, 'export']);
     Route::get('reports/{documentType}/latest-analysis', [ReportController::class, 'getLatestAnalysis']);
     Route::post('reports/{documentType}/analyze-ai', [ReportController::class, 'analyzeWithAI']);
-    
+
     // Report Configurations API
     Route::get('reports/{documentType}/configurations', [ReportConfigurationController::class, 'index']);
     Route::post('reports/{documentType}/configurations', [ReportConfigurationController::class, 'store']);

@@ -21,7 +21,7 @@ class TranslationController extends Controller
     {
         $supportedLocales = config('app.available_locales', ['pt', 'en']);
 
-        if (!in_array($locale, $supportedLocales)) {
+        if (! in_array($locale, $supportedLocales)) {
             return response()->json([
                 'error' => 'Unsupported locale',
                 'supported' => $supportedLocales,

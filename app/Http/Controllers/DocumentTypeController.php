@@ -15,7 +15,7 @@ use Inertia\Response;
 
 /**
  * Controller para gestão de tipos de documentos.
- * 
+ *
  * Refatorado para usar Repository Pattern e Actions,
  * seguindo princípios SOLID e Clean Code.
  */
@@ -26,6 +26,7 @@ final class DocumentTypeController extends Controller
         private readonly StoreDocumentTypeAction $storeDocumentTypeAction,
         private readonly UpdateDocumentTypeAction $updateDocumentTypeAction,
     ) {}
+
     /**
      * Lista todos os tipos de documentos do utilizador.
      */
@@ -58,8 +59,8 @@ final class DocumentTypeController extends Controller
         ]);
 
         $fields = json_decode($validated['fields'], true);
-        
-        if (!is_array($fields)) {
+
+        if (! is_array($fields)) {
             return back()->withErrors(['fields' => 'Formato de campos inválido.']);
         }
 
@@ -104,8 +105,8 @@ final class DocumentTypeController extends Controller
         ]);
 
         $fields = json_decode($validated['fields'], true);
-        
-        if (!is_array($fields)) {
+
+        if (! is_array($fields)) {
             return back()->withErrors(['fields' => 'Formato de campos inválido.']);
         }
 

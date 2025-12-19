@@ -14,12 +14,12 @@ class DocumentFactory extends Factory
     public function definition(): array
     {
         $type = $this->faker->randomElement(['invoice', 'receipt', 'custom']);
-        
+
         return [
             'user_id' => User::factory(),
             'name' => $this->faker->words(3, true),
-            'original_filename' => $this->faker->word() . '.pdf',
-            'file_path' => 'documents/test/' . $this->faker->uuid() . '.pdf',
+            'original_filename' => $this->faker->word().'.pdf',
+            'file_path' => 'documents/test/'.$this->faker->uuid().'.pdf',
             'mime_type' => 'application/pdf',
             'file_size' => $this->faker->numberBetween(10000, 5000000),
             'type' => $type,
@@ -55,7 +55,7 @@ class DocumentFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             $extractedData = $this->generateExtractedData($attributes['type'] ?? 'invoice');
-            
+
             return [
                 'status' => 'completed',
                 'extracted_data' => $extractedData,
@@ -70,7 +70,7 @@ class DocumentFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => 'failed',
-            'error_message' => 'Falha ao processar documento: ' . $this->faker->sentence(),
+            'error_message' => 'Falha ao processar documento: '.$this->faker->sentence(),
             'processed_at' => now(),
         ]);
     }

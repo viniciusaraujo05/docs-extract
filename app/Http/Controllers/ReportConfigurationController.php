@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 
 /**
  * Controller para gestão de configurações de relatórios.
- * 
+ *
  * Refatorado para usar Repository Pattern,
  * seguindo princípios SOLID e Clean Code.
  */

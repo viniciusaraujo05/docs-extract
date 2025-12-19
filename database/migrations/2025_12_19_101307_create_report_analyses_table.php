@@ -19,7 +19,7 @@ return new class extends Migration
             $table->json('analysis_data');
             $table->integer('total_documents');
             $table->timestamps();
-            
+
             $table->index(['user_id', 'document_type_id']);
         });
     }

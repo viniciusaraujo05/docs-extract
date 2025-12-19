@@ -1,10 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\ExtractionController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentTypeController;
-use App\Http\Controllers\LocaleController;
-use App\Http\Controllers\ReportConfigurationController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -65,10 +62,10 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
             'locale' => $locale,
         ]);
     })->name('locale.login');
-    
+
     Route::post('login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])
         ->middleware(['guest:web', 'throttle:login'])->name('locale.login.store');
-    
+
     // Register routes
     Route::get('register', function ($locale) {
         return Inertia::render('auth/register', [
@@ -76,10 +73,10 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
             'locale' => $locale,
         ]);
     })->name('locale.register');
-    
+
     Route::post('register', [\Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'store'])
         ->middleware(['guest:web'])->name('locale.register.store');
-    
+
     // Logout
     Route::post('logout', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])
         ->middleware(['auth:web'])

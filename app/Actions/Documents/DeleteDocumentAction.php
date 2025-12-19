@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * Action para deletar um documento.
- * 
+ *
  * Encapsula a lógica de deleção incluindo remoção do arquivo físico.
  */
 final readonly class DeleteDocumentAction

@@ -15,7 +15,7 @@ use Throwable;
 
 /**
  * Extractor de texto para ficheiros PDF.
- * 
+ *
  * Utiliza a biblioteca smalot/pdfparser para extrair
  * texto de documentos PDF. Se falhar (PDF protegido),
  * tenta usar OCR via OpenAI Vision API.
@@ -23,7 +23,9 @@ use Throwable;
 final class PdfTextExtractor implements TextExtractorInterface
 {
     private const VISION_TIMEOUT = 120;
+
     private const MAX_TOKENS = 4096;
+
     private const MAX_PAGES_FOR_OCR = 5;
 
     /**
@@ -40,7 +42,7 @@ final class PdfTextExtractor implements TextExtractorInterface
         // Primeiro tenta extração normal
         try {
             $text = $this->extractWithParser($path, $file->getClientOriginalName());
-            if (!empty(trim($text))) {
+            if (! empty(trim($text))) {
                 return $text;
             }
         } catch (Throwable $e) {
@@ -59,7 +61,7 @@ final class PdfTextExtractor implements TextExtractorInterface
      */
     private function extractWithParser(string $path, string $filename): string
     {
-        $parser = new Parser();
+        $parser = new Parser;
         $pdf = $parser->parseFile($path);
         $text = $pdf->getText();
 
@@ -82,18 +84,18 @@ final class PdfTextExtractor implements TextExtractorInterface
     private function extractWithOcr(string $path, string $filename): string
     {
         $apiKey = config('services.openai.api_key', '');
-        
+
         if ($apiKey === '') {
             throw new RuntimeException(
-                'PDF protegido detectado. Para processar este documento, configure a API key da OpenAI (OPENAI_API_KEY) ' .
+                'PDF protegido detectado. Para processar este documento, configure a API key da OpenAI (OPENAI_API_KEY) '.
                 'ou remova a proteção do PDF antes de enviar.'
             );
         }
 
         // Verifica se Imagick está disponível
-        if (!extension_loaded('imagick')) {
+        if (! extension_loaded('imagick')) {
             throw new RuntimeException(
-                'PDF protegido detectado. A extensão Imagick não está instalada para fazer OCR. ' .
+                'PDF protegido detectado. A extensão Imagick não está instalada para fazer OCR. '.
                 'Por favor, remova a proteção do PDF antes de enviar, ou converta para imagem.'
             );
         }
@@ -102,19 +104,19 @@ final class PdfTextExtractor implements TextExtractorInterface
 
         try {
             $images = $this->convertPdfToImages($path);
-            
+
             if (empty($images)) {
                 throw new RuntimeException('Não foi possível converter o PDF em imagens para OCR');
             }
 
             $allText = [];
-            
+
             foreach ($images as $index => $imageData) {
                 Log::info('Processing page with OCR', ['page' => $index + 1, 'file' => $filename]);
-                
+
                 $pageText = $this->extractTextFromImage($imageData, $apiKey, $index + 1);
-                if (!empty(trim($pageText))) {
-                    $allText[] = "--- Página " . ($index + 1) . " ---\n" . $pageText;
+                if (! empty(trim($pageText))) {
+                    $allText[] = '--- Página '.($index + 1)." ---\n".$pageText;
                 }
             }
 
@@ -123,7 +125,7 @@ final class PdfTextExtractor implements TextExtractorInterface
             }
 
             $text = implode("\n\n", $allText);
-            
+
             Log::info('PDF OCR extraction successful', [
                 'file' => $filename,
                 'pages_processed' => count($images),
@@ -138,44 +140,44 @@ final class PdfTextExtractor implements TextExtractorInterface
             ]);
 
             throw new RuntimeException(
-                'Não foi possível extrair texto do PDF. ' .
-                'O documento pode estar protegido ou corrompido. ' .
-                'Tente remover a proteção do PDF ou converter para imagem. ' .
-                'Erro: ' . $e->getMessage()
+                'Não foi possível extrair texto do PDF. '.
+                'O documento pode estar protegido ou corrompido. '.
+                'Tente remover a proteção do PDF ou converter para imagem. '.
+                'Erro: '.$e->getMessage()
             );
         }
     }
 
     /**
      * Converte páginas do PDF em imagens base64.
-     * 
+     *
      * @return array<string> Array de imagens em base64
      */
     private function convertPdfToImages(string $path): array
     {
         $images = [];
-        
+
         try {
-            $imagick = new Imagick();
+            $imagick = new Imagick;
             $imagick->setResolution(150, 150); // DPI para boa qualidade
             $imagick->readImage($path);
-            
+
             $pageCount = min($imagick->getNumberImages(), self::MAX_PAGES_FOR_OCR);
-            
+
             for ($i = 0; $i < $pageCount; $i++) {
                 $imagick->setIteratorIndex($i);
                 $imagick->setImageFormat('jpeg');
                 $imagick->setImageCompressionQuality(85);
-                
+
                 $images[] = base64_encode($imagick->getImageBlob());
             }
-            
+
             $imagick->clear();
             $imagick->destroy();
-            
+
         } catch (Throwable $e) {
             Log::error('Failed to convert PDF to images', ['error' => $e->getMessage()]);
-            throw new RuntimeException('Falha ao converter PDF para imagens: ' . $e->getMessage());
+            throw new RuntimeException('Falha ao converter PDF para imagens: '.$e->getMessage());
         }
 
         return $images;
@@ -211,7 +213,7 @@ final class PdfTextExtractor implements TextExtractorInterface
                 'max_tokens' => self::MAX_TOKENS,
             ]);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             $errorBody = $response->json() ?? [];
             $errorMessage = $errorBody['error']['message'] ?? $response->body();
             throw new RuntimeException("OpenAI Vision API falhou na página {$pageNumber}: {$errorMessage}");

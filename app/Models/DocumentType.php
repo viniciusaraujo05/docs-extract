@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 /**
  * Modelo para tipos de documentos pré-definidos.
- * 
+ *
  * Permite aos utilizadores criar templates de extração
  * com campos pré-configurados para reutilização.
  *
@@ -52,9 +52,9 @@ final class DocumentType extends Model
     {
         parent::boot();
 
-        static::creating(function (DocumentType $documentType) {
+        self::creating(function (DocumentType $documentType) {
             if (empty($documentType->slug)) {
-                $documentType->slug = Str::slug($documentType->name) . '-' . Str::random(6);
+                $documentType->slug = Str::slug($documentType->name).'-'.Str::random(6);
             }
         });
     }

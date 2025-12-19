@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('report_configurations', function (Blueprint $table) {
-            if (!Schema::hasColumn('report_configurations', 'calculated_fields')) {
+            if (! Schema::hasColumn('report_configurations', 'calculated_fields')) {
                 $table->jsonb('calculated_fields')->nullable()->after('field_config');
             }
         });

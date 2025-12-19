@@ -12,51 +12,51 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('report_configurations', function (Blueprint $table) {
-            if (!Schema::hasColumn('report_configurations', 'user_id')) {
+            if (! Schema::hasColumn('report_configurations', 'user_id')) {
                 $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             }
 
-            if (!Schema::hasColumn('report_configurations', 'document_type_id')) {
+            if (! Schema::hasColumn('report_configurations', 'document_type_id')) {
                 $table->foreignId('document_type_id')->constrained('document_types')->cascadeOnDelete();
             }
 
-            if (!Schema::hasColumn('report_configurations', 'name')) {
+            if (! Schema::hasColumn('report_configurations', 'name')) {
                 $table->string('name');
             }
 
-            if (!Schema::hasColumn('report_configurations', 'description')) {
+            if (! Schema::hasColumn('report_configurations', 'description')) {
                 $table->text('description')->nullable();
             }
 
-            if (!Schema::hasColumn('report_configurations', 'field_config')) {
+            if (! Schema::hasColumn('report_configurations', 'field_config')) {
                 $table->jsonb('field_config');
             }
 
-            if (!Schema::hasColumn('report_configurations', 'selection_mode')) {
+            if (! Schema::hasColumn('report_configurations', 'selection_mode')) {
                 $table->string('selection_mode')->default('all');
             }
 
-            if (!Schema::hasColumn('report_configurations', 'date_from')) {
+            if (! Schema::hasColumn('report_configurations', 'date_from')) {
                 $table->date('date_from')->nullable();
             }
 
-            if (!Schema::hasColumn('report_configurations', 'date_to')) {
+            if (! Schema::hasColumn('report_configurations', 'date_to')) {
                 $table->date('date_to')->nullable();
             }
 
-            if (!Schema::hasColumn('report_configurations', 'selected_document_ids')) {
+            if (! Schema::hasColumn('report_configurations', 'selected_document_ids')) {
                 $table->jsonb('selected_document_ids')->nullable();
             }
 
-            if (!Schema::hasColumn('report_configurations', 'date_grouping')) {
+            if (! Schema::hasColumn('report_configurations', 'date_grouping')) {
                 $table->string('date_grouping')->nullable();
             }
 
-            if (!Schema::hasColumn('report_configurations', 'date_field')) {
+            if (! Schema::hasColumn('report_configurations', 'date_field')) {
                 $table->string('date_field')->nullable();
             }
 
-            if (!Schema::hasColumn('report_configurations', 'is_default')) {
+            if (! Schema::hasColumn('report_configurations', 'is_default')) {
                 $table->boolean('is_default')->default(false);
             }
         });
@@ -65,7 +65,7 @@ return new class extends Migration
             if (
                 Schema::hasColumn('report_configurations', 'user_id')
                 && Schema::hasColumn('report_configurations', 'document_type_id')
-                && !Schema::hasIndex('report_configurations', 'report_configurations_user_id_document_type_id_index')
+                && ! Schema::hasIndex('report_configurations', 'report_configurations_user_id_document_type_id_index')
             ) {
                 $table->index(['user_id', 'document_type_id']);
             }

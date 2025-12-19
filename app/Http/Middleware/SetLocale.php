@@ -19,16 +19,17 @@ class SetLocale
     {
         // Priority: 1. URL, 2. User preference, 3. Session, 4. Browser, 5. Default
         $locale = $this->determineLocale($request);
-        
+
         App::setLocale($locale);
         Session::put('locale', $locale);
-        
+
         // If URL doesn't have locale and it's not an API route, redirect to localized URL
-        if (!$request->route('locale') && !$request->is('api/*') && !$request->is('/')) {
+        if (! $request->route('locale') && ! $request->is('api/*') && ! $request->is('/')) {
             $path = $request->path();
+
             return redirect("/{$locale}/{$path}");
         }
-        
+
         return $next($request);
     }
 
@@ -38,7 +39,7 @@ class SetLocale
     private function determineLocale(Request $request): string
     {
         $supportedLocales = config('app.available_locales', ['pt', 'en']);
-        
+
         // 1. Check URL parameter (highest priority, validated by route constraint)
         if ($request->route('locale')) {
             $urlLocale = $request->route('locale');
@@ -49,6 +50,7 @@ class SetLocale
                 if ($request->user()) {
                     $request->user()->update(['locale' => $urlLocale]);
                 }
+
                 return $urlLocale;
             }
         }

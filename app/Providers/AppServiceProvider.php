@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Services\TranslationCacheService;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,8 +23,8 @@ class AppServiceProvider extends ServiceProvider
     {
         $translationCache->warm(config('app.available_locales', ['pt', 'en']));
 
-        if (config('app.force_https')) {
-            \Illuminate\Support\Facades\URL::forceScheme('https');
+        if (config('app.force_https', false)) {
+            URL::forceScheme('https');
         }
     }
 }

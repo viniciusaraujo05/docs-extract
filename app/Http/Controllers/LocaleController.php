@@ -24,7 +24,7 @@ class LocaleController extends Controller
 
         // Update session
         Session::put('locale', $locale);
-        
+
         // Update user preference if authenticated
         if ($request->user()) {
             $request->user()->update(['locale' => $locale]);

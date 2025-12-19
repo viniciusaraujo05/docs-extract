@@ -11,22 +11,25 @@ use RuntimeException;
 
 /**
  * Service para extração de dados estruturados de documentos.
- * 
+ *
  * Utiliza a OpenAI para extrair valores de campos específicos
  * a partir do texto de um documento.
  */
 final class ExtractionService
 {
     private const API_URL = 'https://api.openai.com/v1/chat/completions';
+
     private const TEMPERATURE = 0.1;
+
     private const TIMEOUT = 120;
 
     /**
      * Extrai dados estruturados do texto de um documento.
      *
-     * @param string $text Texto do documento
-     * @param array{fields: array<array{name: string, type: string, label?: string}>} $schema Schema com campos a extrair
+     * @param  string  $text  Texto do documento
+     * @param  array{fields: array<array{name: string, type: string, label?: string}>}  $schema  Schema com campos a extrair
      * @return array{data: array<string, mixed>, confidence: int|null} Dados extraídos e confiança
+     *
      * @throws RuntimeException Se a extração falhar
      */
     public function extract(string $text, array $schema): array
@@ -53,7 +56,7 @@ final class ExtractionService
                 'response_format' => ['type' => 'json_object'],
             ]);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             Log::error('OpenAI API error', [
                 'status' => $response->status(),
                 'body' => $response->body(),
@@ -69,16 +72,16 @@ final class ExtractionService
      */
     private function getSystemPrompt(): string
     {
-        return 'Você é um assistente especializado em extrair dados estruturados de documentos. ' .
-            'Sempre responda em JSON válido, sem markdown ou texto adicional. ' .
+        return 'Você é um assistente especializado em extrair dados estruturados de documentos. '.
+            'Sempre responda em JSON válido, sem markdown ou texto adicional. '.
             'Extraia os valores exatos do documento.';
     }
 
     /**
      * Constrói o prompt para extração de campos.
      *
-     * @param string $text Texto do documento
-     * @param array{fields: array<array{name: string, type: string, label?: string}>} $schema Schema com campos
+     * @param  string  $text  Texto do documento
+     * @param  array{fields: array<array{name: string, type: string, label?: string}>}  $schema  Schema com campos
      */
     private function buildPrompt(string $text, array $schema): string
     {
@@ -116,8 +119,9 @@ final class ExtractionService
     /**
      * Faz parse da resposta da OpenAI.
      *
-     * @param string|null $content Conteúdo JSON da resposta
+     * @param  string|null  $content  Conteúdo JSON da resposta
      * @return array{data: array<string, mixed>, confidence: int|null}
+     *
      * @throws RuntimeException Se o JSON for inválido
      */
     private function parseResponse(?string $content): array

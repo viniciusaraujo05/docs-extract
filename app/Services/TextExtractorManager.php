@@ -10,7 +10,7 @@ use RuntimeException;
 
 /**
  * Manager para extração de texto de documentos.
- * 
+ *
  * Gerencia múltiplos extractors e seleciona o apropriado
  * baseado no tipo de ficheiro (Strategy Pattern).
  */
@@ -24,19 +24,21 @@ final class TextExtractorManager
     /**
      * Regista um extractor.
      *
-     * @param TextExtractorInterface $extractor Extractor a registar
+     * @param  TextExtractorInterface  $extractor  Extractor a registar
      */
     public function addExtractor(TextExtractorInterface $extractor): self
     {
         $this->extractors[] = $extractor;
+
         return $this;
     }
 
     /**
      * Extrai texto de um ficheiro usando o extractor apropriado.
      *
-     * @param UploadedFile $file Ficheiro a processar
+     * @param  UploadedFile  $file  Ficheiro a processar
      * @return string Texto extraído
+     *
      * @throws RuntimeException Se nenhum extractor suportar o ficheiro
      */
     public function extract(UploadedFile $file): string
@@ -49,15 +51,15 @@ final class TextExtractorManager
 
         $mimeType = $file->getMimeType() ?? 'unknown';
         throw new RuntimeException(
-            "Tipo de ficheiro não suportado: {$mimeType}. " .
-            "Formatos aceites: PDF, JPG, PNG, WEBP."
+            "Tipo de ficheiro não suportado: {$mimeType}. ".
+            'Formatos aceites: PDF, JPG, PNG, WEBP.'
         );
     }
 
     /**
      * Verifica se algum extractor suporta o ficheiro.
      *
-     * @param UploadedFile $file Ficheiro a verificar
+     * @param  UploadedFile  $file  Ficheiro a verificar
      */
     public function canExtract(UploadedFile $file): bool
     {

@@ -16,6 +16,7 @@ class ProcessDocumentJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
+
     public int $backoff = 60;
 
     public function __construct(
@@ -28,7 +29,7 @@ class ProcessDocumentJob implements ShouldQueue
 
         try {
             $documentService->processDocument($this->document);
-            
+
             Log::info('Document processed successfully', [
                 'document_id' => $this->document->id,
                 'status' => $this->document->fresh()->status,
@@ -50,6 +51,6 @@ class ProcessDocumentJob implements ShouldQueue
             'error' => $exception->getMessage(),
         ]);
 
-        $this->document->markAsFailed('Processamento falhou após múltiplas tentativas: ' . $exception->getMessage());
+        $this->document->markAsFailed('Processamento falhou após múltiplas tentativas: '.$exception->getMessage());
     }
 }

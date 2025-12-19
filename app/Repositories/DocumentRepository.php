@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Repository para operações de acesso a dados de Document.
- * 
+ *
  * Segue o padrão Repository para separar a lógica de acesso a dados
  * da lógica de negócio, facilitando testes e manutenção.
  */
@@ -19,7 +19,7 @@ final readonly class DocumentRepository
 {
     /**
      * Busca documentos paginados do usuário com relacionamentos.
-     * 
+     *
      * @return array{paginator: LengthAwarePaginator, collection: Collection}
      */
     public function getPaginatedForUser(User $user, int $perPage = 20): array
@@ -38,8 +38,8 @@ final readonly class DocumentRepository
 
     /**
      * Busca documento pelo ID.
-     * 
-     * @param string $id ID do documento a ser buscado
+     *
+     * @param  string  $id  ID do documento a ser buscado
      * @return Document|null O documento encontrado ou null se não existir
      */
     public function findById(string $id): ?Document

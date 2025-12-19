@@ -55,7 +55,7 @@ final class TranslationCacheService
     {
         $path = lang_path("{$locale}.json");
 
-        if (!$this->filesystem->exists($path)) {
+        if (! $this->filesystem->exists($path)) {
             return [];
         }
 

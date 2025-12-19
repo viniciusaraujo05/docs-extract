@@ -6,7 +6,7 @@ namespace App\DataTransferObjects;
 
 /**
  * DTO para transferência de dados de documento.
- * 
+ *
  * Encapsula os dados necessários para criar/atualizar documentos.
  */
 final readonly class DocumentData
@@ -25,7 +25,7 @@ final readonly class DocumentData
     public static function fromRequest(array $data): self
     {
         $documentTypeId = $data['document_type_id'] ?? null;
-        
+
         return new self(
             type: $data['type'] ?? 'custom',
             documentTypeId: $documentTypeId !== null && $documentTypeId !== '' ? (int) $documentTypeId : null,

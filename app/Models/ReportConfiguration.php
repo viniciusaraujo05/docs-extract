@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Configuração de relatório personalizado.
- * 
+ *
  * Permite aos utilizadores criar relatórios customizados
  * com agregações, filtros e visualizações específicas.
  */
@@ -85,7 +85,7 @@ final class ReportConfiguration extends Model
                 break;
 
             case 'manual':
-                if (!empty($this->selected_document_ids)) {
+                if (! empty($this->selected_document_ids)) {
                     $query->whereIn('id', $this->selected_document_ids);
                 }
                 break;

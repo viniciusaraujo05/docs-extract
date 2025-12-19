@@ -16,13 +16,14 @@ use Throwable;
 
 /**
  * Controller para API de extração de dados de documentos.
- * 
+ *
  * Fornece endpoints para análise e extração de dados
  * de documentos PDF e imagens usando IA.
  */
 final class ExtractionController extends Controller
 {
     private const MAX_FILE_SIZE = 10240;
+
     private const ALLOWED_MIMES = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
 
     public function __construct(
@@ -34,7 +35,7 @@ final class ExtractionController extends Controller
     /**
      * Analisa um documento e detecta campos extraíveis.
      *
-     * @param Request $request Request com o ficheiro
+     * @param  Request  $request  Request com o ficheiro
      * @return JsonResponse Campos sugeridos e preview do texto
      */
     public function analyze(Request $request): JsonResponse
@@ -77,7 +78,7 @@ final class ExtractionController extends Controller
     /**
      * Extrai dados estruturados de um documento.
      *
-     * @param Request $request Request com ficheiro e campos
+     * @param  Request  $request  Request com ficheiro e campos
      * @return JsonResponse Dados extraídos
      */
     public function extract(Request $request): JsonResponse
@@ -90,7 +91,7 @@ final class ExtractionController extends Controller
             $fields = json_decode($validated['fields'], true, 512, JSON_THROW_ON_ERROR);
 
             $text = $this->textExtractor->extract($file);
-            
+
             if ($text === '') {
                 $text = "Documento: {$file->getClientOriginalName()}";
             }
@@ -156,9 +157,9 @@ final class ExtractionController extends Controller
     /**
      * Retorna resposta de sucesso para análise.
      *
-     * @param array $fields Campos detectados
-     * @param string $textPreview Preview do texto
-     * @param string|null $error Mensagem de erro opcional
+     * @param  array  $fields  Campos detectados
+     * @param  string  $textPreview  Preview do texto
+     * @param  string|null  $error  Mensagem de erro opcional
      */
     private function successResponse(array $fields, string $textPreview, ?string $error = null): JsonResponse
     {

@@ -18,7 +18,7 @@ final readonly class UpdateDocumentTypeAction
 
     /**
      * Executa a ação de atualizar tipo de documento.
-     * 
+     *
      * @throws \InvalidArgumentException Se os campos forem inválidos
      */
     public function execute(
