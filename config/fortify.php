@@ -74,7 +74,14 @@ return [
     */
 
     'home' => function () {
+        $supportedLocales = config('app.available_locales', ['pt', 'en']);
         $locale = session('locale', config('app.locale', 'pt'));
+        
+        // Validate locale against whitelist to prevent injection
+        if (!is_string($locale) || !in_array($locale, $supportedLocales, true)) {
+            $locale = config('app.locale', 'pt');
+        }
+        
         return "/{$locale}/dashboard";
     },
 
@@ -93,18 +100,6 @@ return [
 
     'domain' => null,
     
-    /*
-    |--------------------------------------------------------------------------
-    | Fortify Routes Registration
-    |--------------------------------------------------------------------------
-    |
-    | Indicate if Fortify should register its routes. If set to false,
-    | you will need to manually register routes in your routes file.
-    |
-    */
-
-    'views' => true,
-
     /*
     |--------------------------------------------------------------------------
     | Fortify Routes Middleware

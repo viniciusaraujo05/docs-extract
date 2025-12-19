@@ -37,12 +37,13 @@ class SetLocale
      */
     private function determineLocale(Request $request): string
     {
-        $supportedLocales = ['pt', 'en'];
+        $supportedLocales = config('app.available_locales', ['pt', 'en']);
         
-        // 1. Check URL parameter (highest priority)
+        // 1. Check URL parameter (highest priority, validated by route constraint)
         if ($request->route('locale')) {
             $urlLocale = $request->route('locale');
-            if (in_array($urlLocale, $supportedLocales)) {
+            // Strict validation with type check
+            if (is_string($urlLocale) && in_array($urlLocale, $supportedLocales, true)) {
                 // Store in session and update user preference
                 Session::put('locale', $urlLocale);
                 if ($request->user()) {
@@ -52,29 +53,29 @@ class SetLocale
             }
         }
 
-        // 2. Check authenticated user preference
+        // 2. Check authenticated user preference (trusted database source)
         if ($request->user() && $request->user()->locale) {
             $userLocale = $request->user()->locale;
-            if (in_array($userLocale, $supportedLocales)) {
+            if (is_string($userLocale) && in_array($userLocale, $supportedLocales, true)) {
                 return $userLocale;
             }
         }
 
-        // 3. Check session
+        // 3. Check session (validate to prevent tampering)
         if (Session::has('locale')) {
             $sessionLocale = Session::get('locale');
-            if (in_array($sessionLocale, $supportedLocales)) {
+            if (is_string($sessionLocale) && in_array($sessionLocale, $supportedLocales, true)) {
                 return $sessionLocale;
             }
         }
 
-        // 4. Check browser Accept-Language header
+        // 4. Check browser Accept-Language header (validated by Laravel)
         $browserLocale = $request->getPreferredLanguage($supportedLocales);
-        if ($browserLocale && in_array($browserLocale, $supportedLocales)) {
+        if ($browserLocale && in_array($browserLocale, $supportedLocales, true)) {
             return $browserLocale;
         }
 
-        // 5. Default to Portuguese
-        return 'pt';
+        // 5. Default to configured locale
+        return config('app.locale', 'pt');
     }
 }
