@@ -28,11 +28,6 @@ class AppServiceProvider extends ServiceProvider
 
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
-
-            // Ensure asset() helpers also generate HTTPS URLs when ASSET_URL is not set.
-            if (blank(config('app.asset_url'))) {
-                Config::set('app.asset_url', config('app.url'));
-            }
         }
     }
 }
