@@ -75,7 +75,7 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
     })->name('locale.register');
 
     Route::post('register', [\Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'store'])
-        ->middleware(['guest:web'])->name('locale.register.store');
+        ->middleware(['guest:web', 'throttle:register'])->name('locale.register.store');
 
     // Logout
     Route::post('logout', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])

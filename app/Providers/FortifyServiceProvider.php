@@ -85,5 +85,13 @@ class FortifyServiceProvider extends ServiceProvider
 
             return Limit::perMinute(5)->by($throttleKey);
         });
+
+        RateLimiter::for('register', function (Request $request) {
+            $email = $request->input('email');
+            $emailKey = is_string($email) ? Str::lower($email) : '';
+            $throttleKey = Str::transliterate($emailKey.'|'.$request->ip());
+
+            return Limit::perMinute(3)->by($throttleKey);
+        });
     }
 }

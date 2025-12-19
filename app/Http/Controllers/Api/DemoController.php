@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\ExtractionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -46,7 +47,7 @@ class DemoController extends Controller
                 'required',
                 'file',
                 'mimes:pdf,jpg,jpeg,png',
-                'max:10240', // 10MB max
+                'max:5120', // 5MB max
             ],
         ]);
 
@@ -62,11 +63,17 @@ class DemoController extends Controller
 
             // Store file temporarily
             $path = $file->store('demo', 'local');
-            $fullPath = Storage::disk('local')->path($path);
 
-            // For demo purposes, return realistic sample data
-            // In production, this would use OCR + AI extraction
-            $extractedData = $this->generateDemoData($file->getClientOriginalName());
+            $text = $this->extractTextFromUploadedFile($file);
+
+            $schema = $this->inferSchemaFromText($text);
+
+            $result = $this->extractionService->extract($text, $schema);
+            $extractedData = $result['data'];
+
+            if (isset($result['confidence']) && is_int($result['confidence'])) {
+                $extractedData['confidence'] = $result['confidence'];
+            }
 
             // Delete temporary file
             Storage::disk('local')->delete($path);
@@ -106,46 +113,113 @@ class DemoController extends Controller
         }
     }
 
-    /**
-     * Generate realistic demo data for demonstration purposes
-     */
-    private function generateDemoData(string $filename): array
+    private function extractTextFromUploadedFile(\Illuminate\Http\UploadedFile $file): string
     {
-        // Generate realistic sample data based on common document types
-        $data = [
-            'document_type' => 'Invoice',
-            'invoice_number' => 'INV-'.date('Y').'-'.rand(1000, 9999),
-            'date' => date('Y-m-d'),
-            'due_date' => date('Y-m-d', strtotime('+30 days')),
-            'total_amount' => number_format(rand(100, 5000) + (rand(0, 99) / 100), 2, '.', ''),
-            'currency' => 'EUR',
-            'customer_name' => $this->getRandomCompanyName(),
-            'customer_email' => strtolower(str_replace(' ', '', $this->getRandomCompanyName())).'@example.com',
-            'items_count' => rand(1, 10),
-            'tax_amount' => number_format(rand(20, 500) + (rand(0, 99) / 100), 2, '.', ''),
-            'confidence' => rand(85, 98),
-        ];
+        $mime = $file->getMimeType();
 
-        return $data;
+        if ($mime === 'application/pdf') {
+            $extractor = app(\App\Services\Extractors\PdfTextExtractor::class);
+
+            return $extractor->extract($file);
+        }
+
+        $extractor = app(\App\Services\Extractors\ImageTextExtractor::class);
+
+        return $extractor->extract($file);
     }
 
     /**
-     * Get random company name for demo
+     * Infere dinamicamente um schema (lista de campos) a partir do texto do documento.
+     *
+     * @return array{fields: array<int, array{name: string, type: string, label?: string}>}
      */
-    private function getRandomCompanyName(): string
+    private function inferSchemaFromText(string $text): array
     {
-        $companies = [
-            'ACME Corporation',
-            'TechStart Solutions',
-            'Global Industries Ltd',
-            'Innovation Partners',
-            'Digital Dynamics',
-            'Future Systems Inc',
-            'Smart Business Co',
-            'Enterprise Solutions',
-        ];
+        $apiKey = config('services.openai.api_key', '');
 
-        return $companies[array_rand($companies)];
+        if ($apiKey === '') {
+            throw new \RuntimeException('OpenAI API key não configurada. Configure OPENAI_API_KEY no .env');
+        }
+
+        $model = config('services.openai.model', 'gpt-4o-mini');
+
+        $prompt = <<<PROMPT
+            Analise o documento abaixo e devolva APENAS um JSON válido com um array "fields".
+
+            Regras:
+            1) Campo "name": snake_case, curto e descritivo
+            2) Campo "type": um destes valores: string|number|date|boolean
+            3) Campo "label": opcional (texto humano)
+            4) Inclua SOMENTE campos que realmente existam no documento
+            5) Não invente campos
+
+            Documento:
+            {$text}
+
+            Formato:
+            {"fields":[{"name":"invoice_number","type":"string","label":"Invoice number"}]}
+            PROMPT;
+
+        $response = Http::withToken($apiKey)
+            ->timeout(60)
+            ->post('https://api.openai.com/v1/chat/completions', [
+                'model' => $model,
+                'messages' => [
+                    ['role' => 'system', 'content' => 'Você é um assistente de extração de campos. Responda SEMPRE em JSON válido, sem markdown.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+                'temperature' => 0.1,
+                'response_format' => ['type' => 'json_object'],
+            ]);
+
+        if (! $response->successful()) {
+            throw new \RuntimeException('Falha ao inferir schema: '.$response->status());
+        }
+
+        $content = $response->json('choices.0.message.content');
+        if (! is_string($content) || $content === '') {
+            throw new \RuntimeException('Schema vazio retornado pela IA');
+        }
+
+        try {
+            $decoded = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw new \RuntimeException('Schema inválido retornado pela IA');
+        }
+
+        $fields = $decoded['fields'] ?? null;
+        if (! is_array($fields) || $fields === []) {
+            // fallback mínimo (evita quebrar frontend)
+            return ['fields' => [['name' => 'document_type', 'type' => 'string', 'label' => 'Document type']]];
+        }
+
+        // Sanitização básica do schema
+        $normalized = [];
+        foreach ($fields as $field) {
+            if (! is_array($field)) {
+                continue;
+            }
+            $name = $field['name'] ?? null;
+            $type = $field['type'] ?? null;
+            if (! is_string($name) || ! preg_match('/^[a-z][a-z0-9_]*$/', $name)) {
+                continue;
+            }
+            if (! is_string($type) || ! in_array($type, ['string', 'number', 'date', 'boolean'], true)) {
+                $type = 'string';
+            }
+            $label = $field['label'] ?? null;
+            $normalizedField = ['name' => $name, 'type' => $type];
+            if (is_string($label) && $label !== '') {
+                $normalizedField['label'] = $label;
+            }
+            $normalized[] = $normalizedField;
+        }
+
+        if ($normalized === []) {
+            return ['fields' => [['name' => 'document_type', 'type' => 'string', 'label' => 'Document type']]];
+        }
+
+        return ['fields' => $normalized];
     }
 
     /**
@@ -173,7 +247,7 @@ class DemoController extends Controller
 
     private function currentUsage(string $key): int
     {
-        return (int) Redis::get($key);
+        return (int) Cache::get($key, 0);
     }
 
     private function hasExceededLimit(string $key, int $maxRequests): bool
@@ -183,17 +257,20 @@ class DemoController extends Controller
 
     private function incrementUsage(string $key, int $windowSeconds): void
     {
-        $count = Redis::incr($key);
+        $count = (int) Cache::increment($key);
 
         if ($count === 1) {
-            Redis::expire($key, $windowSeconds);
+            Cache::put($key, $count, $windowSeconds);
         }
     }
 
     private function secondsUntilReset(string $key): ?int
     {
-        $ttl = Redis::ttl($key);
+        $expiresAt = Cache::get($key.':expires_at');
+        if (is_int($expiresAt)) {
+            return max(0, $expiresAt - time());
+        }
 
-        return $ttl >= 0 ? $ttl : null;
+        return null;
     }
 }

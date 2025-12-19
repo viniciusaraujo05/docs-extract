@@ -26,6 +26,8 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
+        $supportedLocales = config('app.available_locales', ['pt', 'en']);
+
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -36,6 +38,7 @@ class CreateNewUser implements CreatesNewUsers
                 Rule::unique(User::class),
             ],
             'password' => $this->passwordRules(),
+            'locale' => ['nullable', 'string', Rule::in($supportedLocales)],
         ])->validate();
 
         $user = User::create([
