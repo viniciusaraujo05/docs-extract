@@ -21,7 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(TranslationCacheService $translationCache): void
     {
-        $translationCache->warm(config('app.available_locales', ['pt', 'en']));
+        // Só aquece o cache de traduções se não estiver rodando via CLI (evita erro no build)
+        if (!$this->app->runningInConsole()) {
+            $translationCache->warm(config('app.available_locales', ['pt', 'en']));
+        }
 
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
