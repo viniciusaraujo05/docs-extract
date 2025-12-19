@@ -1412,17 +1412,36 @@ function DemoModal({
   const [file, setFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      
+      if (selectedFile.size > MAX_FILE_SIZE) {
+        setError(t('File size must not exceed 5MB'));
+        setFile(null);
+        e.target.value = '';
+        return;
+      }
+      
+      setFile(selectedFile);
     }
   };
 
   const handleProcess = async () => {
     if (!file) return;
 
+    if (file.size > MAX_FILE_SIZE) {
+      setError(t('File size must not exceed 5MB'));
+      return;
+    }
+
     setProcessing(true);
+    setError(null);
 
     try {
       const formData = new FormData();
@@ -1441,8 +1460,11 @@ function DemoModal({
 
       if (!response.ok) {
         if (response.status === 429) {
-          toast.error(t('Demo already used. Please register to continue.'));
-          setTimeout(() => router.visit(`/${locale}/register`), 2000);
+          toast.error(t('You have already used the demo. Please register to continue using GetData.'));
+          setTimeout(() => {
+            onClose();
+            router.visit(`/${locale}/register`);
+          }, 2500);
           return;
         }
         throw new Error(data.message || 'Extraction failed');
@@ -1452,6 +1474,7 @@ function DemoModal({
       toast.success(t('Data extracted successfully!'));
     } catch (error: any) {
       console.error('Demo extraction error:', error);
+      setError(error.message || t('An error occurred'));
       toast.error(error.message || t('An error occurred'));
     } finally {
       setProcessing(false);
@@ -1486,16 +1509,21 @@ function DemoModal({
                 {t('Click to upload')}
               </Label>
               <p className="text-sm text-muted-foreground mt-2">
-                {t('PDF, JPG, PNG (max 10MB)')}
+                {t('PDF, JPG, PNG (max 5MB)')}
               </p>
               {file && (
                 <Badge variant="secondary" className="mt-4">
-                  {file.name}
+                  {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
                 </Badge>
+              )}
+              {error && (
+                <div className="mt-4 p-3 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+                  <p className="text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>
+                </div>
               )}
             </div>
 
-            <Button onClick={handleProcess} disabled={!file || processing} className="w-full" size="lg">
+            <Button onClick={handleProcess} disabled={!file || processing || !!error} className="w-full" size="lg">
               {processing ? (
                 <>
                   <Sparkles className="mr-2 h-5 w-5 animate-spin" />

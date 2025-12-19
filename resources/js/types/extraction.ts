@@ -58,4 +58,4 @@ export const FIELD_TYPES: ReadonlyArray<{ value: FieldType; label: string }> = [
 ] as const;
 
 export const ACCEPTED_FILE_TYPES = '.pdf,.jpg,.jpeg,.png,.webp';
-export const MAX_FILE_SIZE_MB = 10;
+export const MAX_FILE_SIZE_MB = 5;

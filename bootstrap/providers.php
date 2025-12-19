@@ -5,4 +5,5 @@ return [
     App\Providers\AuthServiceProvider::class,
     App\Providers\FortifyServiceProvider::class,
     App\Providers\ExtractionServiceProvider::class,
+    App\Providers\DemoServiceProvider::class,
 ];
