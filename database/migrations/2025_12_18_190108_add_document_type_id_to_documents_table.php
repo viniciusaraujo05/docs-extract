@@ -25,8 +25,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('documents', function (Blueprint $table) {
-            $table->dropForeign(['document_type_id']);
-            $table->dropColumn('document_type_id');
+            if (Schema::hasColumn('documents', 'document_type_id')) {
+                $table->dropForeign(['document_type_id']);
+                $table->dropColumn('document_type_id');
+            }
         });
     }
 };
