@@ -1,0 +1,731 @@
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ChartCard, StatsCard, type ChartType } from '@/components/charts';
+import { ReportConfigurator } from '@/components/reports/ReportConfigurator';
+import { CalculatedFieldBuilder, type CalculatedField } from '@/components/reports/CalculatedFieldBuilder';
+import { ReportTableView } from '@/components/reports/ReportTableView';
+import { AIAnalysisModal } from '@/components/reports/AIAnalysisModal';
+import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
+import { Head } from '@inertiajs/react';
+import { Download, FileText, BarChart3, Calculator, Loader2, Settings2, Table2, PieChart, Palette, Sparkles } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
+
+interface SchemaField {
+    name: string;
+    label: string;
+    type: 'string' | 'number' | 'date';
+}
+
+interface DocumentType {
+    id: number;
+    name: string;
+    slug: string;
+    fields: SchemaField[];
+    documents_count: number;
+}
+
+interface AggregatedField {
+    label: string;
+    type: string;
+    count: number;
+    sum?: number;
+    avg?: number;
+    min?: number;
+    max?: number;
+    values?: number[];
+    distribution?: Record<string, number>;
+    uniqueCount?: number;
+    byMonth?: Record<string, number>;
+}
+
+interface ReportData {
+    documentType: {
+        id: number;
+        name: string;
+        fields: SchemaField[];
+    };
+    documents: Array<{
+        id: number;
+        name: string;
+        data: Record<string, unknown>;
+        created_at: string;
+    }>;
+    aggregated: Record<string, AggregatedField>;
+    totalDocuments: number;
+}
+
+interface ReportsIndexProps {
+    documentTypes: DocumentType[];
+}
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Relatórios', href: '/dashboard' },
+];
+
+const COLOR_PRESETS = [
+    { name: 'Azul', value: 'hsl(var(--chart-1))' },
+    { name: 'Verde', value: 'hsl(var(--chart-2))' },
+    { name: 'Laranja', value: 'hsl(var(--chart-3))' },
+    { name: 'Roxo', value: 'hsl(var(--chart-4))' },
+    { name: 'Rosa', value: 'hsl(var(--chart-5))' },
+    { name: 'Azul Escuro', value: '#8884d8' },
+    { name: 'Verde Água', value: '#82ca9d' },
+    { name: 'Amarelo', value: '#ffc658' },
+    { name: 'Laranja Forte', value: '#ff7300' },
+    { name: 'Turquesa', value: '#00C49F' },
+    { name: 'Vermelho', value: '#ef4444' },
+    { name: 'Índigo', value: '#6366f1' },
+];
+
+function formatNumber(value: number): string {
+    return new Intl.NumberFormat('pt-PT', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    }).format(value);
+}
+
+function formatCurrency(value: number): string {
+    return new Intl.NumberFormat('pt-PT', {
+        style: 'currency',
+        currency: 'EUR',
+    }).format(value);
+}
+
+interface FieldConfig {
+    visible: boolean;
+    aggregation: 'sum' | 'avg' | 'count' | 'growth' | null;
+    chartType: 'bar' | 'pie' | 'line' | 'area';
+}
+
+interface ReportConfig {
+    fieldConfig: Record<string, FieldConfig>;
+    selectionMode: 'all' | 'filtered' | 'manual';
+    dateFrom: string | null;
+    dateTo: string | null;
+    selectedDocumentIds: number[];
+    dateGrouping: 'day' | 'month' | 'year' | null;
+    dateField: string | null;
+}
+
+export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
+    const [selectedTypeId, setSelectedTypeId] = useState<string>('');
+    const [reportData, setReportData] = useState<ReportData | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [chartTypes, setChartTypes] = useState<Record<string, ChartType>>({});
+    const [chartColors, setChartColors] = useState<Record<string, string>>({});
+    const [globalColor, setGlobalColor] = useState<string>(() => {
+        // Load from localStorage
+        return localStorage.getItem('report-global-color') || 'hsl(var(--chart-1))';
+    });
+    const [showConfigurator, setShowConfigurator] = useState(false);
+    const [currentConfig, setCurrentConfig] = useState<ReportConfig | null>(null);
+    const [activeView, setActiveView] = useState<'charts' | 'table'>('charts');
+    const [calculatedFields, setCalculatedFields] = useState<CalculatedField[]>([]);
+    const [showAIAnalysis, setShowAIAnalysis] = useState(false);
+    const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+    const [analyzingAI, setAnalyzingAI] = useState(false);
+
+    const selectedType = documentTypes.find(t => t.id.toString() === selectedTypeId);
+
+    // Auto-save global color to localStorage
+    useEffect(() => {
+        localStorage.setItem('report-global-color', globalColor);
+    }, [globalColor]);
+
+    // Auto-save chart colors to localStorage
+    useEffect(() => {
+        if (selectedTypeId && Object.keys(chartColors).length > 0) {
+            localStorage.setItem(`report-colors-${selectedTypeId}`, JSON.stringify(chartColors));
+        }
+    }, [chartColors, selectedTypeId]);
+
+    // Load chart colors from localStorage when type changes
+    useEffect(() => {
+        if (selectedTypeId) {
+            const saved = localStorage.getItem(`report-colors-${selectedTypeId}`);
+            if (saved) {
+                try {
+                    setChartColors(JSON.parse(saved));
+                } catch {
+                    setChartColors({});
+                }
+            } else {
+                setChartColors({});
+            }
+        }
+    }, [selectedTypeId]);
+
+    // Apply global color to all charts
+    const handleApplyGlobalColor = useCallback(() => {
+        if (!reportData) return;
+        const newColors: Record<string, string> = {};
+        Object.keys(reportData.aggregated).forEach(fieldName => {
+            newColors[fieldName] = globalColor;
+        });
+        setChartColors(newColors);
+        toast.success('Cor global aplicada a todos os gráficos');
+    }, [reportData, globalColor]);
+
+    // Analyze report with AI
+    const handleAnalyzeWithAI = useCallback(async () => {
+        if (!selectedTypeId || !reportData) return;
+
+        setAnalyzingAI(true);
+        setShowAIAnalysis(true);
+        setAiAnalysis(null);
+
+        try {
+            const response = await fetch(`/api/reports/${selectedTypeId}/analyze-ai`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Falha ao analisar relatório');
+            }
+
+            const result = await response.json();
+            
+            if (result.success) {
+                setAiAnalysis(result.analysis);
+                toast.success('Análise IA concluída com sucesso!');
+            } else {
+                throw new Error(result.error || 'Erro desconhecido');
+            }
+        } catch (error: any) {
+            toast.error(error.message || 'Erro ao analisar relatório com IA');
+            setShowAIAnalysis(false);
+        } finally {
+            setAnalyzingAI(false);
+        }
+    }, [selectedTypeId, reportData]);
+
+    // Get visible fields from config
+    const visibleFields = useMemo(() => {
+        if (!currentConfig) {
+            return selectedType?.fields.map(f => f.name) || [];
+        }
+        return Object.entries(currentConfig.fieldConfig)
+            .filter(([_, config]) => config.visible)
+            .map(([name]) => name);
+    }, [currentConfig, selectedType]);
+
+    const handleAddCalculatedField = useCallback((field: CalculatedField) => {
+        setCalculatedFields(prev => [...prev, field]);
+    }, []);
+
+    const handleRemoveCalculatedField = useCallback((id: string) => {
+        setCalculatedFields(prev => prev.filter(f => f.id !== id));
+    }, []);
+
+    const fetchReportData = useCallback(async (typeId: string, config?: ReportConfig) => {
+        if (!typeId) return;
+        
+        setLoading(true);
+        try {
+            let url = `/api/reports/${typeId}/data`;
+            let options: RequestInit = {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            };
+
+            // If we have a config, use preview endpoint with POST
+            if (config) {
+                url = `/api/reports/${typeId}/preview`;
+                options = {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                    body: JSON.stringify({
+                        field_config: config.fieldConfig,
+                        selection_mode: config.selectionMode,
+                        date_from: config.dateFrom,
+                        date_to: config.dateTo,
+                        selected_document_ids: config.selectedDocumentIds.length > 0 ? config.selectedDocumentIds : null,
+                        date_grouping: config.dateGrouping,
+                        date_field: config.dateField,
+                    }),
+                };
+            }
+
+            const response = await fetch(url, options);
+            
+            if (!response.ok) {
+                throw new Error('Erro ao carregar dados');
+            }
+            
+            const data = await response.json();
+            
+            // Transform preview data to match report data structure if needed
+            if (config && data.fields) {
+                const transformedData: ReportData = {
+                    documentType: {
+                        id: parseInt(typeId),
+                        name: selectedType?.name || '',
+                        fields: selectedType?.fields || [],
+                    },
+                    documents: data.sampleData || [],
+                    aggregated: {},
+                    totalDocuments: data.totalDocuments || 0,
+                };
+
+                // Transform fields to aggregated format
+                Object.entries(data.fields).forEach(([fieldName, fieldData]: [string, any]) => {
+                    transformedData.aggregated[fieldName] = {
+                        label: fieldData.label,
+                        type: fieldData.type,
+                        count: fieldData.sampleValues?.length || 0,
+                        ...(fieldData.preview || {}),
+                        values: fieldData.sampleValues,
+                        distribution: fieldData.preview?.topValues,
+                        uniqueCount: fieldData.preview?.uniqueCount,
+                    };
+                });
+
+                setReportData(transformedData);
+            } else {
+                setReportData(data);
+            }
+            
+            // Initialize chart types from config or defaults
+            const initialChartTypes: Record<string, ChartType> = {};
+            const fieldsToProcess = config ? Object.keys(config.fieldConfig) : Object.keys(data.aggregated || {});
+            
+            fieldsToProcess.forEach(fieldName => {
+                if (config?.fieldConfig[fieldName]) {
+                    initialChartTypes[fieldName] = config.fieldConfig[fieldName].chartType;
+                } else {
+                    const field = data.aggregated?.[fieldName];
+                    if (field?.type === 'number') {
+                        initialChartTypes[fieldName] = 'bar';
+                    } else if (field?.type === 'date') {
+                        initialChartTypes[fieldName] = 'line';
+                    } else {
+                        initialChartTypes[fieldName] = 'pie';
+                    }
+                }
+            });
+            setChartTypes(initialChartTypes);
+        } catch (error) {
+            toast.error('Erro ao carregar relatório');
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedType]);
+
+    useEffect(() => {
+        if (selectedTypeId) {
+            fetchReportData(selectedTypeId);
+            setShowConfigurator(false);
+        } else {
+            setReportData(null);
+        }
+    }, [selectedTypeId]);
+
+    const handleConfigChange = useCallback((config: ReportConfig) => {
+        setCurrentConfig(config);
+    }, []);
+
+    const handlePreviewRequest = useCallback(() => {
+        if (selectedTypeId && currentConfig) {
+            fetchReportData(selectedTypeId, currentConfig);
+        }
+    }, [selectedTypeId, currentConfig, fetchReportData]);
+
+    const handleExportExcel = useCallback(() => {
+        if (!reportData) return;
+
+        const worksheetData = reportData.documents.map(doc => {
+            const row: Record<string, unknown> = {
+                'ID': doc.id,
+                'Nome': doc.name,
+                'Data': new Date(doc.created_at).toLocaleDateString('pt-PT'),
+            };
+            
+            reportData.documentType.fields.forEach(field => {
+                row[field.label] = doc.data[field.name] ?? '';
+            });
+            
+            return row;
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Dados');
+
+        // Add summary sheet
+        const summaryData: Record<string, unknown>[] = [];
+        Object.entries(reportData.aggregated).forEach(([fieldName, field]) => {
+            const row: Record<string, unknown> = {
+                'Campo': field.label,
+                'Tipo': field.type,
+                'Total Registos': field.count,
+            };
+            
+            if (field.type === 'number') {
+                row['Soma'] = field.sum;
+                row['Média'] = field.avg;
+                row['Mínimo'] = field.min;
+                row['Máximo'] = field.max;
+            } else if (field.distribution) {
+                row['Valores Únicos'] = field.uniqueCount;
+            }
+            
+            summaryData.push(row);
+        });
+
+        const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+        XLSX.utils.book_append_sheet(workbook, summarySheet, 'Resumo');
+
+        const filename = `${reportData.documentType.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        XLSX.writeFile(workbook, filename);
+        
+        toast.success('Ficheiro exportado com sucesso!');
+    }, [reportData]);
+
+    const handleChartTypeChange = useCallback((fieldName: string, type: ChartType) => {
+        setChartTypes(prev => ({ ...prev, [fieldName]: type }));
+    }, []);
+
+    const getChartData = (fieldName: string, field: AggregatedField) => {
+        if (field.type === 'number' && field.values) {
+            return reportData?.documents.map((doc) => ({
+                name: doc.name.substring(0, 15) + (doc.name.length > 15 ? '...' : ''),
+                value: Number(doc.data[fieldName]) || 0,
+            })) || [];
+        } else if (field.type === 'date' && field.byMonth) {
+            return Object.entries(field.byMonth)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .map(([month, count]) => ({
+                    name: month,
+                    value: count,
+                }));
+        } else if (field.distribution) {
+            return Object.entries(field.distribution)
+                .slice(0, 10)
+                .map(([name, value]) => ({
+                    name: name.substring(0, 20) + (name.length > 20 ? '...' : ''),
+                    value,
+                }));
+        }
+        return [];
+    };
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Relatórios" />
+            <div className="flex h-full flex-1 flex-col gap-6 p-4">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold">Relatórios</h1>
+                        <p className="text-muted-foreground">
+                            Visualize e exporte dados dos seus documentos
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {reportData && (
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button variant="outline" size="sm">
+                                        <Palette className="mr-2 h-4 w-4" />
+                                        Cor
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80" align="end">
+                                    <div className="space-y-4">
+                                        <div>
+                                            <h4 className="font-medium text-sm mb-2">Cor dos Gráficos</h4>
+                                            <p className="text-xs text-muted-foreground mb-3">
+                                                Selecione uma cor para aplicar a todos os gráficos
+                                            </p>
+                                        </div>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {COLOR_PRESETS.map((preset) => (
+                                                <button
+                                                    key={preset.value}
+                                                    onClick={() => setGlobalColor(preset.value)}
+                                                    className="group relative h-12 w-full rounded-md border-2 transition-all hover:scale-105"
+                                                    style={{ 
+                                                        backgroundColor: preset.value,
+                                                        borderColor: globalColor === preset.value ? 'hsl(var(--primary))' : 'transparent'
+                                                    }}
+                                                    title={preset.name}
+                                                >
+                                                    {globalColor === preset.value && (
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <div className="h-3 w-3 rounded-full bg-white shadow-md" />
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <Button 
+                                            onClick={handleApplyGlobalColor}
+                                            className="w-full"
+                                            size="sm"
+                                        >
+                                            Aplicar a Todos os Gráficos
+                                        </Button>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+                        )}
+                        {selectedTypeId && (
+                            <Button 
+                                variant={showConfigurator ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => setShowConfigurator(!showConfigurator)}
+                            >
+                                <Settings2 className="mr-2 h-4 w-4" />
+                                Configurar
+                            </Button>
+                        )}
+                        {reportData && (
+                            <>
+                                <Button 
+                                    size="sm" 
+                                    variant="outline"
+                                    onClick={handleAnalyzeWithAI}
+                                    disabled={analyzingAI}
+                                >
+                                    {analyzingAI ? (
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <Sparkles className="mr-2 h-4 w-4" />
+                                    )}
+                                    Análise IA
+                                </Button>
+                                <Button size="sm" onClick={handleExportExcel}>
+                                    <Download className="mr-2 h-4 w-4" />
+                                    Exportar Excel
+                                </Button>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                {/* Type Selector */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg">Selecionar Tipo de Documento</CardTitle>
+                        <CardDescription>
+                            Escolha um tipo de documento para visualizar os relatórios
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Select value={selectedTypeId} onValueChange={setSelectedTypeId}>
+                            <SelectTrigger className="w-full max-w-md">
+                                <SelectValue placeholder="Selecione um tipo de documento..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {documentTypes.map((type) => (
+                                    <SelectItem key={type.id} value={type.id.toString()}>
+                                        <div className="flex items-center gap-2">
+                                            <FileText className="h-4 w-4" />
+                                            {type.name}
+                                            <span className="text-muted-foreground">
+                                                ({type.documents_count} documentos)
+                                            </span>
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        
+                        {documentTypes.length === 0 && (
+                            <p className="text-sm text-muted-foreground mt-4">
+                                Nenhum tipo de documento encontrado. Crie documentos primeiro para gerar relatórios.
+                            </p>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* Report Configurator */}
+                {showConfigurator && selectedType && (
+                    <ReportConfigurator
+                        documentTypeId={selectedType.id}
+                        fields={selectedType.fields}
+                        calculatedFields={calculatedFields}
+                        onCalculatedFieldsChange={setCalculatedFields}
+                        onConfigChange={handleConfigChange}
+                        onPreviewRequest={handlePreviewRequest}
+                        loading={loading}
+                    />
+                )}
+
+                {/* Loading State */}
+                {loading && (
+                    <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                )}
+
+                {/* Report Content */}
+                {reportData && !loading && (
+                    <>
+                        {/* Stats Overview */}
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            <StatsCard
+                                title="Total de Documentos"
+                                value={reportData.totalDocuments}
+                                icon={FileText}
+                            />
+                            <StatsCard
+                                title="Campos Visíveis"
+                                value={visibleFields.length}
+                                icon={BarChart3}
+                            />
+                            {Object.entries(reportData.aggregated)
+                                .filter(([_, field]) => field.type === 'number' && field.sum !== undefined)
+                                .slice(0, 2)
+                                .map(([fieldName, field]) => (
+                                    <StatsCard
+                                        key={fieldName}
+                                        title={`Total ${field.label}`}
+                                        value={formatNumber(field.sum!)}
+                                        description={`Média: ${formatNumber(field.avg!)}`}
+                                        icon={Calculator}
+                                    />
+                                ))}
+                        </div>
+
+                        {/* View Tabs */}
+                        <Tabs value={activeView} onValueChange={(v) => setActiveView(v as 'charts' | 'table')} className="w-full">
+                            <div className="flex items-center justify-between mb-4">
+                                <TabsList>
+                                    <TabsTrigger value="charts" className="gap-2">
+                                        <PieChart className="h-4 w-4" />
+                                        Gráficos
+                                    </TabsTrigger>
+                                    <TabsTrigger value="table" className="gap-2">
+                                        <Table2 className="h-4 w-4" />
+                                        Lista
+                                    </TabsTrigger>
+                                </TabsList>
+
+                                {/* Calculated Fields Builder - only show in table view */}
+                                {activeView === 'table' && selectedType && (
+                                    <div className="text-sm text-muted-foreground">
+                                        {calculatedFields.length > 0 && (
+                                            <span>{calculatedFields.length} campo(s) calculado(s)</span>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Charts View */}
+                            <TabsContent value="charts" className="space-y-6 mt-0">
+                                {Object.keys(reportData.aggregated).length > 0 ? (
+                                    <div className="grid gap-6 md:grid-cols-2">
+                                        {Object.entries(reportData.aggregated).map(([fieldName, field]) => {
+                                            const chartData = getChartData(fieldName, field);
+                                            if (chartData.length === 0) return null;
+
+                                            let description = '';
+                                            if (field.type === 'number') {
+                                                description = `Soma: ${formatNumber(field.sum!)} | Média: ${formatNumber(field.avg!)}`;
+                                            } else if (field.uniqueCount) {
+                                                description = `${field.uniqueCount} valores únicos`;
+                                            }
+
+                                            return (
+                                                <ChartCard
+                                                    key={fieldName}
+                                                    title={field.label}
+                                                    description={description}
+                                                    data={chartData}
+                                                    chartType={chartTypes[fieldName] || 'bar'}
+                                                    onChartTypeChange={(type) => handleChartTypeChange(fieldName, type)}
+                                                    color={chartColors[fieldName] || globalColor}
+                                                    onColorChange={(color) => setChartColors(prev => ({ ...prev, [fieldName]: color }))}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <Card>
+                                        <CardContent className="flex flex-col items-center justify-center py-12">
+                                            <BarChart3 className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                                            <p className="text-muted-foreground">
+                                                Nenhum dado disponível para gerar gráficos
+                                            </p>
+                                        </CardContent>
+                                    </Card>
+                                )}
+                            </TabsContent>
+
+                            {/* Table View */}
+                            <TabsContent value="table" className="space-y-4 mt-0">
+                                <div className="grid gap-4 lg:grid-cols-4">
+                                    {/* Calculated Fields Builder */}
+                                    <div className="lg:col-span-1">
+                                        {selectedType && (
+                                            <CalculatedFieldBuilder
+                                                fields={selectedType.fields}
+                                                calculatedFields={calculatedFields}
+                                                onAdd={handleAddCalculatedField}
+                                                onRemove={handleRemoveCalculatedField}
+                                            />
+                                        )}
+                                    </div>
+
+                                    {/* Table */}
+                                    <div className="lg:col-span-3">
+                                        {selectedType && (
+                                            <ReportTableView
+                                                documents={reportData.documents}
+                                                fields={selectedType.fields}
+                                                calculatedFields={calculatedFields}
+                                                visibleFields={visibleFields}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            </TabsContent>
+                        </Tabs>
+                    </>
+                )}
+
+                {/* Empty State */}
+                {!selectedTypeId && !loading && documentTypes.length > 0 && (
+                    <Card>
+                        <CardContent className="flex flex-col items-center justify-center py-16">
+                            <BarChart3 className="h-16 w-16 text-muted-foreground/30 mb-4" />
+                            <h3 className="text-lg font-medium mb-2">Selecione um Tipo de Documento</h3>
+                            <p className="text-muted-foreground text-center max-w-md">
+                                Escolha um tipo de documento acima para visualizar relatórios detalhados 
+                                com gráficos interativos e estatísticas dos dados extraídos.
+                            </p>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* AI Analysis Modal */}
+                <AIAnalysisModal
+                    open={showAIAnalysis}
+                    onOpenChange={setShowAIAnalysis}
+                    analysis={aiAnalysis}
+                    documentTypeName={selectedType?.name || ''}
+                    loading={analyzingAI}
+                />
+            </div>
+        </AppLayout>
+    );
+}
