@@ -64,10 +64,10 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
             'canResetPassword' => true,
             'locale' => $locale,
         ]);
-    })->name('login');
+    })->name('locale.login');
     
     Route::post('login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])
-        ->middleware(['guest:web', 'throttle:login']);
+        ->middleware(['guest:web', 'throttle:login'])->name('locale.login.store');
     
     // Register routes
     Route::get('register', function ($locale) {
@@ -75,15 +75,15 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
             'canRegister' => Features::enabled(Features::registration()),
             'locale' => $locale,
         ]);
-    })->name('register');
+    })->name('locale.register');
     
     Route::post('register', [\Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'store'])
-        ->middleware(['guest:web']);
+        ->middleware(['guest:web'])->name('locale.register.store');
     
     // Logout
     Route::post('logout', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])
         ->middleware(['auth:web'])
-        ->name('logout');
+        ->name('locale.logout');
 });
 
 // Demo API routes (public, rate limited: 3 requests per hour)
