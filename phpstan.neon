@@ -4,13 +4,9 @@ includes:
 parameters:
     paths:
         - app
-    
+        - config
+        - database
+        - routes
     level: 5
-    
-    excludePaths:
-        - tests
-    
-    ignoreErrors:
-        - '#PHPDoc tag @var#'
     
     checkMissingIterableValueType: false
