@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('documents', function (Blueprint $table) {
-            //
+            $table->dropUnique(['user_id', 'original_filename']);
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('documents', function (Blueprint $table) {
-            //
+            $table->unique(['user_id', 'original_filename']);
         });
     }
 };
