@@ -23,6 +23,10 @@ Route::middleware('auth')->prefix('{locale}')->where(['locale' => 'pt|en'])->gro
         return Inertia::render('settings/appearance');
     })->name('appearance.edit');
 
+    Route::get('settings/language', function () {
+        return Inertia::render('settings/language');
+    })->name('language.edit');
+
     Route::get('settings/two-factor', [TwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
 });

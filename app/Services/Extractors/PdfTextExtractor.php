@@ -68,8 +68,15 @@ final class PdfTextExtractor implements TextExtractorInterface
             $pdf = $parser->parseFile($path);
             $text = $pdf->getText();
 
-            if (empty(trim($text))) {
-                throw new RuntimeException('O PDF não contém texto extraível');
+            // Verifica se o texto extraído é válido (não apenas espaços/quebras de linha)
+            $cleanText = trim(preg_replace('/\s+/', ' ', $text));
+            
+            if (empty($cleanText) || mb_strlen($cleanText) < 10) {
+                Log::info('PDF appears to be image-based, minimal text extracted', [
+                    'file' => $filename,
+                    'text_length' => mb_strlen($text),
+                ]);
+                throw new RuntimeException('O PDF não contém texto extraível (provavelmente baseado em imagens)');
             }
 
             Log::info('PDF text extracted with parser', [
@@ -210,11 +217,15 @@ final class PdfTextExtractor implements TextExtractorInterface
                 'model' => config('services.openai.model', 'gpt-4o-mini'),
                 'messages' => [
                     [
+                        'role' => 'system',
+                        'content' => 'Você é um assistente especializado em OCR (Optical Character Recognition) para extração de texto de documentos administrativos, financeiros e comerciais. Sua função é extrair TODO o texto visível de forma precisa e estruturada, independentemente do tipo de documento.',
+                    ],
+                    [
                         'role' => 'user',
                         'content' => [
                             [
                                 'type' => 'text',
-                                'text' => 'Extraia TODO o texto desta página de documento. Retorne apenas o texto bruto, preservando a estrutura e layout. Seja minucioso e extraia cada pedaço de texto visível. Mantenha números, datas e valores exatamente como aparecem.',
+                                'text' => 'Por favor, realize OCR nesta imagem de documento e extraia TODO o texto visível. Inclua:\n\n- Todos os campos, labels e valores\n- Números de identificação (NIF, NISS, etc)\n- Datas em qualquer formato\n- Valores monetários\n- Nomes, endereços e outras informações\n- Tabelas e listas\n\nRetorne o texto bruto preservando a estrutura original. Seja extremamente detalhado e não omita nenhuma informação visível.',
                             ],
                             [
                                 'type' => 'image_url',

@@ -35,6 +35,11 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
             href: `/${locale}/settings/appearance`,
             icon: null,
         },
+        {
+            title: 'Language',
+            href: `/${locale}/settings/language`,
+            icon: null,
+        },
     ];
 
     // When server-side rendering, we only render the layout on the client...

@@ -1,6 +1,5 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Icon } from '@/components/icon';
-import { LanguageSelector } from '@/components/LanguageSelector';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -147,9 +146,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 <span className="hidden md:inline text-xs sm:text-sm">{t('New Document')}</span>
                             </Button>
                         </Link>
-
-                        {/* Language Selector */}
-                        <LanguageSelector />
 
                         {/* User Menu */}
                         <DropdownMenu>
