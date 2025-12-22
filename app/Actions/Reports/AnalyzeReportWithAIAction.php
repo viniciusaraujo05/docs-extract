@@ -181,18 +181,39 @@ final class AnalyzeReportWithAIAction
     }
 
     /**
+     * Detecta o idioma da resposta da IA.
+     */
+    private function detectLocale(string $text): string
+    {
+        // Procura por marcadores em português
+        if (stripos($text, 'RESUMO EXECUTIVO') !== false) {
+            return 'pt';
+        }
+
+        // Procura por marcadores em inglês
+        if (stripos($text, 'EXECUTIVE SUMMARY') !== false) {
+            return 'en';
+        }
+
+        // Padrão: português
+        return 'pt';
+    }
+
+    /**
      * Parseia a resposta da IA em estrutura organizada.
      */
     private function parseAnalysis(string $analysisText, array $reportData): array
     {
+        $locale = $this->detectLocale($analysisText);
+
         // Extrai seções do texto
         $sections = [
-            'user_response' => $this->extractSection($analysisText, 'RESPOSTA ÀS INSTRUÇÕES DO USUÁRIO', 'RESUMO EXECUTIVO'),
-            'summary' => $this->extractSection($analysisText, 'RESUMO EXECUTIVO', 'INSIGHTS PRINCIPAIS'),
-            'insights' => $this->extractSection($analysisText, 'INSIGHTS PRINCIPAIS', 'PADRÕES E TENDÊNCIAS'),
-            'patterns' => $this->extractSection($analysisText, 'PADRÕES E TENDÊNCIAS', 'RECOMENDAÇÕES ESTRATÉGICAS'),
-            'recommendations' => $this->extractSection($analysisText, 'RECOMENDAÇÕES ESTRATÉGICAS', 'PONTOS DE ATENÇÃO'),
-            'warnings' => $this->extractSection($analysisText, 'PONTOS DE ATENÇÃO', null),
+            'user_response' => $this->extractSectionMultiLang($analysisText, 'RESPOSTA ÀS INSTRUÇÕES DO USUÁRIO', 'RESPONSE TO USER INSTRUCTIONS', 'RESUMO EXECUTIVO', 'EXECUTIVE SUMMARY'),
+            'summary' => $this->extractSectionMultiLang($analysisText, 'RESUMO EXECUTIVO', 'EXECUTIVE SUMMARY', 'INSIGHTS PRINCIPAIS', 'KEY INSIGHTS'),
+            'insights' => $this->extractSectionMultiLang($analysisText, 'INSIGHTS PRINCIPAIS', 'KEY INSIGHTS', 'PADRÕES E TENDÊNCIAS', 'PATTERNS AND TRENDS'),
+            'patterns' => $this->extractSectionMultiLang($analysisText, 'PADRÕES E TENDÊNCIAS', 'PATTERNS AND TRENDS', 'RECOMENDAÇÕES ESTRATÉGICAS', 'STRATEGIC RECOMMENDATIONS'),
+            'recommendations' => $this->extractSectionMultiLang($analysisText, 'RECOMENDAÇÕES ESTRATÉGICAS', 'STRATEGIC RECOMMENDATIONS', 'PONTOS DE ATENÇÃO', 'ATTENTION POINTS'),
+            'warnings' => $this->extractSectionMultiLang($analysisText, 'PONTOS DE ATENÇÃO', 'ATTENTION POINTS', null, null),
         ];
 
         return [
@@ -207,24 +228,35 @@ final class AnalyzeReportWithAIAction
     }
 
     /**
-     * Extrai uma seção específica do texto.
+     * Extrai uma seção específica do texto, considerando múltiplos idiomas.
      */
-    private function extractSection(string $text, string $startMarker, ?string $endMarker): string
+    private function extractSectionMultiLang(string $text, string $startMarkerPt, string $startMarkerEn, ?string $endMarkerPt = null, ?string $endMarkerEn = null): string
     {
-        $pattern = '/##\s*'.preg_quote($startMarker, '/').'\s*\n(.*?)(?=##|$)/s';
+        $patternPt = '/##\s*'.preg_quote($startMarkerPt, '/').'\s*\n(.*?)(?=##|$)/s';
+        $patternEn = '/##\s*'.preg_quote($startMarkerEn, '/').'\s*\n(.*?)(?=##|$)/s';
 
-        if (preg_match($pattern, $text, $matches)) {
-            $content = trim($matches[1]);
+        if (preg_match($patternPt, $text, $matchesPt)) {
+            $contentPt = trim($matchesPt[1]);
 
-            // Se há um marcador de fim, corta até ele
-            if ($endMarker !== null) {
-                $endPattern = '/##\s*'.preg_quote($endMarker, '/').'/';
-                if (preg_match($endPattern, $content, $endMatch, PREG_OFFSET_CAPTURE)) {
-                    $content = substr($content, 0, $endMatch[0][1]);
+            if ($endMarkerPt !== null) {
+                $endPatternPt = '/##\s*'.preg_quote($endMarkerPt, '/').'/';
+                if (preg_match($endPatternPt, $contentPt, $endMatchPt, PREG_OFFSET_CAPTURE)) {
+                    $contentPt = substr($contentPt, 0, $endMatchPt[0][1]);
                 }
             }
 
-            return trim($content);
+            return trim($contentPt);
+        } elseif (preg_match($patternEn, $text, $matchesEn)) {
+            $contentEn = trim($matchesEn[1]);
+
+            if ($endMarkerEn !== null) {
+                $endPatternEn = '/##\s*'.preg_quote($endMarkerEn, '/').'/';
+                if (preg_match($endPatternEn, $contentEn, $endMatchEn, PREG_OFFSET_CAPTURE)) {
+                    $contentEn = substr($contentEn, 0, $endMatchEn[0][1]);
+                }
+            }
+
+            return trim($contentEn);
         }
 
         return '';

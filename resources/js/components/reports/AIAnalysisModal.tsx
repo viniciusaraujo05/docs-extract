@@ -63,9 +63,13 @@ export function AIAnalysisModal({
     }, [instructions]);
 
     useEffect(() => {
-        // Show instructions form if no analysis or if explicitly requested
-        setShowInstructionsForm(!analysis);
-    }, [analysis]);
+        // Show instructions form only if no analysis AND not loading
+        if (!analysis && !loading) {
+            setShowInstructionsForm(true);
+        } else if (analysis) {
+            setShowInstructionsForm(false);
+        }
+    }, [analysis, loading]);
 
     const handleReanalyze = () => {
         setShowInstructionsForm(true);
@@ -165,12 +169,12 @@ ${analysis.raw_text}
                 {loading && (
                     <div className="flex flex-col items-center justify-center py-12 space-y-4">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500" />
-                        <p className="text-sm text-muted-foreground">Analisando dados com IA...</p>
-                        <p className="text-xs text-muted-foreground">Isso pode levar alguns segundos</p>
+                        <p className="text-sm text-muted-foreground">{t('Analyzing data with AI')}</p>
+                        <p className="text-xs text-muted-foreground">{t('This may take a few seconds')}</p>
                     </div>
                 )}
 
-                {!loading && showInstructionsForm && onAnalyze && (
+                {!loading && !analysis && showInstructionsForm && onAnalyze && (
                     <div className="flex-1 overflow-y-auto px-10 py-8">
                         <Card className="border-2 border-dashed border-purple-200 dark:border-purple-800 shadow-lg">
                             <CardHeader className="space-y-3">
@@ -224,7 +228,7 @@ ${analysis.raw_text}
                     </div>
                 )}
 
-                {!loading && analysis && (
+                {!loading && analysis && !showInstructionsForm && (
                     <div className="flex-1 overflow-y-auto px-10 py-8 space-y-8">
                         {/* Metadata */}
                         <div className="flex flex-wrap items-center justify-between gap-6 text-sm bg-gradient-to-r from-muted/50 to-muted/30 rounded-xl p-6 shadow-sm border">
