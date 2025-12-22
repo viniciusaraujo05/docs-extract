@@ -361,7 +361,8 @@ const pricingFallback = {
 
 export default function Welcome() {
   const { t, i18n } = useTranslation();
-  const { props } = usePage();
+  const { props } = usePage<{ auth?: { user?: any }; canRegister: boolean; locale: string }>();
+  const isAuthenticated = !!props.auth?.user;
   const [locale, setLocale] = useState<'pt' | 'en'>(() => {
     if (typeof window !== 'undefined') {
       return (localStorage.getItem('selected-locale') as 'pt' | 'en' | null) === 'en' ? 'en' : 'pt';
@@ -488,6 +489,7 @@ export default function Welcome() {
         onLocaleChange={handleLocaleChange}
         theme={theme}
         onToggleTheme={toggleTheme}
+        isAuthenticated={isAuthenticated}
       />
       <Hero locale={locale} onDemoClick={handleDemoClick} />
       <ValueProps />
@@ -523,11 +525,13 @@ function Header({
   onLocaleChange,
   theme,
   onToggleTheme,
+  isAuthenticated,
 }: {
   locale: string;
   onLocaleChange: (locale: string) => void;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
+  isAuthenticated?: boolean;
 }) {
   const { t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
@@ -622,17 +626,29 @@ function Header({
             </Button>
           </div>
 
-          <Button
-            variant="ghost"
-            onClick={() => router.visit(`/${locale}/login`)}
-            className="hidden md:inline-flex"
-          >
-            {t('Login')}
-          </Button>
+          {isAuthenticated ? (
+            <Button
+              onClick={() => router.visit(`/${locale}/dashboard`)}
+              className="gap-2"
+            >
+              <BarChart3 className="h-4 w-4" />
+              {t('Dashboard')}
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                onClick={() => router.visit(`/${locale}/login`)}
+                className="hidden md:inline-flex"
+              >
+                {t('Login')}
+              </Button>
 
-          <Button onClick={() => router.visit(`/${locale}/register`)}>
-            {t('Start Free Trial')}
-          </Button>
+              <Button onClick={() => router.visit(`/${locale}/register`)}>
+                {t('Start Free Trial')}
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </motion.header>

@@ -8,6 +8,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
+import { ExportDataButton } from '@/components/export-data-button';
 import { Sparkles, Download, Copy, CheckCircle2, AlertCircle, TrendingUp, Lightbulb, AlertTriangle, SquarePen } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -252,13 +253,26 @@ ${analysis.raw_text}
                                     )}
                                     {t('Copy')}
                                 </Button>
+                                <ExportDataButton
+                                    data={{
+                                        summary: analysis.sections.summary,
+                                        insights: analysis.sections.insights,
+                                        patterns: analysis.sections.patterns,
+                                        recommendations: analysis.sections.recommendations,
+                                        warnings: analysis.sections.warnings,
+                                        ...(analysis.sections.user_response && { user_response: analysis.sections.user_response }),
+                                    }}
+                                    filename={`analysis_${documentTypeName.toLowerCase().replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}`}
+                                    variant="outline"
+                                    size="default"
+                                />
                                 <Button
                                     variant="outline"
                                     onClick={handleExport}
                                     className="shadow-sm"
                                 >
                                     <Download className="h-4 w-4 mr-2" />
-                                    {t('Export')}
+                                    {t('Export as Markdown')}
                                 </Button>
                             </div>
                         </div>

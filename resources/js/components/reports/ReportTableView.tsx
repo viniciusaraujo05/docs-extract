@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { ExportDataButton } from '@/components/export-data-button';
 import {
     Table, 
     TableBody, 
@@ -208,52 +209,32 @@ export function ReportTableView({
         });
     }, []);
 
-    const handleExportSelected = useCallback(() => {
+    const exportPayload = useMemo(() => {
         const docsToExport = selectedRows.size > 0
             ? processedDocuments.filter(d => selectedRows.has(d.id))
             : processedDocuments;
 
-        if (docsToExport.length === 0) {
-            toast.error('Nenhum documento para exportar');
-            return;
-        }
+        if (docsToExport.length === 0) return null;
 
-        const worksheetData = docsToExport.map(doc => {
-            const row: Record<string, unknown> = {
-                'Nome': doc.name,
-                'Data': new Date(doc.created_at).toLocaleDateString('pt-PT'),
+        const payload: Record<string, any> = {};
+        docsToExport.forEach((doc, idx) => {
+            const docKey = `${doc.name}_${idx + 1}`;
+            payload[docKey] = {
+                name: doc.name,
+                date: new Date(doc.created_at).toLocaleDateString('pt-PT'),
+                ...displayFields.reduce((acc, field) => ({
+                    ...acc,
+                    [field.label]: doc.data[field.name] ?? '',
+                }), {}),
+                ...calculatedFields.reduce((acc, calcField) => ({
+                    ...acc,
+                    [calcField.label]: calculateFieldValue(doc, calcField),
+                }), {}),
             };
-
-            displayFields.forEach(field => {
-                row[field.label] = doc.data[field.name] ?? '';
-            });
-
-            calculatedFields.forEach(calcField => {
-                row[calcField.label] = calculateFieldValue(doc, calcField);
-            });
-
-            return row;
         });
 
-        // Add totals row
-        const totalsRow: Record<string, unknown> = { 'Nome': 'TOTAL', 'Data': '' };
-        displayFields.forEach(field => {
-            totalsRow[field.label] = field.type === 'number' ? totals[field.name] : '';
-        });
-        calculatedFields.forEach(calcField => {
-            totalsRow[calcField.label] = totals[calcField.name];
-        });
-        worksheetData.push(totalsRow);
-
-        const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Relatório');
-
-        const filename = `relatorio_personalizado_${new Date().toISOString().split('T')[0]}.xlsx`;
-        XLSX.writeFile(workbook, filename);
-
-        toast.success(`${docsToExport.length} registos exportados!`);
-    }, [processedDocuments, selectedRows, displayFields, calculatedFields, totals]);
+        return payload;
+    }, [processedDocuments, selectedRows, displayFields, calculatedFields]);
 
     const getSortIcon = (fieldName: string) => {
         if (sortField !== fieldName) {
@@ -275,10 +256,14 @@ export function ReportTableView({
                             {selectedRows.size > 0 && ` (${selectedRows.size} ${t('selected')})`}
                         </CardDescription>
                     </div>
-                    <Button onClick={handleExportSelected} size="sm">
-                        <Download className="h-4 w-4 mr-2" />
-                        {selectedRows.size > 0 ? `${t('Export')} (${selectedRows.size})` : t('Export All')}
-                    </Button>
+                    {exportPayload && (
+                        <ExportDataButton
+                            data={exportPayload}
+                            filename={`table_export_${new Date().toISOString().split('T')[0]}`}
+                            variant="outline"
+                            size="sm"
+                        />
+                    )}
                 </div>
             </CardHeader>
             <CardContent className="space-y-3">

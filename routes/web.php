@@ -11,6 +11,9 @@ Route::get('/', function () {
     return Inertia::render('welcome', [
         'canRegister' => Features::enabled(Features::registration()),
         'locale' => 'pt',
+        'auth' => [
+            'user' => auth()->user(),
+        ],
     ]);
 })->name('home');
 
@@ -19,6 +22,9 @@ Route::get('/{locale}', function ($locale) {
     return Inertia::render('welcome', [
         'canRegister' => Features::enabled(Features::registration()),
         'locale' => $locale,
+        'auth' => [
+            'user' => auth()->user(),
+        ],
     ]);
 })->where(['locale' => 'pt|en'])->name('home.locale');
 
@@ -61,7 +67,7 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
             'canResetPassword' => true,
             'locale' => $locale,
         ]);
-    })->name('locale.login');
+    })->middleware('guest')->name('locale.login');
 
     Route::post('login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])
         ->middleware(['guest:web', 'throttle:login'])->name('locale.login.store');
@@ -72,7 +78,7 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
             'canRegister' => Features::enabled(Features::registration()),
             'locale' => $locale,
         ]);
-    })->name('locale.register');
+    })->middleware('guest')->name('locale.register');
 
     Route::post('register', [\Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'store'])
         ->middleware(['guest:web', 'throttle:register'])->name('locale.register.store');

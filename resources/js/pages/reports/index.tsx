@@ -9,6 +9,7 @@ import { ReportConfigurator } from '@/components/reports/ReportConfigurator';
 import { CalculatedFieldBuilder, type CalculatedField } from '@/components/reports/CalculatedFieldBuilder';
 import { ReportTableView } from '@/components/reports/ReportTableView';
 import { AIAnalysisModal } from '@/components/reports/AIAnalysisModal';
+import { ExportDataButton } from '@/components/export-data-button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
@@ -244,6 +245,42 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
             .filter(([_, config]) => config.visible)
             .map(([name]) => name);
     }, [currentConfig, selectedType]);
+
+    const reportExportPayload = useMemo(() => {
+        if (!reportData) return null;
+
+        const fieldLabelMap = reportData.documentType.fields.reduce<Record<string, string>>((acc, field) => {
+            acc[field.name] = field.label;
+            return acc;
+        }, {});
+
+        return {
+            document_type: reportData.documentType.name,
+            total_documents: reportData.totalDocuments,
+            generated_at: new Date().toISOString(),
+            filters: currentConfig
+                ? {
+                    date_from: currentConfig.dateFrom,
+                    date_to: currentConfig.dateTo,
+                    selection_mode: currentConfig.selectionMode,
+                    date_grouping: currentConfig.dateGrouping,
+                    date_field: currentConfig.dateField,
+                    selected_document_ids: currentConfig.selectedDocumentIds,
+                }
+                : null,
+            aggregated: reportData.aggregated,
+            documents: reportData.documents.map((doc) => ({
+                id: doc.id,
+                name: doc.name,
+                created_at: doc.created_at,
+                data: visibleFields.reduce<Record<string, unknown>>((acc, fieldName) => {
+                    const label = fieldLabelMap[fieldName] || fieldName;
+                    acc[label] = doc.data[fieldName] ?? '';
+                    return acc;
+                }, {}),
+            })),
+        };
+    }, [reportData, currentConfig, visibleFields]);
 
     const handleAddCalculatedField = useCallback((field: CalculatedField) => {
         setCalculatedFields(prev => [...prev, field]);
@@ -570,10 +607,14 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                                     )}
                                     {hasSavedAnalysis ? t('View AI Analysis') : t('AI Analysis')}
                                 </Button>
-                                <Button size="sm" onClick={handleExportExcel}>
-                                    <Download className="mr-2 h-4 w-4" />
-                                    {t('Export Excel')}
-                                </Button>
+                                {reportExportPayload && (
+                                    <ExportDataButton
+                                        data={reportExportPayload}
+                                        filename={`report_${selectedType?.slug || 'data'}_${new Date().toISOString().split('T')[0]}`}
+                                        variant="outline"
+                                        size="sm"
+                                    />
+                                )}
                             </div>
                         )}
                     </div>
@@ -678,14 +719,26 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                                     </TabsTrigger>
                                 </TabsList>
 
-                                {/* Calculated Fields Builder - only show in table view */}
-                                {activeView === 'table' && selectedType && (
-                                    <div className="text-sm text-muted-foreground">
-                                        {calculatedFields.length > 0 && (
-                                            <span>{calculatedFields.length} {t('calculated field(s)')}</span>
-                                        )}
-                                    </div>
-                                )}
+                                <div className="flex items-center gap-4">
+                                    {/* Calculated Fields Builder - only show in table view */}
+                                    {activeView === 'table' && selectedType && (
+                                        <div className="text-sm text-muted-foreground">
+                                            {calculatedFields.length > 0 && (
+                                                <span>{calculatedFields.length} {t('calculated field(s)')}</span>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Export Button */}
+                                    {reportData && (
+                                        <ExportDataButton
+                                            data={reportData.aggregated}
+                                            filename={`report_${selectedType?.slug || 'data'}_${new Date().toISOString().split('T')[0]}`}
+                                            variant="outline"
+                                            size="sm"
+                                        />
+                                    )}
+                                </div>
                             </div>
 
                             {/* Charts View */}

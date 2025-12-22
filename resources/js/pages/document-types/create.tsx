@@ -11,15 +11,9 @@ import { type BreadcrumbItem } from '@/types';
 import { type SchemaField, type FieldType, FIELD_TYPES } from '@/types/extraction';
 import { Head, router } from '@inertiajs/react';
 import { ArrowLeft, Plus, Save, X } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-
-const BREADCRUMBS: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Tipos de Documento', href: '/document-types' },
-    { title: 'Novo', href: '/document-types/create' },
-];
 
 /**
  * Página de criação de tipo de documento
@@ -75,8 +69,14 @@ export default function DocumentTypesCreate() {
         });
     }, [name, description, fields]);
 
+    const breadcrumbs = useMemo<BreadcrumbItem[]>(() => [
+        { title: t('Dashboard'), href: '/dashboard' },
+        { title: t('Document Types'), href: '/document-types' },
+        { title: t('New'), href: '/document-types/create' },
+    ], [t]);
+
     return (
-        <AppLayout breadcrumbs={BREADCRUMBS}>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('New Document Type')} />
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
                 {/* Header */}

@@ -12,8 +12,9 @@ import { type BreadcrumbItem } from '@/types';
 import { type SchemaField, type FieldType, type DocumentType, FIELD_TYPES } from '@/types/extraction';
 import { Head, router } from '@inertiajs/react';
 import { ArrowLeft, Plus, Save, X } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     documentType: DocumentType;
@@ -23,11 +24,12 @@ interface Props {
  * Página de edição de tipo de documento
  */
 export default function DocumentTypesEdit({ documentType }: Props) {
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Dashboard', href: '/dashboard' },
-        { title: 'Tipos de Documento', href: '/document-types' },
+    const { t } = useTranslation();
+    const breadcrumbs = useMemo<BreadcrumbItem[]>(() => [
+        { title: t('Dashboard'), href: '/dashboard' },
+        { title: t('Document Types'), href: '/document-types' },
         { title: documentType.name, href: `/document-types/${documentType.id}/edit` },
-    ];
+    ], [t, documentType.id, documentType.name]);
 
     const [name, setName] = useState(documentType.name);
     const [description, setDescription] = useState(documentType.description ?? '');
@@ -81,7 +83,7 @@ export default function DocumentTypesEdit({ documentType }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Editar ${documentType.name}`} />
+            <Head title={`${t('Edit')} ${documentType.name}`} />
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
                 {/* Header */}
                 <div>

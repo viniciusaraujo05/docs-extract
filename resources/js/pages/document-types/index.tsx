@@ -5,15 +5,10 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { type DocumentType } from '@/types/extraction';
 import { Head, Link, router } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileType, Plus, Pencil, Trash2, FileText } from 'lucide-react';
 import { toast } from 'sonner';
-
-const BREADCRUMBS: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: '/dashboard' },
-    { title: 'Tipos de Documento', href: '/document-types' },
-];
 
 interface Props {
     documentTypes: DocumentType[];
@@ -25,6 +20,11 @@ interface Props {
 export default function DocumentTypesIndex({ documentTypes }: Props) {
     const { t } = useTranslation();
     const [locale, setLocale] = useState('pt');
+
+    const breadcrumbs = useMemo<BreadcrumbItem[]>(() => [
+        { title: t('Dashboard'), href: '/dashboard' },
+        { title: t('Document Types'), href: '/document-types' },
+    ], [t]);
 
     useEffect(() => {
         const savedLocale = localStorage.getItem('selected-locale') || 'pt';
@@ -54,8 +54,8 @@ export default function DocumentTypesIndex({ documentTypes }: Props) {
     };
 
     return (
-        <AppLayout breadcrumbs={BREADCRUMBS}>
-            <Head title="Tipos de Documento" />
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title={t('Document Types')} />
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
                 {/* Header */}
                 <div className="flex items-center justify-between">
