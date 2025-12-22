@@ -63,20 +63,35 @@ final class PdfTextExtractor implements TextExtractorInterface
      */
     private function extractWithParser(string $path, string $filename): string
     {
-        $parser = new Parser();
-        $pdf = $parser->parseFile($path);
-        $text = $pdf->getText();
+        try {
+            $parser = new Parser();
+            $pdf = $parser->parseFile($path);
+            $text = $pdf->getText();
 
-        if (empty(trim($text))) {
-            throw new RuntimeException('O PDF não contém texto extraível');
+            if (empty(trim($text))) {
+                throw new RuntimeException('O PDF não contém texto extraível');
+            }
+
+            Log::info('PDF text extracted with parser', [
+                'file' => $filename,
+                'text_length' => mb_strlen($text),
+            ]);
+
+            return $text;
+        } catch (Throwable $e) {
+            // Captura erros específicos do parser
+            $errorMsg = $e->getMessage();
+            
+            if (str_contains($errorMsg, 'Secured') || str_contains($errorMsg, 'password')) {
+                throw new RuntimeException('PDF protegido com senha. Por favor, remova a proteção antes de enviar.');
+            }
+            
+            if (str_contains($errorMsg, 'Invalid') || str_contains($errorMsg, 'corrupt')) {
+                throw new RuntimeException('PDF corrompido ou inválido. Por favor, tente outro arquivo.');
+            }
+            
+            throw $e;
         }
-
-        Log::info('PDF text extracted with parser', [
-            'file' => $filename,
-            'text_length' => mb_strlen($text),
-        ]);
-
-        return $text;
     }
 
     /**

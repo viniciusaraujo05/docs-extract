@@ -22,7 +22,7 @@ use Throwable;
  */
 final class ExtractionController extends Controller
 {
-    private const MAX_FILE_SIZE = 10240;
+    private const MAX_FILE_SIZE = 10240; // 10MB
 
     private const ALLOWED_MIMES = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
 
@@ -91,7 +91,11 @@ final class ExtractionController extends Controller
         try {
             /** @var UploadedFile $file */
             $file = $request->file('file');
-            $fields = json_decode($validated['fields'], true, 512, JSON_THROW_ON_ERROR);
+            
+            // Aceita fields como array ou JSON string
+            $fields = is_string($validated['fields']) 
+                ? json_decode($validated['fields'], true, 512, JSON_THROW_ON_ERROR)
+                : $validated['fields'];
 
             $text = $this->textExtractor->extract($file);
 
@@ -107,24 +111,37 @@ final class ExtractionController extends Controller
                 'confidence' => $result['confidence'] ?? null,
                 'raw_text_preview' => mb_substr($text, 0, 500),
             ]);
+        } catch (\JsonException $e) {
+            Log::error('Invalid JSON in fields', [
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Formato de campos inválido. Por favor, tente novamente.',
+            ], 422);
         } catch (Throwable $e) {
             Log::error('Extraction failed', [
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             // Mensagens de erro mais amigáveis
             $userMessage = match (true) {
-                str_contains($e->getMessage(), 'Secured pdf') => 'O PDF está protegido/encriptado. Por favor, remova a proteção antes de enviar.',
-                str_contains($e->getMessage(), 'password') => 'O PDF requer senha. Por favor, envie um PDF sem proteção.',
-                default => "Erro ao extrair dados: {$e->getMessage()}",
+                str_contains($e->getMessage(), 'Secured pdf') || str_contains($e->getMessage(), 'protegido') => 'O PDF está protegido/encriptado. Por favor, remova a proteção antes de enviar.',
+                str_contains($e->getMessage(), 'password') || str_contains($e->getMessage(), 'senha') => 'O PDF requer senha. Por favor, envie um PDF sem proteção.',
+                str_contains($e->getMessage(), 'corrompido') || str_contains($e->getMessage(), 'corrupt') => 'O arquivo parece estar corrompido. Por favor, tente outro arquivo.',
+                str_contains($e->getMessage(), 'Imagick') => 'Não foi possível processar este PDF. Tente converter para imagem (JPG/PNG) antes de enviar.',
+                default => "Erro ao processar documento. Por favor, verifique se o arquivo não está protegido ou corrompido.",
             };
 
             return response()->json([
                 'success' => false,
                 'error' => $userMessage,
-            ], 422); // 422 Unprocessable Entity em vez de 500
+                'message' => $userMessage,
+            ], 500); // 500 para erros de processamento, não 422
         }
     }
 
@@ -153,7 +170,12 @@ final class ExtractionController extends Controller
                 implode(',', self::ALLOWED_MIMES),
                 self::MAX_FILE_SIZE
             ),
-            'fields' => 'required|json',
+            'fields' => 'required', // Aceita array ou JSON string
+        ], [
+            'file.required' => 'Por favor, envie um documento.',
+            'file.mimes' => 'Apenas arquivos PDF e imagens (JPG, PNG, WEBP) são suportados.',
+            'file.max' => 'O arquivo não pode exceder 10MB.',
+            'fields.required' => 'É necessário definir pelo menos um campo para extrair.',
         ]);
     }
 
