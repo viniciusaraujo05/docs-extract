@@ -4,17 +4,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { type SchemaField, type DocumentType } from '@/types/extraction';
+import { DocumentPreview } from './DocumentPreview';
 import { 
     ArrowLeft, 
     Check,
-    FileText,
     Trash2,
-    ZoomIn,
-    ZoomOut,
-    Maximize2,
     Tag,
     X,
-    Pencil
+    Pencil,
+    Loader2
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +25,7 @@ interface StepReviewProps {
     documentTypes: DocumentType[];
     selectedTypeId: number | null;
     newTypeName: string;
+    isSaving?: boolean;
     onUpdateField: (fieldName: string, value: unknown) => void;
     onRemoveField: (fieldName: string) => void;
     onRenameField: (oldName: string, newLabel: string) => void;
@@ -47,6 +46,7 @@ export function StepReview({
     documentTypes,
     selectedTypeId,
     newTypeName,
+    isSaving = false,
     onUpdateField,
     onRemoveField,
     onRenameField,
@@ -55,59 +55,9 @@ export function StepReview({
     onDiscard,
 }: StepReviewProps) {
     const { t } = useTranslation();
-    const [zoomLevel, setZoomLevel] = useState(100);
     const [editingLabel, setEditingLabel] = useState<string | null>(null);
     const [tempLabel, setTempLabel] = useState('');
-    const isPdf = file?.type === 'application/pdf';
 
-    const handleZoomIn = useCallback(() => {
-        setZoomLevel(prev => Math.min(prev + 25, 200));
-    }, []);
-
-    const handleZoomOut = useCallback(() => {
-        setZoomLevel(prev => Math.max(prev - 25, 50));
-    }, []);
-
-    const renderPreview = useCallback(() => {
-        if (!filePreview) {
-            return (
-                <div className="text-center">
-                    <FileText className="mx-auto h-16 w-16 text-muted-foreground/50" />
-                    <p className="mt-2 text-sm text-muted-foreground">
-                        {t('No preview available')}
-                    </p>
-                </div>
-            );
-        }
-
-        if (isPdf) {
-            return (
-                <div 
-                    className="h-full w-full origin-top-left transition-transform duration-200"
-                    style={{ 
-                        transform: `scale(${zoomLevel / 100})`,
-                        width: `${10000 / zoomLevel}%`,
-                        height: `${10000 / zoomLevel}%`
-                    }}
-                >
-                    <iframe
-                        src={`${filePreview}#toolbar=1&navpanes=0`}
-                        className="h-full w-full border-0"
-                        title="PDF Preview"
-                    />
-                </div>
-            );
-        }
-
-        return (
-            <img
-                src={filePreview}
-                alt="Preview"
-                className="max-h-full max-w-full object-contain transition-transform duration-200"
-                style={{ transform: `scale(${zoomLevel / 100})` }}
-            />
-        );
-    }, [filePreview, isPdf, zoomLevel]);
 
     const getInputType = (fieldType: string): string => {
         switch (fieldType) {
@@ -228,53 +178,8 @@ export function StepReview({
 
             {/* Preview Card */}
             <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <CardTitle>{t('Document Preview')}</CardTitle>
-                            <CardDescription>
-                                {file?.name}
-                            </CardDescription>
-                        </div>
-                        {filePreview && (
-                            <div className="flex items-center gap-1">
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={handleZoomOut}
-                                    disabled={zoomLevel <= 50}
-                                >
-                                    <ZoomOut className="h-4 w-4" />
-                                </Button>
-                                <span className="min-w-[3rem] text-center text-sm text-muted-foreground">
-                                    {zoomLevel}%
-                                </span>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={handleZoomIn}
-                                    disabled={zoomLevel >= 200}
-                                >
-                                    <ZoomIn className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8 ml-2"
-                                    onClick={() => window.open(filePreview, '_blank')}
-                                >
-                                    <Maximize2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex aspect-[3/4] items-center justify-center overflow-auto rounded-lg border bg-muted/30">
-                        {renderPreview()}
-                    </div>
+                <CardContent className="pt-6">
+                    <DocumentPreview file={file} filePreview={filePreview} />
                 </CardContent>
             </Card>
 
@@ -291,10 +196,19 @@ export function StepReview({
                     </Button>
                     <Button 
                         onClick={onSave}
-                        disabled={!selectedTypeId && !newTypeName}
+                        disabled={(!selectedTypeId && !newTypeName) || isSaving}
                     >
-                        <Check className="mr-2 h-4 w-4" />
-                        {t('Save Document')}
+                        {isSaving ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                {t('Saving...')}
+                            </>
+                        ) : (
+                            <>
+                                <Check className="mr-2 h-4 w-4" />
+                                {t('Save Document')}
+                            </>
+                        )}
                     </Button>
                 </div>
             </div>

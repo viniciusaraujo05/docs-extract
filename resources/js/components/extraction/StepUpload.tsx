@@ -35,6 +35,8 @@ interface StepUploadProps {
     suggestedFieldsCount: number;
     error: string | null;
     locale: string;
+    checkingDuplicate?: boolean;
+    duplicateExists?: boolean;
     onFileSelect: (file: File | null) => void;
     onTypeSelect: (typeId: number | null) => void;
     onNewTypeNameChange: (name: string) => void;
@@ -57,6 +59,8 @@ export function StepUpload({
     suggestedFieldsCount,
     error,
     locale,
+    checkingDuplicate = false,
+    duplicateExists = false,
     onFileSelect,
     onTypeSelect,
     onNewTypeNameChange,
@@ -389,6 +393,15 @@ export function StepUpload({
                     </div>
                 )}
 
+                {checkingDuplicate && (
+                    <div className="flex items-center justify-center gap-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 p-4">
+                        <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                        <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                            {t('Checking for duplicate documents...')}
+                        </span>
+                    </div>
+                )}
+
                 {analyzing && (
                     <div className="flex items-center justify-center gap-3 rounded-lg bg-primary/5 p-4">
                         <Loader2 className="h-5 w-5 animate-spin text-primary" />
@@ -410,7 +423,7 @@ export function StepUpload({
                     </Button>
                     <Button
                         onClick={onNext}
-                        disabled={!file || analyzing || !hasTypeSelected || (isNewType && !analysisCompleted)}
+                        disabled={!file || analyzing || checkingDuplicate || duplicateExists || !hasTypeSelected || (isNewType && !analysisCompleted)}
                     >
                         {analyzing ? (
                             <>

@@ -217,16 +217,19 @@ final class DocumentController extends Controller
      */
     public function checkName(Request $request): JsonResponse
     {
-        $name = $request->query('name', '');
+        $filename = (string) $request->query('name', '');
+        $displayName = $request->query('display_name');
+        $displayName ??= $filename !== '' ? pathinfo($filename, PATHINFO_FILENAME) : '';
 
         /** @var User $user */
         $user = $request->user();
 
-        $exists = $this->documentRepository->existsByNameForUser($name, $user->id);
+        $exists = $this->documentRepository->existsByNameForUser($filename, $user->id, $displayName);
 
         return response()->json([
             'exists' => $exists,
-            'name' => $name,
+            'name' => $filename,
+            'display_name_checked' => $displayName,
         ]);
     }
 

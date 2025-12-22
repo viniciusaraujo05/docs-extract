@@ -22,6 +22,7 @@ final class DocumentService
     public function __construct(
         private readonly DocumentRepository $documentRepository,
         private readonly ExtractionService $extractionService,
+        private readonly ?EnhancedExtractionService $enhancedExtractionService = null,
     ) {
     }
 

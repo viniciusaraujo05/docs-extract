@@ -24,6 +24,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { usePage } from '@inertiajs/react';
+import { ExportDataButton } from '@/components/export-data-button';
 
 
 function formatDate(dateString: string | null): string {
@@ -297,15 +298,24 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                                     </CardDescription>
                                 </div>
                                 {document.status === 'completed' && (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={handleReprocess}
-                                        disabled={isSaving}
-                                    >
-                                        <RefreshCw className="mr-2 h-4 w-4" />
-                                        {t('Reprocess')}
-                                    </Button>
+                                    <div className="flex items-center gap-2">
+                                        <ExportDataButton
+                                            data={formData}
+                                            filename={document.name}
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={isSaving}
+                                        />
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleReprocess}
+                                            disabled={isSaving}
+                                        >
+                                            <RefreshCw className="mr-2 h-4 w-4" />
+                                            {t('Reprocess')}
+                                        </Button>
+                                    </div>
                                 )}
                             </div>
                         </CardHeader>

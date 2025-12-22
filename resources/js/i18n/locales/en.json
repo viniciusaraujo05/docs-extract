@@ -246,6 +246,11 @@
     "Edit the extracted values if needed": "Edit the extracted values if needed",
     "Save Document": "Save Document",
     "Saving...": "Saving...",
+    "Hold Ctrl/Cmd + scroll to zoom": "Hold Ctrl/Cmd + scroll to zoom",
+  "Checking for duplicate documents...": "Checking for duplicate documents...",
+  "Double-click to zoom": "Double-click to zoom",
+  "Drag to pan when zoomed": "Drag to pan when zoomed",
+  "Duplicate filename warning": "A document named \"{{fileName}}\" already exists. Please rename the file before continuing.",
     "Discard": "Discard",
     "Upload": "Upload",
     "Define Fields": "Define Fields",
@@ -357,7 +362,455 @@
     "Extracting data from document...": "Extracting data from document...",
     "In processing queue...": "In processing queue...",
     "Could not process the document": "Could not process the document",
-    "Try Again": "Try Again",
+    "landing": {
+        "nav": {
+            "product": "Product",
+            "control": "Control",
+            "security": "Security",
+            "pricing": "Pricing"
+        },
+        "hero": {
+            "eyebrow": "Intelligent data extraction platform",
+            "title": "Turn chaotic documents",
+            "highlight": "into reliable, usable data",
+            "subtitle": "Upload PDFs or images, define the fields that matter, review every record and deliver structured data for reports or integrations.",
+            "cta_primary": "Start for free",
+            "cta_secondary": "Watch demo",
+            "triggers": [
+                "No heavy implementation",
+                "You define the model and edit before saving",
+                "Reports and API access without complex BI"
+            ]
+        },
+        "pricing": {
+            "title": "Clear, defensible pricing",
+            "subtitle": "Start free, grow with predictable limits and unlock API access when it matters.",
+            "plans": [
+                {
+                    "name": "FREE",
+                    "tagline": "Experience the value",
+                    "price": "€0",
+                    "frequency": "",
+                    "highlight": false,
+                    "cta": "Start free",
+                    "features": [
+                        "20 documents included",
+                        "1 custom model",
+                        "UI only",
+                        "No saved reports",
+                        "No API"
+                    ]
+                },
+                {
+                    "name": "STARTER",
+                    "tagline": "For freelancers / personal use",
+                    "price": "€15",
+                    "frequency": "/month",
+                    "highlight": false,
+                    "cta": "Choose Starter",
+                    "features": [
+                        "300 documents",
+                        "Up to 5 models",
+                        "Basic reports",
+                        "CSV / Excel export",
+                        "Full UI",
+                        "No API"
+                    ]
+                },
+                {
+                    "name": "PRO",
+                    "tagline": "Primary plan",
+                    "price": "€39",
+                    "frequency": "/month",
+                    "highlight": true,
+                    "cta": "Choose Pro",
+                    "features": [
+                        "1,500 documents",
+                        "Unlimited models",
+                        "Advanced reports + calculated fields",
+                        "Full export options",
+                        "API included (5,000 requests / month)",
+                        "1 API key"
+                    ]
+                },
+                {
+                    "name": "BUSINESS / DEV",
+                    "tagline": "For teams and technical use",
+                    "price": "€89",
+                    "frequency": "/month",
+                    "highlight": false,
+                    "cta": "Choose Business / Dev",
+                    "features": [
+                        "5,000 documents",
+                        "Everything in PRO",
+                        "Advanced API features",
+                        "25,000 requests / month",
+                        "Multiple API keys",
+                        "Webhooks + priority processing"
+                    ]
+                },
+                {
+                    "name": "ENTERPRISE",
+                    "tagline": "Custom volume & SLA",
+                    "price": "Custom",
+                    "frequency": "",
+                    "highlight": false,
+                    "cta": "Talk to us",
+                    "features": [
+                        "Custom document volume",
+                        "Dedicated SLA",
+                        "Annual contract",
+                        "Dedicated support",
+                        "Onboarding & success",
+                        "Roadmap alignment"
+                    ]
+                }
+            ],
+            "disclaimer": "All plans include secure storage, manual review workflow and multi-language extraction."
+        },
+        "valueProps": {
+            "items": [
+                {
+                    "title": "Save hours every week",
+                    "desc": "Automate everything that used to depend on copy & paste."
+                },
+                {
+                    "title": "Models you control",
+                    "desc": "Define text, number or date fields and reuse templates whenever needed."
+                },
+                {
+                    "title": "Transparent review",
+                    "desc": "Compare document vs extracted data and approve with confidence."
+                },
+                {
+                    "title": "Reports & API ready",
+                    "desc": "Structured history for simple dashboards, exports or API integrations."
+                }
+            ]
+        },
+        "control": {
+            "title": "End-to-end control",
+            "subtitle": "The user decides what to extract, how to review and when to activate reports or API access.",
+            "items": [
+                {
+                    "label": "01",
+                    "title": "You define the schema",
+                    "desc": "Create templates with the exact fields that matter (text, number, date) and reuse them across uploads."
+                },
+                {
+                    "label": "02",
+                    "title": "Review before saving",
+                    "desc": "Edit each field with side-by-side context and keep full ownership of the final record."
+                },
+                {
+                    "label": "03",
+                    "title": "Structured history",
+                    "desc": "Statuses, reprocessing, exports and API access powered by the data you curated."
+                }
+            ]
+        },
+        "features": {
+            "title": "Real Features. Real Power.",
+            "subtitle": "Everything we already ship (and what is on the near-term roadmap) to give teams full control.",
+            "sections": [
+                {
+                    "title": "📄 Documents",
+                    "items": [
+                        "Upload PDFs and images",
+                        "Full preview with zoom",
+                        "Processing queue with status history",
+                        "Async reprocessing on demand",
+                        "Secure storage with temporary URLs"
+                    ]
+                },
+                {
+                    "title": "🧩 Models",
+                    "items": [
+                        "Custom field definitions (text, number, date)",
+                        "Reusable templates",
+                        "Automatic validation",
+                        "Foundation for extraction and reports"
+                    ]
+                },
+                {
+                    "title": "🤖 AI extraction",
+                    "items": [
+                        "Model-based prompts in PT/EN",
+                        "OCR fallback for difficult PDFs",
+                        "JSON output aligned with your schema",
+                        "Clear error messages",
+                        "Usage limits by credits/plan"
+                    ]
+                },
+                {
+                    "title": "✍️ Review & control",
+                    "items": [
+                        "Editable fields before saving",
+                        "Confidence indicators per field",
+                        "User decides the final result"
+                    ]
+                },
+                {
+                    "title": "📊 Reports",
+                    "items": [
+                        "Built from historical data",
+                        "Manual or automatic document selection",
+                        "Date filters & aggregations (sum, avg, count, growth)",
+                        "Simple charts + CSV/Excel export"
+                    ]
+                },
+                {
+                    "title": "🔌 API",
+                    "items": [
+                        "Upload via API with template selection",
+                        "Status endpoints to check progress",
+                        "JSON responses ready for downstream systems",
+                        "Plan-based limits and API keys",
+                        "Webhooks + multiple keys on advanced plans"
+                    ]
+                },
+                {
+                    "title": "🔐 Security",
+                    "items": [
+                        "Secure storage with temporary links",
+                        "Users can delete everything at any time",
+                        "We never train public models with your data"
+                    ]
+                }
+            ]
+        },
+        "howItWorks": {
+            "title": "How it works (3 steps + API)",
+            "subtitle": "A clear path from document to decision — without friction.",
+            "steps": [
+                {
+                    "title": "Upload",
+                    "desc": "Send PDFs or images. We process asynchronously with queue visibility."
+                },
+                {
+                    "title": "Define fields",
+                    "desc": "Choose (or create) a template with the fields that matter."
+                },
+                {
+                    "title": "Review & approve",
+                    "desc": "Edit, validate and save. No black boxes."
+                },
+                {
+                    "title": "Report & integrate",
+                    "desc": "Use structured history for dashboards, exports or API calls."
+                }
+            ]
+        },
+        "security": {
+            "title": "Security & governance",
+            "subtitle": "Storage, privacy and deletion policies designed for teams that take data seriously.",
+            "cards": [
+                {
+                    "title": "Storage & privacy",
+                    "desc": "Encrypted storage, temporary links and access only for authorized users."
+                },
+                {
+                    "title": "Governance & control",
+                    "desc": "Audit history, ability to delete everything and zero usage of your data to train public models."
+                }
+            ]
+        },
+        "integration": {
+            "title": "API when you need it",
+            "subtitle": "Available on PRO and above: upload, choose the model, check status and consume JSON output.",
+            "cards": [
+                {
+                    "title": "Upload + model",
+                    "desc": "Send the document and specify which template should be used."
+                },
+                {
+                    "title": "Status tracking",
+                    "desc": "Know exactly when processing is finished."
+                },
+                {
+                    "title": "Structured JSON",
+                    "desc": "Receive fields exactly as defined in your schema."
+                }
+            ],
+            "example_label": "Quick example",
+            "example_note": "Available for PRO, Business/Dev and Enterprise.",
+            "example_code": [
+                "curl -X POST https://api.getdata.com/upload \\",
+                "  -H \"Authorization: Bearer <API_KEY>\" \\",
+                "  -F \"file=@document.pdf\" \\",
+                "  -F \"model=invoice_v2\"",
+                "",
+                "curl -X GET https://api.getdata.com/status/<JOB_ID> \\",
+                "  -H \"Authorization: Bearer <API_KEY>\""
+            ]
+        },
+        "heroAnimation": {
+            "invoiceLabel": "Invoice Number",
+            "invoiceValue": "#INV-2024",
+            "totalLabel": "Total Amount",
+            "totalValue": "€12,450",
+            "success": "Data extracted successfully!"
+        },
+        "faq": {
+            "title": "Frequently asked questions",
+            "items": [
+                {
+                    "q": "Can I define my own fields?",
+                    "a": "Yes. You decide the schema for each template (text, number, date) and reuse it whenever you upload new documents."
+                },
+                {
+                    "q": "Do I need to code to use the platform?",
+                    "a": "No. The UI lets you upload, review and export without writing a single line of code. The API is optional for advanced automation."
+                },
+                {
+                    "q": "Is my data secure?",
+                    "a": "Documents are stored securely with temporary links. You can delete everything whenever you need and we never train public models with your data."
+                },
+                {
+                    "q": "When should I upgrade to a paid plan?",
+                    "a": "Upgrade when you need more documents, multiple templates, saved reports or API access. You can switch plans anytime."
+                }
+            ]
+        },
+        "cta": {
+            "title": "Ready to structure your documents?",
+            "subtitle": "Start free, review every field and unlock API access whenever the business needs it.",
+            "primary": "Start free",
+            "secondary": "Talk to sales"
+        },
+        "pricing": {
+            "title": "Clear, defensible pricing",
+            "subtitle": "Start free, grow with predictable limits and unlock API access when it matters.",
+            "plans": [
+                {
+                    "name": "FREE",
+                    "tagline": "Experience the value",
+                    "price": "€0",
+                    "frequency": "",
+                    "highlight": false,
+                    "cta": "Start free",
+                    "features": [
+                        "20 documents included",
+                        "1 custom model",
+                        "UI only",
+                        "No saved reports",
+                        "No API"
+                    ]
+                },
+                {
+                    "name": "STARTER",
+                    "tagline": "For freelancers / personal use",
+                    "price": "€15",
+                    "frequency": "/month",
+                    "highlight": false,
+                    "cta": "Choose Starter",
+                    "features": [
+                        "300 documents",
+                        "Up to 5 models",
+                        "Basic reports",
+                        "CSV / Excel export",
+                        "Full UI",
+                        "No API"
+                    ]
+                },
+                {
+                    "name": "PRO",
+                    "tagline": "Primary plan",
+                    "price": "€39",
+                    "frequency": "/month",
+                    "highlight": true,
+                    "cta": "Choose Pro",
+                    "features": [
+                        "1,500 documents",
+                        "Unlimited models",
+                        "Advanced reports + calculated fields",
+                        "Full export options",
+                        "API included (5,000 requests / month)",
+                        "1 API key"
+                    ]
+                },
+                {
+                    "name": "BUSINESS / DEV",
+                    "tagline": "For teams and technical use",
+                    "price": "€89",
+                    "frequency": "/month",
+                    "highlight": false,
+                    "cta": "Choose Business / Dev",
+                    "features": [
+                        "5,000 documents",
+                        "Everything in PRO",
+                        "Advanced API features",
+                        "25,000 requests / month",
+                        "Multiple API keys",
+                        "Webhooks + priority processing"
+                    ]
+                },
+                {
+                    "name": "ENTERPRISE",
+                    "tagline": "Custom volume & SLA",
+                    "price": "Custom",
+                    "frequency": "",
+                    "highlight": false,
+                    "cta": "Talk to us",
+                    "features": [
+                        "Custom document volume",
+                        "Dedicated SLA",
+                        "Annual contract",
+                        "Dedicated support",
+                        "Onboarding & success",
+                        "Roadmap alignment"
+                    ]
+                }
+            ],
+            "disclaimer": "All plans include secure storage, manual review workflow and multi-language extraction."
+        },
+        "faq": {
+            "title": "Frequently asked questions",
+            "items": [
+                {
+                    "q": "Can I define my own fields?",
+                    "a": "Yes. You decide the schema for each template (text, number, date) and reuse it whenever you upload new documents."
+                },
+                {
+                    "q": "Do I need to code to use the platform?",
+                    "a": "No. The UI lets you upload, review and export without writing a single line of code. The API is optional for advanced automation."
+                },
+                {
+                    "q": "Is my data secure?",
+                    "a": "Documents are stored securely with temporary links. You can delete everything whenever you need and we never train public models with your data."
+                },
+                {
+                    "q": "When should I upgrade to a paid plan?",
+                    "a": "Upgrade when you need more documents, multiple templates, saved reports or API access. You can switch plans anytime."
+                }
+            ]
+        },
+        "cta": {
+            "title": "Ready to structure your documents?",
+            "subtitle": "Start free, review every field and unlock API access whenever the business needs it.",
+            "primary": "Start free",
+            "secondary": "Talk to sales"
+        }
+    },
+    "Try Again": "Try again",
+  "Export": "Export",
+  "Exporting...": "Exporting...",
+  "Export Format": "Export Format",
+  "Comma-separated values": "Comma-separated values",
+  "Microsoft Excel format": "Microsoft Excel format",
+  "JavaScript Object Notation": "JavaScript Object Notation",
+  "Extensible Markup Language": "Extensible Markup Language",
+  "Web page format": "Web page format",
+  "Exported to CSV successfully!": "Exported to CSV successfully!",
+  "Exported to Excel successfully!": "Exported to Excel successfully!",
+  "Exported to JSON successfully!": "Exported to JSON successfully!",
+  "Exported to XML successfully!": "Exported to XML successfully!",
+  "Exported to HTML successfully!": "Exported to HTML successfully!",
+  "Error exporting to CSV": "Error exporting to CSV",
+  "Error exporting to Excel": "Error exporting to Excel",
+  "Error exporting to JSON": "Error exporting to JSON",
+  "Error exporting to XML": "Error exporting to XML",
+  "Error exporting to HTML": "Error exporting to HTML",
     "No fields defined in schema": "No fields defined in schema",
     "Save Changes": "Save Changes",
     "Document Information": "Document Information",

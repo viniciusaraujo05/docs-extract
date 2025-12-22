@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { type SchemaField, type FieldType, type DocumentType, FIELD_TYPES } from '@/types/extraction';
+import { DocumentPreview } from './DocumentPreview';
 import { 
     ArrowLeft, 
     Loader2, 
@@ -13,10 +14,6 @@ import {
     Sparkles, 
     Wand2,
     X,
-    ZoomIn,
-    ZoomOut,
-    Maximize2,
-    FileText,
     Tag
 } from 'lucide-react';
 import { useCallback, useState } from 'react';
@@ -63,10 +60,6 @@ export function StepFields({
     const [newFieldName, setNewFieldName] = useState('');
     const [newFieldLabel, setNewFieldLabel] = useState('');
     const [newFieldType, setNewFieldType] = useState<FieldType>('string');
-    const [zoomLevel, setZoomLevel] = useState(100);
-    const [isFullscreen, setIsFullscreen] = useState(false);
-
-    const isPdf = file?.type === 'application/pdf';
 
     const availableSuggested = suggestedFields.filter(
         preset => !fields.some(f => f.name === preset.name)
@@ -87,62 +80,6 @@ export function StepFields({
         setNewFieldLabel('');
         setNewFieldType('string');
     }, [fields, newFieldName, newFieldLabel, newFieldType, onAddField]);
-
-    const handleZoomIn = useCallback(() => {
-        setZoomLevel(prev => Math.min(prev + 25, 300));
-    }, []);
-
-    const handleZoomOut = useCallback(() => {
-        setZoomLevel(prev => Math.max(prev - 25, 50));
-    }, []);
-
-    const handleWheel = useCallback((e: React.WheelEvent) => {
-        if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            const delta = e.deltaY > 0 ? -10 : 10;
-            setZoomLevel(prev => Math.max(50, Math.min(300, prev + delta)));
-        }
-    }, []);
-
-    const renderPreview = useCallback(() => {
-        if (!filePreview) {
-            return (
-                <div className="text-center">
-                    <FileText className="mx-auto h-16 w-16 text-muted-foreground/50" />
-                    <p className="mt-2 text-sm text-muted-foreground">
-                        {t('No preview available')}
-                    </p>
-                </div>
-            );
-        }
-
-        if (isPdf) {
-            return (
-                <iframe
-                    src={`${filePreview}#toolbar=1&navpanes=1&zoom=${zoomLevel}`}
-                    className="h-full w-full border-0"
-                    title="PDF Preview"
-                    style={{ minHeight: '600px' }}
-                />
-            );
-        }
-
-        return (
-            <div className="flex items-center justify-center h-full w-full overflow-auto">
-                <img
-                    src={filePreview}
-                    alt="Preview"
-                    className="cursor-zoom-in transition-transform duration-200"
-                    style={{ 
-                        transform: `scale(${zoomLevel / 100})`,
-                        imageRendering: 'high-quality',
-                        maxWidth: 'none'
-                    }}
-                    onClick={() => setIsFullscreen(true)}
-                />
-            </div>
-        );
-    }, [filePreview, isPdf, zoomLevel, t]);
 
     return (
         <div className="mx-auto grid w-full max-w-5xl gap-6 animate-in fade-in-50 slide-in-from-right-4 duration-500 lg:grid-cols-2">
@@ -304,59 +241,8 @@ export function StepFields({
 
             {/* Preview Card */}
             <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <CardTitle>{t('Document Preview')}</CardTitle>
-                            <CardDescription>
-                                {file?.name}
-                            </CardDescription>
-                        </div>
-                        {filePreview && (
-                            <div className="flex items-center gap-1">
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={handleZoomOut}
-                                    disabled={zoomLevel <= 50}
-                                >
-                                    <ZoomOut className="h-4 w-4" />
-                                </Button>
-                                <span className="min-w-[3rem] text-center text-sm text-muted-foreground">
-                                    {zoomLevel}%
-                                </span>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                    onClick={handleZoomIn}
-                                    disabled={zoomLevel >= 300}
-                                >
-                                    <ZoomIn className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8 ml-2"
-                                    onClick={() => window.open(filePreview, '_blank')}
-                                >
-                                    <Maximize2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        )}
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div 
-                        className="flex aspect-[3/4] items-center justify-center overflow-auto rounded-lg border bg-muted/30"
-                        onWheel={handleWheel}
-                    >
-                        {renderPreview()}
-                    </div>
-                    <p className="mt-2 text-xs text-center text-muted-foreground">
-                        {t('Hold Ctrl/Cmd + scroll to zoom')}
-                    </p>
+                <CardContent className="pt-6">
+                    <DocumentPreview file={file} filePreview={filePreview} />
                 </CardContent>
             </Card>
 
@@ -383,32 +269,6 @@ export function StepFields({
                     )}
                 </Button>
             </div>
-
-            {/* Modal Fullscreen para Imagens */}
-            {isFullscreen && !isPdf && filePreview && (
-                <div 
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 p-4"
-                    onClick={() => setIsFullscreen(false)}
-                >
-                    <div className="relative max-h-[95vh] max-w-[95vw] overflow-auto">
-                        <img
-                            src={filePreview}
-                            alt="Preview"
-                            className="w-auto h-auto max-w-none cursor-zoom-out"
-                            style={{ imageRendering: 'high-quality' }}
-                        />
-                        <button
-                            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 backdrop-blur-sm"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setIsFullscreen(false);
-                            }}
-                        >
-                            <X className="h-6 w-6" />
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

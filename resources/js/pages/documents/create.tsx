@@ -71,8 +71,11 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
     // Estado de loading
     const [analyzing, setAnalyzing] = useState(false);
     const [processing, setProcessing] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [checkingDuplicate, setCheckingDuplicate] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [analysisCompleted, setAnalysisCompleted] = useState(false);
+    const [duplicateExists, setDuplicateExists] = useState(false);
 
     /**
      * Analisa o documento com IA para detectar campos
@@ -124,7 +127,7 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
      * Handler para seleção de ficheiro
      * IMPORTANTE: Limpa todos os dados anteriores para evitar mistura de dados
      */
-    const handleFileSelect = useCallback((selectedFile: File | null) => {
+    const handleFileSelect = useCallback(async (selectedFile: File | null) => {
         // Limpa preview anterior
         if (filePreview) {
             URL.revokeObjectURL(filePreview);
@@ -133,6 +136,7 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
         setFile(selectedFile);
         setFilePreview(getFilePreviewUrl(selectedFile));
         setError(null);
+        setDuplicateExists(false);
         
         // RESET: Limpa dados extraídos do documento anterior
         setExtractedData({});
@@ -142,6 +146,46 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
         // Se não tem tipo selecionado, limpa campos também
         if (!selectedTypeId) {
             setFields([]);
+        }
+
+        // Verifica se já existe documento com mesmo nome
+        if (selectedFile) {
+            setCheckingDuplicate(true);
+            try {
+                const baseName = selectedFile.name.replace(/\.[^/.]+$/, '');
+                const params = new URLSearchParams({
+                    name: selectedFile.name,
+                    display_name: baseName,
+                });
+
+                const response = await fetch(`/api/documents/check-name?${params.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': getCsrfToken(),
+                    },
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.exists) {
+                    setDuplicateExists(true);
+                    setError(t('Duplicate filename warning', { fileName: selectedFile.name }));
+                } else {
+                    setDuplicateExists(false);
+                    setError(null);
+                }
+            } catch (err) {
+                console.error('Error checking for duplicate name:', err);
+                // Em caso de erro na verificação, permite continuar
+                setDuplicateExists(false);
+            } finally {
+                setCheckingDuplicate(false);
+            }
         }
     }, [filePreview, selectedTypeId]);
 
@@ -286,7 +330,7 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
     }, []);
 
     /**
-     * Verifica se já existe documento com mesmo nome e salva
+     * Salva o documento
      */
     const checkAndSave = useCallback(async (forceOverwrite = false) => {
         if (!file) return;
@@ -295,40 +339,7 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
             return;
         }
 
-        // Verifica se já existe documento com mesmo nome
-        if (!forceOverwrite) {
-            try {
-                const response = await fetch(`/api/documents/check-name?name=${encodeURIComponent(file.name)}`, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': getCsrfToken(),
-                    },
-                });
-                const data = await response.json();
-                
-                if (data.exists) {
-                    // Mostra confirmação via toast
-                    toast.warning(
-                        `Já existe um documento com o nome "${file.name}". Deseja substituir?`,
-                        {
-                            duration: 10000,
-                            action: {
-                                label: 'Sim, substituir',
-                                onClick: () => checkAndSave(true),
-                            },
-                            cancel: {
-                                label: 'Cancelar',
-                                onClick: () => {},
-                            },
-                        }
-                    );
-                    return;
-                }
-            } catch (err) {
-                // Se falhar a verificação, continua com o save
-                console.warn('Could not check for duplicate name:', err);
-            }
-        }
+        setSaving(true);
         
         const formData = new FormData();
         formData.append('file', file);
@@ -346,13 +357,20 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
             forceFormData: true,
             onSuccess: (page) => {
                 toast.success('Documento salvo com sucesso!');
-                // Redireciona para a lista de documentos após salvar
-                setTimeout(() => {
+                setSaving(false);
+                // Extrai o ID do documento da resposta
+                const documentId = (page.props as any).document?.id;
+                if (documentId) {
+                    // Redireciona para a página do documento criado
+                    router.visit(`/${locale}/documents/${documentId}`);
+                } else {
+                    // Fallback para lista se não conseguir obter o ID
                     router.visit(`/${locale}/documents`);
-                }, 1000);
+                }
             },
             onError: (errors) => {
                 console.error('Save errors:', errors);
+                setSaving(false);
                 toast.error('Erro ao salvar documento');
             },
         });
@@ -408,6 +426,8 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
                         suggestedFieldsCount={suggestedFields.length}
                         error={error}
                         locale={locale}
+                        checkingDuplicate={checkingDuplicate}
+                        duplicateExists={duplicateExists}
                         onFileSelect={handleFileSelect}
                         onTypeSelect={handleTypeSelect}
                         onNewTypeNameChange={handleNewTypeNameChange}
@@ -444,6 +464,7 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
                         documentTypes={documentTypes}
                         selectedTypeId={selectedTypeId}
                         newTypeName={newTypeName}
+                        isSaving={saving}
                         onUpdateField={handleUpdateField}
                         onRemoveField={handleRemoveField}
                         onRenameField={handleRenameField}

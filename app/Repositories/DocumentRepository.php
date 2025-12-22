@@ -75,13 +75,38 @@ final readonly class DocumentRepository
     }
 
     /**
-     * Verifica se existe documento com o mesmo nome para o usuário.
+     * Verifica se existe documento com o mesmo nome/ficheiro para o usuário.
+     *
+     * Aceita tanto o nome exibido (sem extensão) quanto o nome original do ficheiro.
      */
-    public function existsByNameForUser(string $name, int $userId): bool
+    public function existsByNameForUser(string $filenameOrName, int $userId, ?string $displayName = null): bool
     {
+        if ($filenameOrName === '' && ($displayName === null || $displayName === '')) {
+            return false;
+        }
+
+        $originalFilename = mb_strtolower($filenameOrName);
+        $baseName = mb_strtolower(pathinfo($filenameOrName, PATHINFO_FILENAME));
+        $providedName = $displayName !== null ? mb_strtolower($displayName) : null;
+
         return Document::query()
             ->where('user_id', $userId)
-            ->where('name', $name)
+            ->where(function ($query) use ($originalFilename, $baseName, $providedName) {
+                // Anchora inicial para permitir apenas orWhere subsequentes
+                $query->whereRaw('1 = 0');
+
+                if ($originalFilename !== '') {
+                    $query->orWhereRaw('LOWER(original_filename) = ?', [$originalFilename]);
+                }
+
+                if ($baseName !== '') {
+                    $query->orWhereRaw('LOWER(name) = ?', [$baseName]);
+                }
+
+                if ($providedName !== null && $providedName !== '' && $providedName !== $baseName) {
+                    $query->orWhereRaw('LOWER(name) = ?', [$providedName]);
+                }
+            })
             ->exists();
     }
 
