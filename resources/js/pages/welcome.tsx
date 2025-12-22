@@ -392,7 +392,7 @@ export default function Welcome() {
     // Detectar localização
     const detectLocale = async () => {
       try {
-        const response = await fetch('https://freeipapi.com/api/json/');
+        const response = await fetch('/api/geolocation/detect');
         const data = await response.json();
         const country = data.countryCode?.toLowerCase();
         const portugueseCountries = ['pt', 'br', 'ao', 'mz', 'gw', 'cv', 'st', 'tl'];

@@ -1,12 +1,16 @@
 <?php
 
 use App\Http\Controllers\Api\ExtractionController;
+use App\Http\Controllers\Api\GeolocationController;
 use App\Http\Controllers\Api\TranslationController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ReportConfigurationController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
+
+// Geolocation proxy (public, cached)
+Route::get('geolocation/detect', [GeolocationController::class, 'detect']);
 
 // Locale routes (public)
 Route::get('locale/current', [LocaleController::class, 'current']);

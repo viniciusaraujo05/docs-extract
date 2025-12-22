@@ -139,11 +139,11 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                     {/* Right Side */}
                     <div className="ml-auto flex items-center gap-1 sm:gap-2">
-                        {/* New Document Button - Desktop */}
-                        <Link href={`/${locale}/documents/create`} className="hidden sm:block">
+                        {/* New Document Button - Visible on all screens */}
+                        <Link href={`/${locale}/documents/create`}>
                             <Button size="sm" className="gap-1.5 sm:gap-2 h-8 sm:h-9 px-2 sm:px-3">
                                 <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                                <span className="hidden md:inline text-xs sm:text-sm">{t('New Document')}</span>
+                                <span className="hidden sm:inline text-xs sm:text-sm">{t('New Document')}</span>
                             </Button>
                         </Link>
 
