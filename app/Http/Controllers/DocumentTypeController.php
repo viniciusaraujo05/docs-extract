@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Actions\DocumentTypes\StoreDocumentTypeAction;
 use App\Actions\DocumentTypes\UpdateDocumentTypeAction;
+use App\Http\Requests\StoreDocumentTypeRequest;
+use App\Http\Requests\UpdateDocumentTypeRequest;
 use App\Models\DocumentType;
 use App\Repositories\DocumentTypeRepository;
 use Illuminate\Http\RedirectResponse;
@@ -51,25 +53,15 @@ final class DocumentTypeController extends Controller
     /**
      * Armazena um novo tipo de documento.
      */
-    public function store(Request $request, string $locale): RedirectResponse
+    public function store(StoreDocumentTypeRequest $request, string $locale): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'fields' => 'required|string',
-        ]);
-
-        $fields = json_decode($validated['fields'], true);
-
-        if (! is_array($fields)) {
-            return back()->withErrors(['fields' => 'Formato de campos inválido.']);
-        }
-
         try {
+            $fields = $request->getValidatedFields();
+            
             $this->storeDocumentTypeAction->execute(
                 userId: $request->user()->id,
-                name: $validated['name'],
-                description: $validated['description'] ?? null,
+                name: $request->validated('name'),
+                description: $request->validated('description'),
                 fields: $fields,
             );
         } catch (\InvalidArgumentException $e) {
@@ -95,30 +87,19 @@ final class DocumentTypeController extends Controller
     /**
      * Atualiza um tipo de documento.
      */
-    public function update(Request $request, string $locale, DocumentType $documentType): RedirectResponse
+    public function update(UpdateDocumentTypeRequest $request, string $locale, DocumentType $documentType): RedirectResponse
     {
         $this->authorize('update', $documentType);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'fields' => 'required|string',
-            'is_active' => 'boolean',
-        ]);
-
-        $fields = json_decode($validated['fields'], true);
-
-        if (! is_array($fields)) {
-            return back()->withErrors(['fields' => 'Formato de campos inválido.']);
-        }
-
         try {
+            $fields = $request->getValidatedFields();
+            
             $this->updateDocumentTypeAction->execute(
                 documentType: $documentType,
-                name: $validated['name'],
-                description: $validated['description'] ?? null,
+                name: $request->validated('name'),
+                description: $request->validated('description'),
                 fields: $fields,
-                isActive: $validated['is_active'] ?? true,
+                isActive: $request->validated('is_active', true),
             );
         } catch (\InvalidArgumentException $e) {
             return back()->withErrors(['fields' => $e->getMessage()]);

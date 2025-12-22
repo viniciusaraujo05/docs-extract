@@ -7,8 +7,9 @@ namespace App\Http\Controllers;
 use App\Actions\Reports\AggregateReportDataAction;
 use App\Actions\Reports\AnalyzeReportWithAIAction;
 use App\Actions\Reports\ExportReportAction;
+use App\Actions\Reports\GetLatestAnalysisAction;
+use App\Actions\Reports\SaveAnalysisAction;
 use App\Models\DocumentType;
-use App\Models\ReportAnalysis;
 use App\Models\User;
 use App\Repositories\DocumentRepository;
 use App\Repositories\DocumentTypeRepository;
@@ -32,6 +33,8 @@ final class ReportController extends Controller
         private readonly AggregateReportDataAction $aggregateReportDataAction,
         private readonly ExportReportAction $exportReportAction,
         private readonly AnalyzeReportWithAIAction $analyzeReportWithAIAction,
+        private readonly GetLatestAnalysisAction $getLatestAnalysisAction,
+        private readonly SaveAnalysisAction $saveAnalysisAction,
     ) {
     }
 
@@ -124,26 +127,9 @@ final class ReportController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $latestAnalysis = ReportAnalysis::query()
-            ->where('user_id', $user->id)
-            ->where('document_type_id', $documentType->id)
-            ->latest()
-            ->first();
+        $result = $this->getLatestAnalysisAction->execute($user->id, $documentType->id);
 
-        if (! $latestAnalysis) {
-            return response()->json([
-                'success' => true,
-                'has_analysis' => false,
-            ]);
-        }
-
-        return response()->json([
-            'success' => true,
-            'has_analysis' => true,
-            'analysis' => $latestAnalysis->analysis_data,
-            'instructions' => $latestAnalysis->instructions,
-            'created_at' => $latestAnalysis->created_at->toISOString(),
-        ]);
+        return response()->json($result);
     }
 
     /**
@@ -174,13 +160,13 @@ final class ReportController extends Controller
             );
 
             // Salvar análise no banco de dados
-            ReportAnalysis::create([
-                'user_id' => $user->id,
-                'document_type_id' => $documentType->id,
-                'instructions' => $instructions !== '' ? $instructions : null,
-                'analysis_data' => $analysis,
-                'total_documents' => $documents->count(),
-            ]);
+            $this->saveAnalysisAction->execute(
+                userId: $user->id,
+                documentTypeId: $documentType->id,
+                analysisData: $analysis,
+                totalDocuments: $documents->count(),
+                instructions: $instructions !== '' ? $instructions : null
+            );
 
             return response()->json([
                 'success' => true,
