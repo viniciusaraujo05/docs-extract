@@ -31,6 +31,7 @@ class DocumentPolicy
 
     public function delete(User $user, Document $document): bool
     {
-        return $user->id === $document->user_id;
+        return $user->id === $document->user_id
+            || ($user->organization_id && $user->organization_id === $document->organization_id);
     }
 }

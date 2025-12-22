@@ -32,16 +32,25 @@ export default function DocumentTypesIndex({ documentTypes }: Props) {
     }, []);
 
     const handleDelete = (id: number) => {
-        if (confirm(t('Are you sure you want to delete this document type?'))) {
-            router.delete(`/document-types/${id}`, {
-                onSuccess: () => {
-                    toast.success(t('Document type deleted successfully!'));
+        toast.warning(t('Are you sure you want to delete this document type?'), {
+            action: {
+                label: t('Delete'),
+                onClick: () => {
+                    router.delete(`/${locale}/document-types/${id}`, {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                            toast.success(t('Document type deleted successfully!'));
+                        },
+                        onError: () => {
+                            toast.error(t('Error deleting document type'));
+                        },
+                    });
                 },
-                onError: () => {
-                    toast.error(t('Error deleting document type'));
-                },
-            });
-        }
+            },
+            cancel: {
+                label: t('Cancel'),
+            },
+        });
     };
 
     return (
@@ -133,7 +142,7 @@ export default function DocumentTypesIndex({ documentTypes }: Props) {
                                                 className="flex-1"
                                                 asChild
                                             >
-                                                <Link href={`/document-types/${type.id}/edit`}>
+                                                <Link href={`/${locale}/document-types/${type.id}/edit`}>
                                                     <Pencil className="mr-2 h-3 w-3" />
                                                     Editar
                                                 </Link>

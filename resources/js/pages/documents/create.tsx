@@ -344,8 +344,12 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
         const locale = localStorage.getItem('selected-locale') || 'pt';
         router.post(`/${locale}/documents`, formData, { 
             forceFormData: true,
-            onSuccess: () => {
+            onSuccess: (page) => {
                 toast.success('Documento salvo com sucesso!');
+                // Redireciona para a lista de documentos após salvar
+                setTimeout(() => {
+                    router.visit(`/${locale}/documents`);
+                }, 1000);
             },
             onError: (errors) => {
                 console.error('Save errors:', errors);

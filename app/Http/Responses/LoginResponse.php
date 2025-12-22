@@ -20,6 +20,6 @@ class LoginResponse implements LoginResponseContract
 
         return $request->wantsJson()
             ? new JsonResponse('', 204)
-            : redirect()->intended("/{$locale}/dashboard");
+            : redirect()->intended("/{$locale}/documents");
     }
 }

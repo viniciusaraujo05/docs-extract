@@ -11,16 +11,20 @@ import { toast } from 'sonner';
 import { useEffect, useState } from 'react';
 import Flag from 'react-world-flags';
 import { router } from '@inertiajs/react';
+import { setPortugueseVariant } from '@/i18n/config';
 
 export function LanguageSelector() {
     const { i18n, t } = useTranslation();
     const [currentLocale, setCurrentLocale] = useState(() => {
-        // Get from localStorage first, then from i18n
         const saved = localStorage.getItem('selected-locale');
         return saved || i18n.language || 'pt';
     });
+    
+    const [ptVariant, setPtVariant] = useState<'pt-PT' | 'pt-BR'>(() => {
+        const saved = localStorage.getItem('pt-variant') as 'pt-PT' | 'pt-BR' | null;
+        return saved || 'pt-PT';
+    });
 
-    // Sync with i18n on mount
     useEffect(() => {
         if (i18n.language && !localStorage.getItem('selected-locale')) {
             setCurrentLocale(i18n.language);
@@ -28,15 +32,21 @@ export function LanguageSelector() {
         }
     }, [i18n.language]);
 
-    const changeLanguage = async (locale: string) => {
-        if (locale === currentLocale) return; // Don't change if already selected
+    const changeLanguage = async (locale: string, variant?: 'pt-PT' | 'pt-BR') => {
+        // Se mudando variante de português
+        if (locale === 'pt' && variant && variant !== ptVariant) {
+            setPortugueseVariant(variant);
+            setPtVariant(variant);
+            toast.success(t('Language changed successfully'));
+            return;
+        }
+        
+        if (locale === currentLocale) return;
         
         try {
-            // Save to localStorage immediately
             localStorage.setItem('selected-locale', locale);
             setCurrentLocale(locale);
             
-            // Update i18n
             await i18n.changeLanguage(locale);
             
             // Update backend
@@ -84,7 +94,7 @@ export function LanguageSelector() {
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" title={t('Change Language')}>
                     {currentLocale === 'pt' ? (
-                        <Flag code="br" className="w-6 h-4" />
+                        <Flag code={ptVariant === 'pt-BR' ? 'br' : 'pt'} className="w-6 h-4" />
                     ) : (
                         <Flag code="gb" className="w-6 h-4" />
                     )}
@@ -92,12 +102,21 @@ export function LanguageSelector() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                    onClick={() => changeLanguage('pt')}
-                    className={currentLocale === 'pt' ? 'bg-accent' : ''}
+                    onClick={() => changeLanguage('pt', 'pt-PT')}
+                    className={currentLocale === 'pt' && ptVariant === 'pt-PT' ? 'bg-accent' : ''}
+                >
+                    <span className="flex items-center gap-2">
+                        <Flag code="pt" className="w-5 h-3" />
+                        <span>Português (Portugal)</span>
+                    </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    onClick={() => changeLanguage('pt', 'pt-BR')}
+                    className={currentLocale === 'pt' && ptVariant === 'pt-BR' ? 'bg-accent' : ''}
                 >
                     <span className="flex items-center gap-2">
                         <Flag code="br" className="w-5 h-3" />
-                        <span>Português</span>
+                        <span>Português (Brasil)</span>
                     </span>
                 </DropdownMenuItem>
                 <DropdownMenuItem

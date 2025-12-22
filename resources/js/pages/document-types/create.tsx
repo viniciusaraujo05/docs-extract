@@ -26,6 +26,7 @@ const BREADCRUMBS: BreadcrumbItem[] = [
  */
 export default function DocumentTypesCreate() {
     const { t } = useTranslation();
+    const [locale, setLocale] = useState('pt');
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [fields, setFields] = useState<SchemaField[]>([]);
@@ -59,7 +60,7 @@ export default function DocumentTypesCreate() {
         if (!name.trim() || fields.length === 0) return;
 
         setSaving(true);
-        router.post('/document-types', {
+        router.post(`/${locale}/document-types`, {
             name,
             description,
             fields: JSON.stringify(fields),

@@ -71,7 +71,7 @@ class SetLocale
             }
         }
 
-        // 4. Check browser Accept-Language header (validated by Laravel)
+        // 4. Check browser Accept-Language header
         $browserLocale = $request->getPreferredLanguage($supportedLocales);
         if ($browserLocale && in_array($browserLocale, $supportedLocales, true)) {
             return $browserLocale;

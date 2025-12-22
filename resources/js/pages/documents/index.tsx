@@ -397,23 +397,31 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                 <p>{t('Are you sure you want to delete {{count}} document(s)?', { count: selectedIds.size })}</p>
                 <div className="flex gap-2">
                     <button
-                        onClick={() => {
+                        onClick={async () => {
                             toast.dismiss(toastId);
                             const ids = Array.from(selectedIds);
-                            let completed = 0;
                             
-                            ids.forEach(id => {
-                                router.delete(`/${locale}/documents/${id}`, {
-                                    preserveScroll: true,
-                                    onSuccess: () => {
-                                        completed++;
-                                        if (completed === ids.length) {
-                                            toast.success(t('{{count}} document(s) deleted!', { count: ids.length }));
-                                            setSelectedIds(new Set());
-                                        }
-                                    },
-                                });
-                            });
+                            // Deleta todos os documentos em paralelo
+                            const deletePromises = ids.map(id => 
+                                new Promise<void>((resolve, reject) => {
+                                    router.delete(`/${locale}/documents/${id}`, {
+                                        preserveScroll: true,
+                                        preserveState: false,
+                                        onSuccess: () => resolve(),
+                                        onError: () => reject(new Error(`Failed to delete document ${id}`)),
+                                    });
+                                })
+                            );
+                            
+                            try {
+                                await Promise.all(deletePromises);
+                                toast.success(t('{{count}} document(s) deleted!', { count: ids.length }));
+                                setSelectedIds(new Set());
+                                // Força reload da página para atualizar a lista
+                                router.reload({ only: ['documents'] });
+                            } catch (error) {
+                                toast.error(t('Some documents could not be deleted'));
+                            }
                         }}
                         className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                     >

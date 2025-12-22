@@ -14,12 +14,13 @@ class StoreDocumentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],
+            'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:5120'], // 5MB
             'type' => ['required', 'string', 'in:predefined,new_type'],
             'document_type_id' => ['required_if:type,predefined', 'nullable', 'integer', 'exists:document_types,id'],
             'new_type_name' => ['required_if:type,new_type', 'nullable', 'string', 'max:255'],
             'schema' => ['required', 'string'],
             'extracted_data' => ['required', 'string'],
+            'force_overwrite' => ['nullable', 'boolean'],
         ];
     }
 
@@ -28,7 +29,7 @@ class StoreDocumentRequest extends FormRequest
         return [
             'file.required' => 'Por favor, selecione um ficheiro.',
             'file.mimes' => 'O ficheiro deve ser PDF, JPG, PNG ou WebP.',
-            'file.max' => 'O ficheiro não pode exceder 10MB.',
+            'file.max' => 'O ficheiro não pode exceder 5MB.',
         ];
     }
 }

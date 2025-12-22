@@ -6,6 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { setPortugueseVariant } from "@/i18n/config";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import Flag from "react-world-flags";
 import {
   Dialog,
   DialogContent,
@@ -52,7 +62,19 @@ import { toast } from "sonner";
 export default function Welcome() {
   const { t, i18n } = useTranslation();
   const { props } = usePage();
-  const [locale, setLocale] = useState('pt');
+  const [locale, setLocale] = useState<'pt' | 'en'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('selected-locale') as 'pt' | 'en' | null) === 'en' ? 'en' : 'pt';
+    }
+    return 'pt';
+  });
+  const [ptVariant, setPtVariant] = useState<'pt-PT' | 'pt-BR'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('pt-variant') as 'pt-PT' | 'pt-BR' | null;
+      return saved ?? 'pt-PT';
+    }
+    return 'pt-PT';
+  });
   const [showDemo, setShowDemo] = useState(false);
   const [demoUsed, setDemoUsed] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -72,16 +94,36 @@ export default function Welcome() {
         const data = await response.json();
         const country = data.country_code?.toLowerCase();
         const portugueseCountries = ['pt', 'br', 'ao', 'mz', 'gw', 'cv', 'st', 'tl'];
-        const detectedLocale = portugueseCountries.includes(country) ? 'pt' : 'en';
-        const savedLocale = localStorage.getItem('selected-locale');
-        const finalLocale = savedLocale || detectedLocale;
+        const isPortugueseCountry = country ? portugueseCountries.includes(country) : false;
+        const detectedLocale: 'pt' | 'en' = isPortugueseCountry ? 'pt' : 'en';
+        const detectedVariant: 'pt-PT' | 'pt-BR' = country === 'br' ? 'pt-BR' : 'pt-PT';
+
+        const savedLocale = localStorage.getItem('selected-locale') as 'pt' | 'en' | null;
+        const savedVariant = localStorage.getItem('pt-variant') as 'pt-PT' | 'pt-BR' | null;
+
+        const finalLocale = savedLocale ?? detectedLocale;
+        const finalVariant = savedVariant ?? detectedVariant;
+
         setLocale(finalLocale);
-        i18n.changeLanguage(finalLocale);
         localStorage.setItem('selected-locale', finalLocale);
+        i18n.changeLanguage(finalLocale);
+
+        if (finalLocale === 'pt') {
+          setPtVariant(finalVariant);
+          setPortugueseVariant(finalVariant);
+          localStorage.setItem('pt-variant', finalVariant);
+        }
       } catch (error) {
-        const savedLocale = localStorage.getItem('selected-locale') || 'pt';
-        setLocale(savedLocale);
-        i18n.changeLanguage(savedLocale);
+        const fallbackLocale = (localStorage.getItem('selected-locale') as 'pt' | 'en' | null) ?? 'pt';
+        const fallbackVariant = (localStorage.getItem('pt-variant') as 'pt-PT' | 'pt-BR' | null) ?? 'pt-PT';
+
+        setLocale(fallbackLocale);
+        i18n.changeLanguage(fallbackLocale);
+
+        if (fallbackLocale === 'pt') {
+          setPtVariant(fallbackVariant);
+          setPortugueseVariant(fallbackVariant);
+        }
       }
     };
 
@@ -97,12 +139,38 @@ export default function Welcome() {
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   }, [theme]);
 
-  const handleLocaleChange = useCallback((newLocale: string) => {
-    setLocale(newLocale);
-    i18n.changeLanguage(newLocale);
-    localStorage.setItem('selected-locale', newLocale);
-    window.location.href = `/${newLocale}`;
-  }, [i18n]);
+  useEffect(() => {
+    if (locale === 'pt') {
+      setPortugueseVariant(ptVariant);
+    }
+  }, [locale, ptVariant]);
+
+  const handleLocaleChange = useCallback((newLocale: 'pt' | 'en', variant?: 'pt-PT' | 'pt-BR') => {
+    let variantChanged = false;
+
+    if (newLocale === 'pt') {
+      const nextVariant = variant ?? ptVariant;
+      if (nextVariant !== ptVariant) {
+        variantChanged = true;
+        setPtVariant(nextVariant);
+        setPortugueseVariant(nextVariant);
+        localStorage.setItem('pt-variant', nextVariant);
+      }
+    }
+
+    if (locale === newLocale && !variantChanged) {
+      return;
+    }
+
+    if (locale !== newLocale) {
+      setLocale(newLocale);
+      localStorage.setItem('selected-locale', newLocale);
+      i18n.changeLanguage(newLocale);
+      window.location.href = `/${newLocale}`;
+    } else if (variantChanged) {
+      i18n.changeLanguage('pt');
+    }
+  }, [i18n, locale, ptVariant]);
 
   const handleDemoClick = useCallback(() => {
     if (demoUsed) {

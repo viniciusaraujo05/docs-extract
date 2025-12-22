@@ -49,7 +49,7 @@ Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 
         'edit' => 'document-types.edit',
         'update' => 'document-types.update',
         'destroy' => 'document-types.destroy',
-    ]);
+    ])->parameters(['document-types' => 'documentType']);
 });
 
 // Auth routes with locale (must be BEFORE authenticated routes to avoid conflicts)

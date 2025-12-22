@@ -51,7 +51,7 @@ final class DocumentTypeController extends Controller
     /**
      * Armazena um novo tipo de documento.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, string $locale): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -76,25 +76,26 @@ final class DocumentTypeController extends Controller
             return back()->withErrors(['fields' => $e->getMessage()]);
         }
 
-        return redirect()->route('document-types.index');
+        return redirect()->route('document-types.index', ['locale' => $locale]);
     }
 
     /**
      * Mostra o formulário de edição.
      */
-    public function edit(DocumentType $documentType): Response
+    public function edit(string $locale, DocumentType $documentType): Response
     {
         $this->authorize('update', $documentType);
 
         return Inertia::render('document-types/edit', [
             'documentType' => $documentType,
+            'locale' => $locale,
         ]);
     }
 
     /**
      * Atualiza um tipo de documento.
      */
-    public function update(Request $request, DocumentType $documentType): RedirectResponse
+    public function update(Request $request, string $locale, DocumentType $documentType): RedirectResponse
     {
         $this->authorize('update', $documentType);
 
@@ -123,20 +124,20 @@ final class DocumentTypeController extends Controller
             return back()->withErrors(['fields' => $e->getMessage()]);
         }
 
-        return redirect()->route('document-types.index');
+        return redirect()->route('document-types.index', ['locale' => $locale]);
     }
 
     /**
      * Elimina um tipo de documento.
      */
-    public function destroy(DocumentType $documentType): RedirectResponse
+    public function destroy(string $locale, DocumentType $documentType): RedirectResponse
     {
         $this->authorize('delete', $documentType);
 
         $this->documentTypeRepository->delete($documentType);
 
         return redirect()
-            ->route('document-types.index')
+            ->route('document-types.index', ['locale' => $locale])
             ->with('success', 'Tipo de documento eliminado com sucesso.');
     }
 }

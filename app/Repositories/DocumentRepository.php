@@ -86,6 +86,17 @@ final readonly class DocumentRepository
     }
 
     /**
+     * Busca documento por nome de arquivo original para o usuário.
+     */
+    public function findByFilenameForUser(string $originalFilename, int $userId): ?Document
+    {
+        return Document::query()
+            ->where('user_id', $userId)
+            ->where('original_filename', $originalFilename)
+            ->first();
+    }
+
+    /**
      * Busca documento por ID com relacionamentos.
      */
     public function findWithRelations(int $id): ?Document

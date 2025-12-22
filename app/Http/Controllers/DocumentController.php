@@ -106,6 +106,7 @@ final class DocumentController extends Controller
             newTypeName: $documentData->newTypeName,
             schema: $schema,
             extractedData: $documentData->extractedData,
+            forceOverwrite: $request->boolean('force_overwrite', false),
         );
 
         $message = $documentData->extractedData !== null
