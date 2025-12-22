@@ -392,9 +392,9 @@ export default function Welcome() {
     // Detectar localização
     const detectLocale = async () => {
       try {
-        const response = await fetch('https://ipapi.co/json/');
+        const response = await fetch('https://freeipapi.com/api/json/');
         const data = await response.json();
-        const country = data.country_code?.toLowerCase();
+        const country = data.countryCode?.toLowerCase();
         const portugueseCountries = ['pt', 'br', 'ao', 'mz', 'gw', 'cv', 'st', 'tl'];
         const isPortugueseCountry = country ? portugueseCountries.includes(country) : false;
         const detectedLocale: 'pt' | 'en' = isPortugueseCountry ? 'pt' : 'en';

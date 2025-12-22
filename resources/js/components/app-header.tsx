@@ -67,17 +67,17 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     return (
         <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="border-b">
-                <div className="mx-auto flex h-14 items-center px-4 lg:px-6">
+                <div className="mx-auto flex h-12 sm:h-14 items-center px-3 sm:px-4 lg:px-6">
                     {/* Mobile Menu */}
                     <div className="lg:hidden">
                         <Sheet>
                             <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon" className="mr-2">
+                                <Button variant="ghost" size="icon" className="mr-1 sm:mr-2 h-9 w-9">
                                     <Menu className="h-5 w-5" />
                                     <span className="sr-only">Menu</span>
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="left" className="w-72 p-0">
+                            <SheetContent side="left" className="w-[280px] sm:w-72 p-0">
                                 <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
                                 <SheetHeader className="border-b p-4">
                                     <Link href={`/${locale}/dashboard`} className="flex items-center gap-2">
@@ -115,7 +115,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     </div>
 
                     {/* Logo */}
-                    <Link href={`/${locale}/dashboard`} prefetch className="flex items-center gap-2 mr-6">
+                    <Link href={`/${locale}/dashboard`} prefetch className="flex items-center gap-2 mr-3 sm:mr-4 lg:mr-6">
                         <AppLogo />
                     </Link>
 
@@ -139,12 +139,12 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     </nav>
 
                     {/* Right Side */}
-                    <div className="ml-auto flex items-center gap-2">
+                    <div className="ml-auto flex items-center gap-1 sm:gap-2">
                         {/* New Document Button - Desktop */}
                         <Link href={`/${locale}/documents/create`} className="hidden sm:block">
-                            <Button size="sm" className="gap-2">
-                                <Plus className="h-4 w-4" />
-                                <span className="hidden md:inline">{t('New Document')}</span>
+                            <Button size="sm" className="gap-1.5 sm:gap-2 h-8 sm:h-9 px-2 sm:px-3">
+                                <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                <span className="hidden md:inline text-xs sm:text-sm">{t('New Document')}</span>
                             </Button>
                         </Link>
 
@@ -154,8 +154,8 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         {/* User Menu */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                                    <Avatar className="h-9 w-9">
+                                <Button variant="ghost" className="relative h-8 w-8 sm:h-9 sm:w-9 rounded-full">
+                                    <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
                                         <AvatarImage src={auth.user.avatar} alt={auth.user.name} />
                                         <AvatarFallback className="bg-primary/10 text-primary font-medium">
                                             {getInitials(auth.user.name)}
@@ -174,7 +174,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
             {/* Breadcrumbs */}
             {breadcrumbs.length > 1 && (
                 <div className="border-b bg-muted/30">
-                    <div className="mx-auto flex h-10 items-center px-4 lg:px-6">
+                    <div className="mx-auto flex h-9 sm:h-10 items-center px-3 sm:px-4 lg:px-6 overflow-x-auto">
                         <Breadcrumbs breadcrumbs={breadcrumbs} />
                     </div>
                 </div>
