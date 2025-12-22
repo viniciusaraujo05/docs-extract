@@ -22,7 +22,7 @@ class RedirectIfAuthenticated
             if (Auth::guard($guard)->check()) {
                 $locale = $this->resolveLocale($request);
 
-                return redirect("/{$locale}/documents");
+                return redirect("/{$locale}/dashboard");
             }
         }
 

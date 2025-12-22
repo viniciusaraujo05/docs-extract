@@ -48,6 +48,7 @@ import {
   Check,
   Server,
   Calendar,
+  Menu,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -535,6 +536,7 @@ function Header({
 }) {
   const { t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -553,24 +555,24 @@ function Header({
           : "bg-background/60 backdrop-blur-md"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
         <motion.div
           whileHover={{ scale: 1.05, rotate: [0, -1, 1, 0] }}
           transition={{ duration: 0.3 }}
           className="flex items-center gap-2 cursor-pointer"
         >
           <motion.div
-            className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-blue-600 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/30"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-blue-600 via-blue-600 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/30"
             whileHover={{ boxShadow: "0 20px 40px rgba(59, 130, 246, 0.4)" }}
           >
-            <FileJson className="h-6 w-6 text-white" />
+            <FileJson className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </motion.div>
-          <span className="font-bold text-xl bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent">
+          <span className="font-bold text-lg sm:text-xl bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent">
             GetData
           </span>
         </motion.div>
 
-        <nav className="hidden md:flex gap-6 text-sm font-medium">
+        <nav className="hidden lg:flex gap-6 text-sm font-medium">
           {[
             { label: t('landing.nav.product'), href: '#product' },
             { label: t('landing.nav.control'), href: '#control' },
@@ -592,20 +594,20 @@ function Header({
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Theme Toggle */}
           <Button
             variant="ghost"
             size="icon"
             onClick={onToggleTheme}
-            className="relative"
+            className="relative hidden sm:inline-flex"
           >
             <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
 
           {/* Language Selector */}
-          <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+          <div className="hidden sm:flex items-center gap-1 bg-muted rounded-lg p-1">
             <Button
               variant={locale === 'pt' ? 'default' : 'ghost'}
               size="sm"
@@ -629,28 +631,136 @@ function Header({
           {isAuthenticated ? (
             <Button
               onClick={() => router.visit(`/${locale}/dashboard`)}
-              className="gap-2"
+              className="gap-2 hidden sm:inline-flex"
+              size="sm"
             >
               <BarChart3 className="h-4 w-4" />
-              {t('Dashboard')}
+              <span className="hidden md:inline">{t('Dashboard')}</span>
             </Button>
           ) : (
             <>
               <Button
                 variant="ghost"
                 onClick={() => router.visit(`/${locale}/login`)}
-                className="hidden md:inline-flex"
+                className="hidden lg:inline-flex"
+                size="sm"
               >
                 {t('Login')}
               </Button>
 
-              <Button onClick={() => router.visit(`/${locale}/register`)}>
+              <Button 
+                onClick={() => router.visit(`/${locale}/register`)}
+                className="hidden sm:inline-flex"
+                size="sm"
+              >
                 {t('Start Free Trial')}
               </Button>
             </>
           )}
+
+          {/* Mobile Menu Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="lg:hidden border-t border-border/50 bg-background/95 backdrop-blur-xl"
+        >
+          <div className="max-w-7xl mx-auto px-4 py-4 space-y-3">
+            {/* Mobile Navigation */}
+            <nav className="flex flex-col gap-2">
+              {[
+                { label: t('landing.nav.product'), href: '#product' },
+                { label: t('landing.nav.control'), href: '#control' },
+                { label: t('landing.nav.security'), href: '#security' },
+                { label: t('landing.nav.pricing'), href: '#pricing' },
+              ].map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-2"
+                >
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+
+            <Separator />
+
+            {/* Mobile Language & Theme */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={locale === 'pt' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => onLocaleChange('pt')}
+                >
+                  🇵🇹 PT
+                </Button>
+                <Button
+                  variant={locale === 'en' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => onLocaleChange('en')}
+                >
+                  🇬🇧 EN
+                </Button>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggleTheme}
+              >
+                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              </Button>
+            </div>
+
+            <Separator />
+
+            {/* Mobile Auth Buttons */}
+            <div className="flex flex-col gap-2">
+              {isAuthenticated ? (
+                <Button
+                  onClick={() => router.visit(`/${locale}/dashboard`)}
+                  className="w-full gap-2"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  {t('Dashboard')}
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => router.visit(`/${locale}/login`)}
+                    className="w-full"
+                  >
+                    {t('Login')}
+                  </Button>
+                  <Button 
+                    onClick={() => router.visit(`/${locale}/register`)}
+                    className="w-full"
+                  >
+                    {t('Start Free Trial')}
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
     </motion.header>
   );
 }
@@ -674,38 +784,38 @@ function Hero({ locale, onDemoClick }: { locale: string; onDemoClick: () => void
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top,_#1f3b8a,_transparent_60%)] pointer-events-none" />
-      <div className="pt-36 pb-24 px-6 max-w-7xl mx-auto relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <div className="pt-24 sm:pt-32 lg:pt-36 pb-16 sm:pb-20 lg:pb-24 px-4 sm:px-6 max-w-7xl mx-auto relative z-10">
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <Badge variant="outline" className="mb-6 text-xs tracking-[0.2em] uppercase">
+            <Badge variant="outline" className="mb-4 sm:mb-6 text-xs tracking-[0.15em] sm:tracking-[0.2em] uppercase">
               {hero.eyebrow}
             </Badge>
-            <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-6 text-foreground">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4 sm:mb-6 text-foreground">
               {hero.title}{' '}
               <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
                 {hero.highlight}
               </span>
             </h1>
 
-            <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed mb-10 max-w-2xl">
+            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground leading-relaxed mb-6 sm:mb-8 lg:mb-10 max-w-2xl">
               {hero.subtitle}
             </p>
 
-            <div className="flex flex-wrap gap-4 mb-10">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-8 sm:mb-10">
               <Button
                 onClick={() => router.visit(`/${locale}/register`)}
                 size="lg"
-                className="text-base px-8 py-6"
+                className="w-full sm:w-auto text-base px-6 sm:px-8 py-5 sm:py-6"
               >
                 {hero.cta_primary}
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
 
-              <Button onClick={onDemoClick} size="lg" variant="outline" className="text-base px-8 py-6">
+              <Button onClick={onDemoClick} size="lg" variant="outline" className="w-full sm:w-auto text-base px-6 sm:px-8 py-5 sm:py-6">
                 <Sparkles className="mr-2 h-5 w-5" />
                 {hero.cta_secondary}
               </Button>
@@ -716,17 +826,17 @@ function Hero({ locale, onDemoClick }: { locale: string; onDemoClick: () => void
           <HeroAnimation />
         </div>
 
-        <div className="mt-12 grid md:grid-cols-3 gap-4">
+        <div className="mt-8 sm:mt-10 lg:mt-12 grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           {triggers.map((trigger, idx) => (
             <motion.div
               key={trigger}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 + 0.5 }}
-              className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/80 px-5 py-4 shadow-[0_10px_40px_rgba(15,23,42,0.08)] backdrop-blur"
+              className="flex items-center gap-2 sm:gap-3 rounded-xl sm:rounded-2xl border border-border/60 bg-background/80 px-4 sm:px-5 py-3 sm:py-4 shadow-[0_10px_40px_rgba(15,23,42,0.08)] backdrop-blur"
             >
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span className="text-sm text-foreground">{trigger}</span>
+              <CheckCircle className="h-4 w-4 flex-shrink-0 text-green-500" />
+              <span className="text-xs sm:text-sm text-foreground">{trigger}</span>
             </motion.div>
           ))}
         </div>
@@ -882,7 +992,7 @@ function ValueProps() {
   const icons = [Zap, Target, TrendingUp, Sparkles];
 
   return (
-    <section id="product" className="py-24 bg-muted/30 relative overflow-hidden">
+    <section id="product" className="py-12 sm:py-16 lg:py-24 bg-muted/30 relative overflow-hidden">
       <motion.div
         className="absolute inset-0 opacity-5"
         animate={{
@@ -894,8 +1004,8 @@ function ValueProps() {
           backgroundSize: '60px 60px',
         }}
       />
-      <div className="max-w-6xl mx-auto px-6 relative">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {list.map((item, i) => {
             const Icon = icons[i] || Zap;
             return (
@@ -916,8 +1026,8 @@ function ValueProps() {
                     >
                       <Icon className="h-6 w-6 text-white" />
                     </motion.div>
-                    <CardTitle className="text-lg">{item.title}</CardTitle>
-                    <CardDescription className="text-sm leading-relaxed">{item.desc}</CardDescription>
+                    <CardTitle className="text-base sm:text-lg">{item.title}</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm leading-relaxed">{item.desc}</CardDescription>
                   </CardHeader>
                 </Card>
               </motion.div>
@@ -942,24 +1052,24 @@ function ControlSection() {
   };
 
   return (
-    <section id="control" className="py-24 bg-muted/30 relative overflow-hidden">
+    <section id="control" className="py-12 sm:py-16 lg:py-24 bg-muted/30 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/5 to-transparent" />
-      <div className="max-w-6xl mx-auto px-6 relative">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16 max-w-3xl mx-auto"
+          className="text-center mb-8 sm:mb-12 lg:mb-16 max-w-3xl mx-auto"
         >
-          <Badge variant="outline" className="mb-4">
+          <Badge variant="outline" className="mb-3 sm:mb-4">
             {t('landing.nav.control')}
           </Badge>
-          <h2 className="text-4xl font-bold mb-4">{control.title}</h2>
-          <p className="text-lg text-muted-foreground">{control.subtitle}</p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">{control.title}</h2>
+          <p className="text-base sm:text-lg text-muted-foreground">{control.subtitle}</p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
           {control.items.map((item, idx) => (
             <motion.div
               key={item.title}
@@ -971,7 +1081,7 @@ function ControlSection() {
             >
               <Card className="h-full border-border/60 shadow-lg hover:shadow-2xl transition-shadow duration-300">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-xl">
+                  <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
                     <motion.div
                       whileHover={{ scale: 1.2, rotate: 360 }}
                       transition={{ duration: 0.5 }}
@@ -980,7 +1090,7 @@ function ControlSection() {
                     </motion.div>
                     {item.title}
                   </CardTitle>
-                  <CardDescription className="text-base leading-relaxed mt-2">{item.desc}</CardDescription>
+                  <CardDescription className="text-sm sm:text-base leading-relaxed mt-2">{item.desc}</CardDescription>
                 </CardHeader>
               </Card>
             </motion.div>
@@ -1004,8 +1114,8 @@ function FeaturesSection() {
   };
 
   return (
-    <section className="py-24 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-6 space-y-12">
+    <section className="py-12 sm:py-16 lg:py-24 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-8 sm:space-y-10 lg:space-y-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -1013,14 +1123,14 @@ function FeaturesSection() {
           transition={{ duration: 0.6 }}
           className="text-center max-w-3xl mx-auto"
         >
-          <Badge variant="outline" className="mb-4">
+          <Badge variant="outline" className="mb-3 sm:mb-4">
             {features.title}
           </Badge>
-          <h2 className="text-4xl font-bold mb-4">{features.title}</h2>
-          <p className="text-lg text-muted-foreground">{features.subtitle}</p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">{features.title}</h2>
+          <p className="text-base sm:text-lg text-muted-foreground">{features.subtitle}</p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {features.sections.map((section, idx) => (
             <motion.div
               key={section.title}
@@ -1722,22 +1832,22 @@ function Pricing({ locale }: { locale: string }) {
   };
 
   return (
-    <section id="pricing" className="py-24 bg-muted/30">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="pricing" className="py-12 sm:py-16 lg:py-24 bg-muted/30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16 max-w-3xl mx-auto"
+          className="text-center mb-8 sm:mb-12 lg:mb-16 max-w-3xl mx-auto"
         >
-          <Badge variant="outline" className="mb-4">
+          <Badge variant="outline" className="mb-3 sm:mb-4">
             {t('landing.nav.pricing')}
           </Badge>
-          <h2 className="text-4xl font-bold mb-4">{pricing.title}</h2>
-          <p className="text-lg text-muted-foreground">{pricing.subtitle}</p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">{pricing.title}</h2>
+          <p className="text-base sm:text-lg text-muted-foreground">{pricing.subtitle}</p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
           {pricing.plans.map((plan, i) => (
             <motion.div
               key={plan.name}
@@ -1758,24 +1868,24 @@ function Pricing({ locale }: { locale: string }) {
                 )}
 
                 <CardHeader>
-                  <CardTitle className="text-xl">{plan.name}</CardTitle>
-                  <CardDescription className="text-xs">{plan.tagline}</CardDescription>
+                  <CardTitle className="text-lg sm:text-xl">{plan.name}</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">{plan.tagline}</CardDescription>
                   <div className="mt-4">
                     {plan.price === 'Custom' || plan.price === 'Personalizado' ? (
-                      <span className="text-3xl font-bold">{plan.price}</span>
+                      <span className="text-2xl sm:text-3xl font-bold">{plan.price}</span>
                     ) : (
                       <>
-                        <span className="text-4xl font-bold">{plan.price}</span>
-                        <span className="text-sm text-muted-foreground">{plan.frequency}</span>
+                        <span className="text-3xl sm:text-4xl font-bold">{plan.price}</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">{plan.frequency}</span>
                       </>
                     )}
                   </div>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  <ul className="space-y-2">
+                  <ul className="space-y-1.5 sm:space-y-2">
                     {plan.features.map((feature, j) => (
-                      <li key={j} className="flex items-start gap-2 text-sm">
+                      <li key={j} className="flex items-start gap-2 text-xs sm:text-sm">
                         <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                         <span>{feature}</span>
                       </li>

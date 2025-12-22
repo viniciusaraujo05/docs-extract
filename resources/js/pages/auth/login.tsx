@@ -27,8 +27,8 @@ interface LoginProps {
 
 export default function Login({ status, canResetPassword, canRegister }: LoginProps) {
     const { t } = useTranslation();
-    const { props } = usePage();
-    const locale = (props as any).locale || 'pt';
+    const { props } = usePage<{ auth?: { user?: any }; locale: string }>();
+    const locale = props.locale || 'pt';
     
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -38,10 +38,15 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
     const [errors, setErrors] = useState<any>({});
 
     useEffect(() => {
+        if (props.auth?.user) {
+            router.visit(`/${locale}/dashboard`);
+            return;
+        }
+        
         if (status) {
             toast.success(status);
         }
-    }, [status]);
+    }, [status, props.auth, locale]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -79,7 +84,7 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
             
             <div className="min-h-screen flex">
                 {/* Left Side - Form */}
-                <div className="flex-1 flex items-center justify-center p-8 bg-background">
+                <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-background">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -87,29 +92,29 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                         className="w-full max-w-md"
                     >
                         {/* Logo */}
-                        <div className="mb-8">
+                        <div className="mb-6 sm:mb-8">
                             <motion.h1
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.2 }}
-                                className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent"
+                                className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent"
                             >
                                 GetData
                             </motion.h1>
                         </div>
 
                         {/* Header */}
-                        <div className="mb-8">
-                            <h2 className="text-3xl font-bold text-foreground mb-2">
+                        <div className="mb-6 sm:mb-8">
+                            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                                 {t('Welcome back')}
                             </h2>
-                            <p className="text-muted-foreground">
+                            <p className="text-sm sm:text-base text-muted-foreground">
                                 {t('Enter your credentials to access your account')}
                             </p>
                         </div>
 
                         {/* Form */}
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                             {/* Email */}
                             <div className="space-y-2">
                                 <Label htmlFor="email" className="text-sm font-medium">
@@ -123,7 +128,7 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="you@example.com"
-                                        className="pl-10 h-12"
+                                        className="pl-10 h-11 sm:h-12 text-sm sm:text-base"
                                         required
                                         autoComplete="email"
                                     />
@@ -157,7 +162,7 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
-                                        className="pl-10 pr-10 h-12"
+                                        className="pl-10 pr-10 h-11 sm:h-12 text-sm sm:text-base"
                                         required
                                         autoComplete="current-password"
                                     />
@@ -197,7 +202,7 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                             <Button
                                 type="submit"
                                 disabled={processing}
-                                className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold"
+                                className="w-full h-11 sm:h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-sm sm:text-base"
                             >
                                 {processing ? (
                                     <motion.div
@@ -217,7 +222,7 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
 
                         {/* Register Link */}
                         {canRegister && (
-                            <div className="mt-6 text-center">
+                            <div className="mt-4 sm:mt-6 text-center">
                                 <p className="text-sm text-muted-foreground">
                                     {t("Don't have an account?")}{' '}
                                     <button
@@ -231,7 +236,7 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                         )}
 
                         {/* Divider */}
-                        <div className="mt-8 mb-6 flex items-center">
+                        <div className="mt-6 sm:mt-8 mb-4 sm:mb-6 flex items-center">
                             <div className="flex-1 border-t border-border"></div>
                             <span className="px-4 text-sm text-gray-500">{t('or')}</span>
                             <div className="flex-1 border-t border-border"></div>
@@ -254,7 +259,7 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="hidden lg:flex flex-1 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 p-12 items-center justify-center relative overflow-hidden"
+                    className="hidden lg:flex flex-1 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 p-8 lg:p-12 items-center justify-center relative overflow-hidden"
                 >
                     {/* Animated Background */}
                     <div className="absolute inset-0">

@@ -26,8 +26,8 @@ interface RegisterProps {
 
 export default function Register({ canRegister }: RegisterProps) {
     const { t } = useTranslation();
-    const { props } = usePage();
-    const locale = (props as any).locale || 'pt';
+    const { props } = usePage<{ auth?: { user?: any }; locale: string }>();
+    const locale = props.locale || 'pt';
     
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -38,6 +38,13 @@ export default function Register({ canRegister }: RegisterProps) {
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<any>({});
     const [passwordStrength, setPasswordStrength] = useState(0);
+
+    useEffect(() => {
+        if (props.auth?.user) {
+            router.visit(`/${locale}/dashboard`);
+            return;
+        }
+    }, [props.auth, locale]);
 
     useEffect(() => {
         // Calculate password strength
