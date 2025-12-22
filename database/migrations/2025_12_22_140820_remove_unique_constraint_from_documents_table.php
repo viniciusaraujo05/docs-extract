@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('documents', function (Blueprint $table) {
-            $table->dropUnique(['user_id', 'original_filename']);
-        });
+        DB::statement('ALTER TABLE documents DROP CONSTRAINT IF EXISTS documents_user_filename_unique');
+        DB::statement('ALTER TABLE documents DROP CONSTRAINT IF EXISTS documents_user_id_original_filename_unique');
     }
 
     /**
@@ -21,8 +20,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('documents', function (Blueprint $table) {
-            $table->unique(['user_id', 'original_filename']);
+        Schema::table('documents', function (\Illuminate\Database\Schema\Blueprint $table) {
+            $table->unique(['user_id', 'original_filename'], 'documents_user_filename_unique');
         });
     }
 };
