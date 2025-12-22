@@ -112,7 +112,7 @@ export default function DocumentTypesIndex({ documentTypes }: Props) {
                                             </div>
                                         </div>
                                         <Badge variant={type.is_active ? 'default' : 'secondary'}>
-                                            {type.is_active ? 'Ativo' : 'Inativo'}
+                                            {type.is_active ? t('Active') : t('Inactive')}
                                         </Badge>
                                     </div>
                                 </CardHeader>
@@ -120,7 +120,7 @@ export default function DocumentTypesIndex({ documentTypes }: Props) {
                                     <div className="space-y-3">
                                         <div>
                                             <p className="text-xs font-medium text-muted-foreground mb-2">
-                                                Campos ({type.fields.length})
+                                                {t('Fields')} ({type.fields.length})
                                             </p>
                                             <div className="flex flex-wrap gap-1">
                                                 {type.fields.slice(0, 5).map((field) => (
@@ -144,7 +144,7 @@ export default function DocumentTypesIndex({ documentTypes }: Props) {
                                             >
                                                 <Link href={`/${locale}/document-types/${type.id}/edit`}>
                                                     <Pencil className="mr-2 h-3 w-3" />
-                                                    Editar
+                                                    {t('Edit')}
                                                 </Link>
                                             </Button>
                                             <Button
