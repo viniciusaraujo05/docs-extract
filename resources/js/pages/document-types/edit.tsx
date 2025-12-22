@@ -72,10 +72,10 @@ export default function DocumentTypesEdit({ documentType }: Props) {
             is_active: isActive,
         }, {
             onSuccess: () => {
-                toast.success('Tipo de documento atualizado com sucesso!');
+                toast.success(t('Document type updated successfully!'));
             },
             onError: () => {
-                toast.error('Erro ao atualizar tipo de documento');
+                toast.error(t('Error updating document type'));
             },
             onFinish: () => setSaving(false),
         });
@@ -87,9 +87,9 @@ export default function DocumentTypesEdit({ documentType }: Props) {
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
                 {/* Header */}
                 <div>
-                    <h1 className="text-2xl font-bold">Editar Tipo de Documento</h1>
+                    <h1 className="text-2xl font-bold">{t('Edit Document Type')}</h1>
                     <p className="text-muted-foreground">
-                        Atualize as configurações do tipo de documento
+                        {t('Update the document type settings')}
                     </p>
                 </div>
 
@@ -97,27 +97,27 @@ export default function DocumentTypesEdit({ documentType }: Props) {
                     {/* Basic Info */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Informações Básicas</CardTitle>
+                            <CardTitle>{t('Basic Information')}</CardTitle>
                             <CardDescription>
-                                Nome e descrição do tipo de documento
+                                {t('Name and description of the document type')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">Nome *</Label>
+                                <Label htmlFor="name">{t('Name *')}</Label>
                                 <Input
                                     id="name"
-                                    placeholder="Ex: Fatura de Fornecedor"
+                                    placeholder={t('e.g. Supplier Invoice')}
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
                                     required
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="description">Descrição</Label>
+                                <Label htmlFor="description">{t('Description')}</Label>
                                 <Textarea
                                     id="description"
-                                    placeholder="Descreva quando usar este tipo de documento..."
+                                    placeholder={t('Optional description')}
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                     rows={3}
@@ -125,9 +125,9 @@ export default function DocumentTypesEdit({ documentType }: Props) {
                             </div>
                             <div className="flex items-center justify-between rounded-lg border p-4">
                                 <div className="space-y-0.5">
-                                    <Label htmlFor="is-active">Ativo</Label>
+                                    <Label htmlFor="is-active">{t('Active')}</Label>
                                     <p className="text-sm text-muted-foreground">
-                                        Tipos inativos não aparecem na lista de seleção
+                                        {t('Inactive types do not appear in the selection list')}
                                     </p>
                                 </div>
                                 <Switch
@@ -142,18 +142,18 @@ export default function DocumentTypesEdit({ documentType }: Props) {
                     {/* Fields */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Campos a Extrair</CardTitle>
+                            <CardTitle>{t('Fields to Extract')}</CardTitle>
                             <CardDescription>
-                                Defina os campos que serão extraídos automaticamente
+                                {t('Define the fields that will be extracted automatically')}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             {/* Current Fields */}
                             <div className="space-y-2">
-                                <Label>Campos Definidos ({fields.length})</Label>
+                                <Label>{t('Defined Fields')} ({fields.length})</Label>
                                 {fields.length === 0 ? (
                                     <p className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
-                                        Adicione pelo menos um campo abaixo
+                                        {t('Add at least one field below')}
                                     </p>
                                 ) : (
                                     <div className="flex flex-wrap gap-2">
@@ -186,15 +186,15 @@ export default function DocumentTypesEdit({ documentType }: Props) {
 
                             {/* Add Field */}
                             <div className="space-y-3">
-                                <Label>Adicionar Campo</Label>
+                                <Label>{t('Add Field')}</Label>
                                 <div className="grid gap-2">
                                     <Input
-                                        placeholder="Nome interno (ex: total_vendas)"
+                                        placeholder={t('Internal name (e.g. total_sales)')}
                                         value={newFieldName}
                                         onChange={(e) => setNewFieldName(e.target.value)}
                                     />
                                     <Input
-                                        placeholder="Rótulo (ex: Total de Vendas)"
+                                        placeholder={t('Label (ex: Total de Vendas)')}
                                         value={newFieldLabel}
                                         onChange={(e) => setNewFieldLabel(e.target.value)}
                                     />
@@ -221,7 +221,7 @@ export default function DocumentTypesEdit({ documentType }: Props) {
                                             className="flex-1"
                                         >
                                             <Plus className="mr-2 h-4 w-4" />
-                                            Adicionar
+                                            {t('Add')}
                                         </Button>
                                     </div>
                                 </div>
@@ -237,14 +237,14 @@ export default function DocumentTypesEdit({ documentType }: Props) {
                             onClick={() => router.visit('/document-types')}
                         >
                             <ArrowLeft className="mr-2 h-4 w-4" />
-                            Cancelar
+                            {t('Cancel')}
                         </Button>
                         <Button
                             type="submit"
                             disabled={!name.trim() || fields.length === 0 || saving}
                         >
                             <Save className="mr-2 h-4 w-4" />
-                            {saving ? 'A guardar...' : 'Guardar Alterações'}
+                            {saving ? t('Saving...') : t('Save Changes')}
                         </Button>
                     </div>
                 </form>
