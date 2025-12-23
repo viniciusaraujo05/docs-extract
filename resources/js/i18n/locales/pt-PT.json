@@ -800,5 +800,18 @@
   "Enterprise-grade security": "Segurança de nível empresarial",
   "Trusted by": "Confiado por",
   "companies": "empresas",
-  "Processing millions of documents monthly": "A processar milhões de documentos por mês"
+  "Processing millions of documents monthly": "A processar milhões de documentos por mês",
+  "Language settings": "Definições de idioma",
+  "Choose your preferred language and regional variant": "Escolha o seu idioma e variante regional preferidos",
+  "Interface Language": "Idioma da interface",
+  "Select the language you want to use throughout the application": "Selecione o idioma que deseja usar em toda a aplicação",
+  "Português (Portugal)": "Português (Portugal)",
+  "Portuguese - Portugal": "Português - Portugal",
+  "Português (Brasil)": "Português (Brasil)",
+  "Portuguese - Brazil": "Português - Brasil",
+  "English": "Inglês",
+  "English - International": "Inglês - Internacional",
+  "Language variant changed successfully": "Variante de idioma alterada com sucesso",
+  "Language changed successfully": "Idioma alterado com sucesso",
+  "Error changing language": "Erro ao alterar idioma"
 }

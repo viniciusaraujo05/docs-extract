@@ -990,5 +990,18 @@
     "Enterprise-grade security": "Enterprise-grade security",
     "Trusted by": "Trusted by",
     "companies": "companies",
-    "Processing millions of documents monthly": "Processing millions of documents monthly"
+    "Processing millions of documents monthly": "Processing millions of documents monthly",
+    "Language settings": "Language settings",
+    "Choose your preferred language and regional variant": "Choose your preferred language and regional variant",
+    "Interface Language": "Interface Language",
+    "Select the language you want to use throughout the application": "Select the language you want to use throughout the application",
+    "Português (Portugal)": "Portuguese (Portugal)",
+    "Portuguese - Portugal": "Portuguese - Portugal",
+    "Português (Brasil)": "Portuguese (Brazil)",
+    "Portuguese - Brazil": "Portuguese - Brazil",
+    "English": "English",
+    "English - International": "English - International",
+    "Language variant changed successfully": "Language variant changed successfully",
+    "Language changed successfully": "Language changed successfully",
+    "Error changing language": "Error changing language"
 }
