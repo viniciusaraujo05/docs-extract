@@ -219,34 +219,60 @@ const securityFallback = {
   ],
 };
 
-const integrationFallback = {
-  title: "API when you need it",
-  subtitle: "Available on PRO and above: upload, choose the model, check status and consume JSON output.",
+const demoApiFallback = {
+  title: "Finance Team",
+  subtitle: "Invoice processing example",
+  invoiceLabel: "Invoice total",
+  invoiceValue: "€18,923.40",
+  totalLabel: "Saved using automation",
+  totalValue: "€6,134.50",
+  benefit: "Saved per quarter with automated data entry",
   cards: [
     {
-      title: "Upload + model",
-      desc: "Send the document and specify which template should be used.",
+      title: "Invoice ID",
+      desc: "#INV-98213",
     },
     {
-      title: "Status tracking",
-      desc: "Know exactly when processing is finished.",
+      title: "Vendor",
+      desc: "Atlantic Services Lda",
     },
     {
-      title: "Structured JSON",
-      desc: "Receive fields exactly as defined in your schema.",
+      title: "Processed by",
+      desc: "Maria S.",
     },
   ],
-  example_label: "Quick example",
-  example_note: "Available for PRO, Business/Dev and Enterprise.",
-  example_code: [
-    "curl -X POST https://api.getdata.com/upload \\",
-    '  -H "Authorization: Bearer <API_KEY>" \\',
-    '  -F "file=@document.pdf" \\',
-    '  -F "model=invoice_v2"',
-    "",
-    "curl -X GET https://api.getdata.com/status/<JOB_ID> \\",
-    '  -H "Authorization: Bearer <API_KEY>"',
-  ],
+  integration: {
+    title: "Accounting integration",
+    subtitle: "Real-time data sync",
+    cards: [
+      {
+        title: "DOC Number",
+        desc: "#DOC-98213",
+        meta: "Registered in DOCSET",
+      },
+      {
+        title: "Workflow",
+        desc: "Approved → Exported → Synced",
+        meta: "Status: Completed",
+      },
+      {
+        title: "API Endpoint",
+        desc: "POST /api/integrations/accounting",
+        meta: "Connected to ERP",
+      },
+    ],
+    example_label: "Quick example",
+    example_note: "Available for PRO, Business/Dev and Enterprise.",
+    example_code: [
+      "curl -X POST https://api.docset.com/upload \\",
+      '  -H "Authorization: Bearer <API_KEY>" \\',
+      '  -F "file=@document.pdf" \\',
+      '  -F "model=invoice_v2"',
+      "",
+      "curl -X GET https://api.docset.com/status/<JOB_ID> \\",
+      '  -H "Authorization: Bearer <API_KEY>"',
+    ],
+  },
 };
 
 const demoFallback = {
@@ -527,7 +553,7 @@ export default function Welcome() {
             setDemoUsed(true);
             localStorage.setItem('demo-used', 'true');
             setShowDemo(false);
-            toast.success(t('Demo completed! Register to continue using GetData.'));
+            toast.success(t('Demo completed! Register to continue using Docset.'));
             setTimeout(() => router.visit(`/${locale}/register`), 2000);
           }}
         />
@@ -585,7 +611,7 @@ function Header({
             <FileJson className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </motion.div>
           <span className="font-bold text-lg sm:text-xl bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent">
-            GetData
+            Docset
           </span>
         </motion.div>
 
@@ -1767,14 +1793,14 @@ function Testimonials() {
       name: "Sarah Johnson",
       role: t('CFO at TechCorp'),
       avatar: "👩‍💼",
-      quote: t('GetData saved our finance team 45 hours per month. The ROI was immediate and the accuracy is incredible.'),
+      quote: t('Docset saved our finance team 45 hours per month. The ROI was immediate and the accuracy is incredible.'),
       rating: 5,
     },
     {
       name: "Michael Chen",
       role: t('Operations Manager'),
       avatar: "👨‍💼",
-      quote: t('We process 500+ invoices monthly. GetData reduced our processing time by 90%.'),
+      quote: t('We process 500+ invoices monthly. Docset reduced our processing time by 90%.'),
       rating: 5,
     },
     {
@@ -2079,7 +2105,7 @@ function Footer({ locale }: { locale: string }) {
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
                 <FileJson className="h-5 w-5 text-white" />
               </div>
-              <span className="font-bold text-lg">GetData</span>
+              <span className="font-bold text-lg">Docset</span>
             </div>
             <p className="text-sm text-muted-foreground">
               {t('Transform documents into actionable data')}
@@ -2129,7 +2155,7 @@ function Footer({ locale }: { locale: string }) {
         <Separator className="my-8" />
 
         <div className="text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} GetData. {t('All rights reserved.')}</p>
+          <p>© {new Date().getFullYear()} Docset. {t('All rights reserved.')}</p>
         </div>
       </div>
     </footer>
@@ -2197,7 +2223,7 @@ function DemoModal({
 
       if (!response.ok) {
         if (response.status === 429) {
-          toast.error(t('You have already used the demo. Please register to continue using GetData.'));
+          toast.error(t('You have already used the demo. Please register to continue using Docset.'));
           setTimeout(() => {
             onClose();
             router.visit(`/${locale}/register`);
@@ -2222,9 +2248,9 @@ function DemoModal({
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{t('Try GetData Demo')}</DialogTitle>
+          <DialogTitle>{t('Try Docset Demo')}</DialogTitle>
           <DialogDescription>
-            {t('Upload a document to see how GetData extracts data automatically')}
+            {t('Upload a document to see how Docset extracts data automatically')}
           </DialogDescription>
         </DialogHeader>
 

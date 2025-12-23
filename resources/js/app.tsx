@@ -9,7 +9,7 @@ import { initializeTheme } from './hooks/use-appearance';
 import { Toaster } from './components/ui/sonner';
 import { ThemeProvider } from './components/theme-provider';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'DOCSET';
 
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
@@ -23,7 +23,7 @@ createInertiaApp({
 
         root.render(
             <StrictMode>
-                <ThemeProvider defaultTheme="dark" storageKey="getdata-theme">
+                <ThemeProvider defaultTheme="dark" storageKey="docset-theme">
                     <App {...props} />
                     <Toaster position="top-right" richColors closeButton />
                 </ThemeProvider>

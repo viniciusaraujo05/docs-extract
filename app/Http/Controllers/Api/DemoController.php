@@ -65,7 +65,7 @@ class DemoController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $extractedData,
-                'message' => 'Data extracted successfully! Register to continue using GetData.',
+                'message' => 'Data extracted successfully! Register to continue using DOCSET.',
             ]);
         } catch (\Exception $e) {
             if ($path) {

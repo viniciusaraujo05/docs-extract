@@ -99,7 +99,7 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                                 transition={{ delay: 0.2 }}
                                 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent"
                             >
-                                GetData
+                                DOCSET
                             </motion.h1>
                         </div>
 

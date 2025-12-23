@@ -200,7 +200,7 @@ export default function Register({ canRegister }: RegisterProps) {
                                 transition={{ delay: 0.4 }}
                                 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent"
                             >
-                                GetData
+                                DocSet
                             </motion.h1>
                         </div>
 
