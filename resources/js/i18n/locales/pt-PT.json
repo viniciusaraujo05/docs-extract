@@ -813,5 +813,8 @@
   "English - International": "Inglês - Internacional",
   "Language variant changed successfully": "Variante de idioma alterada com sucesso",
   "Language changed successfully": "Idioma alterado com sucesso",
-  "Error changing language": "Erro ao alterar idioma"
+  "Error changing language": "Erro ao alterar idioma",
+  "Shows all data individually": "Mostra todos os dados individualmente",
+  "Group by Period": "Agrupar por Período",
+  "Organize data by day, month, or year to spot trends over time.": "Organize os dados por dia, mês ou ano para ver tendências ao longo do tempo."
 }

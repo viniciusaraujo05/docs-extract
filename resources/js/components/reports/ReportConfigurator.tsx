@@ -708,10 +708,10 @@ export function ReportConfigurator({
                                 <Clock className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
                                 <div>
                                     <p className="text-sm font-medium text-purple-700 dark:text-purple-300">
-                                        Agrupar por Período
+                                        {t('Group by Period')}
                                     </p>
                                     <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-                                        Organize os dados por dia, mês ou ano para ver tendências ao longo do tempo.
+                                        {t('Organize data by day, month, or year to spot trends over time.')}
                                     </p>
                                 </div>
                             </div>
@@ -733,7 +733,7 @@ export function ReportConfigurator({
                                                 <span className="font-medium">{t('Sem Agrupamento')}</span>
                                             </div>
                                             <p className="text-xs text-muted-foreground mt-1">
-                                                Mostra todos os dados individualmente
+                                                {t('Shows all data individually')}
                                             </p>
                                         </button>
                                         {DATE_GROUPINGS_CONFIG.map((g) => (
