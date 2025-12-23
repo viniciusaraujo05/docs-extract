@@ -10,6 +10,7 @@ use App\Actions\Documents\StoreDocumentAction;
 use App\DataTransferObjects\DocumentData;
 use App\Http\Requests\StoreDocumentRequest;
 use App\Http\Requests\UpdateDocumentDataRequest;
+use App\Http\Requests\UpdateDocumentRequest;
 use App\Models\Document;
 use App\Models\ExtractionSchema;
 use App\Models\User;
@@ -134,13 +135,15 @@ final class DocumentController extends Controller
         ]);
     }
 
-    public function update(Request $request, string $locale, string $document): RedirectResponse
+    public function update(UpdateDocumentRequest $request, string $locale, string $document): RedirectResponse
     {
         $documentModel = $this->documentRepository->findById($document);
 
         $this->authorize('update', $documentModel);
 
-        $this->documentRepository->update($documentModel, $request->only(['name']));
+        $this->documentRepository->update($documentModel, [
+            'name' => $request->validated('name'),
+        ]);
 
         return redirect()
             ->route('documents.show', ['locale' => app()->getLocale(), 'document' => $documentModel->id])

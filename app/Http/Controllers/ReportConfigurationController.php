@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreReportConfigurationRequest;
+use App\Http\Requests\UpdateReportConfigurationRequest;
 use App\Models\DocumentType;
 use App\Models\ReportConfiguration;
 use App\Repositories\DocumentRepository;
@@ -47,28 +49,14 @@ final class ReportConfigurationController extends Controller
     /**
      * Store a new configuration.
      */
-    public function store(Request $request, DocumentType $documentType): JsonResponse
+    public function store(StoreReportConfigurationRequest $request, DocumentType $documentType): JsonResponse
     {
         $this->authorize('view', $documentType);
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'field_config' => 'required|array',
-            'calculated_fields' => 'nullable|array',
-            'selection_mode' => 'required|in:all,filtered,manual',
-            'date_from' => 'nullable|date',
-            'date_to' => 'nullable|date|after_or_equal:date_from',
-            'selected_document_ids' => 'nullable|array',
-            'selected_document_ids.*' => 'integer|exists:documents,id',
-            'date_grouping' => 'nullable|in:day,month,year',
-            'date_field' => 'nullable|string',
-        ]);
 
         $config = $this->reportConfigurationRepository->create([
             'user_id' => $request->user()->id,
             'document_type_id' => $documentType->id,
-            ...$validated,
+            ...$request->validated(),
         ]);
 
         return response()->json([
@@ -80,25 +68,11 @@ final class ReportConfigurationController extends Controller
     /**
      * Update a configuration.
      */
-    public function update(Request $request, ReportConfiguration $configuration): JsonResponse
+    public function update(UpdateReportConfigurationRequest $request, ReportConfiguration $configuration): JsonResponse
     {
         $this->authorize('update', $configuration);
 
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'field_config' => 'sometimes|required|array',
-            'calculated_fields' => 'nullable|array',
-            'selection_mode' => 'sometimes|required|in:all,filtered,manual',
-            'date_from' => 'nullable|date',
-            'date_to' => 'nullable|date|after_or_equal:date_from',
-            'selected_document_ids' => 'nullable|array',
-            'selected_document_ids.*' => 'integer|exists:documents,id',
-            'date_grouping' => 'nullable|in:day,month,year',
-            'date_field' => 'nullable|string',
-        ]);
-
-        $this->reportConfigurationRepository->update($configuration, $validated);
+        $this->reportConfigurationRepository->update($configuration, $request->validated());
 
         return response()->json([
             'configuration' => $configuration->fresh(),
