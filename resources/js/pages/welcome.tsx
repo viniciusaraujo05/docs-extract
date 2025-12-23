@@ -395,10 +395,24 @@ export default function Welcome() {
         const response = await fetch('/api/geolocation/detect');
         const data = await response.json();
         const country = data.countryCode?.toLowerCase();
-        const portugueseCountries = ['pt', 'br', 'ao', 'mz', 'gw', 'cv', 'st', 'tl'];
-        const isPortugueseCountry = country ? portugueseCountries.includes(country) : false;
-        const detectedLocale: 'pt' | 'en' = isPortugueseCountry ? 'pt' : 'en';
-        const detectedVariant: 'pt-PT' | 'pt-BR' = country === 'br' ? 'pt-BR' : 'pt-PT';
+        const continent = data.continent?.toLowerCase();
+
+        const isBrazil = country === 'br';
+        const isPortugal = country === 'pt';
+        const isEurope = continent === 'europe';
+
+        let detectedLocale: 'pt' | 'en' = 'en';
+        let detectedVariant: 'pt-PT' | 'pt-BR' = 'pt-PT';
+
+        if (isBrazil) {
+          detectedLocale = 'pt';
+          detectedVariant = 'pt-BR';
+        } else if (isPortugal || isEurope) {
+          detectedLocale = 'pt';
+          detectedVariant = 'pt-PT';
+        } else {
+          detectedLocale = 'en';
+        }
 
         const savedLocale = localStorage.getItem('selected-locale') as 'pt' | 'en' | null;
         const savedVariant = localStorage.getItem('pt-variant') as 'pt-PT' | 'pt-BR' | null;
@@ -416,7 +430,7 @@ export default function Welcome() {
           localStorage.setItem('pt-variant', finalVariant);
         }
       } catch (error) {
-        const fallbackLocale = (localStorage.getItem('selected-locale') as 'pt' | 'en' | null) ?? 'pt';
+        const fallbackLocale = (localStorage.getItem('selected-locale') as 'pt' | 'en' | null) ?? 'en';
         const fallbackVariant = (localStorage.getItem('pt-variant') as 'pt-PT' | 'pt-BR' | null) ?? 'pt-PT';
 
         setLocale(fallbackLocale);
@@ -487,6 +501,7 @@ export default function Welcome() {
     <div className="bg-background text-foreground antialiased overflow-x-hidden transition-colors duration-300">
       <Header
         locale={locale}
+        ptVariant={ptVariant}
         onLocaleChange={handleLocaleChange}
         theme={theme}
         onToggleTheme={toggleTheme}
@@ -523,12 +538,14 @@ export default function Welcome() {
 
 function Header({
   locale,
+  ptVariant,
   onLocaleChange,
   theme,
   onToggleTheme,
   isAuthenticated,
 }: {
   locale: string;
+  ptVariant: 'pt-PT' | 'pt-BR';
   onLocaleChange: (locale: string) => void;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
