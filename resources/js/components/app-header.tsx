@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { cn, resolveUrl } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BarChart3, FileText, Menu, Plus } from 'lucide-react';
+import { BarChart3, FileText, Menu, Plus, Code2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
@@ -53,6 +53,11 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
             title: t('Documents'),
             href: `/${locale}/documents`,
             icon: FileText,
+        },
+        {
+            title: t('API'),
+            href: `/${locale}/api`,
+            icon: Code2,
         },
     ];
 

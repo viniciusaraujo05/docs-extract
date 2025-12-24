@@ -164,6 +164,7 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
                         'Accept': 'application/json',
                         'X-CSRF-TOKEN': getCsrfToken(),
                     },
+                    credentials: 'same-origin',
                 });
                 
                 if (!response.ok) {
@@ -299,6 +300,7 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
                     'X-CSRF-TOKEN': getCsrfToken(),
                     'Accept': 'application/json',
                 },
+                credentials: 'same-origin',
             });
             
             if (!response.ok) {

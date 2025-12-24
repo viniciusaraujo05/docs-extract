@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApiClientController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\ReportController;
@@ -56,6 +57,11 @@ Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 
         'update' => 'document-types.update',
         'destroy' => 'document-types.destroy',
     ])->parameters(['document-types' => 'documentType']);
+
+    // API Clients Management
+    Route::get('api', [ApiClientController::class, 'index'])->name('api.index');
+    Route::post('api/clients', [ApiClientController::class, 'store'])->name('api.clients.store');
+    Route::delete('api/clients/{apiClient}', [ApiClientController::class, 'destroy'])->name('api.clients.destroy');
 });
 
 // Auth routes with locale (must be BEFORE authenticated routes to avoid conflicts)

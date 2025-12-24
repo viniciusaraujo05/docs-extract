@@ -1,0 +1,390 @@
+### DOCSET API v1 - HTTP Client Tests
+### Base URL: http://localhost/api/v1
+
+### Variables
+@baseUrl = http://localhost/api/v1
+@clientId = client_g5ipuzgNhghkl83AfrRWBWkBmLixPl5U
+@clientSecret = 3TTkABXVeZkJvr2RlBoTujjgYkCgKSCw5UOBBx74
+@token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0L2FwaS92MS9hdXRoL3Rva2VuIiwiaWF0IjoxNzY2NTkxMzg2LCJleHAiOjE3NjY1OTQ5ODYsIm5iZiI6MTc2NjU5MTM4NiwianRpIjoiUEhORmxoRVphaHgxVGlpWSIsInN1YiI6IjciLCJwcnYiOiJkYzA5NDQ1ZjVlMDMyODg5NzNhZGUxNTM4YTlhZWJhMmUyZmNhZGUzIiwiY2xpZW50X2lkIjoiY2xpZW50X2c1aXB1emdOaGdoa2w4M0FmclJXQldrQm1MaXhQbDVVIiwiY2xpZW50X3B1YmxpY19pZCI6IjhlYTgzZmQwLWVjNDktNDJlYS1hMzJkLTUyYWFlY2Q1MGQyMiIsImNsaWVudF9uYW1lIjoiQVBJIENsaWVudCAtIGFkbWluIn0.2C5q039ckugL17F9fLYqkuEDbcRxAN4-HSYo1bjV3Tg
+@documentId = 1
+
+###############################################################################
+### 1. AUTHENTICATION - Get JWT Token
+###############################################################################
+
+### 1.1 Login - Get Token (Success)
+POST {{baseUrl}}/authforce
+Content-Type: application/json
+
+{
+  "client_id": "{{clientId}}",
+  "client_secret": "{{clientSecret}}"
+}
+
+### 1.2 Login - Invalid Credentials (401)
+POST {{baseUrl}}/auth/token
+Content-Type: application/json
+
+{
+  "client_id": "invalid_client",
+  "client_secret": "wrong_secret"
+}
+
+### 1.3 Login - Missing Fields (422)
+POST {{baseUrl}}/auth/token
+Content-Type: application/json
+
+{
+  "client_id": "{{clientId}}"
+}
+
+###############################################################################
+### 2. TOKEN MANAGEMENT
+###############################################################################
+
+### 2.1 Refresh Token
+POST {{baseUrl}}/auth/refresh
+Authorization: Bearer {{token}}
+
+### 2.2 Logout (Invalidate Token)
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
+
+### 2.3 Refresh - Without Token (401)
+POST {{baseUrl}}/auth/refresh
+
+###############################################################################
+### 3. DOCUMENTS - Upload
+###############################################################################
+
+### 3.1 Upload Invoice PDF (Success)
+POST {{baseUrl}}/documents
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="invoice.pdf"
+Content-Type: application/pdf
+
+< ./tests/fixtures/sample_invoice.pdf
+--boundary
+Content-Disposition: form-data; name="type"
+
+invoice
+--boundary--
+
+### 3.2 Upload Receipt Image (Success)
+POST {{baseUrl}}/documents
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="receipt.jpg"
+Content-Type: image/jpeg
+
+< ./tests/fixtures/sample_receipt.jpg
+--boundary
+Content-Disposition: form-data; name="type"
+
+receipt
+--boundary--
+
+### 3.3 Upload Custom Document with Schema
+POST {{baseUrl}}/documents
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="custom.pdf"
+Content-Type: application/pdf
+
+< ./tests/fixtures/sample_custom.pdf
+--boundary
+Content-Disposition: form-data; name="type"
+
+custom
+--boundary
+Content-Disposition: form-data; name="schema"
+
+{"fields": [{"name": "company_name", "type": "text"}, {"name": "amount", "type": "number"}]}
+--boundary--
+
+### 3.4 Upload - Without Token (401)
+POST {{baseUrl}}/documents
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="invoice.pdf"
+Content-Type: application/pdf
+
+< ./tests/fixtures/sample_invoice.pdf
+--boundary
+Content-Disposition: form-data; name="type"
+
+invoice
+--boundary--
+
+### 3.5 Upload - Invalid File Type (422)
+POST {{baseUrl}}/documents
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="document.txt"
+Content-Type: text/plain
+
+Sample text content
+--boundary
+Content-Disposition: form-data; name="type"
+
+invoice
+--boundary--
+
+### 3.6 Upload - Missing File (422)
+POST {{baseUrl}}/documents
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "type": "invoice"
+}
+
+### 3.7 Upload - Invalid Type (422)
+POST {{baseUrl}}/documents
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="invoice.pdf"
+Content-Type: application/pdf
+
+< ./tests/fixtures/sample_invoice.pdf
+--boundary
+Content-Disposition: form-data; name="type"
+
+invalid_type
+--boundary--
+
+###############################################################################
+### 4. DOCUMENTS - Get Single Document
+###############################################################################
+
+### 4.1 Get Document by ID (Success)
+GET {{baseUrl}}/documents/{{documentId}}
+Authorization: Bearer {{token}}
+
+### 4.2 Get Document - Without Token (401)
+GET {{baseUrl}}/documents/{{documentId}}
+
+### 4.3 Get Document - Not Found (404)
+GET {{baseUrl}}/documents/999999
+Authorization: Bearer {{token}}
+
+### 4.4 Get Document - Access Denied (404)
+# Document belongs to another user
+GET {{baseUrl}}/documents/{{documentId}}
+Authorization: Bearer {{token}}
+
+###############################################################################
+### 5. DOCUMENTS - List Documents
+###############################################################################
+
+### 5.1 List Documents - Default Pagination
+GET {{baseUrl}}/documents
+Authorization: Bearer {{token}}
+
+### 5.2 List Documents - Custom Per Page (20 items)
+GET {{baseUrl}}/documents?per_page=20
+Authorization: Bearer {{token}}
+
+### 5.3 List Documents - Max Per Page (100 items)
+GET {{baseUrl}}/documents?per_page=100
+Authorization: Bearer {{token}}
+
+### 5.4 List Documents - Invalid Per Page (will use default)
+GET {{baseUrl}}/documents?per_page=abc
+Authorization: Bearer {{token}}
+
+### 5.5 List Documents - Without Token (401)
+GET {{baseUrl}}/documents
+
+###############################################################################
+### 6. DOCUMENTS - Search by Name
+###############################################################################
+
+### 6.1 Search by Name - Success
+GET {{baseUrl}}/documents/search/name?name=invoice
+Authorization: Bearer {{token}}
+
+### 6.2 Search by Name - Partial Match
+GET {{baseUrl}}/documents/search/name?name=inv
+Authorization: Bearer {{token}}
+
+### 6.3 Search by Name - Not Found (404)
+GET {{baseUrl}}/documents/search/name?name=nonexistent_document
+Authorization: Bearer {{token}}
+
+### 6.4 Search by Name - Missing Parameter (422)
+GET {{baseUrl}}/documents/search/name
+Authorization: Bearer {{token}}
+
+### 6.5 Search by Name - Without Token (401)
+GET {{baseUrl}}/documents/search/name?name=invoice
+
+###############################################################################
+### 7. DOCUMENTS - Search by Date Range
+###############################################################################
+
+### 7.1 Search by Date - Success
+POST {{baseUrl}}/documents/search/date
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "start_date": "2025-01-01",
+  "end_date": "2025-01-31",
+  "per_page": 20
+}
+
+### 7.2 Search by Date - Last 7 Days
+POST {{baseUrl}}/documents/search/date
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "start_date": "2025-01-17",
+  "end_date": "2025-01-24"
+}
+
+### 7.3 Search by Date - Custom Pagination
+POST {{baseUrl}}/documents/search/date
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "start_date": "2025-01-01",
+  "end_date": "2025-12-31",
+  "per_page": 1
+}
+
+### 7.4 Search by Date - Missing start_date (422)
+POST {{baseUrl}}/documents/search/date
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "end_date": "2025-01-31"
+}
+
+### 7.5 Search by Date - Invalid Date Range (422)
+POST {{baseUrl}}/documents/search/date
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "start_date": "2025-01-31",
+  "end_date": "2025-01-01"
+}
+
+### 7.6 Search by Date - Without Token (401)
+POST {{baseUrl}}/documents/search/date
+Content-Type: application/json
+
+{
+  "start_date": "2025-01-01",
+  "end_date": "2025-01-31"
+}
+
+###############################################################################
+### 6. RATE LIMITING TESTS
+###############################################################################
+
+### 6.1 Test Rate Limit (60 requests/minute)
+# Run this multiple times quickly to trigger 429
+GET {{baseUrl}}/documents
+Authorization: Bearer {{token}}
+
+###############################################################################
+### 7. COMPLETE WORKFLOW TEST
+###############################################################################
+
+### 7.1 Step 1: Login
+# @name login
+POST {{baseUrl}}/auth/token
+Content-Type: application/json
+
+{
+  "client_id": "{{clientId}}",
+  "client_secret": "{{clientSecret}}"
+}
+
+### 7.2 Step 2: Upload Document
+# Use token from previous request
+POST {{baseUrl}}/documents
+Authorization: Bearer {{login.response.body.access_token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="invoice.pdf"
+Content-Type: application/pdf
+
+< ./tests/fixtures/sample_invoice.pdf
+--boundary
+Content-Disposition: form-data; name="type"
+
+invoice
+--boundary--
+
+### 7.3 Step 3: Check Document Status
+# @name upload
+GET {{baseUrl}}/documents/{{upload.response.body.data.id}}
+Authorization: Bearer {{login.response.body.access_token}}
+
+### 7.4 Step 4: List All Documents
+GET {{baseUrl}}/documents?per_page=50
+Authorization: Bearer {{login.response.body.access_token}}
+
+### 7.5 Step 5: Refresh Token
+POST {{baseUrl}}/auth/refresh
+Authorization: Bearer {{login.response.body.access_token}}
+
+### 7.6 Step 6: Logout
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{login.response.body.access_token}}
+
+###############################################################################
+### 8. ERROR SCENARIOS
+###############################################################################
+
+### 8.1 Expired Token (401)
+POST {{baseUrl}}/documents
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.expired_token
+
+### 8.2 Malformed Token (401)
+GET {{baseUrl}}/documents
+Authorization: Bearer invalid_token_format
+
+### 8.3 Missing Authorization Header (401)
+GET {{baseUrl}}/documents
+
+### 8.4 Wrong Token Type (401)
+GET {{baseUrl}}/documents
+Authorization: Basic {{token}}
+
+###############################################################################
+### NOTES
+###############################################################################
+
+# 1. Replace {{token}} with actual JWT token from login response
+# 2. Replace {{documentId}} with actual document ID from upload response
+# 3. Replace {{clientId}} and {{clientSecret}} with values from ApiClientSeeder
+# 4. Create test fixtures in ./tests/fixtures/ directory
+# 5. Expected responses:
+#    - 200: Success
+#    - 201: Created
+#    - 401: Unauthorized
+#    - 403: Forbidden
+#    - 404: Not Found
+#    - 422: Validation Error
+#    - 429: Too Many Requests
+#    - 500: Server Error

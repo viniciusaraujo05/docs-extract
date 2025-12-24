@@ -10,7 +10,7 @@ import {
     SidebarGroup,
 } from '@/components/ui/sidebar';
 import { Link, usePage } from '@inertiajs/react';
-import { FileText, BarChart3 } from 'lucide-react';
+import { FileText, BarChart3, Code2 } from 'lucide-react';
 import AppLogo from './app-logo';
 import { resolveUrl } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -36,6 +36,11 @@ export function AppSidebar() {
             title: t('Documents'),
             href: `/${locale}/documents`,
             icon: FileText,
+        },
+        {
+            title: t('API'),
+            href: `/${locale}/api`,
+            icon: Code2,
         },
     ];
 

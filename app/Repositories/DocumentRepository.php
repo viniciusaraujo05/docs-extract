@@ -154,4 +154,35 @@ final readonly class DocumentRepository
     {
         return $document->delete();
     }
+
+    /**
+     * Busca documentos por nome (busca parcial).
+     */
+    public function findByName(User $user, string $name)
+    {
+        return Document::query()
+            ->where('user_id', $user->id)
+            ->where('name', 'LIKE', "%{$name}%")
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Busca documentos por intervalo de datas com paginação.
+     *
+     * @return array{collection: \Illuminate\Support\Collection, paginator: \Illuminate\Contracts\Pagination\LengthAwarePaginator}
+     */
+    public function findByDateRange(User $user, string $startDate, string $endDate, int $perPage = 20): array
+    {
+        $paginator = Document::query()
+            ->where('user_id', $user->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+
+        return [
+            'collection' => $paginator->getCollection(),
+            'paginator' => $paginator,
+        ];
+    }
 }
