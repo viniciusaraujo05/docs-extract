@@ -28,20 +28,28 @@ interface ApiClient {
     created_at: string;
 }
 
+interface NewClient extends ApiClient {
+    client_secret: string;
+}
+
 interface PageProps {
     clients: ApiClient[];
+    flash?: {
+        newClient?: NewClient;
+    };
 }
 
 export default function ApiIndex() {
     const { t } = useTranslation();
     const page = usePage<PageProps & { locale?: string }>();
-    const { clients } = page.props;
+    const { clients, flash } = page.props;
     const locale = page.props.locale ?? 'pt';
     const [selectedEndpoint, setSelectedEndpoint] = useState<string>('auth.token');
     const [selectedResponseCode, setSelectedResponseCode] = useState<number>(200);
     
     const { gettingStarted, endpoints, securityNotes, documentStatuses } = useApiDocumentation();
     const { post, processing } = useForm({});
+    const newClient = flash?.newClient;
 
     const handleCreateClient = () => {
         post(apiRoutes.clients.store(locale).url, {
@@ -149,13 +157,45 @@ export default function ApiIndex() {
                                                 <Button size="icon" variant="outline" onClick={() => copyToClipboard(clients[0].client_id, t('Client ID'))}><Copy className="h-4 w-4" /></Button>
                                             </div>
                                         </div>
-                                        <Alert><AlertCircle className="h-4 w-4" /><AlertDescription>{t('The client secret was shown only once during creation. Keep it secure.')}</AlertDescription></Alert>
+                                        {newClient && (
+                                            <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-3">
+                                                <div className="flex items-center gap-2 text-primary font-semibold">
+                                                    <Key className="h-4 w-4" />
+                                                    <span>{t('Save these credentials now!')}</span>
+                                                </div>
+                                                <p className="text-sm text-muted-foreground">{t('The client secret will not be shown again.')}</p>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-medium">{t('Client Secret')}</label>
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="text"
+                                                            value={newClient.client_secret}
+                                                            readOnly
+                                                            className="flex h-10 w-full rounded-md border border-primary/30 bg-white px-3 py-2 text-sm font-mono"
+                                                        />
+                                                        <Button size="icon" variant="outline" onClick={() => copyToClipboard(newClient.client_secret, t('Client Secret'))}>
+                                                            <Copy className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {!newClient && (
+                                            <Alert>
+                                                <AlertCircle className="h-4 w-4" />
+                                                <AlertDescription>{t('The client secret was shown only once during creation. Keep it secure.')}</AlertDescription>
+                                            </Alert>
+                                        )}
                                         <Separator />
-                                        <div className="grid grid-cols-2 gap-4 text-sm">
-                                            <div><span className="text-muted-foreground">{t('Rate Limit')}</span><p className="font-medium mt-1">{clients[0].rate_limit_per_minute} {t('req/min')}</p></div>
-                                            {clients[0].last_used_at && <div><span className="text-muted-foreground">{t('Last Used')}</span><p className="font-medium mt-1">{new Date(clients[0].last_used_at).toLocaleDateString()}</p></div>}
-                                        </div>
-                                        <Separator />
+                                        {clients[0].last_used_at && (
+                                            <>
+                                                <div className="text-sm">
+                                                    <span className="text-muted-foreground">{t('Last Used')}</span>
+                                                    <p className="font-medium mt-1">{new Date(clients[0].last_used_at).toLocaleDateString()}</p>
+                                                </div>
+                                                <Separator />
+                                            </>
+                                        )}
                                         <Button variant="destructive" onClick={() => handleDeleteClient(clients[0].id)} className="w-full"><Trash2 className="mr-2 h-4 w-4" />{t('Delete API Client')}</Button>
                                     </div>
                                 )}
