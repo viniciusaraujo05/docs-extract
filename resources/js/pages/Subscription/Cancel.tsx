@@ -4,6 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { XCircle } from 'lucide-react';
 
 export default function SubscriptionCancel() {
+    const locale = document.documentElement.lang || 'en';
+    
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20">
             <Head title="Subscription Cancelled" />
@@ -20,10 +22,10 @@ export default function SubscriptionCancel() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex flex-col gap-2">
-                        <Button onClick={() => router.visit(`/${locale}`)} className="w-full">
+                        <Button onClick={() => router.visit('/')} className="w-full">
                             View Plans Again
                         </Button>
-                        <Button onClick={() => router.visit(`/${locale}/dashboard`)} variant="outline" className="w-full">
+                        <Button onClick={() => router.visit('/dashboard')} variant="outline" className="w-full">
                             Go to Dashboard
                         </Button>
                     </div>
