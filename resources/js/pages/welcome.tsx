@@ -1866,6 +1866,11 @@ function Testimonials() {
 
 function Pricing({ locale }: { locale: string }) {
   const { t } = useTranslation();
+  const { props } = usePage<{ auth?: { user?: any } }>();
+  const isAuthenticated = !!props.auth?.user;
+  const [stripePrices, setStripePrices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
   const pricingRaw = t('landing.pricing', { returnObjects: true }) as Partial<typeof pricingFallback>;
   const pricing = {
     title: typeof pricingRaw?.title === 'string' ? pricingRaw.title : pricingFallback.title,
@@ -1873,6 +1878,56 @@ function Pricing({ locale }: { locale: string }) {
     plans: Array.isArray(pricingRaw?.plans) && pricingRaw.plans.length > 0 ? pricingRaw.plans : pricingFallback.plans,
     disclaimer: typeof pricingRaw?.disclaimer === 'string' ? pricingRaw.disclaimer : pricingFallback.disclaimer,
   };
+
+  useEffect(() => {
+    const fetchStripePrices = async () => {
+      try {
+        const response = await fetch('/api/stripe/prices');
+        const data = await response.json();
+        if (data.success && data.prices && data.prices.length > 0) {
+          setStripePrices(data.prices);
+        }
+      } catch (error) {
+        console.error('Error fetching Stripe prices:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStripePrices();
+  }, []);
+
+  const formatPrice = (amount: number, currency: string) => {
+    return new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-US', {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+    }).format(amount / 100);
+  };
+
+  const getRecurringText = (recurring: any) => {
+    if (!recurring) return '';
+    const interval = recurring.interval;
+    const count = recurring.interval_count;
+    if (count === 1) {
+      return `/${t(interval === 'month' ? 'month' : interval)}`;
+    }
+    return `/${count} ${t(interval)}s`;
+  };
+
+  // Merge Stripe prices with fallback plans
+  const mergedPlans = pricing.plans.map(plan => {
+    const stripePrice = stripePrices.find(p => p.plan_name === plan.name);
+    if (stripePrice) {
+      return {
+        ...plan,
+        price: formatPrice(stripePrice.unit_amount, stripePrice.currency),
+        frequency: getRecurringText(stripePrice.recurring),
+        price_id: stripePrice.id,
+        stripe_data: stripePrice,
+      };
+    }
+    return plan;
+  });
 
   return (
     <section id="pricing" className="py-12 sm:py-16 lg:py-24 bg-muted/30">
@@ -1891,62 +1946,89 @@ function Pricing({ locale }: { locale: string }) {
         </motion.div>
 
         <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
-          {pricing.plans.map((plan, i) => (
-            <motion.div
-              key={plan.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-              whileHover={{ y: plan.highlight ? -12 : -8, scale: plan.highlight ? 1.02 : 1 }}
-              className={plan.highlight ? 'md:col-span-1 lg:col-span-1' : ''}
-            >
-              <Card className={`relative h-full border-border/70 ${
-                plan.highlight ? 'border-blue-600 border-2 shadow-xl shadow-blue-500/20' : ''
-              }`}>
-                {plan.highlight && (
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-600 to-blue-500">
-                    ⭐ PRO
-                  </Badge>
-                )}
+          {mergedPlans.map((plan, i) => {
+            const hasPriceId = plan.price_id && plan.name !== 'FREE' && plan.name !== 'ENTERPRISE';
+            
+            return (
+              <motion.div
+                key={plan.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                whileHover={{ y: plan.highlight ? -12 : -8, scale: plan.highlight ? 1.02 : 1 }}
+                className={plan.highlight ? 'md:col-span-1 lg:col-span-1' : ''}
+              >
+                <Card className={`relative h-full border-border/70 ${
+                  plan.highlight ? 'border-blue-600 border-2 shadow-xl shadow-blue-500/20' : ''
+                }`}>
+                  {plan.highlight && (
+                    <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-blue-600 to-blue-500">
+                      ⭐ PRO
+                    </Badge>
+                  )}
 
-                <CardHeader>
-                  <CardTitle className="text-lg sm:text-xl">{plan.name}</CardTitle>
-                  <CardDescription className="text-xs sm:text-sm">{plan.tagline}</CardDescription>
-                  <div className="mt-4">
-                    {plan.price === 'Custom' || plan.price === 'Personalizado' ? (
-                      <span className="text-2xl sm:text-3xl font-bold">{plan.price}</span>
+                  <CardHeader>
+                    <CardTitle className="text-lg sm:text-xl">{plan.name}</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">{plan.tagline}</CardDescription>
+                    <div className="mt-4">
+                      {plan.price === 'Custom' || plan.price === 'Personalizado' ? (
+                        <span className="text-2xl sm:text-3xl font-bold">{plan.price}</span>
+                      ) : (
+                        <>
+                          <span className="text-3xl sm:text-4xl font-bold">{plan.price}</span>
+                          <span className="text-xs sm:text-sm text-muted-foreground">{plan.frequency}</span>
+                        </>
+                      )}
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    <ul className="space-y-1.5 sm:space-y-2">
+                      {plan.features.map((feature, j) => (
+                        <li key={j} className="flex items-start gap-2 text-xs sm:text-sm">
+                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {hasPriceId ? (
+                      <Button
+                        onClick={() => {
+                          if (!isAuthenticated) {
+                            router.visit(`/${locale}/register`);
+                            return;
+                          }
+                          
+                          router.visit(`/${locale}/subscription/checkout`, {
+                            data: {
+                              price_id: plan.price_id,
+                              plan_name: plan.name
+                            }
+                          });
+                        }}
+                        className="w-full"
+                        size="sm"
+                        variant={plan.highlight ? 'default' : 'outline'}
+                      >
+                        {plan.cta}
+                      </Button>
                     ) : (
-                      <>
-                        <span className="text-3xl sm:text-4xl font-bold">{plan.price}</span>
-                        <span className="text-xs sm:text-sm text-muted-foreground">{plan.frequency}</span>
-                      </>
+                      <Button
+                        onClick={() => router.visit(`/${locale}/register`)}
+                        className="w-full"
+                        size="sm"
+                        variant={plan.highlight ? 'default' : 'outline'}
+                      >
+                        {plan.cta}
+                      </Button>
                     )}
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-4">
-                  <ul className="space-y-1.5 sm:space-y-2">
-                    {plan.features.map((feature, j) => (
-                      <li key={j} className="flex items-start gap-2 text-xs sm:text-sm">
-                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button
-                    onClick={() => router.visit(`/${locale}/register`)}
-                    className="w-full"
-                    size="sm"
-                    variant={plan.highlight ? 'default' : 'outline'}
-                  >
-                    {plan.cta}
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
 
         <p className="text-center mt-12 text-sm text-muted-foreground">

@@ -9,6 +9,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ReportConfigurationController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\StripePriceController;
 use Illuminate\Support\Facades\Route;
 
 // Geolocation proxy (public, cached)
@@ -20,6 +21,9 @@ Route::post('locale/update', [LocaleController::class, 'update']);
 
 // Translation routes (public, cached in Redis)
 Route::get('translations/{locale}', [TranslationController::class, 'show']);
+
+// Stripe prices (public)
+Route::get('stripe/prices', [StripePriceController::class, 'index']);
 
 // API v1 routes (JWT-based, JSON-only)
 Route::prefix('v1')->name('api.v1.')->middleware([\App\Http\Middleware\ApiV1JsonResponse::class])->group(function () {

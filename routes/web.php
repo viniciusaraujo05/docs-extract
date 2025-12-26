@@ -4,6 +4,8 @@ use App\Http\Controllers\ApiClientController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -94,6 +96,18 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
     Route::post('logout', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])
         ->middleware(['auth:web'])
         ->name('locale.logout');
+    
+    // Subscription routes (authenticated)
+    Route::middleware(['auth'])->prefix('subscription')->name('subscription.')->group(function () {
+        Route::get('/', [SubscriptionController::class, 'index'])->name('index');
+        Route::get('checkout', [SubscriptionController::class, 'showCheckout'])->name('checkout');
+        Route::post('checkout', [SubscriptionController::class, 'checkout'])->name('checkout.process');
+        Route::get('success', [SubscriptionController::class, 'success'])->name('success');
+        Route::get('cancel', [SubscriptionController::class, 'cancel'])->name('cancel');
+        Route::get('portal', [SubscriptionController::class, 'portal'])->name('portal');
+        Route::post('cancel-subscription', [SubscriptionController::class, 'cancelSubscription'])->name('cancel-subscription');
+        Route::post('resume', [SubscriptionController::class, 'resumeSubscription'])->name('resume');
+    });
 });
 
 // Demo API routes (public, rate limited: 3 requests per hour)
@@ -101,5 +115,8 @@ Route::prefix('api/demo')->middleware(['throttle:3,60'])->group(function () {
     Route::post('extract', [\App\Http\Controllers\Api\DemoController::class, 'extract']);
     Route::get('check', [\App\Http\Controllers\Api\DemoController::class, 'checkAvailability']);
 });
+
+// Stripe Webhook (must be outside auth middleware and CSRF protection)
+Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('cashier.webhook');
 
 require __DIR__.'/settings.php';

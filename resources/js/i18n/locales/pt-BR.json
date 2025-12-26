@@ -519,7 +519,7 @@
         }
       ],
       "example_label": "Exemplo rápido",
-      "example_note": "Disponível para PRO, Business/Dev e Enterprise.",
+      "example_note": "Disponível para PRO, Business e Enterprise.",
       "example_code": [
         "curl -X POST https://api.getdata.com/upload \\",
         "  -H \"Authorization: Bearer <API_KEY>\" \\",
@@ -616,12 +616,12 @@
           ]
         },
         {
-          "name": "BUSINESS / DEV",
+          "name": "BUSINESS",
           "tagline": "Para equipes e uso técnico",
           "price": "€89",
           "frequency": "/mês",
           "highlight": false,
-          "cta": "Escolher Business / Dev",
+          "cta": "Escolher Business",
           "features": [
             "5.000 documentos",
             "Tudo do PRO",
@@ -980,5 +980,57 @@
   "Deleting...": "Excluindo...",
   "API Client secret regenerated successfully!": "Segredo do cliente de API regenerado com sucesso!",
   "Failed to regenerate API client secret.": "Falha ao regenerar o segredo do cliente de API.",
-  "Failed to delete API client.": "Falha ao excluir o cliente de API."
+  "Failed to delete API client.": "Falha ao excluir o cliente de API.",
+  "Subscription": "Assinatura",
+  "Billing": "Faturamento",
+  "Manage your subscription and billing": "Gerencie sua assinatura e faturamento",
+  "subscription": {
+    "title": "Gerenciamento de Assinatura",
+    "noPlan": "Sem assinatura ativa",
+    "currentPlan": "Plano Atual",
+    "status": "Status",
+    "active": "Ativo",
+    "canceled": "Cancelado",
+    "trialing": "Teste",
+    "pastDue": "Vencido",
+    "billingPortal": "Portal de Faturamento",
+    "cancelSubscription": "Cancelar Assinatura",
+    "resumeSubscription": "Retomar Assinatura",
+    "invoices": "Faturas",
+    "noInvoices": "Nenhuma fatura ainda",
+    "downloadInvoice": "Baixar",
+    "checkout": {
+      "title": "Checkout",
+      "description": "Complete sua assinatura",
+      "selectedPlan": "Plano Selecionado",
+      "noPriceSelected": "Nenhum preço selecionado. Por favor, volte e selecione um plano.",
+      "error": "Ocorreu um erro. Por favor, tente novamente.",
+      "processing": "Processando...",
+      "proceedToPayment": "Prosseguir para Pagamento",
+      "back": "Voltar aos Planos",
+      "whatHappensNext": "O que acontece a seguir?",
+      "step1": "Você será redirecionado para a página segura de checkout do Stripe",
+      "step2": "Digite seus dados de pagamento com segurança",
+      "step3": "Complete sua assinatura",
+      "step4": "Comece a usar todos os recursos premium imediatamente",
+      "securePayment": "Pagamento Seguro",
+      "securePaymentDesc": "Todos os pagamentos são processados com segurança através do Stripe. Nunca armazenamos os detalhes do seu cartão.",
+      "cancelAnytime": "Você pode cancelar sua assinatura a qualquer momento nas configurações da sua conta.",
+      "questions": "Dúvidas? Entre em contato com nossa equipe de suporte."
+    },
+    "success": {
+      "title": "Assinatura Bem-sucedida!",
+      "description": "Sua assinatura foi ativada com sucesso.",
+      "message": "Obrigado por assinar! Agora você tem acesso a todos os recursos premium.",
+      "goToDashboard": "Ir para o Dashboard",
+      "viewSubscription": "Ver Assinatura"
+    },
+    "cancel": {
+      "title": "Checkout Cancelado",
+      "description": "Seu checkout foi cancelado.",
+      "message": "Nenhuma cobrança foi feita. Você pode tentar novamente a qualquer momento.",
+      "backToPlans": "Voltar aos Planos",
+      "viewSubscription": "Ver Assinatura"
+    }
+  }
 }
