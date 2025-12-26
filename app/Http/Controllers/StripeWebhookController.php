@@ -10,7 +10,7 @@ class StripeWebhookController extends CashierController
     {
         // Handle subscription created event
         // You can add custom logic here
-        
+
         return parent::handleCustomerSubscriptionCreated($payload);
     }
 
@@ -18,7 +18,7 @@ class StripeWebhookController extends CashierController
     {
         // Handle subscription updated event
         // You can add custom logic here
-        
+
         return parent::handleCustomerSubscriptionUpdated($payload);
     }
 
@@ -26,7 +26,7 @@ class StripeWebhookController extends CashierController
     {
         // Handle subscription deleted event
         // You can add custom logic here
-        
+
         return parent::handleCustomerSubscriptionDeleted($payload);
     }
 
@@ -34,7 +34,7 @@ class StripeWebhookController extends CashierController
     {
         // Handle successful payment
         // You can add custom logic here like sending emails
-        
+
         return parent::handleInvoicePaymentSucceeded($payload);
     }
 
@@ -42,7 +42,7 @@ class StripeWebhookController extends CashierController
     {
         // Handle failed payment
         // You can add custom logic here like notifying the user
-        
+
         return parent::handleInvoicePaymentFailed($payload);
     }
 }

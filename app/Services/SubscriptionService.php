@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Support\Collection;
 
 class SubscriptionService
 {
@@ -40,48 +39,52 @@ class SubscriptionService
     public function cancelSubscription(User $user): bool
     {
         $subscription = $user->subscription('default');
-        
-        if (!$subscription) {
+
+        if (! $subscription) {
             return false;
         }
 
         $subscription->cancel();
+
         return true;
     }
 
     public function resumeSubscription(User $user): bool
     {
         $subscription = $user->subscription('default');
-        
-        if (!$subscription) {
+
+        if (! $subscription) {
             return false;
         }
 
         $subscription->resume();
+
         return true;
     }
 
     public function getUserPlanName(User $user): string
     {
         $subscription = $user->subscription('default');
-        
-        if (!$subscription || !$subscription->items->first()) {
+
+        if (! $subscription || ! $subscription->items->first()) {
             return 'FREE';
         }
 
         $productId = $subscription->items->first()->stripe_product;
+
         return $this->stripeProductService->getPlanName($productId);
     }
 
     public function getUserPlanFeatures(User $user): array
     {
         $subscription = $user->subscription('default');
-        
-        if (!$subscription || !$subscription->items->first()) {
+
+        if (! $subscription || ! $subscription->items->first()) {
             return config('stripe-products.features.free', []);
         }
 
         $productId = $subscription->items->first()->stripe_product;
+
         return $this->stripeProductService->getPlanFeatures($productId);
     }
 }

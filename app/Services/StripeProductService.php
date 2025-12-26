@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use Stripe\Stripe;
-use Stripe\Price;
 use Illuminate\Support\Collection;
+use Stripe\Price;
+use Stripe\Stripe;
 
 class StripeProductService
 {
@@ -29,8 +29,8 @@ class StripeProductService
         ]);
 
         return collect($prices->data)
-            ->filter(fn($price) => $price->recurring && isset($this->productMapping[$price->product->id]))
-            ->map(fn($price) => $this->formatPrice($price))
+            ->filter(fn ($price) => $price->recurring && isset($this->productMapping[$price->product->id]))
+            ->map(fn ($price) => $this->formatPrice($price))
             ->values();
     }
 
@@ -47,7 +47,7 @@ class StripeProductService
     private function formatPrice($price): array
     {
         $productId = $price->product->id;
-        
+
         return [
             'id' => $price->id,
             'product_id' => $productId,

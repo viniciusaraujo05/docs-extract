@@ -27,13 +27,13 @@ class SubscriptionController extends Controller
     {
         $priceId = $request->input('price_id');
         $planName = $request->input('plan_name');
-        
+
         Log::info('Checkout page accessed', [
             'price_id' => $priceId,
             'plan_name' => $planName,
             'all_input' => $request->all(),
         ]);
-        
+
         return Inertia::render('Subscription/Checkout', [
             'priceId' => $priceId,
             'planName' => $planName,
@@ -44,7 +44,7 @@ class SubscriptionController extends Controller
     {
         $priceId = $request->input('price_id');
 
-        if (!$priceId) {
+        if (! $priceId) {
             return response()->json(['error' => 'Price ID is required'], 400);
         }
 
@@ -76,6 +76,7 @@ class SubscriptionController extends Controller
     {
         try {
             $url = $this->subscriptionService->getBillingPortalUrl($request->user());
+
             return redirect()->away($url);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -87,7 +88,7 @@ class SubscriptionController extends Controller
         try {
             $success = $this->subscriptionService->cancelSubscription($request->user());
 
-            if (!$success) {
+            if (! $success) {
                 return response()->json(['error' => 'No active subscription found'], 404);
             }
 
@@ -102,7 +103,7 @@ class SubscriptionController extends Controller
         try {
             $success = $this->subscriptionService->resumeSubscription($request->user());
 
-            if (!$success) {
+            if (! $success) {
                 return response()->json(['error' => 'No subscription found'], 404);
             }
 
