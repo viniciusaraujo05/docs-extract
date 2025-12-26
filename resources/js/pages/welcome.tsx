@@ -351,12 +351,12 @@ const pricingFallback = {
       ],
     },
     {
-      name: "BUSINESS / DEV",
+      name: "BUSINESS",
       tagline: "For teams and technical use",
       price: "€89",
       frequency: "/month",
       highlight: false,
-      cta: "Choose Business / Dev",
+      cta: "Choose Business",
       features: [
         "5,000 documents",
         "Everything in PRO",
@@ -1904,6 +1904,12 @@ function Pricing({ locale }: { locale: string }) {
     }).format(amount / 100);
   };
 
+  const normalizePlanName = (name?: string | null) =>
+    (name ?? '')
+      .toString()
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+
   const getRecurringText = (recurring: any) => {
     if (!recurring) return '';
     const interval = recurring.interval;
@@ -1916,7 +1922,9 @@ function Pricing({ locale }: { locale: string }) {
 
   // Merge Stripe prices with fallback plans
   const mergedPlans = pricing.plans.map(plan => {
-    const stripePrice = stripePrices.find(p => p.plan_name === plan.name);
+    const stripePrice = stripePrices.find(
+      (p) => normalizePlanName(p.plan_name) === normalizePlanName(plan.name)
+    );
     if (stripePrice) {
       return {
         ...plan,

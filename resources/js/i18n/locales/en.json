@@ -597,12 +597,12 @@
                     ]
                 },
                 {
-                    "name": "BUSINESS / DEV",
+                    "name": "BUSINESS",
                     "tagline": "For teams and technical use",
                     "price": "€89",
                     "frequency": "/month",
                     "highlight": false,
-                    "cta": "Choose Business / Dev",
+                    "cta": "Choose Business",
                     "features": [
                         "5,000 documents",
                         "Everything in PRO",
@@ -893,12 +893,12 @@
                     ]
                 },
                 {
-                    "name": "BUSINESS / DEV",
+                    "name": "BUSINESS",
                     "tagline": "For teams and technical use",
                     "price": "€89",
                     "frequency": "/month",
                     "highlight": false,
-                    "cta": "Choose Business / Dev",
+                    "cta": "Choose Business",
                     "features": [
                         "5,000 documents",
                         "Everything in PRO",
