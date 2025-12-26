@@ -7,12 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Copy, Key, Plus, Trash2, AlertCircle, ChevronDown, BookOpen, Shield, FileText, RefreshCw, Loader2 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { Copy, Key, Plus, Trash2, AlertCircle, ChevronDown, BookOpen, Shield, FileText, RefreshCw } from 'lucide-react';
+import { useCallback, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { type BreadcrumbItem } from '@/types';
@@ -47,42 +46,113 @@ export default function ApiIndex() {
     const locale = page.props.locale ?? 'pt';
     const [selectedEndpoint, setSelectedEndpoint] = useState<string>('auth.token');
     const [selectedResponseCode, setSelectedResponseCode] = useState<number>(200);
-    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [clientPendingDeletion, setClientPendingDeletion] = useState<ApiClient | null>(null);
 
     const { gettingStarted, endpoints, securityNotes, documentStatuses } = useApiDocumentation();
     const createForm = useForm({});
     const deleteForm = useForm({});
     const regenerateForm = useForm({});
     const newClient = flash?.newClient;
+    const [shownSecrets, setShownSecrets] = useState<Set<number>>(new Set());
+
+    useEffect(() => {
+        if (newClient && !shownSecrets.has(newClient.id)) {
+            toast.custom((toastId) => (
+                <div className="flex flex-col gap-3 max-w-sm">
+                    <div>
+                        <p className="font-semibold text-sm mb-2">{t('Save these credentials now!')}</p>
+                        <p className="text-xs text-muted-foreground mb-3">{t('The client secret will not be shown again.')}</p>
+                    </div>
+                    <div className="space-y-2">
+                        <div>
+                            <label className="text-xs font-medium">{t('Client ID')}</label>
+                            <div className="flex items-center gap-2 mt-1">
+                                <input
+                                    type="text"
+                                    value={newClient.client_id}
+                                    readOnly
+                                    className="flex h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs font-mono"
+                                />
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(newClient.client_id);
+                                        toast.success(`${t('Client ID')} ${t('copied to clipboard!')}`);
+                                    }}
+                                    className="p-1 hover:bg-muted rounded"
+                                >
+                                    <Copy className="h-3 w-3" />
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="text-xs font-medium">{t('Client Secret')}</label>
+                            <div className="flex items-center gap-2 mt-1">
+                                <input
+                                    type="text"
+                                    value={newClient.client_secret}
+                                    readOnly
+                                    className="flex h-8 w-full rounded-md border border-primary/30 bg-primary/5 px-2 py-1 text-xs font-mono"
+                                />
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(newClient.client_secret);
+                                        toast.success(`${t('Client Secret')} ${t('copied to clipboard!')}`);
+                                    }}
+                                    className="p-1 hover:bg-muted rounded"
+                                >
+                                    <Copy className="h-3 w-3" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ), {
+                duration: 10000,
+            });
+            setShownSecrets(prev => new Set(prev).add(newClient.id));
+        }
+    }, [newClient, shownSecrets, t]);
 
     const handleCreateClient = () => {
         createForm.post(apiRoutes.clients.store(locale).url, {
-            onSuccess: () => toast.success(t('API Client created successfully!')),
+            onSuccess: () => {
+                toast.success(t('API Client created successfully!'));
+            },
             onError: () => toast.error(t('Failed to create API client.')),
         });
     };
 
-    const handleOpenDeleteDialog = useCallback((client: ApiClient) => {
-        setClientPendingDeletion(client);
-        setDeleteDialogOpen(true);
-    }, []);
-
-    const handleDeleteClient = useCallback(() => {
-        if (!clientPendingDeletion) {
-            return;
-        }
-
-        deleteForm.delete(apiRoutes.clients.destroy({ locale, apiClient: clientPendingDeletion.id }).url, {
-            preserveScroll: true,
-            onSuccess: () => {
-                toast.success(t('API Client deleted successfully!'));
-                setDeleteDialogOpen(false);
-                setClientPendingDeletion(null);
-            },
-            onError: () => toast.error(t('Failed to delete API client.')),
-        });
-    }, [clientPendingDeletion, deleteForm, locale, t]);
+    const handleDeleteClient = useCallback((client: ApiClient) => {
+        toast.custom((toastId) => (
+            <div className="flex flex-col gap-2">
+                <p>{t('Are you sure you want to delete this API client? This action cannot be undone.')}</p>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => {
+                            toast.dismiss(toastId);
+                            deleteForm.delete(apiRoutes.clients.destroy({ locale, apiClient: client.id }).url, {
+                                preserveScroll: true,
+                                onSuccess: () => {
+                                    toast.success(t('API Client deleted successfully!'));
+                                },
+                                onError: () => {
+                                    toast.error(t('Failed to delete API client.'));
+                                },
+                            });
+                        }}
+                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                    >
+                        {t('Delete')}
+                    </button>
+                    <button
+                        onClick={() => toast.dismiss(toastId)}
+                        className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
+                    >
+                        {t('Cancel')}
+                    </button>
+                </div>
+            </div>
+        ));
+    }, [deleteForm, locale, t]);
 
     const handleRegenerateClient = useCallback(
         (clientId: number) => {
@@ -186,35 +256,10 @@ export default function ApiIndex() {
                                                 <Button size="icon" variant="outline" onClick={() => copyToClipboard(clients[0].client_id, t('Client ID'))}><Copy className="h-4 w-4" /></Button>
                                             </div>
                                         </div>
-                                        {newClient && (
-                                            <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-3">
-                                                <div className="flex items-center gap-2 text-primary font-semibold">
-                                                    <Key className="h-4 w-4" />
-                                                    <span>{t('Save these credentials now!')}</span>
-                                                </div>
-                                                <p className="text-sm text-muted-foreground">{t('The client secret will not be shown again.')}</p>
-                                                <div className="space-y-2">
-                                                    <label className="text-sm font-medium">{t('Client Secret')}</label>
-                                                    <div className="flex items-center gap-2">
-                                                        <input
-                                                            type="text"
-                                                            value={newClient.client_secret}
-                                                            readOnly
-                                                            className="flex h-10 w-full rounded-md border border-primary/30 bg-white px-3 py-2 text-sm font-mono"
-                                                        />
-                                                        <Button size="icon" variant="outline" onClick={() => copyToClipboard(newClient.client_secret, t('Client Secret'))}>
-                                                            <Copy className="h-4 w-4" />
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                        {!newClient && (
-                                            <Alert>
-                                                <AlertCircle className="h-4 w-4" />
-                                                <AlertDescription>{t('The client secret was shown only once during creation. Keep it secure.')}</AlertDescription>
-                                            </Alert>
-                                        )}
+                                        <Alert>
+                                            <AlertCircle className="h-4 w-4" />
+                                            <AlertDescription>{t('The client secret was shown only once during creation. Keep it secure.')}</AlertDescription>
+                                        </Alert>
                                         <Separator />
                                         {clients[0].last_used_at && (
                                             <>
@@ -225,14 +270,24 @@ export default function ApiIndex() {
                                                 <Separator />
                                             </>
                                         )}
-                                        <div className="flex gap-2">
-                                            <Button variant="outline" onClick={() => handleRegenerateClient(clients[0].id)} disabled={regenerateForm.processing} className="flex-1">
-                                                <RefreshCw className={`mr-2 h-4 w-4 ${regenerateForm.processing ? 'animate-spin' : ''}`} />
-                                                {regenerateForm.processing ? t('Regenerating...') : t('Regenerate Secret')}
+                                        <div className="flex gap-2 justify-end">
+                                            <Button 
+                                                variant="outline" 
+                                                size="icon"
+                                                onClick={() => handleRegenerateClient(clients[0].id)} 
+                                                disabled={regenerateForm.processing}
+                                                title={t('Regenerate Secret')}
+                                            >
+                                                <RefreshCw className={`h-4 w-4 ${regenerateForm.processing ? 'animate-spin' : ''}`} />
                                             </Button>
-                                            <Button variant="destructive" onClick={() => handleOpenDeleteDialog(clients[0])} disabled={deleteForm.processing} className="flex-1">
-                                                <Trash2 className="mr-2 h-4 w-4" />
-                                                {deleteForm.processing ? t('Deleting...') : t('Delete API Client')}
+                                            <Button 
+                                                variant="destructive" 
+                                                size="icon"
+                                                onClick={() => handleDeleteClient(clients[0])} 
+                                                disabled={deleteForm.processing}
+                                                title={t('Delete API Client')}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
                                     </div>
@@ -395,35 +450,6 @@ export default function ApiIndex() {
                     </TabsContent>
                 </Tabs>
             </div>
-
-            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>{t('Delete API Client')}</DialogTitle>
-                        <DialogDescription>
-                            {t('Are you sure you want to delete this API client? This action cannot be undone.')}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleteForm.processing}>
-                            {t('Cancel')}
-                        </Button>
-                        <Button variant="destructive" onClick={handleDeleteClient} disabled={deleteForm.processing}>
-                            {deleteForm.processing ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    {t('Deleting...')}
-                                </>
-                            ) : (
-                                <>
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    {t('Delete')}
-                                </>
-                            )}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
         </AppLayout>
     );
 }
