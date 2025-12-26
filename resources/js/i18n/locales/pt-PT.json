@@ -944,5 +944,13 @@
   "Success": "Sucesso",
   "Error": "Erro",
   "Manage your API credentials and explore the documentation": "Gerir as suas credenciais de API e explorar a documentação",
-  "Complete reference for DOCSET API v1": "Referência completa para a API v1 do DOCSET"
+  "Complete reference for DOCSET API v1": "Referência completa para a API v1 do DOCSET",
+  "Regenerate Secret": "Regenerar Segredo",
+  "Regenerating...": "A regenerar...",
+  "Deleting...": "A eliminar...",
+  "API Client secret regenerated successfully!": "Segredo do cliente de API regenerado com sucesso!",
+  "Failed to regenerate API client secret.": "Falha ao regenerar o segredo do cliente de API.",
+  "Failed to create API client.": "Falha ao criar o cliente de API.",
+  "Failed to delete API client.": "Falha ao eliminar o cliente de API.",
+  "copied to clipboard!": "copiado para a área de transferência!"
 }

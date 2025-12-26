@@ -24,9 +24,9 @@ interface ExtractionLoggerInterface
     /**
      * Start tracking a new extraction execution.
      *
-     * @param Document $document The document being processed
-     * @param string $modelUsed AI model identifier
-     * @param string $prompt The prompt sent to the AI
+     * @param  Document  $document  The document being processed
+     * @param  string  $modelUsed  AI model identifier
+     * @param  string  $prompt  The prompt sent to the AI
      * @return ExtractionExecution The created execution record
      */
     public function startExecution(Document $document, string $modelUsed, string $prompt): ExtractionExecution;
@@ -34,13 +34,13 @@ interface ExtractionLoggerInterface
     /**
      * Record successful extraction completion.
      *
-     * @param ExtractionExecution $execution The execution to update
-     * @param array $extractedData The extracted field values
-     * @param string $response Raw AI response
-     * @param int $executionTimeMs Execution time in milliseconds
-     * @param int|null $tokensConsumed Tokens used
-     * @param int|null $confidence Overall confidence score (0-100)
-     * @param array|null $lowConfidenceFields Fields below threshold
+     * @param  ExtractionExecution  $execution  The execution to update
+     * @param  array  $extractedData  The extracted field values
+     * @param  string  $response  Raw AI response
+     * @param  int  $executionTimeMs  Execution time in milliseconds
+     * @param  int|null  $tokensConsumed  Tokens used
+     * @param  int|null  $confidence  Overall confidence score (0-100)
+     * @param  array|null  $lowConfidenceFields  Fields below threshold
      */
     public function recordSuccess(
         ExtractionExecution $execution,
@@ -55,9 +55,9 @@ interface ExtractionLoggerInterface
     /**
      * Record extraction failure.
      *
-     * @param ExtractionExecution $execution The execution to update
-     * @param string $errorMessage Error description
-     * @param int $executionTimeMs Execution time in milliseconds
+     * @param  ExtractionExecution  $execution  The execution to update
+     * @param  string  $errorMessage  Error description
+     * @param  int  $executionTimeMs  Execution time in milliseconds
      */
     public function recordFailure(
         ExtractionExecution $execution,
@@ -68,7 +68,7 @@ interface ExtractionLoggerInterface
     /**
      * Get execution statistics for a document.
      *
-     * @param Document $document The document to analyze
+     * @param  Document  $document  The document to analyze
      * @return array{
      *   total_executions: int,
      *   success_rate: float,

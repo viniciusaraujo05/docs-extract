@@ -8,15 +8,14 @@ use App\Repositories\ReportAnalysisRepository;
 
 /**
  * Action para obter a última análise de relatório.
- * 
+ *
  * Single Responsibility: Apenas buscar e formatar a última análise.
  */
 final class GetLatestAnalysisAction
 {
     public function __construct(
         private readonly ReportAnalysisRepository $reportAnalysisRepository
-    ) {
-    }
+    ) {}
 
     /**
      * Executa a ação de obter a última análise.
@@ -30,7 +29,7 @@ final class GetLatestAnalysisAction
             $documentTypeId
         );
 
-        if (!$latestAnalysis) {
+        if (! $latestAnalysis) {
             return [
                 'success' => true,
                 'has_analysis' => false,

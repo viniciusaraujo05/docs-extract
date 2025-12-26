@@ -16,8 +16,7 @@ final readonly class StoreDocumentTypeAction
 {
     public function __construct(
         private DocumentTypeRepository $documentTypeRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Executa a ação de criar tipo de documento.

@@ -30,11 +30,11 @@ class ExtractionServiceProvider extends ServiceProvider
     {
         // Register TextExtractorManager as singleton
         $this->app->singleton(TextExtractorManager::class, function () {
-            $manager = new TextExtractorManager();
+            $manager = new TextExtractorManager;
 
             // Register available extractors
-            $manager->addExtractor(new PdfTextExtractor());
-            $manager->addExtractor(new ImageTextExtractor());
+            $manager->addExtractor(new PdfTextExtractor);
+            $manager->addExtractor(new ImageTextExtractor);
 
             return $manager;
         });
@@ -53,7 +53,5 @@ class ExtractionServiceProvider extends ServiceProvider
     /**
      * Bootstrap dos serviços.
      */
-    public function boot(): void
-    {
-    }
+    public function boot(): void {}
 }

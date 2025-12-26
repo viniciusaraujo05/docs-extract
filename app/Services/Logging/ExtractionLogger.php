@@ -113,7 +113,7 @@ final class ExtractionLogger implements ExtractionLoggerInterface
             : null;
 
         $totalTokens = $executions->sum('tokens_consumed') ?? 0;
-        $estimatedCost = $executions->sum(fn($exec) => $exec->getEstimatedCost());
+        $estimatedCost = $executions->sum(fn ($exec) => $exec->getEstimatedCost());
 
         return [
             'total_executions' => $totalExecutions,
@@ -128,7 +128,7 @@ final class ExtractionLogger implements ExtractionLoggerInterface
     /**
      * Get the most recent successful execution for a document.
      *
-     * @param Document $document The document to query
+     * @param  Document  $document  The document to query
      * @return ExtractionExecution|null The latest successful execution or null
      */
     public function getLatestSuccessfulExecution(Document $document): ?ExtractionExecution
@@ -142,7 +142,7 @@ final class ExtractionLogger implements ExtractionLoggerInterface
     /**
      * Get fields that consistently have low confidence across executions.
      *
-     * @param Document $document The document to analyze
+     * @param  Document  $document  The document to analyze
      * @return array<string> Field names with recurring low confidence
      */
     public function getProblematicFields(Document $document): array
@@ -170,13 +170,14 @@ final class ExtractionLogger implements ExtractionLoggerInterface
 
         // Return fields that appear in more than 50% of executions
         $threshold = $executions->count() / 2;
-        return array_keys(array_filter($fieldCounts, fn($count) => $count > $threshold));
+
+        return array_keys(array_filter($fieldCounts, fn ($count) => $count > $threshold));
     }
 
     /**
      * Encrypt sensitive data before storage.
      *
-     * @param string $data Data to encrypt
+     * @param  string  $data  Data to encrypt
      * @return string Encrypted data
      */
     private function encryptSensitiveData(string $data): string
@@ -192,7 +193,7 @@ final class ExtractionLogger implements ExtractionLoggerInterface
     /**
      * Decrypt sensitive data for retrieval.
      *
-     * @param string $encryptedData Encrypted data
+     * @param  string  $encryptedData  Encrypted data
      * @return string Decrypted data
      */
     public function decryptSensitiveData(string $encryptedData): string

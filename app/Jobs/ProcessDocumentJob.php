@@ -21,8 +21,7 @@ class ProcessDocumentJob implements ShouldQueue
 
     public function __construct(
         public Document $document
-    ) {
-    }
+    ) {}
 
     public function handle(DocumentService $documentService): void
     {

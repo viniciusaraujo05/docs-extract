@@ -35,8 +35,7 @@ final class ReportController extends Controller
         private readonly AnalyzeReportWithAIAction $analyzeReportWithAIAction,
         private readonly GetLatestAnalysisAction $getLatestAnalysisAction,
         private readonly SaveAnalysisAction $saveAnalysisAction,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): Response
     {

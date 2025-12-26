@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Request para atualização de documento.
- * 
+ *
  * Centraliza validação seguindo Single Responsibility Principle.
  */
 final class UpdateDocumentRequest extends FormRequest

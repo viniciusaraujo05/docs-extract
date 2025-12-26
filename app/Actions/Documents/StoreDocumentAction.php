@@ -26,8 +26,7 @@ final readonly class StoreDocumentAction
     public function __construct(
         private DocumentRepository $documentRepository,
         private DocumentTypeRepository $documentTypeRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Executa a ação de armazenar documento.
@@ -45,12 +44,12 @@ final readonly class StoreDocumentAction
         // Verifica se já existe documento com mesmo nome
         $originalFilename = $file->getClientOriginalName();
         $existingDocument = $this->documentRepository->findByFilenameForUser($originalFilename, $user->id);
-        
+
         // Se existe e force_overwrite é true, deleta o antigo
         if ($existingDocument && $forceOverwrite) {
             $this->documentRepository->delete($existingDocument);
         }
-        
+
         // Upload do arquivo
         $filePath = $this->storeFile($file, $user->id);
 

@@ -12,13 +12,14 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Controller para proxy de geolocalização.
- * 
+ *
  * Resolve problemas de CORS fazendo a requisição server-side
  * e cacheando resultados para melhor performance.
  */
 final class GeolocationController extends Controller
 {
     private const CACHE_TTL = 3600; // 1 hora
+
     private const API_TIMEOUT = 10;
 
     /**
@@ -27,7 +28,7 @@ final class GeolocationController extends Controller
     public function detect(): JsonResponse
     {
         $ip = request()->ip();
-        
+
         // IPs locais/privados retornam fallback
         if ($this->isPrivateIp($ip)) {
             return response()->json([
@@ -44,22 +45,23 @@ final class GeolocationController extends Controller
 
         if ($cached !== null) {
             Log::debug('Geolocation cache hit', ['ip' => $ip]);
+
             return response()->json($cached);
         }
 
         // Faz requisição para API externa
         try {
             $response = Http::timeout(self::API_TIMEOUT)
-                ->get('https://freeipapi.com/api/json/' . $ip);
+                ->get('https://freeipapi.com/api/json/'.$ip);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 throw new \RuntimeException('API request failed');
             }
 
             $data = $response->json();
 
             // Valida dados essenciais
-            if (!isset($data['countryCode'])) {
+            if (! isset($data['countryCode'])) {
                 throw new \RuntimeException('Invalid API response');
             }
 

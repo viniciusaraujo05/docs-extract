@@ -18,7 +18,6 @@ interface TextExtractorInterface
      * Extrai texto de um ficheiro uploaded.
      *
      * @param  UploadedFile  $file  Ficheiro a processar
-     *
      * @return string Texto extraído do documento
      *
      * @throws \RuntimeException Se não for possível extrair texto
@@ -29,7 +28,6 @@ interface TextExtractorInterface
      * Verifica se este extractor suporta o tipo de ficheiro.
      *
      * @param  UploadedFile  $file  Ficheiro a verificar
-     *
      * @return bool True se suporta, false caso contrário
      */
     public function supports(UploadedFile $file): bool;

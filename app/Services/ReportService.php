@@ -22,8 +22,7 @@ final class ReportService
 {
     public function __construct(
         private readonly DocumentRepository $documentRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Gera dados do relatório baseado na configuração.

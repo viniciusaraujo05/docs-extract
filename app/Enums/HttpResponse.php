@@ -39,7 +39,7 @@ enum HttpResponse: int
             self::CREATED => 'Resource created successfully.',
             self::ACCEPTED => 'Request accepted for processing.',
             self::NO_CONTENT => 'Request successful, no content to return.',
-            
+
             self::BAD_REQUEST => 'Bad request. Please check your input.',
             self::UNAUTHORIZED => 'Unauthorized. Invalid or missing credentials.',
             self::FORBIDDEN => 'Forbidden. You do not have permission to access this resource.',
@@ -48,7 +48,7 @@ enum HttpResponse: int
             self::CONFLICT => 'Conflict. Resource already exists.',
             self::UNPROCESSABLE_ENTITY => 'Validation failed. Please check your input.',
             self::TOO_MANY_REQUESTS => 'Too many requests. Please slow down.',
-            
+
             self::INTERNAL_SERVER_ERROR => 'Internal server error. Please try again later.',
             self::SERVICE_UNAVAILABLE => 'Service temporarily unavailable.',
         };
@@ -81,8 +81,8 @@ enum HttpResponse: int
     /**
      * Cria resposta JSON padronizada.
      *
-     * @param array<string, mixed>|null $data
-     * @param array<string, mixed> $meta
+     * @param  array<string, mixed>|null  $data
+     * @param  array<string, mixed>  $meta
      */
     public function json(
         ?array $data = null,

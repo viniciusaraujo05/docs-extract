@@ -17,8 +17,7 @@ final readonly class DocumentData
         public ?string $newTypeName,
         public ?array $schema,
         public ?array $extractedData,
-    ) {
-    }
+    ) {}
 
     /**
      * Cria DTO a partir de request.

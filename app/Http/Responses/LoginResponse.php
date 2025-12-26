@@ -14,7 +14,7 @@ class LoginResponse implements LoginResponseContract
         $locale = session('locale', config('app.locale', 'pt'));
 
         // Validate locale against whitelist to prevent injection
-        if (!is_string($locale) || !in_array($locale, $supportedLocales, true)) {
+        if (! is_string($locale) || ! in_array($locale, $supportedLocales, true)) {
             $locale = config('app.locale', 'pt');
         }
 

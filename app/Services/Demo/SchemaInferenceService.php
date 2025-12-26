@@ -13,7 +13,9 @@ use RuntimeException;
 final class SchemaInferenceService
 {
     private const API_URL = 'https://api.openai.com/v1/chat/completions';
+
     private const TIMEOUT = 60;
+
     private const TEMPERATURE = 0.1;
 
     public function __construct(

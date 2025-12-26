@@ -27,8 +27,7 @@ final class DocumentTypeController extends Controller
         private readonly DocumentTypeRepository $documentTypeRepository,
         private readonly StoreDocumentTypeAction $storeDocumentTypeAction,
         private readonly UpdateDocumentTypeAction $updateDocumentTypeAction,
-    ) {
-    }
+    ) {}
 
     /**
      * Lista todos os tipos de documentos do utilizador.
@@ -57,7 +56,7 @@ final class DocumentTypeController extends Controller
     {
         try {
             $fields = $request->getValidatedFields();
-            
+
             $this->storeDocumentTypeAction->execute(
                 userId: $request->user()->id,
                 name: $request->validated('name'),
@@ -93,7 +92,7 @@ final class DocumentTypeController extends Controller
 
         try {
             $fields = $request->getValidatedFields();
-            
+
             $this->updateDocumentTypeAction->execute(
                 documentType: $documentType,
                 name: $request->validated('name'),

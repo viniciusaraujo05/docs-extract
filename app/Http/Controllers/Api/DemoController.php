@@ -84,7 +84,6 @@ class DemoController extends Controller
         }
     }
 
-
     /**
      * Check if IP can use demo
      */

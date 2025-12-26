@@ -26,13 +26,14 @@ final class DemoRateLimiter
     public function increment(string $ip): void
     {
         $key = $this->buildKey($ip);
-        
+
         // Se não existe, cria com valor 1 e TTL
         if (! Cache::has($key)) {
             Cache::put($key, 1, $this->windowSeconds);
+
             return;
         }
-        
+
         // Se já existe, incrementa
         Cache::increment($key);
     }

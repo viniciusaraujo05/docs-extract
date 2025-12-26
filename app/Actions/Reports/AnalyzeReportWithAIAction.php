@@ -28,7 +28,6 @@ final class AnalyzeReportWithAIAction
      *
      * @param  array  $reportData  Dados agregados do relatório
      * @param  string  $documentTypeName  Nome do tipo de documento
-     *
      * @return array Análise estruturada com insights e recomendações
      *
      * @throws RuntimeException Se a API falhar
@@ -177,7 +176,7 @@ final class AnalyzeReportWithAIAction
             }
         }
 
-        return $prompt . $this->getStructurePrompt($locale, $customInstructions);
+        return $prompt.$this->getStructurePrompt($locale, $customInstructions);
     }
 
     /**

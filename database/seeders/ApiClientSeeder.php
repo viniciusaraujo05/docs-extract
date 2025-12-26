@@ -19,6 +19,7 @@ class ApiClientSeeder extends Seeder
 
         if (! $user) {
             $this->command->warn('No users found. Please create a user first.');
+
             return;
         }
 
@@ -28,7 +29,7 @@ class ApiClientSeeder extends Seeder
             'user_id' => $user->id,
             'name' => 'Test API Client',
             'contact_email' => 'api-test@docset.com',
-            'client_id' => 'test_client_' . uniqid(),
+            'client_id' => 'test_client_'.uniqid(),
             'client_secret' => $plainSecret,
             'status' => 'active',
             'rate_limit_per_minute' => 60,
@@ -40,9 +41,9 @@ class ApiClientSeeder extends Seeder
         ]);
 
         $this->command->info('API Client created successfully!');
-        $this->command->info('Client ID: ' . $client->client_id);
-        $this->command->info('Client Secret: ' . $plainSecret);
-        $this->command->info('Public ID: ' . $client->public_id);
+        $this->command->info('Client ID: '.$client->client_id);
+        $this->command->info('Client Secret: '.$plainSecret);
+        $this->command->info('Public ID: '.$client->public_id);
         $this->command->warn('Save these credentials - the secret cannot be retrieved again!');
     }
 }

@@ -19,8 +19,8 @@ class AuthTokenController extends Controller
     public function __construct(
         private readonly AuthenticateApiClientAction $authenticateAction,
         private readonly ApiClientRepository $repository,
-    ) {
-    }
+    ) {}
+
     public function store(AuthenticateApiClientRequest $request): JsonResponse
     {
         $credentials = $request->validated();

@@ -9,15 +9,14 @@ use App\Repositories\ReportAnalysisRepository;
 
 /**
  * Action para salvar análise de relatório.
- * 
+ *
  * Single Responsibility: Apenas salvar análise no banco de dados.
  */
 final class SaveAnalysisAction
 {
     public function __construct(
         private readonly ReportAnalysisRepository $reportAnalysisRepository
-    ) {
-    }
+    ) {}
 
     /**
      * Executa a ação de salvar análise.

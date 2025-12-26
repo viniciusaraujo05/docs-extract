@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('status', 50)->default('pending'); // pending, success, failed
             $table->text('error_message')->nullable();
             $table->timestamps();
-            
+
             $table->index(['document_id', 'created_at']);
             $table->index('status');
         });

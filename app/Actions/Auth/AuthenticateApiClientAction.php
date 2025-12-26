@@ -16,8 +16,7 @@ final readonly class AuthenticateApiClientAction
 {
     public function __construct(
         private ApiClientRepository $repository,
-    ) {
-    }
+    ) {}
 
     /**
      * Executa a autenticação e retorna o token JWT.

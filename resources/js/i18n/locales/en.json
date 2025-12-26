@@ -1162,5 +1162,13 @@
     "English - International": "English - International",
     "Language variant changed successfully": "Language variant changed successfully",
     "Language changed successfully": "Language changed successfully",
-    "Error changing language": "Error changing language"
+    "Error changing language": "Error changing language",
+    "Regenerate Secret": "Regenerate Secret",
+    "Regenerating...": "Regenerating...",
+    "Deleting...": "Deleting...",
+    "API Client secret regenerated successfully!": "API Client secret regenerated successfully!",
+    "Failed to regenerate API client secret.": "Failed to regenerate API client secret.",
+    "Failed to create API client.": "Failed to create API client.",
+    "Failed to delete API client.": "Failed to delete API client.",
+    "copied to clipboard!": "copied to clipboard!"
 }

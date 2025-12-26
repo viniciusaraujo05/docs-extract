@@ -64,13 +64,13 @@ final class PdfTextExtractor implements TextExtractorInterface
     private function extractWithParser(string $path, string $filename): string
     {
         try {
-            $parser = new Parser();
+            $parser = new Parser;
             $pdf = $parser->parseFile($path);
             $text = $pdf->getText();
 
             // Verifica se o texto extraído é válido (não apenas espaços/quebras de linha)
             $cleanText = trim(preg_replace('/\s+/', ' ', $text));
-            
+
             if (empty($cleanText) || mb_strlen($cleanText) < 10) {
                 Log::info('PDF appears to be image-based, minimal text extracted', [
                     'file' => $filename,
@@ -88,15 +88,15 @@ final class PdfTextExtractor implements TextExtractorInterface
         } catch (Throwable $e) {
             // Captura erros específicos do parser
             $errorMsg = $e->getMessage();
-            
+
             if (str_contains($errorMsg, 'Secured') || str_contains($errorMsg, 'password')) {
                 throw new RuntimeException('PDF protegido com senha. Por favor, remova a proteção antes de enviar.');
             }
-            
+
             if (str_contains($errorMsg, 'Invalid') || str_contains($errorMsg, 'corrupt')) {
                 throw new RuntimeException('PDF corrompido ou inválido. Por favor, tente outro arquivo.');
             }
-            
+
             throw $e;
         }
     }
@@ -182,7 +182,7 @@ final class PdfTextExtractor implements TextExtractorInterface
         $images = [];
 
         try {
-            $imagick = new Imagick();
+            $imagick = new Imagick;
             $imagick->setResolution(150, 150); // DPI para boa qualidade
             $imagick->readImage($path);
 

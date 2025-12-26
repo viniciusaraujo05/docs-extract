@@ -32,23 +32,26 @@ use RuntimeException;
 final class EnhancedExtractionService
 {
     private const API_URL = 'https://api.openai.com/v1/chat/completions';
+
     private const TEMPERATURE = 0.1;
+
     private const TIMEOUT = 120;
+
     private const CONFIDENCE_THRESHOLD = 70;
 
     public function __construct(
         private readonly ExtractionLoggerInterface $logger,
         private readonly FieldValidatorInterface $validator
-    ) {
-    }
+    ) {}
 
     /**
      * Extract structured data from document text.
      *
-     * @param Document $document The document being processed
-     * @param string $text Raw text extracted from document
-     * @param array{fields: array<array{name: string, type: string, label?: string, required?: bool, pattern?: string, min?: mixed, max?: mixed}>} $schema Field schema
+     * @param  Document  $document  The document being processed
+     * @param  string  $text  Raw text extracted from document
+     * @param  array{fields: array<array{name: string, type: string, label?: string, required?: bool, pattern?: string, min?: mixed, max?: mixed}>}  $schema  Field schema
      * @return array{data: array<string, mixed>, confidence: int|null, validation_errors: array<string, array<string>>, low_confidence_fields: array<string>}
+     *
      * @throws RuntimeException If extraction fails
      */
     public function extract(Document $document, string $text, array $schema): array
@@ -56,33 +59,33 @@ final class EnhancedExtractionService
         $startTime = microtime(true);
         $apiKey = $this->getApiKey();
         $model = config('services.openai.model', 'gpt-4o-mini');
-        
+
         // Build optimized prompt
         $prompt = $this->buildPrompt($text, $schema);
-        
+
         // Start execution tracking
         $execution = $this->logger->startExecution($document, $model, $prompt);
 
         try {
             // Call OpenAI API
             $response = $this->callOpenAI($apiKey, $model, $prompt);
-            
+
             // Parse response
             $parsed = $this->parseResponse($response->json('choices.0.message.content'));
-            
+
             // Validate and normalize extracted data
             $validated = $this->validateAndNormalize($parsed['data'], $schema);
-            
+
             // Identify low confidence fields
             $lowConfidenceFields = $this->identifyLowConfidenceFields(
                 $validated['normalized_data'],
                 $parsed['confidence']
             );
-            
+
             // Calculate execution time and tokens
             $executionTimeMs = (int) ((microtime(true) - $startTime) * 1000);
             $tokensConsumed = $response->json('usage.total_tokens');
-            
+
             // Record successful execution
             $this->logger->recordSuccess(
                 $execution,
@@ -111,9 +114,9 @@ final class EnhancedExtractionService
 
         } catch (\Exception $e) {
             $executionTimeMs = (int) ((microtime(true) - $startTime) * 1000);
-            
+
             $this->logger->recordFailure($execution, $e->getMessage(), $executionTimeMs);
-            
+
             Log::error('Extraction failed', [
                 'document_id' => $document->id,
                 'error' => $e->getMessage(),
@@ -127,10 +130,10 @@ final class EnhancedExtractionService
     /**
      * Call OpenAI API with retry logic.
      *
-     * @param string $apiKey API key
-     * @param string $model Model identifier
-     * @param string $prompt User prompt
-     * @return \Illuminate\Http\Client\Response
+     * @param  string  $apiKey  API key
+     * @param  string  $model  Model identifier
+     * @param  string  $prompt  User prompt
+     *
      * @throws RuntimeException If API call fails
      */
     private function callOpenAI(string $apiKey, string $model, string $prompt): \Illuminate\Http\Client\Response
@@ -140,7 +143,7 @@ final class EnhancedExtractionService
             ->retry(3, 1000, function ($exception, $request) {
                 // Retry on timeout or rate limit
                 return $exception instanceof \Illuminate\Http\Client\ConnectionException
-                    || ($exception instanceof \Illuminate\Http\Client\RequestException 
+                    || ($exception instanceof \Illuminate\Http\Client\RequestException
                         && $exception->response->status() === 429);
             })
             ->post(self::API_URL, [
@@ -153,15 +156,15 @@ final class EnhancedExtractionService
                 'response_format' => ['type' => 'json_object'],
             ]);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             $errorBody = $response->json() ?? [];
             $errorMessage = $errorBody['error']['message'] ?? $response->body();
-            
+
             Log::error('OpenAI API error', [
                 'status' => $response->status(),
                 'error' => $errorMessage,
             ]);
-            
+
             throw new RuntimeException("OpenAI API failed: {$errorMessage}");
         }
 
@@ -186,31 +189,31 @@ final class EnhancedExtractionService
      *
      * Includes field-specific instructions and examples.
      *
-     * @param string $text Document text
-     * @param array $schema Field schema
+     * @param  string  $text  Document text
+     * @param  array  $schema  Field schema
      * @return string Complete prompt
      */
     private function buildPrompt(string $text, array $schema): string
     {
         $fields = $schema['fields'] ?? [];
-        
+
         // Build field descriptions with enhanced metadata
         $fieldsDescription = collect($fields)
             ->map(function (array $field): string {
                 $description = "- {$field['name']} ({$field['type']})";
-                
+
                 if (isset($field['label'])) {
                     $description .= ": {$field['label']}";
                 }
-                
+
                 if (isset($field['pattern'])) {
                     $description .= " [Pattern: {$field['pattern']}]";
                 }
-                
+
                 if (isset($field['required']) && $field['required']) {
-                    $description .= " [REQUIRED]";
+                    $description .= ' [REQUIRED]';
                 }
-                
+
                 return $description;
             })
             ->implode("\n");
@@ -219,7 +222,7 @@ final class EnhancedExtractionService
         $maxTextLength = 8000;
         if (mb_strlen($text) > $maxTextLength) {
             $halfLength = (int) ($maxTextLength / 2);
-            $text = mb_substr($text, 0, $halfLength) . "\n\n[... middle section truncated ...]\n\n" . mb_substr($text, -$halfLength);
+            $text = mb_substr($text, 0, $halfLength)."\n\n[... middle section truncated ...]\n\n".mb_substr($text, -$halfLength);
         }
 
         return <<<PROMPT
@@ -258,8 +261,9 @@ PROMPT;
     /**
      * Parse OpenAI response.
      *
-     * @param string|null $content JSON content
+     * @param  string|null  $content  JSON content
      * @return array{data: array<string, mixed>, confidence: int|null, field_confidence: array<string, int>}
+     *
      * @throws RuntimeException If JSON is invalid
      */
     private function parseResponse(?string $content): array
@@ -288,8 +292,8 @@ PROMPT;
     /**
      * Validate and normalize extracted data.
      *
-     * @param array $extractedData Raw extracted data
-     * @param array $schema Field schema
+     * @param  array  $extractedData  Raw extracted data
+     * @param  array  $schema  Field schema
      * @return array{normalized_data: array<string, mixed>, validation_errors: array<string, array<string>>}
      */
     private function validateAndNormalize(array $extractedData, array $schema): array
@@ -304,7 +308,7 @@ PROMPT;
             // Validate field
             $validationResult = $this->validator->validate($value, $fieldSchema);
 
-            if (!$validationResult['valid']) {
+            if (! $validationResult['valid']) {
                 $validationErrors[$fieldName] = $validationResult['errors'];
                 Log::warning('Field validation failed', [
                     'field' => $fieldName,
@@ -325,8 +329,8 @@ PROMPT;
     /**
      * Identify fields with low confidence.
      *
-     * @param array $data Extracted data
-     * @param int|null $overallConfidence Overall confidence score
+     * @param  array  $data  Extracted data
+     * @param  int|null  $overallConfidence  Overall confidence score
      * @return array<string> Field names with low confidence
      */
     private function identifyLowConfidenceFields(array $data, ?int $overallConfidence): array
@@ -349,6 +353,7 @@ PROMPT;
      * Get OpenAI API key.
      *
      * @return string API key
+     *
      * @throws RuntimeException If API key is not configured
      */
     private function getApiKey(): string

@@ -7,11 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Copy, Key, Plus, Trash2, AlertCircle, ChevronDown, BookOpen, Shield, FileText } from 'lucide-react';
-import { useState } from 'react';
+import { Copy, Key, Plus, Trash2, AlertCircle, ChevronDown, BookOpen, Shield, FileText, RefreshCw, Loader2 } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { type BreadcrumbItem } from '@/types';
@@ -46,25 +47,53 @@ export default function ApiIndex() {
     const locale = page.props.locale ?? 'pt';
     const [selectedEndpoint, setSelectedEndpoint] = useState<string>('auth.token');
     const [selectedResponseCode, setSelectedResponseCode] = useState<number>(200);
-    
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [clientPendingDeletion, setClientPendingDeletion] = useState<ApiClient | null>(null);
+
     const { gettingStarted, endpoints, securityNotes, documentStatuses } = useApiDocumentation();
-    const { post, processing } = useForm({});
+    const createForm = useForm({});
+    const deleteForm = useForm({});
+    const regenerateForm = useForm({});
     const newClient = flash?.newClient;
 
     const handleCreateClient = () => {
-        post(apiRoutes.clients.store(locale).url, {
+        createForm.post(apiRoutes.clients.store(locale).url, {
             onSuccess: () => toast.success(t('API Client created successfully!')),
             onError: () => toast.error(t('Failed to create API client.')),
         });
     };
 
-    const handleDeleteClient = (clientId: number) => {
-        if (confirm(t('Are you sure you want to delete this API client? This action cannot be undone.'))) {
-            useForm().delete(apiRoutes.clients.destroy({ locale, apiClient: clientId }).url, {
-                onSuccess: () => toast.success(t('API Client deleted successfully!')),
-            });
+    const handleOpenDeleteDialog = useCallback((client: ApiClient) => {
+        setClientPendingDeletion(client);
+        setDeleteDialogOpen(true);
+    }, []);
+
+    const handleDeleteClient = useCallback(() => {
+        if (!clientPendingDeletion) {
+            return;
         }
-    };
+
+        deleteForm.delete(apiRoutes.clients.destroy({ locale, apiClient: clientPendingDeletion.id }).url, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success(t('API Client deleted successfully!'));
+                setDeleteDialogOpen(false);
+                setClientPendingDeletion(null);
+            },
+            onError: () => toast.error(t('Failed to delete API client.')),
+        });
+    }, [clientPendingDeletion, deleteForm, locale, t]);
+
+    const handleRegenerateClient = useCallback(
+        (clientId: number) => {
+            regenerateForm.post(apiRoutes.clients.regenerate({ locale, apiClient: clientId }).url, {
+                preserveScroll: true,
+                onSuccess: () => toast.success(t('API Client secret regenerated successfully!')),
+                onError: () => toast.error(t('Failed to regenerate API client secret.')),
+            });
+        },
+        [locale, regenerateForm, t],
+    );
 
     const copyToClipboard = (text: string, label: string) => {
         navigator.clipboard.writeText(text);
@@ -137,8 +166,8 @@ export default function ApiIndex() {
                                         <div className="rounded-full bg-primary/10 p-4 mb-4"><Key className="h-8 w-8 text-primary" /></div>
                                         <h3 className="text-lg font-semibold mb-2">{t('No API Client')}</h3>
                                         <p className="text-sm text-muted-foreground text-center mb-6 max-w-md">{t('Create your API client to start integrating DOCSET with your applications')}</p>
-                                        <Button onClick={handleCreateClient} disabled={processing} size="lg">
-                                            <Plus className="mr-2 h-4 w-4" />{processing ? t('Creating...') : t('Create API Client')}
+                                        <Button onClick={handleCreateClient} disabled={createForm.processing} size="lg">
+                                            <Plus className="mr-2 h-4 w-4" />{createForm.processing ? t('Creating...') : t('Create API Client')}
                                         </Button>
                                     </div>
                                 ) : (
@@ -196,7 +225,16 @@ export default function ApiIndex() {
                                                 <Separator />
                                             </>
                                         )}
-                                        <Button variant="destructive" onClick={() => handleDeleteClient(clients[0].id)} className="w-full"><Trash2 className="mr-2 h-4 w-4" />{t('Delete API Client')}</Button>
+                                        <div className="flex gap-2">
+                                            <Button variant="outline" onClick={() => handleRegenerateClient(clients[0].id)} disabled={regenerateForm.processing} className="flex-1">
+                                                <RefreshCw className={`mr-2 h-4 w-4 ${regenerateForm.processing ? 'animate-spin' : ''}`} />
+                                                {regenerateForm.processing ? t('Regenerating...') : t('Regenerate Secret')}
+                                            </Button>
+                                            <Button variant="destructive" onClick={() => handleOpenDeleteDialog(clients[0])} disabled={deleteForm.processing} className="flex-1">
+                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                {deleteForm.processing ? t('Deleting...') : t('Delete API Client')}
+                                            </Button>
+                                        </div>
                                     </div>
                                 )}
                             </CardContent>
@@ -357,6 +395,35 @@ export default function ApiIndex() {
                     </TabsContent>
                 </Tabs>
             </div>
+
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{t('Delete API Client')}</DialogTitle>
+                        <DialogDescription>
+                            {t('Are you sure you want to delete this API client? This action cannot be undone.')}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} disabled={deleteForm.processing}>
+                            {t('Cancel')}
+                        </Button>
+                        <Button variant="destructive" onClick={handleDeleteClient} disabled={deleteForm.processing}>
+                            {deleteForm.processing ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    {t('Deleting...')}
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    {t('Delete')}
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }

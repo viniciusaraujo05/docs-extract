@@ -23,8 +23,7 @@ final class DocumentService
         private readonly DocumentRepository $documentRepository,
         private readonly ExtractionService $extractionService,
         private readonly ?EnhancedExtractionService $enhancedExtractionService = null,
-    ) {
-    }
+    ) {}
 
     public function upload(UploadedFile $file, User $user, string $type = 'invoice', ?array $schema = null): Document
     {
@@ -127,7 +126,7 @@ final class DocumentService
         // MVP: Usar biblioteca simples ou mock
         // Em produção, usar Smalot/PdfParser ou serviço OCR
         if (class_exists(\Smalot\PdfParser\Parser::class)) {
-            $parser = new \Smalot\PdfParser\Parser();
+            $parser = new \Smalot\PdfParser\Parser;
             $pdf = $parser->parseFile($path);
 
             return $pdf->getText();

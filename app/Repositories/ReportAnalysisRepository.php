@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Repository para análises de relatórios.
- * 
+ *
  * Centraliza queries relacionadas a ReportAnalysis,
  * seguindo Repository Pattern.
  */

@@ -30,14 +30,12 @@ final class ExtractionController extends Controller
         private readonly TextExtractorManager $textExtractor,
         private readonly FieldDetectorService $fieldDetector,
         private readonly ExtractionService $extractionService,
-    ) {
-    }
+    ) {}
 
     /**
      * Analisa um documento e detecta campos extraíveis.
      *
      * @param  Request  $request  Request com o ficheiro
-     *
      * @return JsonResponse Campos sugeridos e preview do texto
      */
     public function analyze(Request $request): JsonResponse
@@ -81,7 +79,6 @@ final class ExtractionController extends Controller
      * Extrai dados estruturados de um documento.
      *
      * @param  Request  $request  Request com ficheiro e campos
-     *
      * @return JsonResponse Dados extraídos
      */
     public function extract(Request $request): JsonResponse
@@ -91,9 +88,9 @@ final class ExtractionController extends Controller
         try {
             /** @var UploadedFile $file */
             $file = $request->file('file');
-            
+
             // Aceita fields como array ou JSON string
-            $fields = is_string($validated['fields']) 
+            $fields = is_string($validated['fields'])
                 ? json_decode($validated['fields'], true, 512, JSON_THROW_ON_ERROR)
                 : $validated['fields'];
 
@@ -134,7 +131,7 @@ final class ExtractionController extends Controller
                 str_contains($e->getMessage(), 'password') || str_contains($e->getMessage(), 'senha') => 'O PDF requer senha. Por favor, envie um PDF sem proteção.',
                 str_contains($e->getMessage(), 'corrompido') || str_contains($e->getMessage(), 'corrupt') => 'O arquivo parece estar corrompido. Por favor, tente outro arquivo.',
                 str_contains($e->getMessage(), 'Imagick') => 'Não foi possível processar este PDF. Tente converter para imagem (JPG/PNG) antes de enviar.',
-                default => "Erro ao processar documento. Por favor, verifique se o arquivo não está protegido ou corrompido.",
+                default => 'Erro ao processar documento. Por favor, verifique se o arquivo não está protegido ou corrompido.',
             };
 
             return response()->json([

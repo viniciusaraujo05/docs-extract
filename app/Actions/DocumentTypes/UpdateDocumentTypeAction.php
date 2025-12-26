@@ -14,8 +14,7 @@ final readonly class UpdateDocumentTypeAction
 {
     public function __construct(
         private DocumentTypeRepository $documentTypeRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Executa a ação de atualizar tipo de documento.

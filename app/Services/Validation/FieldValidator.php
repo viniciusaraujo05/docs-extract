@@ -36,6 +36,7 @@ final class FieldValidator implements FieldValidatorInterface
         // Check required
         if ($required && ($value === null || $value === '')) {
             $errors[] = 'Field is required but empty';
+
             return [
                 'valid' => false,
                 'errors' => $errors,
@@ -57,6 +58,7 @@ final class FieldValidator implements FieldValidatorInterface
             $normalizedValue = $this->normalize($value, $type);
         } catch (\Exception $e) {
             $errors[] = "Normalization failed: {$e->getMessage()}";
+
             return [
                 'valid' => false,
                 'errors' => $errors,
@@ -76,7 +78,7 @@ final class FieldValidator implements FieldValidatorInterface
 
         // Pattern validation
         if (isset($fieldSchema['pattern']) && is_string($normalizedValue)) {
-            if (!preg_match($fieldSchema['pattern'], $normalizedValue)) {
+            if (! preg_match($fieldSchema['pattern'], $normalizedValue)) {
                 $errors[] = 'Value does not match required pattern';
             }
         }
@@ -108,16 +110,17 @@ final class FieldValidator implements FieldValidatorInterface
     /**
      * Validate number field.
      *
-     * @param mixed $value Normalized value
-     * @param array $schema Field schema
+     * @param  mixed  $value  Normalized value
+     * @param  array  $schema  Field schema
      * @return array<string> Validation errors
      */
     private function validateNumber(mixed $value, array $schema): array
     {
         $errors = [];
 
-        if (!is_numeric($value)) {
+        if (! is_numeric($value)) {
             $errors[] = 'Value is not a valid number';
+
             return $errors;
         }
 
@@ -141,16 +144,17 @@ final class FieldValidator implements FieldValidatorInterface
     /**
      * Validate date field.
      *
-     * @param mixed $value Normalized value
-     * @param array $schema Field schema
+     * @param  mixed  $value  Normalized value
+     * @param  array  $schema  Field schema
      * @return array<string> Validation errors
      */
     private function validateDate(mixed $value, array $schema): array
     {
         $errors = [];
 
-        if (!$value instanceof Carbon) {
+        if (! $value instanceof Carbon) {
             $errors[] = 'Value is not a valid date';
+
             return $errors;
         }
 
@@ -182,16 +186,17 @@ final class FieldValidator implements FieldValidatorInterface
     /**
      * Validate text field.
      *
-     * @param mixed $value Normalized value
-     * @param array $schema Field schema
+     * @param  mixed  $value  Normalized value
+     * @param  array  $schema  Field schema
      * @return array<string> Validation errors
      */
     private function validateText(mixed $value, array $schema): array
     {
         $errors = [];
 
-        if (!is_string($value)) {
+        if (! is_string($value)) {
             $errors[] = 'Value is not a valid text';
+
             return $errors;
         }
 
@@ -301,7 +306,7 @@ final class FieldValidator implements FieldValidatorInterface
     /**
      * Check if a field has low confidence.
      *
-     * @param int|null $confidence Confidence score (0-100)
+     * @param  int|null  $confidence  Confidence score (0-100)
      * @return bool True if confidence is below threshold
      */
     public function hasLowConfidence(?int $confidence): bool

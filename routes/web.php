@@ -61,6 +61,7 @@ Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 
     // API Clients Management
     Route::get('api', [ApiClientController::class, 'index'])->name('api.index');
     Route::post('api/clients', [ApiClientController::class, 'store'])->name('api.clients.store');
+    Route::post('api/clients/{apiClient}/regenerate', [ApiClientController::class, 'regenerate'])->name('api.clients.regenerate');
     Route::delete('api/clients/{apiClient}', [ApiClientController::class, 'destroy'])->name('api.clients.destroy');
 });
 

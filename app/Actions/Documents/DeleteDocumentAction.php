@@ -17,8 +17,7 @@ final readonly class DeleteDocumentAction
 {
     public function __construct(
         private DocumentRepository $documentRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Executa a ação de deletar documento.

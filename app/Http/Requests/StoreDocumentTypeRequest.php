@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Request para criação de tipo de documento.
- * 
+ *
  * Centraliza validação seguindo Single Responsibility Principle.
  */
 final class StoreDocumentTypeRequest extends FormRequest
@@ -58,7 +58,7 @@ final class StoreDocumentTypeRequest extends FormRequest
     {
         $fields = json_decode($this->input('fields'), true);
 
-        if (!is_array($fields)) {
+        if (! is_array($fields)) {
             throw new \InvalidArgumentException('Formato de campos inválido.');
         }
 

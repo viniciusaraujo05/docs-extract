@@ -40,8 +40,7 @@ final class DocumentController extends Controller
         private readonly StoreDocumentAction $storeDocumentAction,
         private readonly DeleteDocumentAction $deleteDocumentAction,
         private readonly ReprocessDocumentAction $reprocessDocumentAction,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): Response
     {

@@ -8,7 +8,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * Request para atualização de configuração de relatório.
- * 
+ *
  * Centraliza validação seguindo Single Responsibility Principle.
  */
 final class UpdateReportConfigurationRequest extends FormRequest

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Documents\StoreDocumentAction;
-use App\DataTransferObjects\DocumentData;
 use App\Enums\HttpResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\UploadDocumentRequest;
@@ -18,7 +17,7 @@ use Illuminate\Http\Request;
 
 /**
  * Controller para API v1 de documentos.
- * 
+ *
  * Endpoints protegidos por JWT para clientes externos.
  */
 final class DocumentControllerApi extends Controller
@@ -26,12 +25,11 @@ final class DocumentControllerApi extends Controller
     public function __construct(
         private readonly StoreDocumentAction $storeDocumentAction,
         private readonly DocumentRepository $documentRepository,
-    ) {
-    }
+    ) {}
 
     /**
      * Upload de documento via API.
-     * 
+     *
      * POST /api/v1/documents
      */
     public function store(UploadDocumentRequest $request): JsonResponse
@@ -44,7 +42,7 @@ final class DocumentControllerApi extends Controller
         $documentTypeId = $request->input('document_type_id');
         $schemaJson = $request->input('schema');
 
-        $schema = $schemaJson !== null 
+        $schema = $schemaJson !== null
             ? json_decode($schemaJson, true, 512, JSON_THROW_ON_ERROR)
             : $this->getDefaultSchema($type);
 
@@ -86,7 +84,7 @@ final class DocumentControllerApi extends Controller
 
     /**
      * Consulta status/resultado de documento.
-     * 
+     *
      * GET /api/v1/documents/{id}
      */
     public function show(Request $request, string $id): JsonResponse
@@ -123,7 +121,7 @@ final class DocumentControllerApi extends Controller
 
     /**
      * Lista documentos do cliente.
-     * 
+     *
      * GET /api/v1/documents
      */
     public function index(Request $request): JsonResponse
@@ -164,7 +162,7 @@ final class DocumentControllerApi extends Controller
 
     /**
      * Busca documento por nome.
-     * 
+     *
      * GET /api/v1/documents/search/name?name=invoice
      */
     public function searchByName(Request $request): JsonResponse
@@ -174,7 +172,7 @@ final class DocumentControllerApi extends Controller
 
         $name = $request->query('name');
 
-        if (!$name) {
+        if (! $name) {
             return response()->json(
                 HttpResponse::UNPROCESSABLE_ENTITY->json(
                     message: 'The name parameter is required.'
@@ -185,7 +183,7 @@ final class DocumentControllerApi extends Controller
 
         $documents = $this->documentRepository->findByName($apiClient->user, (string) $name);
 
-        if (!$documents || $documents->isEmpty()) {
+        if (! $documents || $documents->isEmpty()) {
             return response()->json(
                 HttpResponse::NOT_FOUND->json(
                     message: 'No documents found with the specified name.'
@@ -204,7 +202,7 @@ final class DocumentControllerApi extends Controller
                     'status' => $doc->status,
                     'extracted_data' => $doc->extracted_data,
                     'created_at' => $doc->created_at?->toISOString(),
-                ])->toArray()
+                ])->toArray(),
             ],
             HttpResponse::OK->value
         );
@@ -212,7 +210,7 @@ final class DocumentControllerApi extends Controller
 
     /**
      * Filtra documentos por intervalo de datas.
-     * 
+     *
      * POST /api/v1/documents/search/date
      */
     public function searchByDate(Request $request): JsonResponse
@@ -257,7 +255,7 @@ final class DocumentControllerApi extends Controller
                         'start_date' => $validated['start_date'],
                         'end_date' => $validated['end_date'],
                     ],
-                ]
+                ],
             ],
             HttpResponse::OK->value
         );
@@ -265,9 +263,9 @@ final class DocumentControllerApi extends Controller
 
     /**
      * Filtrar documentos com múltiplos critérios opcionais.
-     * 
+     *
      * GET /api/v1/documents/filter
-     * 
+     *
      * Query params:
      * - document_type: nome do tipo de documento (opcional)
      * - start_date: data inicial (opcional)
@@ -290,23 +288,23 @@ final class DocumentControllerApi extends Controller
             ->where('user_id', $apiClient->user_id);
 
         // Filtro por tipo de documento
-        if (!empty($validated['document_type'])) {
+        if (! empty($validated['document_type'])) {
             $query->whereHas('documentType', function ($q) use ($validated) {
-                $q->where('name', 'like', '%' . $validated['document_type'] . '%');
+                $q->where('name', 'like', '%'.$validated['document_type'].'%');
             });
         }
 
         // Filtro por intervalo de datas
-        if (!empty($validated['start_date'])) {
+        if (! empty($validated['start_date'])) {
             $query->whereDate('created_at', '>=', $validated['start_date']);
         }
-        if (!empty($validated['end_date'])) {
+        if (! empty($validated['end_date'])) {
             $query->whereDate('created_at', '<=', $validated['end_date']);
         }
 
         // Filtro por nome do documento
-        if (!empty($validated['name'])) {
-            $query->where('name', 'like', '%' . $validated['name'] . '%');
+        if (! empty($validated['name'])) {
+            $query->where('name', 'like', '%'.$validated['name'].'%');
         }
 
         $documents = $query->with('documentType')

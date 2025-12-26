@@ -51,13 +51,13 @@ class ApiClient extends Authenticatable implements JWTSubject
                 $client->client_id = strtoupper(Str::random(32));
             }
 
-            if ($client->client_secret !== null && !Str::startsWith($client->client_secret, '$2y$')) {
+            if ($client->client_secret !== null && ! Str::startsWith($client->client_secret, '$2y$')) {
                 $client->client_secret = Hash::make($client->client_secret);
             }
         });
 
         static::updating(function (self $client): void {
-            if ($client->isDirty('client_secret') && $client->client_secret !== null && !Str::startsWith($client->client_secret, '$2y$')) {
+            if ($client->isDirty('client_secret') && $client->client_secret !== null && ! Str::startsWith($client->client_secret, '$2y$')) {
                 $client->client_secret = Hash::make($client->client_secret);
             }
         });
