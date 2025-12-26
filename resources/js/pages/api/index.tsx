@@ -56,57 +56,8 @@ export default function ApiIndex() {
 
     useEffect(() => {
         if (newClient && !shownSecrets.has(newClient.id)) {
-            toast.custom((toastId) => (
-                <div className="flex flex-col gap-3 max-w-sm">
-                    <div>
-                        <p className="font-semibold text-sm mb-2">{t('Save these credentials now!')}</p>
-                        <p className="text-xs text-muted-foreground mb-3">{t('The client secret will not be shown again.')}</p>
-                    </div>
-                    <div className="space-y-2">
-                        <div>
-                            <label className="text-xs font-medium">{t('Client ID')}</label>
-                            <div className="flex items-center gap-2 mt-1">
-                                <input
-                                    type="text"
-                                    value={newClient.client_id}
-                                    readOnly
-                                    className="flex h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs font-mono"
-                                />
-                                <button
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(newClient.client_id);
-                                        toast.success(`${t('Client ID')} ${t('copied to clipboard!')}`);
-                                    }}
-                                    className="p-1 hover:bg-muted rounded"
-                                >
-                                    <Copy className="h-3 w-3" />
-                                </button>
-                            </div>
-                        </div>
-                        <div>
-                            <label className="text-xs font-medium">{t('Client Secret')}</label>
-                            <div className="flex items-center gap-2 mt-1">
-                                <input
-                                    type="text"
-                                    value={newClient.client_secret}
-                                    readOnly
-                                    className="flex h-8 w-full rounded-md border border-primary/30 bg-primary/5 px-2 py-1 text-xs font-mono"
-                                />
-                                <button
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(newClient.client_secret);
-                                        toast.success(`${t('Client Secret')} ${t('copied to clipboard!')}`);
-                                    }}
-                                    className="p-1 hover:bg-muted rounded"
-                                >
-                                    <Copy className="h-3 w-3" />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            ), {
-                duration: 10000,
+            toast.success(t('API Client created successfully! The secret is displayed below.'), {
+                duration: 5000,
             });
             setShownSecrets(prev => new Set(prev).add(newClient.id));
         }
@@ -123,32 +74,34 @@ export default function ApiIndex() {
 
     const handleDeleteClient = useCallback((client: ApiClient) => {
         toast.custom((toastId) => (
-            <div className="flex flex-col gap-2">
-                <p>{t('Are you sure you want to delete this API client? This action cannot be undone.')}</p>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => {
-                            toast.dismiss(toastId);
-                            deleteForm.delete(apiRoutes.clients.destroy({ locale, apiClient: client.id }).url, {
-                                preserveScroll: true,
-                                onSuccess: () => {
-                                    toast.success(t('API Client deleted successfully!'));
-                                },
-                                onError: () => {
-                                    toast.error(t('Failed to delete API client.'));
-                                },
-                            });
-                        }}
-                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                    >
-                        {t('Delete')}
-                    </button>
-                    <button
-                        onClick={() => toast.dismiss(toastId)}
-                        className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                    >
-                        {t('Cancel')}
-                    </button>
+            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg shadow-lg p-4 max-w-md">
+                <div className="flex flex-col gap-3">
+                    <p className="text-sm text-slate-900 dark:text-slate-50">{t('Are you sure you want to delete this API client? This action cannot be undone.')}</p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => {
+                                toast.dismiss(toastId);
+                                deleteForm.delete(apiRoutes.clients.destroy({ locale, apiClient: client.id }).url, {
+                                    preserveScroll: true,
+                                    onSuccess: () => {
+                                        toast.success(t('API Client deleted successfully!'));
+                                    },
+                                    onError: () => {
+                                        toast.error(t('Failed to delete API client.'));
+                                    },
+                                });
+                            }}
+                            className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors"
+                        >
+                            {t('Delete')}
+                        </button>
+                        <button
+                            onClick={() => toast.dismiss(toastId)}
+                            className="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-50 text-sm rounded-md hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                        >
+                            {t('Cancel')}
+                        </button>
+                    </div>
                 </div>
             </div>
         ));
@@ -171,7 +124,7 @@ export default function ApiIndex() {
     };
 
     const baseApiUrl = `${window.location.origin}/api/v1`;
-    const breadcrumbs: BreadcrumbItem[] = [{ name: t('API'), href: `/${locale}/api` }];
+    const breadcrumbs: BreadcrumbItem[] = [{ title: t('API'), href: `/${locale}/api` }];
     const endpointKeys = Object.keys(endpoints);
 
     return (
@@ -256,10 +209,34 @@ export default function ApiIndex() {
                                                 <Button size="icon" variant="outline" onClick={() => copyToClipboard(clients[0].client_id, t('Client ID'))}><Copy className="h-4 w-4" /></Button>
                                             </div>
                                         </div>
-                                        <Alert>
-                                            <AlertCircle className="h-4 w-4" />
-                                            <AlertDescription>{t('The client secret was shown only once during creation. Keep it secure.')}</AlertDescription>
-                                        </Alert>
+                                        {newClient && newClient.id === clients[0].id ? (
+                                            <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-3">
+                                                <div className="flex items-center gap-2 text-primary font-semibold">
+                                                    <Key className="h-4 w-4" />
+                                                    <span>{t('Save these credentials now!')}</span>
+                                                </div>
+                                                <p className="text-sm text-muted-foreground">{t('The client secret will not be shown again.')}</p>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-medium">{t('Client Secret')}</label>
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="text"
+                                                            value={newClient.client_secret}
+                                                            readOnly
+                                                            className="flex h-10 w-full rounded-md border border-primary/30 bg-white dark:bg-slate-950 px-3 py-2 text-sm font-mono"
+                                                        />
+                                                        <Button size="icon" variant="outline" onClick={() => copyToClipboard(newClient.client_secret, t('Client Secret'))}>
+                                                            <Copy className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <Alert>
+                                                <AlertCircle className="h-4 w-4" />
+                                                <AlertDescription>{t('The client secret was shown only once during creation. Keep it secure.')}</AlertDescription>
+                                            </Alert>
+                                        )}
                                         <Separator />
                                         {clients[0].last_used_at && (
                                             <>
