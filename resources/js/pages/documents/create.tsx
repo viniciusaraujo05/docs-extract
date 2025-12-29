@@ -77,7 +77,34 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
     const [checkingDuplicate, setCheckingDuplicate] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [analysisCompleted, setAnalysisCompleted] = useState(false);
+    const [modelLimitReached, setModelLimitReached] = useState(false);
     const [duplicateExists, setDuplicateExists] = useState(false);
+
+    /**
+     * Check model limit
+     */
+    useEffect(() => {
+        const checkModelLimit = async () => {
+            try {
+                const usageResponse = await fetch(`/${locale}/api/usage`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': getCsrfToken(),
+                    },
+                });
+                const usageData = await usageResponse.json();
+                
+                if (usageData.success && usageData.usage.models.is_reached) {
+                    setModelLimitReached(true);
+                }
+            } catch (err) {
+                console.error('Error checking model limit:', err);
+            }
+        };
+        
+        checkModelLimit();
+    }, [locale]);
 
     /**
      * Analisa o documento com IA para detectar campos
@@ -467,24 +494,31 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
             },
             onError: (errors) => {
                 console.error('Save errors:', errors);
+                // Check if it's a limit error
+                if (errors.error && errors.error.includes('limit reached')) {
+                    toast.error(errors.error);
+                } else if (errors.file) {
+                    toast.error(errors.file);
+                } else {
+                    toast.error('Erro ao salvar documento. Tente novamente.');
+                }
                 setSaving(false);
-                toast.error('Erro ao salvar documento');
             },
         });
-    }, [file, selectedTypeId, newTypeName, fields, extractedData]);
-
-    /**
-     * Salva o documento (wrapper para checkAndSave)
-     */
-    const handleSave = useCallback(() => {
-        checkAndSave(false);
-    }, [checkAndSave]);
+    }, [file, selectedTypeId, newTypeName, fields, extractedData, locale]);
 
     /**
      * Descarta e volta à lista
      */
     const handleDiscard = useCallback(() => {
         router.visit(`/${locale}/documents`);
+    }, [locale]);
+
+    /**
+     * Redireciona para a página de upgrade
+     */
+    const handleUpgradePlan = useCallback(() => {
+        router.visit(`/${locale}/settings/billing`);
     }, [locale]);
 
     return (
@@ -541,11 +575,13 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
                         locale={locale}
                         checkingDuplicate={checkingDuplicate}
                         duplicateExists={duplicateExists}
+                        modelLimitReached={modelLimitReached}
                         onFileSelect={handleFileSelect}
                         onTypeSelect={handleTypeSelect}
                         onNewTypeNameChange={handleNewTypeNameChange}
                         onAnalyzeDocument={() => file && analyzeDocument(file)}
                         onNext={() => setStep(2)}
+                        onUpgradePlan={handleUpgradePlan}
                     />
                 )}
 
@@ -582,7 +618,7 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
                         onRemoveField={handleRemoveField}
                         onRenameField={handleRenameField}
                         onBack={() => setStep(2)}
-                        onSave={handleSave}
+                        onSave={checkAndSave}
                         onDiscard={handleDiscard}
                     />
                 )}

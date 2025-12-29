@@ -37,11 +37,13 @@ interface StepUploadProps {
     locale: string;
     checkingDuplicate?: boolean;
     duplicateExists?: boolean;
+    modelLimitReached?: boolean;
     onFileSelect: (file: File | null) => void;
     onTypeSelect: (typeId: number | null) => void;
     onNewTypeNameChange: (name: string) => void;
     onAnalyzeDocument: () => void;
     onNext: () => void;
+    onUpgradePlan?: () => void;
 }
 
 /**
@@ -61,11 +63,13 @@ export function StepUpload({
     locale,
     checkingDuplicate = false,
     duplicateExists = false,
+    modelLimitReached = false,
     onFileSelect,
     onTypeSelect,
     onNewTypeNameChange,
     onAnalyzeDocument,
     onNext,
+    onUpgradePlan,
 }: StepUploadProps) {
     const { t } = useTranslation();
     const [dragActive, setDragActive] = useState(false);
@@ -164,61 +168,78 @@ export function StepUpload({
                     
                     {!showNewType ? (
                         <div className="space-y-3">
-                            {documentTypes.length > 0 ? (
-                                <>
-                                    <Select
-                                        value={selectedTypeId?.toString() ?? ''}
-                                        onValueChange={(v) => onTypeSelect(v ? parseInt(v) : null)}
-                                    >
-                                        <SelectTrigger className={cn(
-                                            "h-11",
-                                            selectedTypeId && "border-green-500 bg-white dark:bg-background"
-                                        )}>
-                                            <SelectValue placeholder={t('Select an existing template...')} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {documentTypes.map((type) => (
-                                                <SelectItem key={type.id} value={type.id.toString()}>
-                                                    <div className="flex items-center gap-2">
-                                                        <Tag className="h-4 w-4" />
-                                                        {type.name}
-                                                        <Badge variant="secondary" className="ml-2 text-xs">
-                                                            {type.fields?.length || 0} {t('fields')}
-                                                        </Badge>
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    
-                                    {selectedType && (
-                                        <div className="flex items-start gap-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 p-3 text-sm">
-                                            <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                                            <span className="text-blue-700 dark:text-blue-300">
-                                                {t('Fields are already defined. Document will be extracted using these fields.')}
-                                            </span>
+                            {modelLimitReached ? (
+                                <div className="space-y-3">
+                                    <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/30">
+                                        <div className="flex items-start gap-3">
+                                            <Info className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                                                    {t('Model limit reached')}
+                                                </p>
+                                                <p className="text-sm text-amber-700 dark:text-amber-300">
+                                                    {t('You have reached the limit of models in your plan. Upgrade to create more models.')}
+                                                </p>
+                                            </div>
                                         </div>
-                                    )}
-                                    
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-px flex-1 bg-border" />
-                                        <span className="text-xs text-muted-foreground">ou</span>
-                                        <div className="h-px flex-1 bg-border" />
                                     </div>
-                                </>
-                            ) : null}
-                            <Button
-                                type="button"
-                                variant={documentTypes.length === 0 ? 'default' : 'outline'}
-                                onClick={() => {
-                                    setShowNewType(true);
-                                    onTypeSelect(null);
-                                }}
-                                className="w-full"
-                            >
-                                <FolderPlus className="mr-2 h-4 w-4" />
-                                {documentTypes.length === 0 ? t('Create First Template') : t('Create New Template')}
-                            </Button>
+                                    {onUpgradePlan && (
+                                        <Button
+                                            type="button"
+                                            onClick={onUpgradePlan}
+                                            className="w-full"
+                                        >
+                                            {t('Upgrade Plan')}
+                                        </Button>
+                                    )}
+                                </div>
+                            ) : (
+                            <>
+                                {documentTypes.length > 0 ? (
+                                    <>
+                                        <Select
+                                            value={selectedTypeId?.toString() || ''}
+                                            onValueChange={(value) => onTypeSelect(value ? parseInt(value) : null)}
+                                        >
+                                            <SelectTrigger className="h-11">
+                                                <SelectValue placeholder={t('Select a template')} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {documentTypes.map((type) => (
+                                                    <SelectItem key={type.id} value={type.id.toString()}>
+                                                        <div className="flex items-center gap-2">
+                                                            <Tag className="h-4 w-4" />
+                                                            <span>{type.name}</span>
+                                                            <Badge variant="secondary" className="ml-2 text-xs">
+                                                                {type.fields?.length || 0} {t('fields')}
+                                                            </Badge>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-px flex-1 bg-border" />
+                                            <span className="text-xs text-muted-foreground">ou</span>
+                                            <div className="h-px flex-1 bg-border" />
+                                        </div>
+                                    </>
+                                ) : null}
+                                <Button
+                                    type="button"
+                                    variant={documentTypes.length === 0 ? 'default' : 'outline'}
+                                    onClick={() => {
+                                        setShowNewType(true);
+                                        onTypeSelect(null);
+                                    }}
+                                    className="w-full"
+                                >
+                                    <FolderPlus className="mr-2 h-4 w-4" />
+                                    {documentTypes.length === 0 ? t('Create First Template') : t('Create New Template')}
+                                </Button>
+                            </>
+                        )}
                         </div>
                     ) : (
                         <div className="space-y-3">

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CheckUsageLimit;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -42,6 +43,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'guest' => RedirectIfAuthenticated::class,
             'plan.limit' => \App\Http\Middleware\CheckPlanLimits::class,
             'track.usage' => \App\Http\Middleware\TrackUsage::class,
+            'usage.limit' => CheckUsageLimit::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

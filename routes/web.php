@@ -45,12 +45,12 @@ Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 
         'show' => 'documents.show',
         'update' => 'documents.update',
         'destroy' => 'documents.destroy',
-    ])->parameters(['documents' => 'document']);
+    ])->parameters(['documents' => 'document'])->middleware(['usage.limit:documents']);
     Route::get('documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
     Route::put('documents/{document}/data', [DocumentController::class, 'updateData'])->name('documents.updateData');
     Route::post('documents/{document}/reprocess', [DocumentController::class, 'reprocess'])->name('documents.reprocess');
 
-    // Document Types
+    // Document Types (Models)
     Route::resource('document-types', DocumentTypeController::class)->names([
         'index' => 'document-types.index',
         'create' => 'document-types.create',
@@ -59,11 +59,11 @@ Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 
         'edit' => 'document-types.edit',
         'update' => 'document-types.update',
         'destroy' => 'document-types.destroy',
-    ])->parameters(['document-types' => 'documentType']);
+    ])->parameters(['document-types' => 'documentType'])->middleware(['usage.limit:models']);
 
     // API Clients Management
     Route::get('api', [ApiClientController::class, 'index'])->name('api.index');
-    Route::post('api/clients', [ApiClientController::class, 'store'])->name('api.clients.store');
+    Route::post('api/clients', [ApiClientController::class, 'store'])->name('api.clients.store')->middleware(['usage.limit:api_keys']);
     Route::post('api/clients/{apiClient}/regenerate', [ApiClientController::class, 'regenerate'])->name('api.clients.regenerate');
     Route::delete('api/clients/{apiClient}', [ApiClientController::class, 'destroy'])->name('api.clients.destroy');
 

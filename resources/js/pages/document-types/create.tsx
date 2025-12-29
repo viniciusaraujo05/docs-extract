@@ -84,8 +84,13 @@ export default function DocumentTypesCreate() {
             onSuccess: () => {
                 toast.success(t('Document type created successfully!'));
             },
-            onError: () => {
-                toast.error(t('Error creating document type'));
+            onError: (errors) => {
+                // Check if it's a limit error
+                if (errors.error && errors.error.includes('limit reached')) {
+                    toast.error(errors.error);
+                } else {
+                    toast.error(t('Error creating document type'));
+                }
             },
             onFinish: () => setSaving(false),
         });

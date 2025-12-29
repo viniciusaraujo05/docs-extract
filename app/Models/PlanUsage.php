@@ -84,6 +84,26 @@ class PlanUsage extends Model
     }
 
     /**
+     * Decrement usage counter
+     */
+    public function decrementUsage(string $type, int $count = 1): bool
+    {
+        if (!in_array($type, ['documents', 'models', 'api_requests', 'reports'])) {
+            return false;
+        }
+        
+        $column = "{$type}_count";
+        
+        // Only decrement if current value is greater than 0
+        if ($this->$column > 0) {
+            $this->decrement($column, $count);
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
      * Get remaining quota for a resource
      */
     public function getRemaining(string $resource, int $limit): int
