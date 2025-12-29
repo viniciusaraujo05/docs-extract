@@ -36,7 +36,6 @@ import {
   TrendingUp,
   Download,
   ExternalLink,
-  Settings,
   ArrowRight,
   Zap,
   Shield,
@@ -241,10 +240,6 @@ export default function BillingIndex() {
     }
   };
 
-  const handleManageBilling = () => {
-    router.visit(`/${locale}/subscription/portal`);
-  };
-
   const handleUpgrade = (priceId: string) => {
     router.visit(`/${locale}/subscription/checkout?price_id=${priceId}`);
   };
@@ -368,17 +363,7 @@ export default function BillingIndex() {
                   )}
                 </CardDescription>
               </div>
-              <div className="flex gap-2">
-                {currentPlan !== 'free' && (
-                  <Button
-                    variant="outline"
-                    onClick={handleManageBilling}
-                    className="gap-2"
-                  >
-                    <Settings className="h-4 w-4" />
-                    Manage Billing
-                  </Button>
-                )}
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   onClick={() => setShowUpgradeDialog(true)}
                   className="gap-2"
@@ -386,16 +371,6 @@ export default function BillingIndex() {
                   <TrendingUp className="h-4 w-4" />
                   {currentPlan === 'free' ? 'Upgrade Plan' : 'Change Plan'}
                 </Button>
-                {currentPlan !== 'free' && (
-                  <Button
-                    variant="destructive"
-                    onClick={() => setShowCancelDialog(true)}
-                    className="gap-2"
-                  >
-                    <XCircle className="h-4 w-4" />
-                    Cancel Subscription
-                  </Button>
-                )}
               </div>
             </div>
           </CardHeader>
@@ -527,7 +502,7 @@ export default function BillingIndex() {
         </div>
 
         {/* Upcoming Invoice */}
-        {upcomingInvoice && (
+        {upcomingInvoice && upcomingInvoice.amount !== undefined && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -634,6 +609,31 @@ export default function BillingIndex() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Cancellation Section */}
+        {currentPlan !== 'free' && (
+          <Card className="border-red-200 dark:border-red-800">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                <XCircle className="h-5 w-5" />
+                Cancel Subscription
+              </CardTitle>
+              <CardDescription>
+                If you need to cancel your subscription, you can do it here. You'll continue to have access until the end of your billing period.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                variant="destructive" 
+                onClick={() => setShowCancelDialog(true)}
+                className="gap-2"
+              >
+                <XCircle className="h-4 w-4" />
+                Cancel Subscription
+              </Button>
+            </CardContent>
+          </Card>
+        )}
         </div>
 
       {/* Upgrade Dialog */}
