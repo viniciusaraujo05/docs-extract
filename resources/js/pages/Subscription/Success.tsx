@@ -36,10 +36,10 @@ export default function SubscriptionSuccess({ session_id }: { session_id: string
                     </div>
 
                     <div className="flex flex-col gap-2">
-                        <Button onClick={() => router.visit('/subscription')} className="w-full">
+                        <Button onClick={() => router.visit(`/${locale}/subscription`)} className="w-full">
                             View Subscription Details
                         </Button>
-                        <Button onClick={() => router.visit('/dashboard')} variant="outline" className="w-full">
+                        <Button onClick={() => router.visit(`/${locale}/dashboard`)} variant="outline" className="w-full">
                             Go to Dashboard
                         </Button>
                     </div>

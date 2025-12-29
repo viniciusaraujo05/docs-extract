@@ -573,7 +573,7 @@ function Header({
 }: {
   locale: string;
   ptVariant: 'pt-PT' | 'pt-BR';
-  onLocaleChange: (locale: string) => void;
+  onLocaleChange: (newLocale: 'pt' | 'en', variant?: 'pt-PT' | 'pt-BR') => void;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
   isAuthenticated?: boolean;

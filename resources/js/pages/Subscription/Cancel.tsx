@@ -22,10 +22,10 @@ export default function SubscriptionCancel() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex flex-col gap-2">
-                        <Button onClick={() => router.visit('/')} className="w-full">
+                        <Button onClick={() => router.visit(`/${locale}`)} className="w-full">
                             View Plans Again
                         </Button>
-                        <Button onClick={() => router.visit('/dashboard')} variant="outline" className="w-full">
+                        <Button onClick={() => router.visit(`/${locale}/dashboard`)} variant="outline" className="w-full">
                             Go to Dashboard
                         </Button>
                     </div>

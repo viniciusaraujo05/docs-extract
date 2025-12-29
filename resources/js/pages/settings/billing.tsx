@@ -500,10 +500,13 @@ export default function BillingIndex() {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-2xl font-bold">
-                    {new Intl.NumberFormat('en-US', {
-                      style: 'currency',
-                      currency: upcomingInvoice?.currency || 'USD',
-                    }).format((upcomingInvoice?.amount || 0) / 100)}
+                    {upcomingInvoice?.amount != null ? 
+                      new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: upcomingInvoice?.currency || 'USD',
+                      }).format((upcomingInvoice?.amount || 0) / 100) :
+                      'N/A'
+                    }
                   </p>
                   <p className="text-sm text-muted-foreground">
                     Due on {upcomingInvoice?.date || 'N/A'}
@@ -535,10 +538,13 @@ export default function BillingIndex() {
                   >
                     <div>
                       <p className="font-medium">
-                        {new Intl.NumberFormat('en-US', {
-                          style: 'currency',
-                          currency: invoice.currency,
-                        }).format(invoice.amount / 100)}
+                        {invoice.amount != null ?
+                          new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: invoice.currency,
+                          }).format(invoice.amount / 100) :
+                          'N/A'
+                        }
                       </p>
                       <p className="text-sm text-muted-foreground">
                         {invoice.date}

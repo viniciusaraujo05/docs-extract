@@ -121,6 +121,11 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
         Route::get('/upcoming-invoice', [PlanController::class, 'upcomingInvoice'])->name('upcoming-invoice');
         Route::get('/invoices', [PlanController::class, 'invoices'])->name('invoices');
     });
+
+    // Usage API route
+    Route::middleware(['auth'])->prefix('api')->name('api.')->group(function () {
+        Route::get('/usage', [\App\Http\Controllers\Api\UsageController::class, 'index'])->name('usage');
+    });
 });
 
 // Demo API routes (public, rate limited: 3 requests per hour)
