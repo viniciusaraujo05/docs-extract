@@ -1172,7 +1172,7 @@
         "invoices": "Invoices",
         "noInvoices": "No invoices yet",
         "downloadInvoice": "Download",
-        "checkout": {
+    "checkout": {
             "title": "Checkout",
             "description": "Complete your subscription",
             "selectedPlan": "Selected Plan",
@@ -1222,5 +1222,9 @@
     "Failed to regenerate API client secret.": "Failed to regenerate API client secret.",
     "Failed to create API client.": "Failed to create API client.",
     "Failed to delete API client.": "Failed to delete API client.",
-    "copied to clipboard!": "copied to clipboard!"
+    "copied to clipboard!": "copied to clipboard!",
+    "File too large": "File is too large. Maximum size is {{size}}MB.",
+    "Invalid file type": "Invalid file type. Accepted types: {{types}}",
+    "Invalid PDF file": "Invalid PDF file: {{fileName}}. The file appears to be corrupted or is not a valid PDF.",
+    "Error reading file": "Error reading file: {{fileName}}. Please try again."
 }

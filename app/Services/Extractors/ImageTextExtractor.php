@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Extractors;
 
 use App\Contracts\TextExtractorInterface;
+use Illuminate\Http\Client\Response;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -46,12 +47,7 @@ final class ImageTextExtractor implements TextExtractorInterface
 
         $base64 = base64_encode($fileContent);
 
-        Log::info('Sending image to OpenAI Vision API', [
-            'file' => $file->getClientOriginalName(),
-            'mime_type' => $mimeType,
-            'file_size_kb' => round(strlen($fileContent) / 1024, 2),
-        ]);
-
+        /** @var Response $response */
         $response = Http::withToken($apiKey)
             ->timeout(self::TIMEOUT)
             ->post('https://api.openai.com/v1/chat/completions', [
@@ -80,21 +76,11 @@ final class ImageTextExtractor implements TextExtractorInterface
         if ($response->successful()) {
             $text = $response->json('choices.0.message.content') ?? '';
 
-            Log::info('Vision API extracted text successfully', [
-                'file' => $file->getClientOriginalName(),
-                'text_length' => mb_strlen($text),
-            ]);
-
             return $text;
         }
 
         $errorBody = $response->json() ?? [];
         $errorMessage = $errorBody['error']['message'] ?? $response->body();
-
-        Log::error('OpenAI Vision API failed', [
-            'status' => $response->status(),
-            'error' => $errorMessage,
-        ]);
 
         throw new RuntimeException("OpenAI Vision API falhou: {$errorMessage}");
     }

@@ -32,7 +32,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
         },
         {
             title: 'Billing',
-            href: `/${locale}/subscription`,
+            href: `/${locale}/settings/billing`,
             icon: null,
         },
         {

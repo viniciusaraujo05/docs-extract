@@ -1,0 +1,85 @@
+<?php
+
+namespace App\Actions;
+
+use App\Services\FieldDetectorService;
+use App\Services\PdfAutoConversionService;
+use App\Services\PdfValidationService;
+use App\Services\TextExtractorManager;
+use Illuminate\Http\UploadedFile;
+
+/**
+ * Action to analyze document and detect fields.
+ */
+class AnalyzeDocument
+{
+    public function __construct(
+        private readonly TextExtractorManager $textExtractor,
+        private readonly FieldDetectorService $fieldDetector,
+        private readonly PdfValidationService $pdfValidationService,
+        private readonly PdfAutoConversionService $pdfConversionService,
+    ) {}
+
+    /**
+     * Analyzes a document and returns detected fields.
+     * 
+     * @param UploadedFile $file The document file
+     * @return array{fields: array, text: string, message: string|null}
+     */
+    public function execute(UploadedFile $file): array
+    {
+        // Try normal extraction first
+        try {
+            $text = $this->textExtractor->extract($file);
+            
+            if ($text === '') {
+                throw new \RuntimeException('No text extracted');
+            }
+            
+            // If we got text, detect fields
+            $fields = $this->fieldDetector->detect($text);
+            
+            return [
+                'fields' => $fields,
+                'text' => mb_substr($text, 0, 1000),
+                'message' => null,
+            ];
+            
+        } catch (\Throwable $e) {
+            // If extraction failed and it's a PDF, try conversion
+            if ($file->getMimeType() === 'application/pdf') {
+                return $this->handlePdfConversion($file);
+            }
+            
+            // For non-PDF files or if conversion fails, return error
+            throw $e;
+        }
+    }
+
+    /**
+     * Handles PDF conversion when normal extraction fails.
+     */
+    private function handlePdfConversion(UploadedFile $file): array
+    {
+        // Check file size first
+        if ($file->getSize() > 5 * 1024 * 1024) { // 5MB
+            return [
+                'fields' => $this->fieldDetector->getDefaultFields(),
+                'text' => '',
+                'message' => 'PDF is too large for automatic analysis. Please convert to images manually.',
+            ];
+        }
+        
+        // Try conversion
+        $text = $this->pdfConversionService->extractWithConversion($file);
+        
+        // Detect fields from converted text
+        $fields = $this->fieldDetector->detect($text);
+        
+        return [
+            'fields' => $fields,
+            'text' => mb_substr($text, 0, 1000),
+            'message' => 'PDF was automatically converted from image for analysis',
+        ];
+    }
+}

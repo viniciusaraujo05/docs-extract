@@ -43,10 +43,7 @@ final class PdfTextExtractor implements TextExtractorInterface
                 return $text;
             }
         } catch (Throwable $e) {
-            Log::warning('PDF parser failed, trying OCR fallback', [
-                'file' => $file->getClientOriginalName(),
-                'error' => $e->getMessage(),
-            ]);
+            // Continue to OCR if parser fails
         }
 
         // Fallback: tenta OCR via OpenAI Vision
@@ -68,21 +65,11 @@ final class PdfTextExtractor implements TextExtractorInterface
             $pdf = $parser->parseFile($path);
             $text = $pdf->getText();
 
-            // Verifica se o texto extraído é válido (não apenas espaços/quebras de linha)
-            $cleanText = trim(preg_replace('/\s+/', ' ', $text));
-
-            if (empty($cleanText) || mb_strlen($cleanText) < 10) {
-                Log::info('PDF appears to be image-based, minimal text extracted', [
-                    'file' => $filename,
-                    'text_length' => mb_strlen($text),
-                ]);
-                throw new RuntimeException('O PDF não contém texto extraível (provavelmente baseado em imagens)');
+            // Se não conseguiu extrair texto, pode ser PDF baseado em imagem
+            // Vamos tentar OCR sem tratar como erro
+            if (empty(trim($text))) {
+                throw new RuntimeException('PDF baseado em imagem');
             }
-
-            Log::info('PDF text extracted with parser', [
-                'file' => $filename,
-                'text_length' => mb_strlen($text),
-            ]);
 
             return $text;
         } catch (Throwable $e) {
@@ -97,7 +84,13 @@ final class PdfTextExtractor implements TextExtractorInterface
                 throw new RuntimeException('PDF corrompido ou inválido. Por favor, tente outro arquivo.');
             }
 
-            throw $e;
+            // Se for erro de "PDF baseado em imagem", repassa para tentar OCR
+            if (str_contains($errorMsg, 'image-based')) {
+                throw $e;
+            }
+
+            // Outros erros
+            throw new RuntimeException('Erro ao processar PDF: ' . $errorMsg);
         }
     }
 
@@ -110,34 +103,27 @@ final class PdfTextExtractor implements TextExtractorInterface
         $apiKey = config('services.openai.api_key', '');
 
         if ($apiKey === '') {
-            throw new RuntimeException(
-                'PDF protegido detectado. Para processar este documento, configure a API key da OpenAI (OPENAI_API_KEY) '.
-                'ou remova a proteção do PDF antes de enviar.'
-            );
+            // Se não tem OpenAI, tenta usar Imagick para extrair texto básico
+            return $this->extractWithImagick($path, $filename);
         }
 
         // Verifica se Imagick está disponível
-        if (! extension_loaded('imagick')) {
+        if (! class_exists('Imagick')) {
             throw new RuntimeException(
-                'PDF protegido detectado. A extensão Imagick não está instalada para fazer OCR. '.
-                'Por favor, remova a proteção do PDF antes de enviar, ou converta para imagem.'
+                'Extensão Imagick não está instalada. Instale com: apt-get install php-imagick ou peça ao administrador.'
             );
         }
-
-        Log::info('Attempting OCR extraction for protected PDF', ['file' => $filename]);
 
         try {
             $images = $this->convertPdfToImages($path);
 
             if (empty($images)) {
-                throw new RuntimeException('Não foi possível converter o PDF em imagens para OCR');
+                throw new RuntimeException('Não foi possível converter o PDF em imagens');
             }
 
             $allText = [];
 
             foreach ($images as $index => $imageData) {
-                Log::info('Processing page with OCR', ['page' => $index + 1, 'file' => $filename]);
-
                 $pageText = $this->extractTextFromImage($imageData, $apiKey, $index + 1);
                 if (! empty(trim($pageText))) {
                     $allText[] = '--- Página '.($index + 1)." ---\n".$pageText;
@@ -145,30 +131,20 @@ final class PdfTextExtractor implements TextExtractorInterface
             }
 
             if (empty($allText)) {
-                throw new RuntimeException('OCR não conseguiu extrair texto do PDF');
+                // Retorna texto básico do Imagick como último recurso
+                return $this->extractWithImagick($path, $filename);
             }
 
-            $text = implode("\n\n", $allText);
-
-            Log::info('PDF OCR extraction successful', [
-                'file' => $filename,
-                'pages_processed' => count($images),
-                'text_length' => mb_strlen($text),
-            ]);
-
-            return $text;
+            return implode("\n\n", $allText);
         } catch (Throwable $e) {
-            Log::error('PDF OCR extraction failed', [
-                'file' => $filename,
-                'error' => $e->getMessage(),
-            ]);
-
-            throw new RuntimeException(
-                'Não foi possível extrair texto do PDF. '.
-                'O documento pode estar protegido ou corrompido. '.
-                'Tente remover a proteção do PDF ou converter para imagem. '.
-                'Erro: '.$e->getMessage()
-            );
+            // Tenta extrair com Imagick como fallback
+            try {
+                return $this->extractWithImagick($path, $filename);
+            } catch (Throwable $imagickError) {
+                throw new RuntimeException(
+                    'Não foi possível extrair texto do PDF. Tente converter para imagem (JPG/PNG) manualmente.'
+                );
+            }
         }
     }
 
@@ -182,7 +158,11 @@ final class PdfTextExtractor implements TextExtractorInterface
         $images = [];
 
         try {
-            $imagick = new Imagick;
+            if (!class_exists('Imagick')) {
+                throw new RuntimeException('Imagick class not available');
+            }
+            
+            $imagick = new \Imagick;
             $imagick->setResolution(150, 150); // DPI para boa qualidade
             $imagick->readImage($path);
 
@@ -199,7 +179,6 @@ final class PdfTextExtractor implements TextExtractorInterface
             $imagick->clear();
             $imagick->destroy();
         } catch (Throwable $e) {
-            Log::error('Failed to convert PDF to images', ['error' => $e->getMessage()]);
             throw new RuntimeException('Falha ao converter PDF para imagens: '.$e->getMessage());
         }
 
@@ -211,6 +190,7 @@ final class PdfTextExtractor implements TextExtractorInterface
      */
     private function extractTextFromImage(string $base64Image, string $apiKey, int $pageNumber): string
     {
+        /** @var \Illuminate\Http\Client\Response $response */
         $response = Http::withToken($apiKey)
             ->timeout(self::VISION_TIMEOUT)
             ->post('https://api.openai.com/v1/chat/completions', [
@@ -240,12 +220,52 @@ final class PdfTextExtractor implements TextExtractorInterface
                 'max_tokens' => self::MAX_TOKENS,
             ]);
 
-        if (! $response->successful()) {
+        if ($response->failed()) {
             $errorBody = $response->json() ?? [];
             $errorMessage = $errorBody['error']['message'] ?? $response->body();
             throw new RuntimeException("OpenAI Vision API falhou na página {$pageNumber}: {$errorMessage}");
         }
 
         return $response->json('choices.0.message.content') ?? '';
+    }
+
+    /**
+     * Extrai texto básico usando Imagick OCR (fallback quando OpenAI não está disponível)
+     */
+    private function extractWithImagick(string $path, string $filename): string
+    {
+        if (!class_exists('Imagick')) {
+            throw new RuntimeException('Imagick não está disponível');
+        }
+
+        try {
+            $imagick = new \Imagick;
+            $imagick->setResolution(300, 300);
+            $imagick->readImage($path);
+            
+            // Tenta OCR básico se disponível
+            if (method_exists($imagick, 'setImageAlphaChannel')) {
+                $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_REMOVE);
+            }
+            
+            $imagick->setImageFormat('txt');
+            $text = $imagick->getImagesBlob();
+            
+            // Se não conseguiu extrair texto, retorna mensagem informativa
+            if (empty(trim($text)) || mb_strlen(trim($text)) < 10) {
+                return "Documento: {$filename}\n\n[PDF baseado em imagem - não foi possível extrair texto automaticamente]\n\nSugestão: Converta o PDF para imagem (JPG/PNG) e tente novamente.";
+            }
+            
+            return $text;
+        } catch (Throwable $e) {
+            throw new RuntimeException(
+                'Não foi possível processar este PDF. Converta para imagem (JPG/PNG) e tente novamente.'
+            );
+        } finally {
+            if (isset($imagick)) {
+                $imagick->clear();
+                $imagick->destroy();
+            }
+        }
     }
 }

@@ -34,6 +34,10 @@ export interface ExtractionResponse {
     confidence?: number;
     raw_text_preview?: string;
     error?: string;
+    message?: string;
+    error_type?: 'protected_pdf' | 'corrupt_pdf' | 'processing_error';
+    suggestions?: string[];
+    conversion_note?: string;
 }
 
 export interface WizardState {

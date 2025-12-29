@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -30,8 +31,7 @@ final class FieldDetectorService
     {
         $apiKey = $this->getApiKey();
 
-        Log::info('Detecting fields with OpenAI', ['text_length' => mb_strlen($text)]);
-
+        /** @var Response $response */
         $response = Http::withToken($apiKey)
             ->timeout(self::TIMEOUT)
             ->post('https://api.openai.com/v1/chat/completions', [
@@ -51,16 +51,12 @@ final class FieldDetectorService
             ]);
 
         if (! $response->successful()) {
-            Log::error('OpenAI field detection failed', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-
-            throw new RuntimeException("Falha ao detectar campos: {$response->status()}");
+            throw new RuntimeException(
+                'OpenAI API error: '.$response->status().' '.$response->body()
+            );
         }
 
         $content = $response->json('choices.0.message.content') ?? '{}';
-        Log::info('OpenAI field detection response received');
 
         return $this->parseResponse($content);
     }
@@ -86,14 +82,14 @@ final class FieldDetectorService
     private function getSystemPrompt(): string
     {
         return <<<'PROMPT'
-Você é um especialista em análise de documentos financeiros e administrativos portugueses/brasileiros.
+Você é um especialista em análise de documentos financeiros e administrativos multilíngue.
 
 Sua tarefa é identificar TODOS os campos de dados presentes no documento que podem ser extraídos de forma estruturada.
 
 REGRAS IMPORTANTES:
-1. Analise cuidadosamente o documento e identifique CADA campo de dado presente
-2. Use nomes de campos (name) em snake_case, baseados no conteúdo real do documento
-3. O label deve ser em Português, descritivo e legível
+1. PRIMEIRO, identifique o idioma principal do documento (português, inglês, espanhol, etc.)
+2. Use nomes de campos (name) em snake_case, baseados no conteúdo real do documento (preferencialmente em inglês para compatibilidade)
+3. O label deve estar NO MESMO IDIOMA do documento, ser descritivo e legível
 4. Identifique o tipo correto: string, number, date, boolean
 5. Para valores monetários, use type "number"
 6. Para datas em qualquer formato, use type "date"
@@ -101,10 +97,12 @@ REGRAS IMPORTANTES:
 8. Seja ABRANGENTE - capture todos os campos relevantes do documento
 9. Preste atenção especial a: valores, datas, identificadores, nomes, endereços, totais, subtotais
 
-EXEMPLOS de campos comuns em documentos portugueses:
-- Recibos de vencimento: nome, nif, niss, vencimento_base, subsidio_alimentacao, irs, seguranca_social, total_bruto, total_liquido
-- Faturas: numero_fatura, data_emissao, nif_cliente, nif_fornecedor, base_tributavel, iva, total
-- Contratos: partes, data_inicio, data_fim, valor, clausulas
+EXEMPLOS de campos comuns:
+- Documentos em PORTUGUÊS: numero_fatura, data_emissao, nif_cliente, total_liquido
+- Documentos em INGLÊS: invoice_number, issue_date, customer_id, net_total
+- Documentos em ESPANHOL: numero_factura, fecha_emision, nif_cliente, total_neto
+
+IMPORTANTE: Responda com labels NO IDIOMA DO DOCUMENTO ORIGINAL. Se o documento está em inglês, todos os labels devem estar em inglês.
 
 Retorne APENAS um objeto JSON válido com a estrutura:
 {
@@ -139,8 +137,6 @@ PROMPT;
                 'type' => $f['type'] ?? 'string',
             ], $fields);
         } catch (\JsonException $e) {
-            Log::warning('Failed to parse field detection response', ['error' => $e->getMessage()]);
-
             return $this->getDefaultFields();
         }
     }

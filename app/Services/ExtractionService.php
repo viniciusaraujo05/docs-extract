@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use JsonException;
@@ -38,12 +39,7 @@ final class ExtractionService
         $model = config('services.openai.model', 'gpt-4o-mini');
         $prompt = $this->buildPrompt($text, $schema);
 
-        Log::info('Sending extraction request to OpenAI', [
-            'model' => $model,
-            'text_length' => mb_strlen($text),
-            'fields_count' => count($schema['fields'] ?? []),
-        ]);
-
+        /** @var Response $response */
         $response = Http::withToken($apiKey)
             ->timeout(self::TIMEOUT)
             ->post(self::API_URL, [
@@ -57,14 +53,23 @@ final class ExtractionService
             ]);
 
         if (! $response->successful()) {
-            Log::error('OpenAI API error', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-            throw new RuntimeException("Falha na comunicação com OpenAI: {$response->status()}");
+            throw new RuntimeException(
+                'OpenAI API error: '.$response->status().' '.$response->body()
+            );
         }
 
-        return $this->parseResponse($response->json('choices.0.message.content'));
+        $content = $response->json('choices.0.message.content') ?? '';
+
+        try {
+            $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+
+            return [
+                'data' => $data['extracted_data'] ?? $data,
+                'confidence' => $data['confidence'] ?? null,
+            ];
+        } catch (JsonException $e) {
+            throw new RuntimeException('Resposta da IA não é JSON válido');
+        }
     }
 
     /**
@@ -72,9 +77,12 @@ final class ExtractionService
      */
     private function getSystemPrompt(): string
     {
-        return 'Você é um assistente especializado em extrair dados estruturados de documentos. '.
-            'Sempre responda em JSON válido, sem markdown ou texto adicional. '.
-            'Extraia os valores exatos do documento.';
+        return 'Você é um assistente especializado em extrair dados estruturados de documentos multilíngues. '.
+            'PRIMEIRO identifique o idioma do documento. '.
+            'Extraia os valores exatos e mantenha os dados no mesmo idioma do documento original. '.
+            'Se o documento está em inglês, extraia os valores em inglês. '.
+            'Se está em português, extraia em português. '.
+            'Sempre responda em JSON válido, sem markdown ou texto adicional.';
     }
 
     /**
@@ -109,7 +117,9 @@ final class ExtractionService
             3. Formate datas como YYYY-MM-DD
             4. Formate números sem símbolos de moeda (ex: 1234.56)
             5. Extraia os valores EXATOS do documento
-            6. Inclua um campo "confidence" de 0 a 100
+            6. MANTENHA O IDIOMA ORIGINAL: Se o documento está em inglês, os valores extraídos devem estar em inglês
+            7. MANTENHA O IDIOMA ORIGINAL: Se o documento está em português, os valores extraídos devem estar em português
+            8. Inclua um campo "confidence" de 0 a 100
 
             FORMATO DE RESPOSTA:
             {"extracted_data": {...}, "confidence": 85}
@@ -130,8 +140,6 @@ final class ExtractionService
             throw new RuntimeException('Resposta vazia da OpenAI');
         }
 
-        Log::info('OpenAI response received', ['content_length' => mb_strlen($content)]);
-
         try {
             $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
 
@@ -140,7 +148,6 @@ final class ExtractionService
                 'confidence' => $data['confidence'] ?? null,
             ];
         } catch (JsonException $e) {
-            Log::error('Invalid JSON from OpenAI', ['error' => $e->getMessage()]);
             throw new RuntimeException('Resposta da IA não é JSON válido');
         }
     }

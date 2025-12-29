@@ -5,7 +5,9 @@ import {
     type SchemaField, 
     type DocumentType,
     type AnalyzeResponse, 
-    type ExtractionResponse 
+    type ExtractionResponse,
+    MAX_FILE_SIZE_MB,
+    ACCEPTED_FILE_TYPES
 } from '@/types/extraction';
 import { Head, router } from '@inertiajs/react';
 import { useCallback, useEffect, useState } from 'react';
@@ -146,6 +148,46 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
         // Se não tem tipo selecionado, limpa campos também
         if (!selectedTypeId) {
             setFields([]);
+        }
+        
+        // Validação inicial do arquivo
+        if (selectedFile) {
+            // Verifica tamanho
+            const maxSize = MAX_FILE_SIZE_MB * 1024 * 1024;
+            if (selectedFile.size > maxSize) {
+                setError(t('File too large', { size: MAX_FILE_SIZE_MB }));
+                return;
+            }
+            
+            // Verifica tipo
+            const fileExtension = selectedFile.name.toLowerCase().split('.').pop();
+            const allowedExtensions = ACCEPTED_FILE_TYPES.split(',');
+            if (!fileExtension || !allowedExtensions.includes(`.${fileExtension}`)) {
+                setError(t('Invalid file type', { types: ACCEPTED_FILE_TYPES }));
+                return;
+            }
+            
+            // Verifica se é PDF e tenta ler basic info
+            if (fileExtension === 'pdf') {
+                try {
+                    // Tenta ler o arquivo para verificar se não está corrompido
+                    const arrayBuffer = await selectedFile.slice(0, 1024).arrayBuffer();
+                    const view = new Uint8Array(arrayBuffer);
+                    
+                    // Verifica header do PDF
+                    const pdfHeader = '%PDF-';
+                    const headerBytes = view.slice(0, 5);
+                    const headerString = String.fromCharCode(...headerBytes);
+                    
+                    if (!headerString.startsWith(pdfHeader)) {
+                        setError(t('Invalid PDF file', { fileName: selectedFile.name }));
+                        return;
+                    }
+                } catch (err) {
+                    setError(t('Error reading file', { fileName: selectedFile.name }));
+                    return;
+                }
+            }
         }
 
         // Verifica se já existe documento com mesmo nome
@@ -311,13 +353,44 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
             
             if (data.success && data.extracted_data) {
                 setExtractedData(data.extracted_data);
+                
+                // Mostra nota de conversão se houver
+                if (data.conversion_note) {
+                    // Você pode mostrar isso como um toast ou notification
+                    console.log('📌 ' + data.conversion_note);
+                }
+                
                 setStep(3);
             } else {
-                setError(data.error ?? 'Erro ao extrair dados');
+                // Trata erro amigável
+                if (data.error_type === 'protected_pdf') {
+                    const suggestions = Array.isArray(data.suggestions) 
+                        ? data.suggestions.map((s: string) => `• ${s}`).join('\n')
+                        : '';
+                    setError(`📄 PDF Protegido\n\n${data.error}\n\nSugestões:\n${suggestions}`);
+                } else if (data.error_type === 'corrupt_pdf') {
+                    const suggestions = Array.isArray(data.suggestions) 
+                        ? data.suggestions.map((s: string) => `• ${s}`).join('\n')
+                        : '';
+                    setError(`⚠️ PDF Corrompido\n\n${data.error}\n\nSugestões:\n${suggestions}`);
+                } else if (data.error_type === 'processing_error') {
+                    const suggestions = Array.isArray(data.suggestions) 
+                        ? data.suggestions.map((s: string) => `• ${s}`).join('\n')
+                        : '';
+                    setError(`❌ Erro no Processamento\n\n${data.error}\n\nSugestões:\n${suggestions}`);
+                } else {
+                    setError(data.error ?? 'Erro ao extrair dados');
+                }
             }
         } catch (err) {
             const message = err instanceof Error ? err.message : 'Erro ao processar documento';
-            setError(message);
+            
+            // Se for erro 500, mostra mensagem amigável
+            if (message.includes('500')) {
+                setError('❌ Não foi possível processar este documento\n\nIsso pode acontecer quando:\n• O PDF está protegido por senha\n• O arquivo está corrompido\n• O formato não é suportado\n\nSugestões:\n• Tente converter o PDF para imagem (JPG/PNG)\n• Verifique se o arquivo não está protegido\n• Use outro PDF se disponível');
+            } else {
+                setError(message);
+            }
             console.error('Extraction error:', err);
         } finally {
             setProcessing(false);
@@ -407,8 +480,24 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
                 {/* Error Alert */}
                 {error && (
                     <div className="mx-auto w-full max-w-2xl animate-in fade-in-50">
-                        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-center text-destructive">
-                            {error}
+                        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-left text-destructive">
+                            <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                                {error}
+                            </div>
+                            <div className="mt-3 flex gap-2">
+                                <button
+                                    onClick={() => setError('')}
+                                    className="text-xs underline hover:no-underline"
+                                >
+                                    Fechar
+                                </button>
+                                <button
+                                    onClick={() => window.location.reload()}
+                                    className="text-xs underline hover:no-underline"
+                                >
+                                    Recarregar página
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

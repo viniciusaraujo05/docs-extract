@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Api\DebugPdfController;
 use App\Http\Controllers\Api\ExtractionController;
 use App\Http\Controllers\Api\GeolocationController;
 use App\Http\Controllers\Api\TranslationController;
+use App\Http\Controllers\Api\UsageController;
 use App\Http\Controllers\Api\V1\AuthTokenController;
 use App\Http\Controllers\Api\V1\DocumentControllerApi;
 use App\Http\Controllers\DocumentController;
@@ -36,17 +38,20 @@ Route::prefix('v1')->name('api.v1.')->middleware([\App\Http\Middleware\ApiV1Json
         Route::post('auth/logout', [AuthTokenController::class, 'destroy'])->name('auth.logout');
 
         // Document endpoints
-        Route::get('documents', [DocumentControllerApi::class, 'index'])->name('documents.index');
-        Route::post('documents', [DocumentControllerApi::class, 'store'])->name('documents.store');
-        Route::get('documents/filter', [DocumentControllerApi::class, 'filter'])->name('documents.filter');
-        Route::get('documents/search/name', [DocumentControllerApi::class, 'searchByName'])->name('documents.search.name');
-        Route::post('documents/search/date', [DocumentControllerApi::class, 'searchByDate'])->name('documents.search.date');
-        Route::get('documents/{id}', [DocumentControllerApi::class, 'show'])->name('documents.show');
+        Route::get('documents', [DocumentControllerApi::class, 'index'])->name('documents.index')->middleware('track.usage:api_requests');
+        Route::post('documents', [DocumentControllerApi::class, 'store'])->name('documents.store')->middleware('track.usage:api_requests');
+        Route::get('documents/filter', [DocumentControllerApi::class, 'filter'])->name('documents.filter')->middleware('track.usage:api_requests');
+        Route::get('documents/search/name', [DocumentControllerApi::class, 'searchByName'])->name('documents.search.name')->middleware('track.usage:api_requests');
+        Route::post('documents/search/date', [DocumentControllerApi::class, 'searchByDate'])->name('documents.search.date')->middleware('track.usage:api_requests');
+        Route::get('documents/{id}', [DocumentControllerApi::class, 'show'])->name('documents.show')->middleware('track.usage:api_requests');
     });
 });
 
 // Protected API routes (using web session authentication)
 Route::middleware(['auth'])->group(function () {
+    // Usage API
+    Route::get('usage', [UsageController::class, 'index']);
+
     // Reports API
     Route::get('reports/{documentType}/data', [ReportController::class, 'getData']);
     Route::get('reports/{documentType}/export', [ReportController::class, 'export']);

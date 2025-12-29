@@ -3,6 +3,7 @@
 use App\Http\Controllers\ApiClientController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentTypeController;
+use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\SubscriptionController;
@@ -15,7 +16,7 @@ Route::get('/', function () {
         'canRegister' => Features::enabled(Features::registration()),
         'locale' => 'pt',
         'auth' => [
-            'user' => auth()->user(),
+            'user' => \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::user() : null,
         ],
     ]);
 })->name('home');
@@ -26,7 +27,7 @@ Route::get('/{locale}', function ($locale) {
         'canRegister' => Features::enabled(Features::registration()),
         'locale' => $locale,
         'auth' => [
-            'user' => auth()->user(),
+            'user' => \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::user() : null,
         ],
     ]);
 })->where(['locale' => 'pt|en'])->name('home.locale');
@@ -65,6 +66,10 @@ Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 
     Route::post('api/clients', [ApiClientController::class, 'store'])->name('api.clients.store');
     Route::post('api/clients/{apiClient}/regenerate', [ApiClientController::class, 'regenerate'])->name('api.clients.regenerate');
     Route::delete('api/clients/{apiClient}', [ApiClientController::class, 'destroy'])->name('api.clients.destroy');
+
+    // Settings Routes
+    Route::get('settings/billing', [PlanController::class, 'billing'])->name('settings.billing');
+    Route::get('subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
 });
 
 // Auth routes with locale (must be BEFORE authenticated routes to avoid conflicts)
@@ -107,6 +112,14 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
         Route::get('portal', [SubscriptionController::class, 'portal'])->name('portal');
         Route::post('cancel-subscription', [SubscriptionController::class, 'cancelSubscription'])->name('cancel-subscription');
         Route::post('resume', [SubscriptionController::class, 'resumeSubscription'])->name('resume');
+    });
+
+    // Plan API routes
+    Route::middleware(['auth'])->prefix('api/plans')->name('api.plans.')->group(function () {
+        Route::get('/', [PlanController::class, 'index'])->name('index');
+        Route::get('/current', [PlanController::class, 'current'])->name('current');
+        Route::get('/upcoming-invoice', [PlanController::class, 'upcomingInvoice'])->name('upcoming-invoice');
+        Route::get('/invoices', [PlanController::class, 'invoices'])->name('invoices');
     });
 });
 

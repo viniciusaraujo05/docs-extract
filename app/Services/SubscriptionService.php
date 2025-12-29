@@ -2,20 +2,48 @@
 
 namespace App\Services;
 
+use App\Models\ApiClient;
+use App\Models\DocumentType;
+use App\Models\PlanUsage;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class SubscriptionService
 {
     public function __construct(
-        private StripeProductService $stripeProductService
+        private StripeProductService $stripeProductService,
+        private UsageTrackingService $usageTrackingService
     ) {}
+
+    /**
+     * Get all active prices from Stripe
+     */
+    public function getActivePrices(): \Illuminate\Support\Collection
+    {
+        return $this->stripeProductService->getActivePrices();
+    }
 
     public function getUserSubscriptionData(User $user): array
     {
+        $subscription = $user->subscription('default');
+        $invoices = $user->invoices();
+        $upcomingInvoice = null;
+        
+        if ($subscription && $subscription->active()) {
+            try {
+                $upcomingInvoice = $user->upcomingInvoice();
+            } catch (\Exception $e) {
+                // No upcoming invoice
+            }
+        }
+
         return [
-            'subscription' => $user->subscription('default'),
+            'subscription' => $subscription,
             'subscriptions' => $user->subscriptions,
-            'invoices' => $user->invoices(),
+            'invoices' => $invoices,
+            'upcoming_invoice' => $upcomingInvoice,
+            'plan_name' => $this->getUserPlanName($user),
+            'plan_features' => $this->getUserPlanFeatures($user),
         ];
     }
 
@@ -80,11 +108,94 @@ class SubscriptionService
         $subscription = $user->subscription('default');
 
         if (! $subscription || ! $subscription->items->first()) {
-            return config('stripe-products.features.free', []);
+            return config('plans.plans.free.features', []);
         }
 
         $productId = $subscription->items->first()->stripe_product;
+        $planKey = config('plans.product_mapping')[$productId] ?? 'free';
 
-        return $this->stripeProductService->getPlanFeatures($productId);
+        return config("plans.plans.{$planKey}.features", []);
+    }
+
+    /**
+     * Get plan limits for user
+     */
+    public function getUserPlanLimits(User $user): array
+    {
+        $subscription = $user->subscription('default');
+
+        if (! $subscription || ! $subscription->items->first()) {
+            return config('plans.plans.free.limits', []);
+        }
+
+        $productId = $subscription->items->first()->stripe_product;
+        $planKey = config('plans.product_mapping')[$productId] ?? 'free';
+
+        return config("plans.plans.{$planKey}.limits", []);
+    }
+
+    /**
+     * Check if user has reached a specific limit
+     */
+    public function hasReachedLimit(User $user, string $feature): bool
+    {
+        $limits = $this->getUserPlanLimits($user);
+        $limit = $limits[$feature] ?? 0;
+
+        if ($limit === -1) {
+            return false; // unlimited
+        }
+
+        // Get current usage from PlanUsage
+        $usage = PlanUsage::getOrCreateForUser($user);
+        $currentUsage = match($feature) {
+            'documents' => $usage->documents_count,
+            'models' => $usage->models_count,
+            'api_requests' => $usage->api_requests_count,
+            'reports' => $usage->reports_count,
+            'api_keys' => ApiClient::where('user_id', $user->id)->count(),
+            default => 0,
+        };
+
+        return $currentUsage >= $limit;
+    }
+
+    /**
+     * Get usage percentage for a feature
+     */
+    public function getUsagePercentage(User $user, string $feature): float
+    {
+        $limits = $this->getUserPlanLimits($user);
+        $limit = $limits[$feature] ?? 0;
+
+        if ($limit === -1) {
+            return 0; // unlimited
+        }
+
+        if ($limit === 0) {
+            return 100; // not available
+        }
+
+        // Get current usage from PlanUsage
+        $usage = PlanUsage::getOrCreateForUser($user);
+        $currentUsage = match($feature) {
+            'documents' => $usage->documents_count,
+            'models' => $usage->models_count,
+            'api_requests' => $usage->api_requests_count,
+            'reports' => $usage->reports_count,
+            'api_keys' => ApiClient::where('user_id', $user->id)->count(),
+            default => 0,
+        };
+
+        return min(100, ($currentUsage / $limit) * 100);
+    }
+
+    /**
+     * Get API usage for current billing period
+     */
+    private function getApiUsage(User $user): int
+    {
+        // TODO: Implement API usage tracking
+        return 0;
     }
 }

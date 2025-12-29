@@ -1,0 +1,603 @@
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { router, usePage } from "@inertiajs/react";
+import { Head } from "@inertiajs/react";
+import { type BreadcrumbItem, type SharedData } from "@/types";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
+import AppLayout from "@/layouts/app-layout";
+import SettingsLayout from "@/layouts/settings/layout";
+import {
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  CreditCard,
+  FileText,
+  Database,
+  Key,
+  Globe,
+  Calendar,
+  DollarSign,
+  TrendingUp,
+  Download,
+  ExternalLink,
+  Settings,
+  ArrowRight,
+  Zap,
+  Shield,
+} from "lucide-react";
+import { toast } from "sonner";
+
+interface Plan {
+  name: string;
+  price: string;
+  interval?: string;
+  tagline: string;
+  features: string[];
+  limits: Record<string, any>;
+  color: string;
+  recommended: boolean;
+  stripe_price_id?: string;
+}
+
+interface Usage {
+  documents: number;
+  models: number;
+  api_requests: number;
+  api_keys: number;
+}
+
+interface UsagePercentages {
+  documents: number;
+  models: number;
+  api_requests: number;
+  api_keys: number;
+}
+
+interface Invoice {
+  id: string;
+  amount: number;
+  currency: string;
+  date: string;
+  status: string;
+  url: string;
+}
+
+export default function BillingIndex() {
+  const { t, i18n } = useTranslation();
+  const page = usePage<SharedData>();
+  const { auth } = page.props;
+  const [locale, setLocale] = useState('pt');
+
+  useEffect(() => {
+    const savedLocale = localStorage.getItem('selected-locale') || 'pt';
+    setLocale(savedLocale);
+  }, []);
+
+  const BREADCRUMBS: BreadcrumbItem[] = [
+    { title: t('Dashboard'), href: `/${locale}/dashboard` },
+    { title: t('Settings'), href: `/${locale}/settings/billing` },
+    { title: t('Billing', 'Billing'), href: `/${locale}/settings/billing` },
+  ];
+
+  const [loading, setLoading] = useState(true);
+  const [currentPlan, setCurrentPlan] = useState<string>('free');
+  const [planData, setPlanData] = useState<Plan | null>(null);
+  const [usage, setUsage] = useState<Usage>({ documents: 0, models: 0, api_requests: 0, api_keys: 0 });
+  const [usagePercentages, setUsagePercentages] = useState<UsagePercentages>({
+    documents: 0,
+    models: 0,
+    api_requests: 0,
+    api_keys: 0,
+  });
+  const [nextBillingDate, setNextBillingDate] = useState<string | null>(null);
+  const [isTrial, setIsTrial] = useState(false);
+  const [isPastDue, setIsPastDue] = useState(false);
+  const [isCanceled, setIsCanceled] = useState(false);
+  const [upcomingInvoice, setUpcomingInvoice] = useState<any>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [availablePlans, setAvailablePlans] = useState<Plan[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Default limits for free plan
+  const defaultLimits = {
+    documents: 20,
+    models: 2,
+    api_requests: 100,
+    api_keys: 1,
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch current plan and usage
+      const currentResponse = await fetch(`/${locale}/api/plans/current`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+      });
+      const currentData = await currentResponse.json();
+
+      setCurrentPlan(currentData.current_plan || 'free');
+      setPlanData(currentData.plan_data || null);
+      setUsage(currentData.usage || { documents: 0, models: 0, api_requests: 0, api_keys: 0 });
+      setUsagePercentages(currentData.usage_percentages || { documents: 0, models: 0, api_requests: 0, api_keys: 0 });
+      setNextBillingDate(currentData.next_billing_date || null);
+      setIsTrial(currentData.is_trial || false);
+      setIsPastDue(currentData.is_past_due || false);
+      setIsCanceled(currentData.is_canceled || false);
+
+      // Fetch upcoming invoice
+      try {
+        const invoiceResponse = await fetch(`/${locale}/api/plans/upcoming-invoice`, {
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          },
+        });
+        if (invoiceResponse.ok) {
+          const invoiceData = await invoiceResponse.json();
+          setUpcomingInvoice(invoiceData);
+        }
+      } catch (e) {
+        // No upcoming invoice
+      }
+
+      // Fetch invoice history
+      const invoicesResponse = await fetch(`/${locale}/api/plans/invoices`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+      });
+      const invoicesData = await invoicesResponse.json();
+      setInvoices(invoicesData);
+
+      // Fetch all plans for upgrade
+      const plansResponse = await fetch(`/${locale}/api/plans`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+      });
+      const plansData = await plansResponse.json();
+      setAvailablePlans((Object.values(plansData) as Plan[]).filter((p: Plan) => p.name !== currentData.current_plan));
+    } catch (error) {
+      console.error('Error fetching billing data:', error);
+      setError('Failed to load billing information');
+      toast.error('Failed to load billing information');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManageBilling = () => {
+    router.visit(`/${locale}/subscription/portal`);
+  };
+
+  const handleUpgrade = (priceId: string) => {
+    router.visit(`/${locale}/subscription/checkout?price_id=${priceId}`);
+  };
+
+  const getStatusBadge = () => {
+    if (isPastDue) {
+      return (
+        <Badge variant="destructive" className="flex items-center gap-1">
+          <XCircle className="h-3 w-3" />
+          Past Due
+        </Badge>
+      );
+    }
+    if (isCanceled) {
+      return (
+        <Badge variant="secondary" className="flex items-center gap-1">
+          <AlertCircle className="h-3 w-3" />
+          Canceled
+        </Badge>
+      );
+    }
+    if (isTrial) {
+      return (
+        <Badge variant="default" className="flex items-center gap-1">
+          <Zap className="h-3 w-3" />
+          Trial
+        </Badge>
+      );
+    }
+    if (currentPlan !== 'free') {
+      return (
+        <Badge className="flex items-center gap-1 bg-green-100 text-green-800 border-green-200">
+          <CheckCircle className="h-3 w-3" />
+          Active
+        </Badge>
+      );
+    }
+    return null;
+  };
+
+  const getUsageColor = (percentage: number) => {
+    if (percentage >= 95) return 'text-red-600';
+    if (percentage >= 80) return 'text-yellow-600';
+    return 'text-green-600';
+  };
+
+  const getProgressColor = (percentage: number) => {
+    if (percentage >= 95) return 'bg-red-500';
+    if (percentage >= 80) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-muted rounded w-1/4 mb-4"></div>
+          <div className="grid gap-4">
+            <div className="h-32 bg-muted rounded"></div>
+            <div className="h-48 bg-muted rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  return (
+    <AppLayout breadcrumbs={BREADCRUMBS}>
+      <Head title={t('Billing', 'Billing & Subscription')} />
+      
+      <SettingsLayout>
+        <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <h3 className="text-lg font-medium">{t('billing.title', 'Billing & Subscription')}</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            {t('billing.subtitle', 'Manage your plan, view usage, and control your subscription.')}
+          </p>
+        </div>
+
+        {/* Current Plan Overview */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-3">
+                  <span>Current Plan</span>
+                  {getStatusBadge()}
+                </CardTitle>
+                <CardDescription>
+                  You are currently on the {planData?.name || 'FREE'} plan ({planData?.price || '€0'}
+                  {planData?.interval ? `/${planData.interval}` : ''})
+                  {nextBillingDate && (
+                    <span className="ml-2">
+                      • Next billing date: {nextBillingDate}
+                    </span>
+                  )}
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                {currentPlan !== 'free' && (
+                  <Button
+                    variant="outline"
+                    onClick={handleManageBilling}
+                    className="gap-2"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Manage Billing
+                  </Button>
+                )}
+                <Button
+                  onClick={() => setShowUpgradeDialog(true)}
+                  className="gap-2"
+                >
+                  <TrendingUp className="h-4 w-4" />
+                  {currentPlan === 'free' ? 'Upgrade Plan' : 'Change Plan'}
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+
+        {/* Usage Overview */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Documents
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span>{usage?.documents || 0} of {planData?.limits?.documents === -1 ? '∞' : (planData?.limits?.documents || defaultLimits.documents)}</span>
+                  <span className={getUsageColor(usagePercentages?.documents || 0)}>
+                    {(usagePercentages?.documents || 0).toFixed(0)}%
+                  </span>
+                </div>
+                <Progress
+                  value={usagePercentages?.documents || 0}
+                  className="h-2"
+                />
+                {usagePercentages?.documents >= 80 && (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {usagePercentages?.documents >= 95
+                        ? "You've reached your document limit. Upgrade to continue uploading."
+                        : "You're approaching your document limit. Consider upgrading soon."}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Models
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span>{usage?.models || 0} of {planData?.limits?.models === -1 ? '∞' : (planData?.limits?.models || defaultLimits.models)}</span>
+                  <span className={getUsageColor(usagePercentages?.models || 0)}>
+                    {(usagePercentages?.models || 0).toFixed(0)}%
+                  </span>
+                </div>
+                <Progress
+                  value={usagePercentages?.models || 0}
+                  className="h-2"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                API Requests
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span>{usage?.api_requests || 0} of {planData?.limits?.api_requests === -1 ? '∞' : (planData?.limits?.api_requests || defaultLimits.api_requests)}</span>
+                  <span className={getUsageColor(usagePercentages?.api_requests || 0)}>
+                    {(usagePercentages?.api_requests || 0).toFixed(0)}%
+                  </span>
+                </div>
+                <Progress
+                  value={usagePercentages?.api_requests || 0}
+                  className="h-2"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Key className="h-5 w-5" />
+                API Keys
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span>{usage?.api_keys || 0} of {planData?.limits?.api_keys === -1 ? '∞' : (planData?.limits?.api_keys || defaultLimits.api_keys)}</span>
+                  <span className={getUsageColor(usagePercentages?.api_keys || 0)}>
+                    {(usagePercentages?.api_keys || 0).toFixed(0)}%
+                  </span>
+                </div>
+                <Progress
+                  value={usagePercentages?.api_keys || 0}
+                  className="h-2"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Upcoming Invoice */}
+        {upcomingInvoice && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Upcoming Invoice
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-2xl font-bold">
+                    {new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: upcomingInvoice?.currency || 'USD',
+                    }).format((upcomingInvoice?.amount || 0) / 100)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Due on {upcomingInvoice?.date || 'N/A'}
+                  </p>
+                </div>
+                <Button variant="outline" size="sm">
+                  View Details
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Invoice History */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5" />
+              Invoice History
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {invoices.length > 0 ? (
+              <div className="space-y-3">
+                {invoices.map((invoice) => (
+                  <div
+                    key={invoice.id}
+                    className="flex items-center justify-between p-3 rounded-lg border"
+                  >
+                    <div>
+                      <p className="font-medium">
+                        {new Intl.NumberFormat('en-US', {
+                          style: 'currency',
+                          currency: invoice.currency,
+                        }).format(invoice.amount / 100)}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {invoice.date}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
+                    >
+                      <a
+                        href={invoice.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="gap-2"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        View
+                      </a>
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-8">
+                No invoices yet
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Features Summary */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Plan Features</CardTitle>
+            <CardDescription>
+              What's included in your {planData?.name} plan
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {planData?.features.map((feature, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                  <span className="text-sm">{feature}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        </div>
+
+      {/* Upgrade Dialog */}
+      <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Change Your Plan</DialogTitle>
+            <DialogDescription>
+              You are currently on the <strong>{planData?.name || 'FREE'}</strong> plan. Select a new plan that fits your needs
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 md:grid-cols-2 mt-4">
+            {availablePlans.map((plan) => (
+              <Card
+                key={plan.name}
+                className={`relative ${
+                  plan.recommended ? 'border-primary' : ''
+                }`}
+              >
+                {plan.recommended && (
+                  <Badge className="absolute -top-2 left-4">
+                    Recommended
+                  </Badge>
+                )}
+                <CardHeader>
+                  <CardTitle>{plan.name}</CardTitle>
+                  <CardDescription>{plan.tagline}</CardDescription>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-bold">{plan.price}</span>
+                    {plan.interval && (
+                      <span className="text-muted-foreground">/{plan.interval}</span>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 mb-4">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    className="w-full"
+                    onClick={() => plan.stripe_price_id && handleUpgrade(plan.stripe_price_id)}
+                  >
+                    Subscribe to {plan.name}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+      </SettingsLayout>
+    </AppLayout>
+  );
+}

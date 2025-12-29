@@ -36,6 +36,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Override default RedirectIfAuthenticated with locale-aware version
         $middleware->alias([
             'guest' => RedirectIfAuthenticated::class,
+            'plan.limit' => \App\Http\Middleware\CheckPlanLimits::class,
+            'track.usage' => \App\Http\Middleware\TrackUsage::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

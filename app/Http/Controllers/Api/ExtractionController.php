@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\AnalyzeDocument;
+use App\Actions\ExtractDocumentData;
+use App\Actions\FormatErrorMessage;
 use App\Http\Controllers\Controller;
-use App\Services\ExtractionService;
+use App\Services\DocumentExtractionService;
 use App\Services\FieldDetectorService;
-use App\Services\TextExtractorManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
@@ -27,9 +28,9 @@ final class ExtractionController extends Controller
     private const ALLOWED_MIMES = ['pdf', 'jpg', 'jpeg', 'png', 'webp'];
 
     public function __construct(
-        private readonly TextExtractorManager $textExtractor,
         private readonly FieldDetectorService $fieldDetector,
-        private readonly ExtractionService $extractionService,
+        private readonly DocumentExtractionService $extractionService,
+        private readonly AnalyzeDocument $analyzeAction,
     ) {}
 
     /**
@@ -45,28 +46,16 @@ final class ExtractionController extends Controller
         try {
             /** @var UploadedFile $file */
             $file = $request->file('file');
-            $text = $this->textExtractor->extract($file);
-
-            if ($text === '') {
-                return $this->successResponse(
-                    $this->fieldDetector->getDefaultFields(),
-                    ''
-                );
-            }
-
-            $suggestedFields = $this->fieldDetector->detect($text);
-
+            
+            $result = $this->analyzeAction->execute($file);
+            
             return $this->successResponse(
-                $suggestedFields,
-                mb_substr($text, 0, 1000)
+                $result['fields'],
+                $result['text'],
+                $result['message']
             );
+            
         } catch (Throwable $e) {
-            Log::error('Document analysis failed', [
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-            ]);
-
             return $this->successResponse(
                 $this->fieldDetector->getDefaultFields(),
                 '',
@@ -76,70 +65,67 @@ final class ExtractionController extends Controller
     }
 
     /**
-     * Extrai dados estruturados de um documento.
-     *
-     * @param  Request  $request  Request com ficheiro e campos
-     * @return JsonResponse Dados extraídos
+     * Extracts structured data from a document.
+     * 
+     * Attempts normal extraction first, then tries PDF to image conversion
+     * if the initial extraction fails and the file is a PDF.
      */
     public function extract(Request $request): JsonResponse
     {
+        // Parse fields before validation
+        $fields = $request->get('fields');
+        if (is_string($fields)) {
+            $fields = json_decode($fields, true, 512, JSON_THROW_ON_ERROR);
+            $request->merge(['fields' => $fields]);
+        }
+        
         $validated = $this->validateFileAndFields($request);
-
+        
         try {
             /** @var UploadedFile $file */
             $file = $request->file('file');
-
-            // Aceita fields como array ou JSON string
-            $fields = is_string($validated['fields'])
-                ? json_decode($validated['fields'], true, 512, JSON_THROW_ON_ERROR)
-                : $validated['fields'];
-
-            $text = $this->textExtractor->extract($file);
-
-            if ($text === '') {
-                $text = "Documento: {$file->getClientOriginalName()}";
+            $fields = $validated['fields'];
+            
+            $result = $this->extractionService->extract($file, $fields);
+            
+            if ($result['success']) {
+                return response()->json([
+                    'success' => true,
+                    'extracted_data' => $result['data'],
+                    'confidence' => $result['confidence'],
+                    'raw_text_preview' => $result['raw_text_preview'] ?? '',
+                    'conversion_note' => $result['conversion_note'] ?? null,
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'error' => $result['error'],
+                    'error_type' => $result['error_type'] ?? 'processing_error',
+                    'suggestions' => $result['suggestions'] ?? [],
+                ], 200);
             }
-
-            $result = $this->extractionService->extract($text, ['fields' => $fields]);
-
-            return response()->json([
-                'success' => true,
-                'extracted_data' => $result['data'] ?? $result,
-                'confidence' => $result['confidence'] ?? null,
-                'raw_text_preview' => mb_substr($text, 0, 500),
-            ]);
+            
         } catch (\JsonException $e) {
-            Log::error('Invalid JSON in fields', [
-                'error' => $e->getMessage(),
-            ]);
-
             return response()->json([
                 'success' => false,
                 'error' => 'Formato de campos inválido. Por favor, tente novamente.',
             ], 422);
         } catch (Throwable $e) {
-            Log::error('Extraction failed', [
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            // Mensagens de erro mais amigáveis
-            $userMessage = match (true) {
-                str_contains($e->getMessage(), 'Secured pdf') || str_contains($e->getMessage(), 'protegido') => 'O PDF está protegido/encriptado. Por favor, remova a proteção antes de enviar.',
-                str_contains($e->getMessage(), 'password') || str_contains($e->getMessage(), 'senha') => 'O PDF requer senha. Por favor, envie um PDF sem proteção.',
-                str_contains($e->getMessage(), 'corrompido') || str_contains($e->getMessage(), 'corrupt') => 'O arquivo parece estar corrompido. Por favor, tente outro arquivo.',
-                str_contains($e->getMessage(), 'Imagick') => 'Não foi possível processar este PDF. Tente converter para imagem (JPG/PNG) antes de enviar.',
-                default => 'Erro ao processar documento. Por favor, verifique se o arquivo não está protegido ou corrompido.',
-            };
-
             return response()->json([
                 'success' => false,
-                'error' => $userMessage,
-                'message' => $userMessage,
-            ], 500); // 500 para erros de processamento, não 422
+                'error' => 'Erro ao processar documento. Tente novamente.',
+            ], 500);
         }
+    }
+
+    /**
+     * Parses fields from request data.
+     */
+    private function parseFields(mixed $fields): array
+    {
+        return is_string($fields)
+            ? json_decode($fields, true, 512, JSON_THROW_ON_ERROR)
+            : $fields;
     }
 
     /**
@@ -167,7 +153,10 @@ final class ExtractionController extends Controller
                 implode(',', self::ALLOWED_MIMES),
                 self::MAX_FILE_SIZE
             ),
-            'fields' => 'required', // Aceita array ou JSON string
+            'fields' => 'required|array',
+            'fields.*.name' => 'required|string',
+            'fields.*.label' => 'required|string',
+            'fields.*.type' => 'required|string|in:string,number,date,email,phone,currency',
         ], [
             'file.required' => 'Por favor, envie um documento.',
             'file.mimes' => 'Apenas arquivos PDF e imagens (JPG, PNG, WEBP) são suportados.',
