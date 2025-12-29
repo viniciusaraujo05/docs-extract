@@ -112,6 +112,7 @@ export default function BillingIndex() {
   const [upcomingInvoice, setUpcomingInvoice] = useState<any>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [availablePlans, setAvailablePlans] = useState<Plan[]>([]);
   const [error, setError] = useState<string | null>(null);
   
@@ -242,6 +243,28 @@ export default function BillingIndex() {
     router.visit(`/${locale}/subscription/checkout?price_id=${priceId}`);
   };
 
+  const handleCancelSubscription = async () => {
+    try {
+      const response = await fetch(`/${locale}/api/plans/cancel-subscription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+      });
+
+      if (response.ok) {
+        setShowCancelDialog(false);
+        window.location.reload();
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Failed to cancel subscription');
+      }
+    } catch (error) {
+      setError('Failed to cancel subscription');
+    }
+  };
+
   const getStatusBadge = () => {
     if (isPastDue) {
       return (
@@ -357,6 +380,16 @@ export default function BillingIndex() {
                   <TrendingUp className="h-4 w-4" />
                   {currentPlan === 'free' ? 'Upgrade Plan' : 'Change Plan'}
                 </Button>
+                {currentPlan !== 'free' && (
+                  <Button
+                    variant="destructive"
+                    onClick={() => setShowCancelDialog(true)}
+                    className="gap-2"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Cancel Subscription
+                  </Button>
+                )}
               </div>
             </div>
           </CardHeader>
@@ -500,7 +533,7 @@ export default function BillingIndex() {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-2xl font-bold">
-                    {upcomingInvoice?.amount != null ? 
+                    {upcomingInvoice?.amount != null && !isNaN(upcomingInvoice.amount) ? 
                       new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: upcomingInvoice?.currency || 'USD',
@@ -647,6 +680,26 @@ export default function BillingIndex() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Subscription Dialog */}
+      <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel Subscription</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel your subscription? You will lose access to all premium features at the end of your billing period.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 mt-4">
+            <Button variant="outline" onClick={() => setShowCancelDialog(false)}>
+              Keep Subscription
+            </Button>
+            <Button variant="destructive" onClick={handleCancelSubscription}>
+              Cancel Subscription
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

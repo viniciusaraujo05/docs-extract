@@ -120,6 +120,7 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
         Route::get('/current', [PlanController::class, 'current'])->name('current');
         Route::get('/upcoming-invoice', [PlanController::class, 'upcomingInvoice'])->name('upcoming-invoice');
         Route::get('/invoices', [PlanController::class, 'invoices'])->name('invoices');
+        Route::post('/cancel-subscription', [SubscriptionController::class, 'cancelSubscription'])->name('cancel-subscription');
     });
 
     // Usage API route

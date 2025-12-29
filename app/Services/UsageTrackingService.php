@@ -43,7 +43,12 @@ class UsageTrackingService
         
         $remaining = [];
         foreach ($limits as $resource => $limit) {
-            $remaining[$resource] = $usage->getRemaining($resource, $limit);
+            // Only process numeric limits (skip arrays like 'exports' and booleans like 'webhooks')
+            if (is_int($limit)) {
+                $remaining[$resource] = $usage->getRemaining($resource, $limit);
+            } else {
+                $remaining[$resource] = $limit; // Pass through non-numeric values
+            }
         }
         
         return $remaining;
