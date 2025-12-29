@@ -132,14 +132,16 @@ class PlanController extends Controller
 
         try {
             $invoice = $user->upcomingInvoice();
+            $amount = $invoice->total();
+            
             return response()->json([
-                'amount' => $invoice->total(),
+                'amount' => is_numeric($amount) ? (int)$amount : 0,
                 'currency' => strtoupper($invoice->currency),
                 'date' => $invoice->date()->format('F j, Y'),
                 'items' => collect($invoice->invoiceItems())->map(function ($item) {
                     return [
                         'description' => $item->description,
-                        'amount' => $item->total(),
+                        'amount' => is_numeric($item->total()) ? (int)$item->total() : 0,
                         'currency' => strtoupper($item->currency),
                     ];
                 })->toArray(),
@@ -156,9 +158,10 @@ class PlanController extends Controller
     {
         $user = $request->user();
         $invoices = $user->invoices()->map(function ($invoice) {
+            $amount = $invoice->total();
             return [
                 'id' => $invoice->id,
-                'amount' => $invoice->total(),
+                'amount' => is_numeric($amount) ? (int)$amount : 0,
                 'currency' => strtoupper($invoice->currency),
                 'date' => $invoice->date()->format('F j, Y'),
                 'status' => $invoice->status,

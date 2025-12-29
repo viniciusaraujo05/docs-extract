@@ -122,11 +122,9 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
         Route::get('/invoices', [PlanController::class, 'invoices'])->name('invoices');
         Route::post('/cancel-subscription', [SubscriptionController::class, 'cancelSubscription'])->name('cancel-subscription');
     });
-
+    
     // Usage API route
-    Route::middleware(['auth'])->prefix('api')->name('api.')->group(function () {
-        Route::get('/usage', [\App\Http\Controllers\Api\UsageController::class, 'index'])->name('usage');
-    });
+    Route::middleware(['auth'])->get('api/usage', [\App\Http\Controllers\Api\UsageController::class, 'index'])->name('api.usage');
 });
 
 // Demo API routes (public, rate limited: 3 requests per hour)
