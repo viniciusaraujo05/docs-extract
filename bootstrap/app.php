@@ -33,6 +33,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Session\Middleware\StartSession::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'stripe/webhook',
+        ]);
+
         // Override default RedirectIfAuthenticated with locale-aware version
         $middleware->alias([
             'guest' => RedirectIfAuthenticated::class,
