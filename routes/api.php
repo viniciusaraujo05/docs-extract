@@ -53,10 +53,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('usage', [UsageController::class, 'index']);
 
     // Reports API
-    Route::get('reports/{documentType}/data', [ReportController::class, 'getData']);
-    Route::get('reports/{documentType}/export', [ReportController::class, 'export']);
-    Route::get('reports/{documentType}/latest-analysis', [ReportController::class, 'getLatestAnalysis']);
-    Route::post('reports/{documentType}/analyze-ai', [ReportController::class, 'analyzeWithAI']);
+    Route::get('reports/{documentType}/data', [ReportController::class, 'getData'])->middleware('track.usage:api_requests');
+    Route::get('reports/{documentType}/export', [ReportController::class, 'export'])->middleware('track.usage:api_requests');
+    Route::get('reports/{documentType}/latest-analysis', [ReportController::class, 'getLatestAnalysis'])->middleware('track.usage:api_requests');
+    Route::post('reports/{documentType}/analyze-ai', [ReportController::class, 'analyzeWithAI'])->middleware('track.usage:api_requests');
 
     // Report Configurations API
     Route::get('reports/{documentType}/configurations', [ReportConfigurationController::class, 'index']);
@@ -68,7 +68,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('reports/configurations/{configuration}/generate', [ReportConfigurationController::class, 'generate']);
 
     // Documents API
-    Route::post('documents/analyze', [ExtractionController::class, 'analyze']);
-    Route::post('documents/extract', [ExtractionController::class, 'extract']);
+    Route::post('documents/analyze', [ExtractionController::class, 'analyze'])->middleware('track.usage:api_requests');
+    Route::post('documents/extract', [ExtractionController::class, 'extract'])->middleware('track.usage:api_requests');
     Route::get('documents/check-name', [DocumentController::class, 'checkName']);
 });

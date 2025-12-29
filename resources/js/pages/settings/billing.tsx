@@ -210,7 +210,7 @@ export default function BillingIndex() {
       if (invoiceResponse.status === 'fulfilled') {
         const invoiceData = await invoiceResponse.value.json();
         // Only set if we have actual data (not null)
-        if (invoiceData && invoiceData.amount !== undefined) {
+        if (invoiceData && typeof invoiceData.amount === 'number') {
           setUpcomingInvoice(invoiceData);
         }
       }
@@ -226,7 +226,11 @@ export default function BillingIndex() {
         });
         if (invoicesResponse.ok) {
           const invoicesData = await invoicesResponse.json();
-          setInvoices(invoicesData || []);
+          // Filter only valid invoices with numeric amount
+          const validInvoices = (invoicesData || []).filter((invoice: any) => 
+            invoice && typeof invoice.amount === 'number'
+          );
+          setInvoices(validInvoices);
         }
       } catch (e) {
         console.error('Error fetching invoices:', e);
@@ -514,7 +518,7 @@ export default function BillingIndex() {
               <div className="flex justify-between items-center">
                 <div>
                   <p className="text-2xl font-bold">
-                    {upcomingInvoice?.amount != null && !isNaN(upcomingInvoice.amount) ? 
+                    {upcomingInvoice?.amount != null ? 
                       new Intl.NumberFormat('en-US', {
                         style: 'currency',
                         currency: upcomingInvoice?.currency || 'USD',
@@ -552,7 +556,7 @@ export default function BillingIndex() {
                   >
                     <div>
                       <p className="font-medium">
-                        {invoice.amount != null && !isNaN(invoice.amount) ?
+                        {invoice.amount != null ?
                           new Intl.NumberFormat('en-US', {
                             style: 'currency',
                             currency: invoice.currency,
