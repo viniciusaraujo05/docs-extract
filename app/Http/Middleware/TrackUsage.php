@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use App\Services\UsageTrackingService;
 use Closure;
 use Illuminate\Http\Request;
@@ -21,9 +22,12 @@ class TrackUsage
         // Get response first
         $response = $next($request);
         
-        // Only track if request was successful and user is authenticated
+        // Only track if request was successful and authenticated user is a User model
         if ($response->isSuccessful() && $user = $request->user()) {
-            $this->usageTrackingService->trackUsage($user, $resource);
+            // Only track for web users (not API clients)
+            if ($user instanceof User) {
+                $this->usageTrackingService->trackUsage($user, $resource);
+            }
         }
         
         return $response;

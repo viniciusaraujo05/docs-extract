@@ -1051,6 +1051,34 @@
     "Invalid PDF file": "Ficheiro PDF inválido: {{fileName}}. O ficheiro parece estar corrompido ou não é um PDF válido.",
     "Error reading file": "Erro ao ler ficheiro: {{fileName}}. Tente novamente.",
     "Document limit reached": "Atingiu o limite de documentos ({{used}}/{{limit}}). Faça upgrade do seu plano para enviar mais documentos.",
-    "Model limit reached": "Atingiu o limite de modelos ({{used}}/{{limit}}). Faça upgrade do seu plano para criar mais modelos."
+    "Model limit reached": "Atingiu o limite de modelos ({{used}}/{{limit}}). Faça upgrade do seu plano para criar mais modelos.",
+    "billing": {
+      "title": "Faturamento e Subscrição",
+      "subtitle": "Gerencie o seu plano, visualize o uso e controle a sua subscrição.",
+      "current_plan": "Plano Atual",
+      "free_plan": "Gratuito",
+      "status": "Estado",
+      "active": "Ativo",
+      "trial": "Teste",
+      "past_due": "Em Atraso",
+      "canceled": "Cancelado",
+      "next_billing": "Próxima Cobrança",
+      "change_plan": "Alterar Plano",
+      "current_plan_description": "Você está atualmente no",
+      "plan_select": "plano. Selecione um novo plano que atenda às suas necessidades",
+      "usage": "Uso",
+      "documents": "Documentos",
+      "models": "Modelos",
+      "api_requests": "Requisições API",
+      "api_keys": "Chaves API",
+      "upgrade": "Fazer Upgrade",
+      "manage": "Gerenciar",
+      "cancel": "Cancelar",
+      "current": "Atual",
+      "limit_reached": "Limite Atingido",
+      "approaching_limit": "Aproximando-se do Limite",
+      "upgrade_to_continue": "Faça upgrade para continuar",
+      "consider_upgrading": "Considere fazer upgrade em breve"
+    }
   }
 }

@@ -131,92 +131,100 @@ export default function BillingIndex() {
     try {
       setLoading(true);
 
-      // Fetch usage data from new API
-      const usageResponse = await fetch(`/${locale}/api/usage`, {
-        headers: {
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-        },
-      });
-      const usageData = await usageResponse.json();
+      // Fetch all data in parallel
+      const [usageResponse, planResponse, plansResponse, invoiceResponse] = await Promise.allSettled([
+        fetch(`/${locale}/api/usage`, {
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          },
+        }),
+        fetch(`/${locale}/api/plans/current`, {
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          },
+        }),
+        fetch(`/${locale}/api/plans`, {
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          },
+        }),
+        fetch(`/${locale}/api/plans/upcoming-invoice`, {
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          },
+        }),
+      ]);
 
-      if (usageData.success) {
-        // Update usage state with new structure
-        setUsage({
-          documents: usageData.usage.documents?.used || 0,
-          models: usageData.usage.models?.used || 0,
-          api_requests: usageData.usage.api_requests?.used || 0,
-          api_keys: 0, // Not tracked in new API yet
-        });
-        
-        setUsagePercentages({
-          documents: usageData.usage.documents?.percentage || 0,
-          models: usageData.usage.models?.percentage || 0,
-          api_requests: usageData.usage.api_requests?.percentage || 0,
-          api_keys: 0,
-        });
+      // Process usage data
+      if (usageResponse.status === 'fulfilled') {
+        const usageData = await usageResponse.value.json();
+        if (usageData.success) {
+          setUsage({
+            documents: usageData.usage.documents?.used || 0,
+            models: usageData.usage.models?.used || 0,
+            api_requests: usageData.usage.api_requests?.used || 0,
+            api_keys: 0,
+          });
+          
+          setUsagePercentages({
+            documents: usageData.usage.documents?.percentage || 0,
+            models: usageData.usage.models?.percentage || 0,
+            api_requests: usageData.usage.api_requests?.percentage || 0,
+            api_keys: 0,
+          });
 
-        // Set next billing date from period
-        if (usageData.period?.end) {
-          const endDate = new Date(usageData.period.end);
-          setNextBillingDate(endDate.toLocaleDateString());
+          if (usageData.period?.end) {
+            const endDate = new Date(usageData.period.end);
+            setNextBillingDate(endDate.toLocaleDateString());
+          }
+
+          setCurrentPlan(usageData.plan?.name?.toLowerCase() || 'free');
+          setIsPastDue(usageData.plan?.status !== 'active');
         }
-
-        // Set plan info
-        setCurrentPlan(usageData.plan?.name?.toLowerCase() || 'free');
-        setIsPastDue(usageData.plan?.status !== 'active');
       }
 
-      // Fetch plan data for limits
-      const planResponse = await fetch(`/${locale}/api/plans/current`, {
-        headers: {
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-        },
-      });
-      const planDataResponse = await planResponse.json();
-      setPlanData(planDataResponse.plan_data || null);
+      // Process plan data
+      if (planResponse.status === 'fulfilled') {
+        const planDataResponse = await planResponse.value.json();
+        setPlanData(planDataResponse.plan_data || null);
+      }
 
-      // Fetch upcoming invoice
+      // Process available plans
+      if (plansResponse.status === 'fulfilled') {
+        const plansData = await plansResponse.value.json();
+        setAvailablePlans((Object.values(plansData) as Plan[]).filter((p: Plan) => p.name !== currentPlan));
+      }
+
+      // Process invoice data
+      if (invoiceResponse.status === 'fulfilled') {
+        const invoiceData = await invoiceResponse.value.json();
+        setUpcomingInvoice(invoiceData);
+      }
+
+      // Fetch invoices separately (less critical)
       try {
-        const invoiceResponse = await fetch(`/${locale}/api/plans/upcoming-invoice`, {
+        const invoicesResponse = await fetch(`/${locale}/api/plans/invoices`, {
           headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
           },
         });
-        if (invoiceResponse.ok) {
-          const invoiceData = await invoiceResponse.json();
-          setUpcomingInvoice(invoiceData);
+        if (invoicesResponse.ok) {
+          const invoicesData = await invoicesResponse.json();
+          setInvoices(invoicesData || []);
         }
       } catch (e) {
-        // No upcoming invoice
+        console.error('Error fetching invoices:', e);
       }
-
-      // Fetch invoice history
-      const invoicesResponse = await fetch(`/${locale}/api/plans/invoices`, {
-        headers: {
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-        },
-      });
-      const invoicesData = await invoicesResponse.json();
-      setInvoices(invoicesData);
-
-      // Fetch all plans for upgrade
-      const plansResponse = await fetch(`/${locale}/api/plans`, {
-        headers: {
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-        },
-      });
-      const plansData = await plansResponse.json();
-      setAvailablePlans((Object.values(plansData) as Plan[]).filter((p: Plan) => p.name !== currentPlan));
     } catch (error) {
       console.error('Error fetching billing data:', error);
       setError('Failed to load billing information');
@@ -597,9 +605,9 @@ export default function BillingIndex() {
       <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Change Your Plan</DialogTitle>
+            <DialogTitle>{t('billing.change_plan', 'Change Your Plan')}</DialogTitle>
             <DialogDescription>
-              You are currently on the <strong>{planData?.name || 'FREE'}</strong> plan. Select a new plan that fits your needs
+              {t('billing.current_plan_description', 'You are currently on the')} <strong>{planData?.name || t('billing.free_plan', 'FREE')}</strong> {t('billing.plan_select', 'plan. Select a new plan that fits your needs')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 md:grid-cols-2 mt-4">
