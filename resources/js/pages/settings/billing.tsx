@@ -291,17 +291,7 @@ export default function BillingIndex() {
   };
 
   if (loading) {
-    return (
-      <div className="space-y-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/4 mb-4"></div>
-          <div className="grid gap-4">
-            <div className="h-32 bg-muted rounded"></div>
-            <div className="h-48 bg-muted rounded"></div>
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (error) {

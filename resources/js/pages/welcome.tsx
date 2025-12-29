@@ -675,21 +675,12 @@ function Header({
           {isAuthenticated ? (
             <div className="flex items-center gap-2">
               <Button
-                onClick={() => router.visit(`/${locale}/settings/billing`)}
-                variant="ghost"
-                size="sm"
-                className="hidden md:inline-flex gap-2"
-              >
-                <CreditCard className="h-4 w-4" />
-                <span>Billing</span>
-              </Button>
-              <Button
                 onClick={() => router.visit(`/${locale}/dashboard`)}
-                className="gap-2 hidden sm:inline-flex"
-                size="sm"
+                variant="default"
+                className="gap-2"
               >
-                <BarChart3 className="h-4 w-4" />
-                <span className="hidden md:inline">{t('Dashboard')}</span>
+                <ArrowRight className="h-4 w-4" />
+                {t('landing.hero.cta_primary', heroFallback.cta_primary)}
               </Button>
             </div>
           ) : (
@@ -788,23 +779,14 @@ function Header({
             {/* Mobile Auth Buttons */}
             <div className="flex flex-col gap-2">
               {isAuthenticated ? (
-                <>
-                  <Button
-                    onClick={() => router.visit(`/${locale}/settings/billing`)}
-                    variant="outline"
-                    className="w-full gap-2"
-                  >
-                    <CreditCard className="h-4 w-4" />
-                    Billing
-                  </Button>
-                  <Button
-                    onClick={() => router.visit(`/${locale}/dashboard`)}
-                    className="w-full gap-2"
-                  >
-                    <BarChart3 className="h-4 w-4" />
-                    {t('Dashboard')}
-                  </Button>
-                </>
+                <Button
+                  onClick={() => router.visit(`/${locale}/dashboard`)}
+                  variant="default"
+                  className="w-full gap-2"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                  Go to dashboard
+                </Button>
               ) : (
                 <>
                   <Button
