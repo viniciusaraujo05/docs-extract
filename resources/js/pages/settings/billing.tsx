@@ -189,6 +189,9 @@ export default function BillingIndex() {
 
           setCurrentPlan(usageData.plan?.name?.toLowerCase() || 'free');
           setIsPastDue(usageData.plan?.status !== 'active');
+          
+          // Debug log
+          console.log('Current plan set to:', usageData.plan?.name?.toLowerCase() || 'free');
         }
       }
 
@@ -207,7 +210,10 @@ export default function BillingIndex() {
       // Process invoice data
       if (invoiceResponse.status === 'fulfilled') {
         const invoiceData = await invoiceResponse.value.json();
-        setUpcomingInvoice(invoiceData);
+        // Only set if we have actual data (not null)
+        if (invoiceData && invoiceData.amount !== undefined) {
+          setUpcomingInvoice(invoiceData);
+        }
       }
 
       // Fetch invoices separately (less critical)
@@ -571,7 +577,7 @@ export default function BillingIndex() {
                   >
                     <div>
                       <p className="font-medium">
-                        {invoice.amount != null ?
+                        {invoice.amount != null && !isNaN(invoice.amount) ?
                           new Intl.NumberFormat('en-US', {
                             style: 'currency',
                             currency: invoice.currency,

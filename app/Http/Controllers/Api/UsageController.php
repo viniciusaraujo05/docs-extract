@@ -30,15 +30,28 @@ class UsageController extends Controller
         // Build usage data for each resource
         $usageData = [];
         foreach ($limits as $resource => $limit) {
-            $used = $usage[$resource] ?? 0;
-            $usageData[$resource] = [
-                'used' => $used,
-                'limit' => $limit,
-                'remaining' => $remaining[$resource],
-                'percentage' => $this->calculatePercentage($used, $limit),
-                'is_approaching' => $this->isApproachingLimit($used, $limit),
-                'is_reached' => $this->hasReachedLimit($used, $limit),
-            ];
+            // Only process numeric limits
+            if (is_int($limit)) {
+                $used = $usage[$resource] ?? 0;
+                $usageData[$resource] = [
+                    'used' => $used,
+                    'limit' => $limit,
+                    'remaining' => $remaining[$resource],
+                    'percentage' => $this->calculatePercentage($used, $limit),
+                    'is_approaching' => $this->isApproachingLimit($used, $limit),
+                    'is_reached' => $this->hasReachedLimit($used, $limit),
+                ];
+            } else {
+                // For non-numeric limits (like exports array), just pass through
+                $usageData[$resource] = [
+                    'used' => $usage[$resource] ?? 0,
+                    'limit' => $limit,
+                    'remaining' => $limit,
+                    'percentage' => 0,
+                    'is_approaching' => false,
+                    'is_reached' => false,
+                ];
+            }
         }
         
         return response()->json([
