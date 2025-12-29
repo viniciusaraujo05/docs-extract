@@ -131,24 +131,53 @@ export default function BillingIndex() {
     try {
       setLoading(true);
 
-      // Fetch current plan and usage
-      const currentResponse = await fetch(`/${locale}/api/plans/current`, {
+      // Fetch usage data from new API
+      const usageResponse = await fetch(`/${locale}/api/usage`, {
         headers: {
           'Accept': 'application/json',
           'X-Requested-With': 'XMLHttpRequest',
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
         },
       });
-      const currentData = await currentResponse.json();
+      const usageData = await usageResponse.json();
 
-      setCurrentPlan(currentData.current_plan || 'free');
-      setPlanData(currentData.plan_data || null);
-      setUsage(currentData.usage || { documents: 0, models: 0, api_requests: 0, api_keys: 0 });
-      setUsagePercentages(currentData.usage_percentages || { documents: 0, models: 0, api_requests: 0, api_keys: 0 });
-      setNextBillingDate(currentData.next_billing_date || null);
-      setIsTrial(currentData.is_trial || false);
-      setIsPastDue(currentData.is_past_due || false);
-      setIsCanceled(currentData.is_canceled || false);
+      if (usageData.success) {
+        // Update usage state with new structure
+        setUsage({
+          documents: usageData.usage.documents?.used || 0,
+          models: usageData.usage.models?.used || 0,
+          api_requests: usageData.usage.api_requests?.used || 0,
+          api_keys: 0, // Not tracked in new API yet
+        });
+        
+        setUsagePercentages({
+          documents: usageData.usage.documents?.percentage || 0,
+          models: usageData.usage.models?.percentage || 0,
+          api_requests: usageData.usage.api_requests?.percentage || 0,
+          api_keys: 0,
+        });
+
+        // Set next billing date from period
+        if (usageData.period?.end) {
+          const endDate = new Date(usageData.period.end);
+          setNextBillingDate(endDate.toLocaleDateString());
+        }
+
+        // Set plan info
+        setCurrentPlan(usageData.plan?.name?.toLowerCase() || 'free');
+        setIsPastDue(usageData.plan?.status !== 'active');
+      }
+
+      // Fetch plan data for limits
+      const planResponse = await fetch(`/${locale}/api/plans/current`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+      });
+      const planDataResponse = await planResponse.json();
+      setPlanData(planDataResponse.plan_data || null);
 
       // Fetch upcoming invoice
       try {
@@ -187,7 +216,7 @@ export default function BillingIndex() {
         },
       });
       const plansData = await plansResponse.json();
-      setAvailablePlans((Object.values(plansData) as Plan[]).filter((p: Plan) => p.name !== currentData.current_plan));
+      setAvailablePlans((Object.values(plansData) as Plan[]).filter((p: Plan) => p.name !== currentPlan));
     } catch (error) {
       console.error('Error fetching billing data:', error);
       setError('Failed to load billing information');
@@ -389,6 +418,16 @@ export default function BillingIndex() {
                   value={usagePercentages?.models || 0}
                   className="h-2"
                 />
+                {usagePercentages?.models >= 80 && (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {usagePercentages?.models >= 95
+                        ? "You've reached your models limit. Upgrade to continue creating new models."
+                        : "You're approaching your models limit. Consider upgrading soon."}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -412,6 +451,16 @@ export default function BillingIndex() {
                   value={usagePercentages?.api_requests || 0}
                   className="h-2"
                 />
+                {usagePercentages?.api_requests >= 80 && (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {usagePercentages?.api_requests >= 95
+                        ? "You've reached your API requests limit. Upgrade to continue using the API."
+                        : "You're approaching your API requests limit. Consider upgrading soon."}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
             </CardContent>
           </Card>

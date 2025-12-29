@@ -1045,6 +1045,12 @@
       "message": "Nenhuma cobrança foi efetuada. Pode tentar novamente a qualquer momento.",
       "backToPlans": "Voltar aos Planos",
       "viewSubscription": "Ver Subscrição"
-    }
+    },
+    "File too large": "Ficheiro muito grande. Tamanho máximo é {{size}}MB.",
+    "Invalid file type": "Tipo de ficheiro inválido. Tipos aceitos: {{types}}",
+    "Invalid PDF file": "Ficheiro PDF inválido: {{fileName}}. O ficheiro parece estar corrompido ou não é um PDF válido.",
+    "Error reading file": "Erro ao ler ficheiro: {{fileName}}. Tente novamente.",
+    "Document limit reached": "Atingiu o limite de documentos ({{used}}/{{limit}}). Faça upgrade do seu plano para enviar mais documentos.",
+    "Model limit reached": "Atingiu o limite de modelos ({{used}}/{{limit}}). Faça upgrade do seu plano para criar mais modelos."
   }
 }

@@ -327,6 +327,28 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
     const handleExtract = useCallback(async () => {
         if (!file || fields.length === 0) return;
         
+        // Check document limit before extracting
+        try {
+            const usageResponse = await fetch(`/${locale}/api/usage`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                },
+            });
+            const usageData = await usageResponse.json();
+            
+            if (usageData.success && usageData.usage.documents.is_reached) {
+                setError(t('Document limit reached', {
+                    used: usageData.usage.documents.used,
+                    limit: usageData.usage.documents.limit
+                }));
+                return;
+            }
+        } catch (err) {
+            console.error('Error checking usage:', err);
+        }
+        
         setProcessing(true);
         setError(null);
         

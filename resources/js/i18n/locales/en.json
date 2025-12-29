@@ -1226,5 +1226,7 @@
     "File too large": "File is too large. Maximum size is {{size}}MB.",
     "Invalid file type": "Invalid file type. Accepted types: {{types}}",
     "Invalid PDF file": "Invalid PDF file: {{fileName}}. The file appears to be corrupted or is not a valid PDF.",
-    "Error reading file": "Error reading file: {{fileName}}. Please try again."
+    "Error reading file": "Error reading file: {{fileName}}. Please try again.",
+    "Document limit reached": "You've reached your document limit ({{used}}/{{limit}}). Upgrade your plan to upload more documents.",
+    "Model limit reached": "You've reached your model limit ({{used}}/{{limit}}). Upgrade your plan to create more models."
 }

@@ -49,9 +49,31 @@ export default function DocumentTypesCreate() {
         setFields(prev => prev.filter(f => f.name !== fieldName));
     }, []);
 
-    const handleSubmit = useCallback((e: React.FormEvent) => {
+    const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         if (!name.trim() || fields.length === 0) return;
+
+        // Check model limit before creating
+        try {
+            const usageResponse = await fetch(`/${locale}/api/usage`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            });
+            const usageData = await usageResponse.json();
+            
+            if (usageData.success && usageData.usage.models.is_reached) {
+                toast.error(t('Model limit reached', {
+                    used: usageData.usage.models.used,
+                    limit: usageData.usage.models.limit
+                }));
+                return;
+            }
+        } catch (err) {
+            console.error('Error checking usage:', err);
+        }
 
         setSaving(true);
         router.post(`/${locale}/document-types`, {

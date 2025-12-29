@@ -883,6 +883,8 @@
   "Invalid file type": "Tipo de arquivo inválido. Tipos aceitos: {{types}}",
   "Invalid PDF file": "Arquivo PDF inválido: {{fileName}}. O arquivo parece estar corrompido ou não é um PDF válido.",
   "Error reading file": "Erro ao ler arquivo: {{fileName}}. Tente novamente.",
+  "Document limit reached": "Você atingiu o limite de documentos ({{used}}/{{limit}}). Faça upgrade do seu plano para enviar mais documentos.",
+  "Model limit reached": "Você atingiu o limite de modelos ({{used}}/{{limit}}). Faça upgrade do seu plano para criar mais modelos.",
   "Complete reference for DOCSET API v1": "Referência completa para a API v1 do DOCSET",
   "Base URL": "URL Base",
   "Endpoints": "Endpoints",
