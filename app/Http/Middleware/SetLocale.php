@@ -23,6 +23,11 @@ class SetLocale
         App::setLocale($locale);
         Session::put('locale', $locale);
 
+        // Allow Stripe webhook without locale redirect or session changes
+        if ($request->is('stripe/webhook')) {
+            return $next($request);
+        }
+
         // If URL doesn't have locale and it's not an API route, redirect to localized URL
         if (! $request->route('locale') && ! $request->is('api/*') && ! $request->is('/')) {
             $path = $request->path();
