@@ -35,7 +35,8 @@ class StripeWebhookController extends CashierController
         // Handle successful payment
         // You can add custom logic here like sending emails
 
-        return parent::handleInvoicePaymentSucceeded($payload);
+        // No need to call parent since Cashier doesn't have this method by default
+        return parent::successMethod();
     }
 
     public function handleInvoicePaymentFailed(array $payload)
