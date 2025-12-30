@@ -20,6 +20,7 @@
         "laravel/wayfinder": "^0.1.9",
         "php-open-source-saver/jwt-auth": "^2.8",
         "predis/predis": "^3.3",
+        "resend/resend-laravel": "^1.1",
         "smalot/pdfparser": "^2.12"
     },
     "require-dev": {

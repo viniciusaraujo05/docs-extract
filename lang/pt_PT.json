@@ -86,81 +86,81 @@
     "Info": "Informação",
     "emails": {
         "verification": {
-            "subject": "Confirme seu e-mail - DOCSET",
-            "title": "Confirme seu e-mail",
-            "content": "Confirme seu e-mail para ativar sua conta no DOCSET.",
+            "subject": "Confirme o seu e-mail - DOCSET",
+            "title": "Confirme o seu e-mail",
+            "content": "Confirme o seu e-mail para ativar a sua conta no DOCSET.",
             "button": "Confirmar E-mail",
             "expiration": "Este link expirará em :count minutos.",
-            "trouble": "Se você estiver tendo problemas para clicar no botão \":actionText\", copie e cole a URL abaixo no seu navegador:"
+            "trouble": "Se estiver com problemas ao clicar no botão \":actionText\", copie e cole o URL abaixo no seu navegador:"
         },
         "password_reset": {
-            "subject": "Recuperar Senha - DOCSET",
-            "title": "Recupere sua senha",
-            "content": "Clique no botão abaixo para recuperar sua senha do DOCSET.",
-            "button": "Recuperar Senha",
-            "expiration": "Este link de recuperação de senha expirará em :count minutos.",
-            "ignore": "Se você não solicitou a recuperação de senha, nenhuma ação adicional é necessária.",
-            "security_notice": "Por segurança, este link só pode ser usado uma vez."
+            "subject": "Recuperar Palavra-passe - DOCSET",
+            "title": "Recupere a sua palavra-passe",
+            "content": "Clique no botão abaixo para recuperar a sua palavra-passe do DOCSET.",
+            "button": "Recuperar Palavra-passe",
+            "expiration": "Este link de recuperação de palavra-passe expirará em :count minutos.",
+            "ignore": "Se não solicitou a recuperação de palavra-passe, não é necessária qualquer ação adicional.",
+            "security_notice": "Por segurança, este link só pode ser utilizado uma vez."
         },
         "welcome": {
             "subject": "Bem-vindo ao DOCSET!",
             "title": "Bem-vindo ao DOCSET",
-            "content": "Estamos felizes em ter você aqui! Envie um documento e defina seu primeiro modelo para começar.",
-            "step_1": "1. Envie seu primeiro documento",
-            "step_2": "2. Defina seu modelo de extração",
+            "content": "Estamos felizes por tê-lo connosco! Envie um documento e defina o seu primeiro modelo para começar.",
+            "step_1": "1. Envie o seu primeiro documento",
+            "step_2": "2. Defina o seu modelo de extração",
             "button": "Ir para o Painel",
-            "signature": "Equipe DOCSET"
+            "signature": "Equipa DOCSET"
         },
         "payment_success": {
             "subject": "Pagamento Concluído - DOCSET",
             "title": "Pagamento Confirmado",
-            "content": "Seu pagamento para o plano :plan foi processado com sucesso.",
+            "content": "O seu pagamento para o plano :plan foi processado com sucesso.",
             "start_date": "Início do serviço: :date",
-            "billing_link": "Ver detalhes de cobrança",
-            "stripe_notice": "Você receberá um recibo separado do Stripe em breve."
+            "billing_link": "Ver detalhes de faturação",
+            "stripe_notice": "Receberá um recibo separado do Stripe em breve."
         },
         "payment_failed": {
             "subject": "Falha no Pagamento - DOCSET",
             "title": "Ação Necessária: Falha no Pagamento",
-            "content": "Não conseguimos processar seu pagamento. Por favor, atualize suas informações de cobrança para evitar interrupção do serviço.",
+            "content": "Não conseguimos processar o seu pagamento. Por favor, atualize as suas informações de faturação para evitar a interrupção do serviço.",
             "button": "Atualizar Método de Pagamento",
-            "deadline": "Você tem :days dias para atualizar suas informações antes que seu serviço seja limitado."
+            "deadline": "Tem :days dias para atualizar as suas informações antes que o seu serviço seja limitado."
         },
         "subscription_canceled": {
             "subject": "Assinatura Cancelada - DOCSET",
             "title": "Assinatura Cancelada",
-            "content": "Sua assinatura foi cancelada conforme solicitado.",
-            "access_until": "Você terá acesso aos recursos até :date.",
-            "post_cancel": "Após esta data, sua conta mudará para o plano gratuito.",
-            "feedback": "Sentimos muito por vê-lo partir. Se tiver um momento, adoraríamos saber como podemos melhorar."
+            "content": "A sua assinatura foi cancelada conforme solicitado.",
+            "access_until": "Terá acesso às funcionalidades até :date.",
+            "post_cancel": "Após esta data, a sua conta passará para o plano gratuito.",
+            "feedback": "Lamentamos a sua partida. Se tiver um momento, gostaríamos de saber como podemos melhorar."
         },
         "plan_changed": {
             "subject": "Plano Alterado - DOCSET",
-            "title": "Seu plano foi atualizado",
-            "content": "Seu plano foi alterado com sucesso de :old para :new.",
+            "title": "O seu plano foi atualizado",
+            "content": "O seu plano foi alterado com sucesso de :old para :new.",
             "effective_date": "Esta alteração entra em vigor imediatamente.",
-            "button": "Gerenciar Cobrança"
+            "button": "Gerir Faturação"
         },
         "usage_limit": {
-            "subject": "Limite de Uso Atingido - DOCSET",
+            "subject": "Limite de Utilização Atingido - DOCSET",
             "title": "Limite Atingido",
-            "content": "Você atingiu o limite mensal de documentos para o plano :plan.",
-            "upgrade_cta": "Faça o upgrade para continuar processando arquivos sem interrupção.",
+            "content": "Atingiu o limite mensal de documentos para o plano :plan.",
+            "upgrade_cta": "Faça o upgrade para continuar a processar ficheiros sem interrupção.",
             "button": "Ver Planos"
         },
         "usage_warning": {
-            "subject": "Aviso de Uso (80%) - DOCSET",
-            "title": "Aproximando-se do limite",
-            "content": "Você utilizou 80% da sua cota mensal de documentos.",
-            "current_usage": "Uso atual: :used de :total documentos.",
-            "button": "Gerenciar Uso"
+            "subject": "Aviso de Utilização (80%) - DOCSET",
+            "title": "A aproximar-se do limite",
+            "content": "Utilizou 80% da sua quota mensal de documentos.",
+            "current_usage": "Utilização atual: :used de :total documentos.",
+            "button": "Gerir Utilização"
         },
         "security_change": {
             "subject": "Atualização de Segurança - DOCSET",
-            "title": "Alteração de Segurança Detectada",
-            "content": "Seu :field foi alterado com sucesso.",
-            "warning": "Se você não realizou esta alteração, entre em contato com nosso suporte imediatamente.",
-            "button": "Contatar Suporte"
+            "title": "Alteração de Segurança Detetada",
+            "content": "O seu campo :field foi alterado com sucesso.",
+            "warning": "Se não realizou esta alteração, entre em contacto com o nosso suporte imediatamente.",
+            "button": "Contactar Suporte"
         }
     }
 }

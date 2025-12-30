@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Actions\Usage\DecrementUsageAction;
 use App\Actions\Usage\IncrementUsageAction;
+use App\Mail\UsageLimitReachedMail;
+use App\Mail\UsageWarningMail;
+use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use App\Repositories\PlanUsageRepository;
 use App\Services\SubscriptionService;
@@ -103,6 +106,36 @@ class UsageLimitService
     public function incrementUsage(User $user, string $resource): void
     {
         $this->incrementUsageAction->execute($user, $resource);
+
+        // Check for limits and send emails
+        $this->checkAndNotifyUsage($user, $resource);
+    }
+
+    /**
+     * Check usage and send notifications if necessary
+     */
+    protected function checkAndNotifyUsage(User $user, string $resource): void
+    {
+        if ($resource !== 'documents') {
+            return;
+        }
+
+        $limits = $this->subscriptionService->getUserPlanLimits($user);
+        $limit = $limits[$resource] ?? 0;
+
+        if ($limit <= 0) {
+            return;
+        }
+
+        $usage = $this->planUsageRepository->getUsage($user, $resource);
+        $planName = $this->subscriptionService->getUserPlanName($user);
+
+        if ($usage >= $limit) {
+            Mail::to($user->email)->send(new UsageLimitReachedMail($planName));
+        } elseif ($usage >= ($limit * 0.8) && $usage < ($limit * 0.8) + 1) {
+            // Send warning at exactly 80% (or first time crossing it)
+            Mail::to($user->email)->send(new UsageWarningMail($usage, $limit));
+        }
     }
 
     /**

@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Models\Document;
 use App\Models\DocumentType;
 use App\Models\ReportAnalysis;
+use App\Observers\UserObserver;
 use App\Observers\DocumentObserver;
 use App\Observers\DocumentTypeObserver;
 use App\Observers\ReportAnalysisObserver;
@@ -30,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
         File::ensureDirectoryExists(storage_path('framework/sessions'));
 
         // Register observers
+        User::observe(UserObserver::class);
         Document::observe(DocumentObserver::class);
         DocumentType::observe(DocumentTypeObserver::class);
         ReportAnalysis::observe(ReportAnalysisObserver::class);
