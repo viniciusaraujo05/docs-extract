@@ -17,7 +17,7 @@ class LocaleController extends Controller
     public function update(Request $request): JsonResponse
     {
         $request->validate([
-            'locale' => 'required|string|in:pt,en',
+            'locale' => 'required|string|in:pt,pt_PT,en',
         ]);
 
         $locale = $request->input('locale');

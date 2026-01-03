@@ -14,17 +14,19 @@ class PaymentSuccessMail extends Mailable
 
     public $plan;
     public $date;
+    public $locale;
 
-    public function __construct($plan, $date)
+    public function __construct($plan, $date, $locale = null)
     {
         $this->plan = $plan;
         $this->date = $date;
+        $this->locale = $locale ?? app()->getLocale();
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('emails.payment_success.subject'),
+            subject: __('emails.payment_success.subject', [], $this->locale),
         );
     }
 
@@ -32,6 +34,15 @@ class PaymentSuccessMail extends Mailable
     {
         return new Content(
             view: 'emails.payment-success',
+            with: [
+                'locale' => $this->locale,
+            ],
         );
+    }
+
+    public function build()
+    {
+        app()->setLocale($this->locale);
+        return $this;
     }
 }

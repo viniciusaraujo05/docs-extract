@@ -416,64 +416,70 @@ export default function Welcome() {
       document.documentElement.classList.toggle('dark', savedTheme === 'dark');
     }
 
-    // Detectar localização
-    const detectLocale = async () => {
-      try {
-        const response = await fetch('/api/geolocation/detect');
-        const data = await response.json();
-        const country = data.countryCode?.toLowerCase();
-        const continent = data.continent?.toLowerCase();
+    // Detectar localização e ajustar idioma
+    const detectAndAdjustLocale = async () => {
+      const savedLocale = localStorage.getItem('selected-locale') as 'pt' | 'en' | null;
+      const currentUrlLocale = props.locale as 'pt' | 'en';
 
-        const isBrazil = country === 'br';
-        const isPortugal = country === 'pt';
-        const isEurope = continent === 'europe';
+      // Se o usuário já escolheu um idioma manualmente (localStorage), respeitamos isso acima de tudo
+      if (savedLocale && savedLocale !== currentUrlLocale) {
+        window.location.href = `/${savedLocale}`;
+        return;
+      }
 
-        let detectedLocale: 'pt' | 'en' = 'en';
-        let detectedVariant: 'pt-PT' | 'pt-BR' = 'pt-PT';
+      // Se não há escolha manual, detectamos por geolocalização
+      if (!savedLocale) {
+        try {
+          const response = await fetch('/api/geolocation/detect');
+          const data = await response.json();
+          const country = data.countryCode?.toLowerCase();
+          const continent = data.continent?.toLowerCase();
 
-        if (isBrazil) {
-          detectedLocale = 'pt';
-          detectedVariant = 'pt-BR';
-        } else if (isPortugal || isEurope) {
-          detectedLocale = 'pt';
-          detectedVariant = 'pt-PT';
-        } else {
-          detectedLocale = 'en';
-        }
+          const isBrazil = country === 'br';
+          const isPortugal = country === 'pt';
+          const isEurope = continent === 'europe';
 
-        const savedLocale = localStorage.getItem('selected-locale') as 'pt' | 'en' | null;
-        const savedVariant = localStorage.getItem('pt-variant') as 'pt-PT' | 'pt-BR' | null;
+          let detectedLocale: 'pt' | 'en' = 'en';
+          let detectedVariant: 'pt-PT' | 'pt-BR' = 'pt-PT';
 
-        const finalLocale = savedLocale ?? detectedLocale;
-        const finalVariant = savedVariant ?? detectedVariant;
+          if (isBrazil) {
+            detectedLocale = 'pt';
+            detectedVariant = 'pt-BR';
+          } else if (isPortugal || isEurope) {
+            detectedLocale = 'pt';
+            detectedVariant = 'pt-PT';
+          }
 
-        setLocale(finalLocale);
-        localStorage.setItem('selected-locale', finalLocale);
-        i18n.changeLanguage(finalLocale);
+          // Se o idioma detectado for diferente do atual na URL, redirecionamos
+          if (detectedLocale !== currentUrlLocale) {
+            localStorage.setItem('selected-locale', detectedLocale);
+            if (detectedLocale === 'pt') {
+              localStorage.setItem('pt-variant', detectedVariant);
+            }
+            window.location.href = `/${detectedLocale}`;
+            return;
+          }
+          
+          // Se o idioma da URL já é o detectado, apenas salvamos as preferências
+          localStorage.setItem('selected-locale', detectedLocale);
+          if (detectedLocale === 'pt') {
+            localStorage.setItem('pt-variant', detectedVariant);
+            setPtVariant(detectedVariant);
+            setPortugueseVariant(detectedVariant);
+          }
+          i18n.changeLanguage(detectedLocale);
+          setLocale(detectedLocale);
 
-        if (finalLocale === 'pt') {
-          setPtVariant(finalVariant);
-          setPortugueseVariant(finalVariant);
-          localStorage.setItem('pt-variant', finalVariant);
-        }
-      } catch (error) {
-        const fallbackLocale = (localStorage.getItem('selected-locale') as 'pt' | 'en' | null) ?? 'en';
-        const fallbackVariant = (localStorage.getItem('pt-variant') as 'pt-PT' | 'pt-BR' | null) ?? 'pt-PT';
-
-        setLocale(fallbackLocale);
-        i18n.changeLanguage(fallbackLocale);
-
-        if (fallbackLocale === 'pt') {
-          setPtVariant(fallbackVariant);
-          setPortugueseVariant(fallbackVariant);
+        } catch (error) {
+          console.error('Erro na detecção de localização:', error);
         }
       }
     };
 
-    detectLocale();
+    detectAndAdjustLocale();
     const used = localStorage.getItem('demo-used');
     if (used) setDemoUsed(true);
-  }, [i18n]);
+  }, []);
 
   const toggleTheme = useCallback(() => {
     const newTheme = theme === 'light' ? 'dark' : 'light';

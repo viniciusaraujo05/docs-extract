@@ -15,7 +15,6 @@
   "Login": "Entrar",
   "Register": "Registrar",
   "Email": "E-mail",
-  "Password": "Senha",
   "Remember me": "Lembrar-me",
   "Forgot your password?": "Esqueceu sua senha?",
   "Already registered?": "Já tem cadastro?",
@@ -891,12 +890,9 @@
   "Error reading file": "Erro ao ler arquivo: {{fileName}}. Tente novamente.",
   "Document limit reached": "Você atingiu o limite de documentos ({{used}}/{{limit}}). Faça upgrade do seu plano para enviar mais documentos.",
   "Model limit reached": "Você atingiu o limite de modelos ({{used}}/{{limit}}). Faça upgrade do seu plano para criar mais modelos.",
-  "Document limit reached": "Você atingiu o limite de documentos ({{used}}/{{limit}}). Faça upgrade do seu plano para enviar mais documentos.",
   "Report limit reached": "Você atingiu o limite de relatórios ({{used}}/{{limit}}). Faça upgrade do seu plano para criar mais relatórios.",
   "API keys limit reached": "Você atingiu o limite de chaves API ({{used}}/{{limit}}). Faça upgrade do seu plano para criar mais chaves.",
-  "You have reached the limit of models in your plan. Upgrade to create more models.": "Você atingiu o limite de modelos no seu plano. Faça upgrade para criar mais modelos.",
   "Upgrade Plan": "Fazer Upgrade do Plano",
-  "Regenerating...": "Regenerando...",
   "Use the Documentation tab to browse endpoints by category. Each endpoint includes copy-ready cURL and response examples.": "Use a aba Documentação para navegar pelos endpoints por categoria. Cada endpoint inclui exemplos de cURL e resposta prontos para copiar.",
   "API Client": "Cliente de API",
   "Your credentials to access the DOCSET API": "Suas credenciais para acessar a API do DOCSET",
@@ -971,7 +967,6 @@
   "Failed to regenerate API client secret.": "Falha ao regenerar o segredo do cliente de API.",
   "Failed to delete API client.": "Falha ao excluir o cliente de API.",
   "Subscription": "Assinatura",
-  "Billing": "Faturamento",
   "Manage your subscription and billing": "Gerencie sua assinatura e faturamento",
   "billing": {
     "title": "Faturamento e Assinatura",
@@ -1047,6 +1042,37 @@
     "description": "Todos os pagamentos são processados com segurança através do Stripe. Nunca armazenamos os detalhes do seu cartão.",
     "proceed": "Prosseguir para Pagamento",
     "cancel_note": "Você pode cancelar sua assinatura a qualquer momento nas configurações da sua conta."
+  },
+  "auth": {
+    "verify_email": {
+      "title": "Verificar e-mail",
+      "description": "Por favor, verifique seu endereço de e-mail clicando no link que acabamos de enviar para você.",
+      "page_title": "Verificação de e-mail",
+      "link_sent": "Um novo link de verificação foi enviado para o endereço de e-mail que você forneceu durante o registro.",
+      "resend_button": "Reenviar e-mail de verificação",
+      "logout": "Sair"
+    },
+    "forgot_password": {
+      "title": "Esqueceu a senha",
+      "description": "Digite seu e-mail para receber um link de recuperação de senha",
+      "page_title": "Esqueceu a senha",
+      "email_label": "Endereço de e-mail",
+      "email_placeholder": "email@exemplo.com",
+      "submit_button": "Enviar link de recuperação",
+      "back_to_login": "Ou, voltar para",
+      "login_link": "entrar"
+    },
+    "reset_password": {
+      "title": "Recuperar senha",
+      "description": "Por favor, digite sua nova senha abaixo",
+      "page_title": "Recuperar senha",
+      "email_label": "E-mail",
+      "password_label": "Senha",
+      "password_placeholder": "Senha",
+      "confirm_password_label": "Confirmar senha",
+      "confirm_password_placeholder": "Confirmar senha",
+      "submit_button": "Recuperar senha"
+    }
   },
   "subscription": {
     "title": "Gerenciamento de Assinatura",

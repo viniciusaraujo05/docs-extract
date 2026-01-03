@@ -14,17 +14,19 @@ class PlanChangedMail extends Mailable
 
     public $old;
     public $new;
+    public $locale;
 
-    public function __construct($old, $new)
+    public function __construct($old, $new, $locale = null)
     {
         $this->old = $old;
         $this->new = $new;
+        $this->locale = $locale ?? app()->getLocale();
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('emails.plan_changed.subject'),
+            subject: __('emails.plan_changed.subject', [], $this->locale),
         );
     }
 
@@ -32,6 +34,15 @@ class PlanChangedMail extends Mailable
     {
         return new Content(
             view: 'emails.plan-changed',
+            with: [
+                'locale' => $this->locale,
+            ],
         );
+    }
+
+    public function build()
+    {
+        app()->setLocale($this->locale);
+        return $this;
     }
 }

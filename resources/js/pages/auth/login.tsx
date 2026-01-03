@@ -150,7 +150,7 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                                             onClick={() => router.visit(`/${locale}/forgot-password`)}
                                             className="text-sm text-primary hover:text-primary/80"
                                         >
-                                            {t('Forgot password?')}
+                                            {t('Forgot your password?')}
                                         </button>
                                     )}
                                 </div>

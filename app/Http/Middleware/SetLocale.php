@@ -43,7 +43,7 @@ class SetLocale
      */
     private function determineLocale(Request $request): string
     {
-        $supportedLocales = config('app.available_locales', ['pt', 'en']);
+        $supportedLocales = config('app.available_locales', ['pt', 'pt_PT', 'en']);
 
         // 1. Check URL parameter (highest priority, validated by route constraint)
         if ($request->route('locale')) {

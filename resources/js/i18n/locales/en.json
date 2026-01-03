@@ -1229,6 +1229,37 @@
     "Error reading file": "Error reading file: {{fileName}}. Please try again.",
     "Document limit reached": "You've reached your document limit ({{used}}/{{limit}}). Upgrade your plan to upload more documents.",
     "Model limit reached": "You've reached your model limit ({{used}}/{{limit}}). Upgrade your plan to create more models.",
+    "auth": {
+        "verify_email": {
+            "title": "Verify email",
+            "description": "Please verify your email address by clicking on the link we just emailed to you.",
+            "page_title": "Email verification",
+            "link_sent": "A new verification link has been sent to the email address you provided during registration.",
+            "resend_button": "Resend verification email",
+            "logout": "Log out"
+        },
+        "forgot_password": {
+            "title": "Forgot password",
+            "description": "Enter your email to receive a password reset link",
+            "page_title": "Forgot password",
+            "email_label": "Email address",
+            "email_placeholder": "email@example.com",
+            "submit_button": "Email password reset link",
+            "back_to_login": "Or, return to",
+            "login_link": "log in"
+        },
+        "reset_password": {
+            "title": "Reset password",
+            "description": "Please enter your new password below",
+            "page_title": "Reset password",
+            "email_label": "Email",
+            "password_label": "Password",
+            "password_placeholder": "Password",
+            "confirm_password_label": "Confirm password",
+            "confirm_password_placeholder": "Confirm password",
+            "submit_button": "Reset password"
+        }
+    },
     "billing": {
       "title": "Billing & Subscription",
       "subtitle": "Manage your plan, view usage, and control your subscription.",

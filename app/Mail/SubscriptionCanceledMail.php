@@ -13,16 +13,18 @@ class SubscriptionCanceledMail extends Mailable
     use Queueable, SerializesModels;
 
     public $date;
+    public $locale;
 
-    public function __construct($date)
+    public function __construct($date, $locale = null)
     {
         $this->date = $date;
+        $this->locale = $locale ?? app()->getLocale();
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('emails.subscription_canceled.subject'),
+            subject: __('emails.subscription_canceled.subject', [], $this->locale),
         );
     }
 
@@ -30,6 +32,15 @@ class SubscriptionCanceledMail extends Mailable
     {
         return new Content(
             view: 'emails.subscription-canceled',
+            with: [
+                'locale' => $this->locale,
+            ],
         );
+    }
+
+    public function build()
+    {
+        app()->setLocale($this->locale);
+        return $this;
     }
 }

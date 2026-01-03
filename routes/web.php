@@ -78,13 +78,58 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
     Route::get('login', function ($locale) {
         return Inertia::render('auth/login', [
             'canRegister' => Features::enabled(Features::registration()),
-            'canResetPassword' => true,
+            'canResetPassword' => Features::enabled(Features::resetPasswords()),
             'locale' => $locale,
+            'status' => session('status'),
         ]);
     })->middleware('guest')->name('locale.login');
 
     Route::post('login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])
         ->middleware(['guest:web', 'throttle:login'])->name('locale.login.store');
+
+    // Password Reset routes
+    if (Features::enabled(Features::resetPasswords())) {
+        Route::get('forgot-password', function ($locale) {
+            return Inertia::render('auth/forgot-password', [
+                'status' => session('status'),
+                'locale' => $locale,
+            ]);
+        })->middleware('guest')->name('locale.password.request');
+
+        Route::post('forgot-password', [\Laravel\Fortify\Http\Controllers\PasswordResetLinkController::class, 'store'])
+            ->middleware(['guest', 'throttle:6,1'])
+            ->name('locale.password.email');
+
+        Route::get('reset-password/{token}', function ($locale, $token) {
+            return Inertia::render('auth/reset-password', [
+                'token' => $token,
+                'email' => request('email'),
+                'locale' => $locale,
+            ]);
+        })->middleware('guest')->name('locale.password.reset');
+
+        Route::post('reset-password', [\Laravel\Fortify\Http\Controllers\NewPasswordController::class, 'store'])
+            ->middleware('guest')
+            ->name('locale.password.update');
+    }
+
+    // Email Verification routes
+    if (Features::enabled(Features::emailVerification())) {
+        Route::get('email/verify', function ($locale) {
+            return Inertia::render('auth/verify-email', [
+                'status' => session('status'),
+                'locale' => $locale,
+            ]);
+        })->middleware('auth')->name('locale.verification.notice');
+
+        Route::get('email/verify/{id}/{hash}', [\Laravel\Fortify\Http\Controllers\VerifyEmailController::class, '__invoke'])
+            ->middleware(['auth', 'signed', 'throttle:6,1'])
+            ->name('locale.verification.verify');
+
+        Route::post('email/verification-notification', [\Laravel\Fortify\Http\Controllers\EmailVerificationNotificationController::class, 'store'])
+            ->middleware(['auth', 'throttle:6,1'])
+            ->name('locale.verification.send');
+    }
 
     // Register routes
     Route::get('register', function ($locale) {

@@ -76,16 +76,19 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendEmailVerificationNotification()
     {
+        $locale = $this->locale ?? app()->getLocale();
+        
         $url = \Illuminate\Support\Facades\URL::temporarySignedRoute(
-            'verification.verify',
+            'locale.verification.verify',
             now()->addMinutes(config('auth.verification.expire', 60)),
             [
+                'locale' => $locale,
                 'id' => $this->getKey(),
                 'hash' => sha1($this->getEmailForVerification()),
             ]
         );
 
-        Mail::to($this->email)->send(new VerificationMail($url));
+        Mail::to($this->email)->send(new VerificationMail($url, 60, $locale));
     }
 
     /**
@@ -96,11 +99,13 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendPasswordResetNotification($token)
     {
-        $url = url(route('password.reset', [
-            'token' => $token,
-            'email' => $this->getEmailForPasswordReset(),
-        ], false));
+        $locale = $this->locale ?? app()->getLocale();
 
-        Mail::to($this->email)->send(new PasswordResetMail($url));
+        $url = url(route('locale.password.reset', [
+            'locale' => $locale,
+            'token' => $token,
+        ], false)) . '?email=' . urlencode($this->getEmailForPasswordReset());
+
+        Mail::to($this->email)->send(new PasswordResetMail($url, 60, $locale));
     }
 }

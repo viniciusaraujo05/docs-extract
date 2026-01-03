@@ -15,17 +15,19 @@ class VerificationMail extends Mailable
 
     public $url;
     public $count;
+    public $locale;
 
-    public function __construct($url, $count = 60)
+    public function __construct($url, $count = 60, $locale = null)
     {
         $this->url = $url;
         $this->count = $count;
+        $this->locale = $locale ?? app()->getLocale();
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: __('emails.verification.subject'),
+            subject: __('emails.verification.subject', [], $this->locale),
         );
     }
 
@@ -33,6 +35,15 @@ class VerificationMail extends Mailable
     {
         return new Content(
             view: 'emails.verification',
+            with: [
+                'locale' => $this->locale,
+            ],
         );
+    }
+
+    public function build()
+    {
+        app()->setLocale($this->locale);
+        return $this;
     }
 }

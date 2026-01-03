@@ -1058,6 +1058,37 @@
     "Error reading file": "Erro ao ler ficheiro: {{fileName}}. Tente novamente.",
     "Document limit reached": "Atingiu o limite de documentos ({{used}}/{{limit}}). Faça upgrade do seu plano para enviar mais documentos.",
     "Model limit reached": "Atingiu o limite de modelos ({{used}}/{{limit}}). Faça upgrade do seu plano para criar mais modelos.",
+    "auth": {
+      "verify_email": {
+        "title": "Verificar e-mail",
+        "description": "Por favor, verifique o seu endereço de e-mail clicando no link que acabámos de enviar.",
+        "page_title": "Verificação de e-mail",
+        "link_sent": "Um novo link de verificação foi enviado para o endereço de e-mail que forneceu durante o registo.",
+        "resend_button": "Reenviar e-mail de verificação",
+        "logout": "Terminar sessão"
+      },
+      "forgot_password": {
+        "title": "Esqueceu-se da senha",
+        "description": "Introduza o seu e-mail para receber um link de recuperação de senha",
+        "page_title": "Esqueceu-se da senha",
+        "email_label": "Endereço de e-mail",
+        "email_placeholder": "email@exemplo.com",
+        "submit_button": "Enviar link de recuperação",
+        "back_to_login": "Ou, voltar para",
+        "login_link": "iniciar sessão"
+      },
+      "reset_password": {
+        "title": "Recuperar senha",
+        "description": "Por favor, introduza a sua nova senha abaixo",
+        "page_title": "Recuperar senha",
+        "email_label": "E-mail",
+        "password_label": "Senha",
+        "password_placeholder": "Senha",
+        "confirm_password_label": "Confirmar senha",
+        "confirm_password_placeholder": "Confirmar senha",
+        "submit_button": "Recuperar senha"
+      }
+    },
     "billing": {
       "title": "Faturamento e Subscrição",
       "subtitle": "Gerencie o seu plano, visualize o uso e controle a sua subscrição.",
