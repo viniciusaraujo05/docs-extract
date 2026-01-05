@@ -432,11 +432,11 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
                 }
             }
         } catch (err) {
-            const message = err instanceof Error ? err.message : 'Erro ao processar documento';
+            const message = err instanceof Error ? err.message : t('Error processing document');
             
             // Se for erro 500, mostra mensagem amigável
             if (message.includes('500')) {
-                setError('❌ Não foi possível processar este documento\n\nIsso pode acontecer quando:\n• O PDF está protegido por senha\n• O arquivo está corrompido\n• O formato não é suportado\n\nSugestões:\n• Tente converter o PDF para imagem (JPG/PNG)\n• Verifique se o arquivo não está protegido\n• Use outro PDF se disponível');
+                setError(t('document_processing_error'));
             } else {
                 setError(message);
             }
@@ -472,9 +472,7 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
         formData.append('new_type_name', newTypeName);
         formData.append('schema', JSON.stringify({ fields }));
         formData.append('extracted_data', JSON.stringify(extractedData));
-        if (forceOverwrite) {
-            formData.append('force_overwrite', 'true');
-        }
+        formData.append('force_overwrite', forceOverwrite ? '1' : '0');
         
         const locale = localStorage.getItem('selected-locale') || 'pt';
         router.post(`/${locale}/documents`, formData, { 

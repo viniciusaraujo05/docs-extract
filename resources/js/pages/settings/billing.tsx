@@ -187,10 +187,6 @@ export default function BillingIndex() {
 
           setCurrentPlan(usageData.plan?.name?.toLowerCase() || 'free');
           
-          // Debug log
-          console.log('Current plan set to:', usageData.plan?.name?.toLowerCase() || 'free');
-          console.log('Plan data:', planData?.name);
-          console.log('Usage plan:', usageData.plan?.name);
         }
       }
 
@@ -203,7 +199,8 @@ export default function BillingIndex() {
       // Process available plans
       if (plansResponse.status === 'fulfilled') {
         const plansData = await plansResponse.value.json();
-        setAvailablePlans((Object.values(plansData) as Plan[]).filter((p: Plan) => p.name.toLowerCase() !== currentPlan.toLowerCase()));
+        const plansArray = Object.values(plansData) as Plan[];
+        setAvailablePlans(plansArray.filter((p: Plan) => p.name.toLowerCase() !== currentPlan.toLowerCase()));
       }
 
       // Process invoice data
@@ -245,6 +242,10 @@ export default function BillingIndex() {
   };
 
   const handleUpgrade = (priceId: string) => {
+    if (!priceId) {
+      toast.error('Invalid plan selected');
+      return;
+    }
     router.visit(`/${locale}/subscription/checkout?price_id=${priceId}`);
   };
 

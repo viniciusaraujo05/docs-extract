@@ -18,7 +18,7 @@ export default function Checkout({ priceId, planName }: CheckoutProps) {
 
     console.log('Checkout props:', { priceId, planName });
 
-    const handleCheckout = async () => {
+    const handleCheckout = () => {
         if (!priceId) {
             alert(t('subscription.checkout.noPriceSelected'));
             return;
@@ -26,29 +26,28 @@ export default function Checkout({ priceId, planName }: CheckoutProps) {
 
         setIsProcessing(true);
 
-        try {
-            const response = await fetch(`/${locale}/subscription/checkout`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-                body: JSON.stringify({ price_id: priceId }),
-            });
-
-            const data = await response.json();
-
-            if (data.checkout_url) {
-                window.location.href = data.checkout_url;
-            } else {
-                alert(t('subscription.checkout.error'));
-                setIsProcessing(false);
-            }
-        } catch (error) {
-            console.error('Checkout error:', error);
-            alert(t('subscription.checkout.error'));
-            setIsProcessing(false);
+        // Create a form and submit it to avoid CORS issues with Stripe redirect
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/${locale}/subscription/checkout`;
+        
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (csrfToken) {
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
         }
+        
+        const priceInput = document.createElement('input');
+        priceInput.type = 'hidden';
+        priceInput.name = 'price_id';
+        priceInput.value = priceId;
+        form.appendChild(priceInput);
+        
+        document.body.appendChild(form);
+        form.submit();
     };
 
     const handleBack = () => {

@@ -58,7 +58,13 @@ Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 
         'show' => 'documents.show',
         'update' => 'documents.update',
         'destroy' => 'documents.destroy',
-    ])->parameters(['documents' => 'document'])->middleware(['usage.limit:documents']);
+    ])->parameters(['documents' => 'document']);
+    
+    // Apply usage limit only to store route (creating new documents)
+    Route::post('documents', [DocumentController::class, 'store'])
+        ->name('documents.store')
+        ->middleware(['usage.limit:documents']);
+    
     Route::get('documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
     Route::put('documents/{document}/data', [DocumentController::class, 'updateData'])->name('documents.updateData');
     Route::post('documents/{document}/reprocess', [DocumentController::class, 'reprocess'])->name('documents.reprocess');

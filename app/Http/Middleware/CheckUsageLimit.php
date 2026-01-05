@@ -38,10 +38,36 @@ class CheckUsageLimit
         }
 
         // Check if user has reached the limit
-        $response = $this->usageLimitService->checkLimitAndRespond($actualUser, $resource);
-        
-        if ($response) {
-            return $response;
+        if ($this->usageLimitService->hasReachedLimit($actualUser, $resource)) {
+            $limits = app(\App\Services\SubscriptionService::class)->getUserPlanLimits($actualUser);
+            $limit = $limits[$resource] ?? 0;
+            
+            $resourceNames = [
+                'documents' => __('documents'),
+                'models' => __('models'),
+                'reports' => __('reports'),
+                'api_keys' => __('API keys'),
+                'api_requests' => __('API requests'),
+            ];
+            
+            $message = __(":resource limit reached. You've used all :limit :resource included in your plan. Upgrade to continue.", [
+                'resource' => $resourceNames[$resource] ?? $resource,
+                'limit' => $limit,
+            ]);
+            
+            // If this is an Inertia request, redirect back with error
+            if ($request->header('X-Inertia')) {
+                return redirect()->back()->with('error', $message);
+            }
+            
+            // Otherwise return JSON for API requests
+            return response()->json([
+                'error' => $message,
+                'code' => 'LIMIT_REACHED',
+                'resource' => $resource,
+                'limit' => $limit,
+                'usage' => app(\App\Repositories\PlanUsageRepository::class)->getUsage($actualUser, $resource),
+            ], 422);
         }
 
         // Continue with the request

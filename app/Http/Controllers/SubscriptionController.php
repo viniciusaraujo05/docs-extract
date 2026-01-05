@@ -40,12 +40,12 @@ class SubscriptionController extends Controller
         ]);
     }
 
-    public function checkout(Request $request): JsonResponse
+    public function checkout(Request $request): RedirectResponse
     {
         $priceId = $request->input('price_id');
 
         if (! $priceId) {
-            return response()->json(['error' => 'Price ID is required'], 400);
+            return redirect()->back()->with('error', 'Price ID is required');
         }
 
         try {
@@ -54,9 +54,9 @@ class SubscriptionController extends Controller
                 $priceId
             );
 
-            return response()->json(['checkout_url' => $checkoutUrl]);
+            return redirect()->away($checkoutUrl);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
