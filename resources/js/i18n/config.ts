@@ -31,7 +31,7 @@ i18n
                 translation: enTranslations,
             },
         },
-        fallbackLng: 'pt',
+        fallbackLng: 'en',
         supportedLngs: ['pt', 'en'],
         interpolation: {
             escapeValue: false,

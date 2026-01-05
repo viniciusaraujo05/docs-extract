@@ -14,7 +14,7 @@ use Laravel\Fortify\Features;
 Route::get('/', function () {
     return Inertia::render('welcome', [
         'canRegister' => Features::enabled(Features::registration()),
-        'locale' => 'pt',
+        'locale' => 'en',
         'auth' => [
             'user' => \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::user() : null,
         ],
@@ -31,6 +31,19 @@ Route::get('/{locale}', function ($locale) {
         ],
     ]);
 })->where(['locale' => 'pt|en'])->name('home.locale');
+
+// Privacy and Terms pages with locale
+Route::get('/{locale}/privacy', function ($locale) {
+    return Inertia::render('privacy', [
+        'locale' => $locale,
+    ]);
+})->where(['locale' => 'pt|en'])->name('privacy');
+
+Route::get('/{locale}/terms', function ($locale) {
+    return Inertia::render('terms', [
+        'locale' => $locale,
+    ]);
+})->where(['locale' => 'pt|en'])->name('terms');
 
 // Pages with locale prefix
 Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {

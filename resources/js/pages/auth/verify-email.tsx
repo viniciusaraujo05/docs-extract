@@ -11,7 +11,8 @@ import {
   Zap,
   CheckCircle,
   LoaderCircle,
-  LogOut
+  LogOut,
+  FileJson
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -20,17 +21,22 @@ interface VerifyEmailProps {
 }
 
 export default function VerifyEmail({ status }: VerifyEmailProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { props } = usePage<{ locale: string }>();
-    const locale = props.locale || 'pt';
+    const locale = props.locale || 'en';
     
     const [processing, setProcessing] = useState(false);
+    
+    useEffect(() => {
+        i18n.changeLanguage(locale);
+        localStorage.setItem('selected-locale', locale);
+    }, [locale, i18n]);
 
     useEffect(() => {
         if (status === 'verification-link-sent') {
             toast.success(t('A new verification link has been sent to your email address.'));
         }
-    }, [status, t]);
+    }, [status]);
 
     const handleResend = (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,90 +51,114 @@ export default function VerifyEmail({ status }: VerifyEmailProps) {
         router.post(`/${locale}/logout`);
     };
 
-    const benefits = [
-        { icon: <Sparkles className="h-5 w-5" />, text: t('AI-powered extraction') },
-        { icon: <Zap className="h-5 w-5" />, text: t('Process documents in seconds') },
-        { icon: <Shield className="h-5 w-5" />, text: t('Bank-level security') },
-    ];
-
     return (
         <>
-            <Head title={t('Verify Email')} />
+            <Head title="Verify Email - DOCSET" />
             
-            <div className="min-h-screen flex">
-                {/* Left Side - Form */}
-                <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-background">
+            <div className="min-h-screen flex bg-black text-white">
+                <div className="flex-1 flex items-center justify-center p-6 lg:p-8 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-950/20 via-transparent to-blue-950/20" />
+                    <div className="absolute inset-0">
+                        <motion.div 
+                          className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"
+                          animate={{
+                            scale: [1, 1.2, 1],
+                            opacity: [0.3, 0.5, 0.3],
+                          }}
+                          transition={{
+                            duration: 8,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+                        <motion.div 
+                          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-700/20 rounded-full blur-3xl"
+                          animate={{
+                            scale: [1.2, 1, 1.2],
+                            opacity: [0.5, 0.3, 0.5],
+                          }}
+                          transition={{
+                            duration: 8,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                            delay: 1
+                          }}
+                        />
+                    </div>
+
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        className="w-full max-w-md"
+                        className="w-full max-w-md relative z-10"
                     >
-                        {/* Logo */}
-                        <div className="mb-6 sm:mb-8">
-                            <motion.h1
+                        <div className="mb-8">
+                            <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.2 }}
-                                className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent"
+                                className="flex items-center gap-2 mb-8"
+                                onClick={() => router.visit(`/${locale}`)}
                             >
-                                DOCSET
-                            </motion.h1>
-                        </div>
+                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center cursor-pointer">
+                                    <FileJson className="h-5 w-5 text-white" />
+                                </div>
+                                <span className="font-bold text-lg cursor-pointer">DOCSET</span>
+                            </motion.div>
 
-                        {/* Header */}
-                        <div className="mb-6 sm:mb-8">
-                            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-                                {t('Verify your email')}
+                            <div className="flex items-center justify-center mb-6">
+                                <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center">
+                                    <Mail className="w-8 h-8 text-blue-400" />
+                                </div>
+                            </div>
+
+                            <h2 className="text-4xl font-bold mb-3 text-center">
+                                {t('auth.verify_email.title')}
                             </h2>
-                            <p className="text-sm sm:text-base text-muted-foreground">
-                                {t('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you?')}{' '}
-                                {t("If you didn't receive the email, we will gladly send you another.")}
+                            <p className="text-gray-400 text-center">
+                                {t('auth.verify_email.description')}
+                            </p>
+                            <p className="text-gray-400 text-center mt-2">
+                                {t('auth.verify_email.link_sent')}
                             </p>
                         </div>
 
-                        {/* Form */}
-                        <form onSubmit={handleResend} className="space-y-4 sm:space-y-6">
-                            {/* Submit Button */}
-                            <Button
-                                type="submit"
-                                disabled={processing}
-                                className="w-full h-11 sm:h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-sm sm:text-base"
+                        <form onSubmit={handleResend} className="space-y-6">
+                            <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                             >
-                                {processing ? (
-                                    <LoaderCircle className="h-5 w-5 animate-spin" />
-                                ) : (
-                                    <>
-                                        {t('Resend Verification Email')}
-                                        <ArrowRight className="ml-2 h-5 w-5" />
-                                    </>
-                                )}
-                            </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="w-full h-12 bg-blue-500 hover:bg-blue-600 text-white font-semibold"
+                                >
+                                    {processing ? (
+                                        <LoaderCircle className="h-5 w-5 animate-spin" />
+                                    ) : (
+                                        <>
+                                            {t('Click here to resend verification email.')}
+                                            <ArrowRight className="ml-2 h-5 w-5" />
+                                        </>
+                                    )}
+                                </Button>
+                            </motion.div>
                         </form>
 
-                        {/* Logout */}
                         <div className="mt-6 text-center">
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center justify-center gap-2 mx-auto text-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
+                                className="flex items-center justify-center gap-2 mx-auto text-sm text-gray-400 hover:text-white font-medium transition-colors"
                             >
                                 <LogOut className="h-4 w-4" />
-                                {t('Logout')}
+                                Logout
                             </button>
                         </div>
 
-                        {/* Divider */}
-                        <div className="mt-6 sm:mt-8 mb-4 sm:mb-6 flex items-center">
-                            <div className="flex-1 border-t border-border"></div>
-                            <span className="px-4 text-sm text-gray-500">{t('or')}</span>
-                            <div className="flex-1 border-t border-border"></div>
-                        </div>
-
-                        {/* Back to Home */}
-                        <div className="text-center">
+                        <div className="mt-8 text-center">
                             <button
                                 onClick={() => router.visit(`/${locale}`)}
-                                className="text-sm text-muted-foreground hover:text-foreground"
+                                className="text-sm text-gray-400 hover:text-white transition"
                             >
                                 ← {t('Back to home')}
                             </button>
@@ -136,29 +166,27 @@ export default function VerifyEmail({ status }: VerifyEmailProps) {
                     </motion.div>
                 </div>
 
-                {/* Right Side - Benefits */}
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="hidden lg:flex flex-1 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 p-8 lg:p-12 items-center justify-center relative overflow-hidden"
+                    className="hidden lg:flex flex-1 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 p-12 items-center justify-center relative overflow-hidden"
                 >
-                    {/* Animated Background */}
                     <div className="absolute inset-0">
-                        {[...Array(20)].map((_, i) => (
+                        {[...Array(30)].map((_, i) => (
                             <motion.div
                                 key={i}
                                 animate={{
-                                    y: [0, -100, 0],
+                                    y: [0, -150, 0],
                                     x: [0, Math.random() * 100 - 50, 0],
-                                    opacity: [0, 1, 0],
+                                    opacity: [0, 0.8, 0],
                                 }}
                                 transition={{
                                     repeat: Infinity,
-                                    duration: Math.random() * 5 + 3,
+                                    duration: Math.random() * 8 + 5,
                                     delay: Math.random() * 5,
                                 }}
-                                className="absolute w-2 h-2 bg-white rounded-full"
+                                className="absolute w-1 h-1 bg-white rounded-full"
                                 style={{
                                     left: `${Math.random() * 100}%`,
                                     top: `${Math.random() * 100}%`,
@@ -173,26 +201,30 @@ export default function VerifyEmail({ status }: VerifyEmailProps) {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.4 }}
                         >
-                            <h2 className="text-4xl font-bold mb-6">
-                                {t('One step away from automation')}
+                            <h2 className="text-5xl font-bold mb-6 leading-tight">
+                                One step away from automation
                             </h2>
-                            <p className="text-xl text-blue-100 mb-8">
-                                {t('Verifying your email ensures the security of your account and enables full access to Docset.')}
+                            <p className="text-xl text-blue-100 mb-10 leading-relaxed">
+                                Verifying your email ensures the security of your account and enables full access to DOCSET.
                             </p>
 
                             <div className="space-y-4">
-                                {benefits.map((benefit, i) => (
+                                {[
+                                    { icon: <Sparkles className="h-5 w-5" />, text: 'AI-powered extraction' },
+                                    { icon: <Zap className="h-5 w-5" />, text: 'Process in seconds' },
+                                    { icon: <Shield className="h-5 w-5" />, text: 'Bank-level security' },
+                                ].map((benefit, i) => (
                                     <motion.div
                                         key={i}
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: 0.6 + i * 0.1 }}
-                                        className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg p-4"
+                                        className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10"
                                     >
-                                        <div className="bg-white/20 rounded-full p-2">
+                                        <div className="bg-white/20 rounded-lg p-2">
                                             {benefit.icon}
                                         </div>
-                                        <span className="font-medium">{benefit.text}</span>
+                                        <span className="font-medium text-lg">{benefit.text}</span>
                                     </motion.div>
                                 ))}
                             </div>
@@ -201,15 +233,15 @@ export default function VerifyEmail({ status }: VerifyEmailProps) {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 1 }}
-                                className="mt-8 flex items-center gap-6 text-sm"
+                                className="mt-10 flex items-center gap-6 text-sm"
                             >
                                 <div className="flex items-center gap-2">
-                                    <CheckCircle className="h-5 w-5" />
-                                    <span>{t('Instant activation')}</span>
+                                    <CheckCircle className="h-5 w-5 text-green-400" />
+                                    <span>Instant activation</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <CheckCircle className="h-5 w-5" />
-                                    <span>{t('Secure access')}</span>
+                                    <CheckCircle className="h-5 w-5 text-green-400" />
+                                    <span>Secure access</span>
                                 </div>
                             </motion.div>
                         </motion.div>

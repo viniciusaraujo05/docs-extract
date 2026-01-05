@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
@@ -21,13 +21,18 @@ interface ForgotPasswordProps {
 }
 
 export default function ForgotPassword({ status }: ForgotPasswordProps) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { props } = usePage<{ locale: string }>();
-    const locale = props.locale || 'pt';
+    const locale = props.locale || 'en';
     
     const [email, setEmail] = useState('');
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<any>({});
+    
+    useEffect(() => {
+        i18n.changeLanguage(locale);
+        localStorage.setItem('selected-locale', locale);
+    }, [locale, i18n]);
 
     useEffect(() => {
         if (status) {
