@@ -178,9 +178,8 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
         Route::post('resume', [SubscriptionController::class, 'resumeSubscription'])->name('resume');
     });
 
-    // Plan API routes
+    // Plan API routes (protected)
     Route::middleware(['auth'])->prefix('api/plans')->name('api.plans.')->group(function () {
-        Route::get('/', [PlanController::class, 'index'])->name('index');
         Route::get('/current', [PlanController::class, 'current'])->name('current');
         Route::get('/upcoming-invoice', [PlanController::class, 'upcomingInvoice'])->name('upcoming-invoice');
         Route::get('/invoices', [PlanController::class, 'invoices'])->name('invoices');

@@ -27,8 +27,16 @@ class PlanController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        // Get locale from request, default to 'en'
+        $locale = $request->input('locale', 'en');
+        
+        // Normalize locale (convert 'pt' to 'pt-BR')
+        if ($locale === 'pt') {
+            $locale = 'pt-BR';
+        }
+        
         // Get plans from Stripe with real-time pricing
-        $plans = $this->stripePlanService->getAllPlans();
+        $plans = $this->stripePlanService->getAllPlans($locale);
         
         return response()->json($plans);
     }
@@ -41,19 +49,29 @@ class PlanController extends Controller
         $user = $request->user();
         $subscription = $user->subscription('default');
         
-        $currentPlan = 'free';
-        $planData = config('plans.plans.free');
+        // Get locale from request or fallback to app locale
+        $locale = $request->input('locale', app()->getLocale());
+        if ($locale === 'pt') $locale = 'pt-BR';
+
+        $currentPlanKey = 'free';
         
         if ($subscription && $subscription->active()) {
             $productId = $subscription->items->first()->stripe_product;
-            $planKey = config('plans.product_mapping')[$productId] ?? 'free';
-            $currentPlan = $planKey;
-            $planData = config("plans.plans.{$planKey}");
+            $currentPlanKey = config('plans.product_mapping')[$productId] ?? 'free';
         }
         
-        // Ensure planData exists
+        // Get translated plan data
+        $planData = $this->stripePlanService->getPlan($currentPlanKey, $locale);
+        
+        // If plan data not found via Stripe service, fallback to config directly but with translation
         if (!$planData) {
-            $planData = config('plans.plans.free');
+            $plans = $this->stripePlanService->getAllPlans($locale);
+            $planData = $plans[$currentPlanKey] ?? null;
+        }
+
+        // Ensure we still have some data even if fallback failed
+        if (!$planData) {
+            $planData = config("plans.plans.{$currentPlanKey}");
         }
 
         // Get usage data from PlanUsage
@@ -64,17 +82,11 @@ class PlanController extends Controller
             'api_requests' => $planUsage->api_requests_count,
             'api_keys' => ApiClient::where('user_id', $user->id)->count(),
         ];
-        
-        // Debug log
-        \Log::info('Plan data for user ' . $user->id, [
-            'plan' => $currentPlan,
-            'planData' => $planData,
-            'usage' => $usage
-        ]);
 
         // Calculate usage percentages
         $usagePercentages = [];
-        foreach ($planData['limits'] as $limit => $value) {
+        $limits = $planData['limits'] ?? [];
+        foreach ($limits as $limit => $value) {
             // Skip non-numeric limits (like exports array, webhooks boolean)
             if (is_array($value) || is_bool($value)) {
                 if ($value === false) {
@@ -99,7 +111,7 @@ class PlanController extends Controller
         }
 
         return response()->json([
-            'current_plan' => $currentPlan,
+            'current_plan' => $currentPlanKey,
             'plan_data' => $planData,
             'subscription' => $subscription,
             'usage' => $usage,

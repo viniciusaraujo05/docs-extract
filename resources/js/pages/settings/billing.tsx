@@ -139,14 +139,14 @@ export default function BillingIndex() {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
           },
         }),
-        fetch(`/${locale}/api/plans/current`, {
+        fetch(`/${locale}/api/plans/current?locale=${locale}`, {
           headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
           },
         }),
-        fetch(`/${locale}/api/plans`, {
+        fetch(`/api/plans?locale=${locale}`, {
           headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
@@ -197,10 +197,10 @@ export default function BillingIndex() {
       }
 
       // Process available plans
-      if (plansResponse.status === 'fulfilled') {
+      if (plansResponse.status === 'fulfilled' && plansResponse.value.ok) {
         const plansData = await plansResponse.value.json();
         const plansArray = Object.values(plansData) as Plan[];
-        setAvailablePlans(plansArray.filter((p: Plan) => p.name.toLowerCase() !== currentPlan.toLowerCase()));
+        setAvailablePlans(plansArray.filter((p: Plan) => p.name && p.name.toLowerCase() !== (currentPlan || '').toLowerCase()));
       }
 
       // Process invoice data
@@ -612,7 +612,7 @@ export default function BillingIndex() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2">
-              {planData?.features.map((feature, index) => (
+              {Array.isArray(planData?.features) && planData.features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500" />
                   <span className="text-sm">{feature}</span>
@@ -676,7 +676,7 @@ export default function BillingIndex() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 mb-4">
-                    {planData.features.slice(0, 5).map((feature, index) => (
+                    {Array.isArray(planData.features) && planData.features.slice(0, 5).map((feature, index) => (
                       <li key={index} className="flex items-start gap-2 text-sm">
                         <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-500 mt-0.5 flex-shrink-0" />
                         <span>{translateFeature(feature)}</span>
@@ -715,7 +715,7 @@ export default function BillingIndex() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 mb-4">
-                    {plan.features.map((feature, index) => (
+                    {Array.isArray(plan.features) && plan.features.map((feature, index) => (
                       <li key={index} className="flex items-start gap-2 text-sm">
                         <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-500 mt-0.5 flex-shrink-0" />
                         <span>{translateFeature(feature)}</span>

@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,13 +45,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
-};
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
 };
 exports.__esModule = true;
 var framer_motion_1 = require("framer-motion");
@@ -181,7 +185,7 @@ var productFlowFallback = {
 var codeExampleFallback = {
     en: {
         badge: "Developer API",
-        title: "Built for developers",
+        title: "Built for data extraction",
         subtitle: "Use DOCSET via UI or integrate it using a simple REST API. JSON responses, webhooks, and more.",
         cta: "Try demo",
         tabs: { upload: "Upload", retrieve: "Retrieve" }
@@ -219,34 +223,14 @@ var finalCTAFallback = {
     }
 };
 var headerNavFallback = {
-    en: { features: "Features", pricing: "Pricing", api: "API", docs: "Docs", login: "Login", startFree: "Start free", dashboard: "Dashboard" },
-    'pt-BR': { features: "Recursos", pricing: "Preços", api: "API", docs: "Docs", login: "Entrar", startFree: "Começar grátis", dashboard: "Painel" },
-    'pt-PT': { features: "Recursos", pricing: "Preços", api: "API", docs: "Docs", login: "Entrar", startFree: "Começar grátis", dashboard: "Painel" }
+    en: { features: "Features", pricing: "Pricing", api: "API", login: "Login", startFree: "Start free", dashboard: "Dashboard" },
+    'pt-BR': { features: "Recursos", pricing: "Preços", api: "API", login: "Entrar", startFree: "Começar grátis", dashboard: "Painel" },
+    'pt-PT': { features: "Recursos", pricing: "Preços", api: "API", login: "Entrar", startFree: "Começar grátis", dashboard: "Painel" }
 };
 var miscFallback = {
-    en: { builtForDevelopers: "Built for developers", mostPopular: "Most popular" },
-    'pt-BR': { builtForDevelopers: "Feito para desenvolvedores", mostPopular: "Mais popular" },
-    'pt-PT': { builtForDevelopers: "Feito para programadores", mostPopular: "Mais popular" }
-};
-var planFeaturesMapping = {
-    en: {
-        'FREE': ["Limited usage", "All core features", "API access"],
-        'STARTER': ["Higher limits", "Priority support", "API access"],
-        'PRO': ["Recommended", "Advanced features", "API access"],
-        'BUSINESS': ["High volume", "Custom limits", "API access"]
-    },
-    'pt-BR': {
-        'FREE': ["Uso limitado", "Todos os recursos", "Acesso à API"],
-        'STARTER': ["Limites maiores", "Suporte prioritário", "Acesso à API"],
-        'PRO': ["Recomendado", "Recursos avançados", "Acesso à API"],
-        'BUSINESS': ["Alto volume", "Limites personalizados", "Acesso à API"]
-    },
-    'pt-PT': {
-        'FREE': ["Uso limitado", "Todos os recursos", "Acesso à API"],
-        'STARTER': ["Limites maiores", "Suporte prioritário", "Acesso à API"],
-        'PRO': ["Recomendado", "Recursos avançados", "Acesso à API"],
-        'BUSINESS': ["Alto volume", "Limites personalizados", "Acesso à API"]
-    }
+    en: { builtForDevelopers: "Built for data extraction", mostPopular: "Most popular" },
+    'pt-BR': { builtForDevelopers: "Feito para extração de dados", mostPopular: "Mais popular" },
+    'pt-PT': { builtForDevelopers: "Feito para extração de dados", mostPopular: "Mais popular" }
 };
 function Welcome() {
     var _a;
@@ -358,6 +342,7 @@ exports["default"] = Welcome;
 function Header(_a) {
     var locale = _a.locale, onLocaleChange = _a.onLocaleChange, theme = _a.theme, onToggleTheme = _a.onToggleTheme, isAuthenticated = _a.isAuthenticated;
     var _b = react_1.useState(false), scrolled = _b[0], setScrolled = _b[1];
+    var _c = react_1.useState(false), mobileMenuOpen = _c[0], setMobileMenuOpen = _c[1];
     var getHeaderText = function () {
         if (locale === 'pt-BR' || locale === 'pt')
             return headerNavFallback['pt-BR'];
@@ -385,41 +370,70 @@ function Header(_a) {
             return 'Português (BR)';
         return 'Português (PT)';
     };
-    return (react_1["default"].createElement(framer_motion_1.motion.header, { initial: { y: -100, opacity: 0 }, animate: { y: 0, opacity: 1 }, className: "fixed top-0 w-full z-50 transition-all duration-300 " + (scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/10" : "bg-transparent") },
-        react_1["default"].createElement("div", { className: "max-w-7xl mx-auto px-6 py-4 flex items-center justify-between" },
-            react_1["default"].createElement("div", { className: "flex items-center gap-8" },
-                react_1["default"].createElement(framer_motion_1.motion.div, { whileHover: { scale: 1.05 }, className: "flex items-center gap-2 cursor-pointer" },
-                    react_1["default"].createElement("div", { className: "w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center" },
+    return (react_1["default"].createElement(react_1["default"].Fragment, null,
+        react_1["default"].createElement(framer_motion_1.motion.header, { initial: { y: -100, opacity: 0 }, animate: { y: 0, opacity: 1 }, className: "fixed top-0 w-full z-50 transition-all duration-300 " + (scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/10" : "bg-transparent") },
+            react_1["default"].createElement("div", { className: "max-w-7xl mx-auto px-6 py-4 flex items-center justify-between" },
+                react_1["default"].createElement("div", { className: "flex items-center gap-8" },
+                    react_1["default"].createElement(framer_motion_1.motion.div, { whileHover: { scale: 1.05 }, className: "flex items-center gap-2 cursor-pointer", onClick: function () { return react_2.router.visit("/" + locale.split('-')[0]); } },
+                        react_1["default"].createElement("div", { className: "w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center" },
+                            react_1["default"].createElement(lucide_react_1.FileJson, { className: "h-5 w-5 text-white" })),
+                        react_1["default"].createElement("span", { className: "font-bold text-lg" }, "DOCSET")),
+                    react_1["default"].createElement("nav", { className: "hidden md:flex gap-6 text-sm" },
+                        react_1["default"].createElement("a", { href: "#features", className: "text-gray-400 hover:text-white transition" }, headerText.features),
+                        react_1["default"].createElement("a", { href: "#pricing", className: "text-gray-400 hover:text-white transition" }, headerText.pricing),
+                        react_1["default"].createElement("a", { href: "#api", className: "text-gray-400 hover:text-white transition" }, headerText.api))),
+                react_1["default"].createElement("div", { className: "flex items-center gap-3" },
+                    react_1["default"].createElement("div", { className: "hidden md:flex items-center gap-3" },
+                        react_1["default"].createElement(select_1.Select, { value: locale, onValueChange: onLocaleChange },
+                            react_1["default"].createElement(select_1.SelectTrigger, { className: "w-[160px] bg-white/5 border-white/10 text-white" },
+                                react_1["default"].createElement(select_1.SelectValue, null,
+                                    react_1["default"].createElement("span", { className: "flex items-center gap-2" },
+                                        react_1["default"].createElement("span", null, getLocaleFlag(locale)),
+                                        react_1["default"].createElement("span", { className: "text-sm" }, getLocaleLabel(locale).split(' ')[0])))),
+                            react_1["default"].createElement(select_1.SelectContent, { className: "bg-zinc-900 border-white/10" },
+                                react_1["default"].createElement(select_1.SelectItem, { value: "en", className: "text-white" },
+                                    react_1["default"].createElement("span", { className: "flex items-center gap-2" },
+                                        "\uD83C\uDDEC\uD83C\uDDE7 ",
+                                        react_1["default"].createElement("span", null, "English"))),
+                                react_1["default"].createElement(select_1.SelectItem, { value: "pt-BR", className: "text-white" },
+                                    react_1["default"].createElement("span", { className: "flex items-center gap-2" },
+                                        "\uD83C\uDDE7\uD83C\uDDF7 ",
+                                        react_1["default"].createElement("span", null, "Portugu\u00EAs (BR)"))),
+                                react_1["default"].createElement(select_1.SelectItem, { value: "pt-PT", className: "text-white" },
+                                    react_1["default"].createElement("span", { className: "flex items-center gap-2" },
+                                        "\uD83C\uDDF5\uD83C\uDDF9 ",
+                                        react_1["default"].createElement("span", null, "Portugu\u00EAs (PT)"))))),
+                        isAuthenticated ? (react_1["default"].createElement(button_1.Button, { onClick: function () { return react_2.router.visit("/" + locale.split('-')[0] + "/dashboard"); }, className: "bg-blue-500 hover:bg-blue-600 text-white" }, headerText.dashboard)) : (react_1["default"].createElement(react_1["default"].Fragment, null,
+                            react_1["default"].createElement(button_1.Button, { variant: "ghost", onClick: function () { return react_2.router.visit("/" + locale.split('-')[0] + "/login"); }, className: "text-white hover:bg-white/10" }, headerText.login),
+                            react_1["default"].createElement(button_1.Button, { onClick: function () { return react_2.router.visit("/" + locale.split('-')[0] + "/register"); }, className: "bg-white text-black hover:bg-gray-200" }, headerText.startFree)))),
+                    react_1["default"].createElement(button_1.Button, { variant: "ghost", size: "icon", className: "md:hidden text-white", onClick: function () { return setMobileMenuOpen(true); } },
+                        react_1["default"].createElement(lucide_react_1.Menu, { className: "h-6 w-6" }))))),
+        react_1["default"].createElement(framer_motion_1.AnimatePresence, null, mobileMenuOpen && (react_1["default"].createElement(framer_motion_1.motion.div, { initial: { opacity: 0, x: "100%" }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: "100%" }, transition: { type: "spring", damping: 25, stiffness: 200 }, className: "fixed inset-0 z-[60] bg-zinc-950 flex flex-col md:hidden" },
+            react_1["default"].createElement("div", { className: "flex items-center justify-between p-6 border-b border-white/10" },
+                react_1["default"].createElement("div", { className: "flex items-center gap-2" },
+                    react_1["default"].createElement("div", { className: "w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center" },
                         react_1["default"].createElement(lucide_react_1.FileJson, { className: "h-5 w-5 text-white" })),
                     react_1["default"].createElement("span", { className: "font-bold text-lg" }, "DOCSET")),
-                react_1["default"].createElement("nav", { className: "hidden md:flex gap-6 text-sm" },
-                    react_1["default"].createElement("a", { href: "#features", className: "text-gray-400 hover:text-white transition" }, headerText.features),
-                    react_1["default"].createElement("a", { href: "#pricing", className: "text-gray-400 hover:text-white transition" }, headerText.pricing),
-                    react_1["default"].createElement("a", { href: "#api", className: "text-gray-400 hover:text-white transition" }, headerText.api),
-                    react_1["default"].createElement("a", { href: "https://docs.docset.app", target: "_blank", rel: "noopener", className: "text-gray-400 hover:text-white transition" }, headerText.docs))),
-            react_1["default"].createElement("div", { className: "flex items-center gap-3" },
-                react_1["default"].createElement(select_1.Select, { value: locale, onValueChange: onLocaleChange },
-                    react_1["default"].createElement(select_1.SelectTrigger, { className: "w-[160px] bg-white/5 border-white/10 text-white" },
-                        react_1["default"].createElement(select_1.SelectValue, null,
-                            react_1["default"].createElement("span", { className: "flex items-center gap-2" },
-                                react_1["default"].createElement("span", null, getLocaleFlag(locale)),
-                                react_1["default"].createElement("span", { className: "text-sm" }, getLocaleLabel(locale).split(' ')[0])))),
-                    react_1["default"].createElement(select_1.SelectContent, { className: "bg-zinc-900 border-white/10" },
-                        react_1["default"].createElement(select_1.SelectItem, { value: "en", className: "text-white" },
-                            react_1["default"].createElement("span", { className: "flex items-center gap-2" },
-                                "\uD83C\uDDEC\uD83C\uDDE7 ",
-                                react_1["default"].createElement("span", null, "English"))),
-                        react_1["default"].createElement(select_1.SelectItem, { value: "pt-BR", className: "text-white" },
-                            react_1["default"].createElement("span", { className: "flex items-center gap-2" },
-                                "\uD83C\uDDE7\uD83C\uDDF7 ",
-                                react_1["default"].createElement("span", null, "Portugu\u00EAs (BR)"))),
-                        react_1["default"].createElement(select_1.SelectItem, { value: "pt-PT", className: "text-white" },
-                            react_1["default"].createElement("span", { className: "flex items-center gap-2" },
-                                "\uD83C\uDDF5\uD83C\uDDF9 ",
-                                react_1["default"].createElement("span", null, "Portugu\u00EAs (PT)"))))),
-                isAuthenticated ? (react_1["default"].createElement(button_1.Button, { onClick: function () { return react_2.router.visit("/" + locale.split('-')[0] + "/dashboard"); }, className: "bg-blue-500 hover:bg-blue-600 text-white" }, headerText.dashboard)) : (react_1["default"].createElement(react_1["default"].Fragment, null,
-                    react_1["default"].createElement(button_1.Button, { variant: "ghost", onClick: function () { return react_2.router.visit("/" + locale.split('-')[0] + "/login"); }, className: "hidden md:inline-flex text-white hover:bg-white/10" }, headerText.login),
-                    react_1["default"].createElement(button_1.Button, { onClick: function () { return react_2.router.visit("/" + locale.split('-')[0] + "/register"); }, className: "bg-white text-black hover:bg-gray-200" }, headerText.startFree)))))));
+                react_1["default"].createElement(button_1.Button, { variant: "ghost", size: "icon", onClick: function () { return setMobileMenuOpen(false); }, className: "text-white" },
+                    react_1["default"].createElement(lucide_react_1.X, { className: "h-6 w-6" }))),
+            react_1["default"].createElement("div", { className: "flex-1 overflow-y-auto p-6 space-y-8" },
+                react_1["default"].createElement("nav", { className: "flex flex-col gap-6 text-xl" },
+                    react_1["default"].createElement("a", { href: "#features", onClick: function () { return setMobileMenuOpen(false); }, className: "text-gray-400 hover:text-white transition" }, headerText.features),
+                    react_1["default"].createElement("a", { href: "#pricing", onClick: function () { return setMobileMenuOpen(false); }, className: "text-gray-400 hover:text-white transition" }, headerText.pricing),
+                    react_1["default"].createElement("a", { href: "#api", onClick: function () { return setMobileMenuOpen(false); }, className: "text-gray-400 hover:text-white transition" }, headerText.api)),
+                react_1["default"].createElement("div", { className: "space-y-6 pt-8 border-t border-white/10" },
+                    react_1["default"].createElement("div", { className: "space-y-3" },
+                        react_1["default"].createElement("p", { className: "text-sm text-gray-500 uppercase tracking-wider" }, "Language"),
+                        react_1["default"].createElement("div", { className: "grid grid-cols-1 gap-2" }, ['en', 'pt-BR', 'pt-PT'].map(function (loc) { return (react_1["default"].createElement("button", { key: loc, onClick: function () {
+                                onLocaleChange(loc);
+                                setMobileMenuOpen(false);
+                            }, className: "flex items-center gap-3 p-3 rounded-lg transition " + (locale === loc ? 'bg-blue-500/10 text-blue-400' : 'text-gray-400 hover:bg-white/5') },
+                            react_1["default"].createElement("span", { className: "text-xl" }, getLocaleFlag(loc)),
+                            react_1["default"].createElement("span", null, getLocaleLabel(loc)),
+                            locale === loc && react_1["default"].createElement(lucide_react_1.Check, { className: "ml-auto h-4 w-4" }))); }))),
+                    react_1["default"].createElement("div", { className: "flex flex-col gap-3 pt-4" }, isAuthenticated ? (react_1["default"].createElement(button_1.Button, { onClick: function () { return react_2.router.visit("/" + locale.split('-')[0] + "/dashboard"); }, className: "w-full bg-blue-500 hover:bg-blue-600 text-white h-12 text-lg" }, headerText.dashboard)) : (react_1["default"].createElement(react_1["default"].Fragment, null,
+                        react_1["default"].createElement(button_1.Button, { variant: "outline", onClick: function () { return react_2.router.visit("/" + locale.split('-')[0] + "/login"); }, className: "w-full text-white border-white/10 hover:bg-white/5 h-12 text-lg" }, headerText.login),
+                        react_1["default"].createElement(button_1.Button, { onClick: function () { return react_2.router.visit("/" + locale.split('-')[0] + "/register"); }, className: "w-full bg-white text-black hover:bg-gray-200 h-12 text-lg" }, headerText.startFree)))))))))));
 }
 function Hero(_a) {
     var locale = _a.locale, onOpenDemo = _a.onOpenDemo;
@@ -431,7 +445,7 @@ function Hero(_a) {
         return heroFallback.en;
     };
     var heroRaw = getHeroText();
-    return (react_1["default"].createElement("section", { className: "relative overflow-hidden pt-32 pb-24" },
+    return (react_1["default"].createElement("section", { className: "relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24" },
         react_1["default"].createElement("div", { className: "absolute inset-0 bg-gradient-to-b from-blue-950/20 via-transparent to-transparent" }),
         react_1["default"].createElement("div", { className: "absolute inset-0" },
             react_1["default"].createElement(framer_motion_1.motion.div, { className: "absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl", animate: {
@@ -462,7 +476,7 @@ function Hero(_a) {
                             return miscFallback['pt-PT'].builtForDevelopers;
                         return miscFallback.en.builtForDevelopers;
                     })()),
-                react_1["default"].createElement("h1", { className: "text-5xl md:text-7xl font-bold leading-tight mb-6" }, heroRaw.title),
+                react_1["default"].createElement("h1", { className: "text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-6" }, heroRaw.title),
                 react_1["default"].createElement("p", { className: "text-xl text-gray-400 leading-relaxed mb-10 max-w-3xl mx-auto" }, heroRaw.subtitle),
                 react_1["default"].createElement("div", { className: "flex flex-col sm:flex-row items-center justify-center gap-4" },
                     react_1["default"].createElement(framer_motion_1.motion.div, { whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } },
@@ -486,7 +500,7 @@ function AnimatedProductDemo() {
     }, []);
     return (react_1["default"].createElement("div", { className: "relative" },
         react_1["default"].createElement("div", { className: "absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10 pointer-events-none" }),
-        react_1["default"].createElement(framer_motion_1.motion.div, { className: "bg-zinc-900 rounded-2xl border border-white/10 p-8 shadow-2xl", initial: { opacity: 0, scale: 0.95 }, animate: { opacity: 1, scale: 1 } },
+        react_1["default"].createElement(framer_motion_1.motion.div, { className: "bg-zinc-900 rounded-2xl border border-white/10 p-4 sm:p-8 shadow-2xl", initial: { opacity: 0, scale: 0.95 }, animate: { opacity: 1, scale: 1 } },
             react_1["default"].createElement("div", { className: "flex gap-2 mb-6" }, [0, 1, 2].map(function (i) { return (react_1["default"].createElement("div", { key: i, className: "h-1.5 flex-1 rounded-full transition-all duration-500 " + (step === i ? 'bg-blue-500' : 'bg-white/10') })); })),
             react_1["default"].createElement(framer_motion_1.AnimatePresence, { mode: "wait" },
                 step === 0 && (react_1["default"].createElement(framer_motion_1.motion.div, { key: "upload", initial: { opacity: 0, x: 20 }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: -20 }, className: "space-y-4" },
@@ -546,12 +560,12 @@ function ProductFlow(_a) {
     };
     var flowText = getProductFlowText();
     var iconMap = [lucide_react_1.Upload, lucide_react_1.Eye, lucide_react_1.Database];
-    return (react_1["default"].createElement("section", { className: "py-32 relative overflow-hidden" },
+    return (react_1["default"].createElement("section", { className: "py-20 md:py-32 relative overflow-hidden" },
         react_1["default"].createElement("div", { className: "max-w-7xl mx-auto px-6" },
             react_1["default"].createElement("div", { className: "text-center mb-20" },
                 react_1["default"].createElement(badge_1.Badge, { className: "mb-6 bg-blue-500/10 text-blue-300 border-blue-500/20" }, flowText.badge),
                 react_1["default"].createElement("h2", { className: "text-4xl md:text-5xl font-bold" }, flowText.title)),
-            react_1["default"].createElement("div", { className: "grid md:grid-cols-3 gap-8" }, flowText.steps.map(function (item, i) { return (react_1["default"].createElement(framer_motion_1.motion.div, { key: item.step, initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { delay: i * 0.1 }, className: "relative" },
+            react_1["default"].createElement("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-8" }, flowText.steps.map(function (item, i) { return (react_1["default"].createElement(framer_motion_1.motion.div, { key: item.step, initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { delay: i * 0.1 }, className: "relative" },
                 react_1["default"].createElement("div", { className: "bg-gradient-to-b from-white/5 to-transparent border border-white/10 rounded-2xl p-8 hover:border-blue-500/50 transition-all duration-300" },
                     react_1["default"].createElement("div", { className: "text-5xl font-bold text-white/10 mb-4" }, item.step),
                     react_1["default"].createElement("div", { className: "w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-6" }, react_1["default"].createElement(iconMap[i], { className: "w-6 h-6 text-blue-400" })),
@@ -568,11 +582,11 @@ function Features(_a) {
         return featuresFallback.en;
     };
     var featuresText = getFeaturesText();
-    return (react_1["default"].createElement("section", { id: "features", className: "py-32 relative" },
+    return (react_1["default"].createElement("section", { id: "features", className: "py-20 md:py-32 relative" },
         react_1["default"].createElement("div", { className: "max-w-7xl mx-auto px-6" },
             react_1["default"].createElement("div", { className: "text-center mb-20" },
                 react_1["default"].createElement("h2", { className: "text-4xl md:text-5xl font-bold mb-6" }, featuresText.title)),
-            react_1["default"].createElement("div", { className: "grid md:grid-cols-2 lg:grid-cols-3 gap-6" }, featuresText.items.map(function (feature, i) { return (react_1["default"].createElement(framer_motion_1.motion.div, { key: feature.title, initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { delay: i * 0.05 }, className: "group" },
+            react_1["default"].createElement("div", { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" }, featuresText.items.map(function (feature, i) { return (react_1["default"].createElement(framer_motion_1.motion.div, { key: feature.title, initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { delay: i * 0.05 }, className: "group" },
                 react_1["default"].createElement("div", { className: "bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-blue-500/50 transition-all duration-300" },
                     react_1["default"].createElement(feature.icon, { className: "w-8 h-8 text-blue-400 mb-4" }),
                     react_1["default"].createElement("h3", { className: "text-lg font-semibold mb-2" }, feature.title),
@@ -593,7 +607,7 @@ function CodeExample(_a) {
         upload: "curl -X POST https://api.docset.app/v1/documents \\\n  -H \"Authorization: Bearer YOUR_API_KEY\" \\\n  -F \"file=@invoice.pdf\" \\\n  -F \"template=invoice_template\"\n  \n// Response\n{\n  \"id\": \"doc_abc123\",\n  \"status\": \"processing\",\n  \"template\": \"invoice_template\"\n}",
         retrieve: "curl https://api.docset.app/v1/documents/doc_abc123 \\\n  -H \"Authorization: Bearer YOUR_API_KEY\"\n  \n// Response\n{\n  \"id\": \"doc_abc123\",\n  \"status\": \"completed\",\n  \"data\": {\n    \"invoice_number\": \"#INV-2024-001\",\n    \"amount\": 12450.00,\n    \"date\": \"2024-01-05\"\n  }\n}"
     };
-    return (react_1["default"].createElement("section", { id: "api", className: "py-32 relative overflow-hidden" },
+    return (react_1["default"].createElement("section", { id: "api", className: "py-20 md:py-32 relative overflow-hidden" },
         react_1["default"].createElement("div", { className: "absolute inset-0 bg-gradient-to-b from-transparent via-blue-950/10 to-transparent" }),
         react_1["default"].createElement("div", { className: "max-w-6xl mx-auto px-6 relative" },
             react_1["default"].createElement("div", { className: "text-center mb-16" },
@@ -630,28 +644,29 @@ function Pricing(_a) {
         return pricingFallback.en;
     };
     var pricingText = getPricingText();
-    var _b = react_1.useState([]), stripePrices = _b[0], setStripePrices = _b[1];
+    var _b = react_1.useState([]), plans = _b[0], setPlans = _b[1];
     var _c = react_1.useState(true), loading = _c[0], setLoading = _c[1];
     react_1.useEffect(function () {
-        var fetchStripePrices = function () { return __awaiter(_this, void 0, void 0, function () {
-            var response, data, error_1;
+        var fetchPlans = function () { return __awaiter(_this, void 0, void 0, function () {
+            var response, data, plansArray, error_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, 4, 5]);
-                        return [4 /*yield*/, fetch('/api/stripe/prices')];
+                        return [4 /*yield*/, fetch("/api/plans?locale=" + locale)];
                     case 1:
                         response = _a.sent();
                         return [4 /*yield*/, response.json()];
                     case 2:
                         data = _a.sent();
-                        if (data.success && data.prices && data.prices.length > 0) {
-                            setStripePrices(data.prices);
+                        if (data && Object.keys(data).length > 0) {
+                            plansArray = Object.values(data).map(function (plan, index) { return (__assign(__assign({}, plan), { order: plan.id === 'free' ? 0 : plan.id === 'starter' ? 1 : plan.id === 'pro' ? 2 : 3 })); });
+                            setPlans(plansArray.sort(function (a, b) { return a.order - b.order; }));
                         }
                         return [3 /*break*/, 5];
                     case 3:
                         error_1 = _a.sent();
-                        console.error('Error fetching Stripe prices:', error_1);
+                        console.error('Error fetching plans:', error_1);
                         return [3 /*break*/, 5];
                     case 4:
                         setLoading(false);
@@ -660,21 +675,8 @@ function Pricing(_a) {
                 }
             });
         }); };
-        fetchStripePrices();
-    }, []);
-    var formatPrice = function (amount, currency) {
-        return new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-US', {
-            style: 'currency',
-            currency: currency.toUpperCase()
-        }).format(amount / 100);
-    };
-    var normalizePlanName = function (name) {
-        return (name !== null && name !== void 0 ? name : '')
-            .toString()
-            .toLowerCase()
-            .trim()
-            .replace(/[^a-z0-9]/g, '');
-    };
+        fetchPlans();
+    }, [locale]);
     var getRecurringText = function (recurring) {
         if (!recurring)
             return '';
@@ -691,58 +693,23 @@ function Pricing(_a) {
         }
         return "/" + count + " " + interval + "s";
     };
-    var buildPlansFromStripe = function () {
-        var localeKey = locale === 'pt-BR' ? 'pt-BR' : locale === 'pt-PT' ? 'pt-PT' : 'en';
-        var nameMapping = planNamesMapping[localeKey] || planNamesMapping.en;
-        var featuresMapping = planFeaturesMapping[localeKey] || planFeaturesMapping.en;
-        // Adicionar plano FREE manualmente
-        var freePlan = {
-            name: nameMapping['FREE'],
-            price: '€0',
-            frequency: '',
-            price_id: 'free',
-            popular: false,
-            features: featuresMapping['FREE'],
-            order: 0
-        };
-        if (!stripePrices || stripePrices.length === 0) {
-            return [freePlan];
-        }
-        // Remover duplicados mantendo o de menor preço
-        var uniquePlans = new Map();
-        stripePrices.forEach(function (stripePrice) {
-            var planKey = stripePrice.plan_name;
-            var existing = uniquePlans.get(planKey);
-            if (!existing || stripePrice.unit_amount < existing.unit_amount) {
-                uniquePlans.set(planKey, stripePrice);
-            }
-        });
-        // Mapear planos do Stripe
-        var stripePlans = Array.from(uniquePlans.values()).map(function (stripePrice) {
-            var planKey = stripePrice.plan_name;
-            var orderMap = { 'STARTER': 1, 'PRO': 2, 'BUSINESS': 3 };
-            return {
-                name: nameMapping[planKey] || stripePrice.product_name,
-                price: formatPrice(stripePrice.unit_amount, stripePrice.currency),
-                frequency: getRecurringText(stripePrice.recurring),
-                price_id: stripePrice.id,
-                popular: planKey === 'PRO',
-                features: featuresMapping[planKey] || stripePrice.features || [],
-                order: orderMap[planKey] || 99
-            };
-        });
-        // Combinar FREE + Stripe e ordenar
-        return __spreadArrays([freePlan], stripePlans).sort(function (a, b) { return a.order - b.order; });
-    };
-    var displayPlans = buildPlansFromStripe();
-    return (react_1["default"].createElement("section", { id: "pricing", className: "py-32 relative" },
+    var displayPlans = plans.map(function (plan) { return ({
+        name: plan.display_name || plan.name,
+        price: plan.price,
+        frequency: plan.recurring ? getRecurringText(plan.recurring) : '',
+        price_id: plan.price_id || plan.id,
+        popular: plan.recommended || false,
+        features: plan.features || [],
+        order: plan.order || 0
+    }); });
+    return (react_1["default"].createElement("section", { id: "pricing", className: "py-20 md:py-32 relative" },
         react_1["default"].createElement("div", { className: "max-w-6xl mx-auto px-6" },
             react_1["default"].createElement(framer_motion_1.motion.div, { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, className: "text-center mb-20" },
                 react_1["default"].createElement("h2", { className: "text-4xl md:text-5xl font-bold mb-6" }, pricingText.title),
                 react_1["default"].createElement("p", { className: "text-xl text-gray-400" }, pricingText.subtitle)),
             loading ? (react_1["default"].createElement("div", { className: "text-center py-12" },
-                react_1["default"].createElement("p", { className: "text-gray-400" }, "Loading pricing..."))) : displayPlans.length === 0 ? (react_1["default"].createElement("div", { className: "text-center py-12" },
-                react_1["default"].createElement("p", { className: "text-gray-400" }, "No pricing plans available"))) : (react_1["default"].createElement("div", { className: "grid md:grid-cols-4 gap-6" }, displayPlans.map(function (plan, i) { return (react_1["default"].createElement(framer_motion_1.motion.div, { key: plan.price_id, initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { delay: i * 0.1 }, whileHover: { y: -8 } },
+                react_1["default"].createElement("p", { className: "text-gray-400" }, "Loading pricing..."))) : plans.length === 0 ? (react_1["default"].createElement("div", { className: "text-center py-12" },
+                react_1["default"].createElement("p", { className: "text-gray-400" }, "No pricing plans available"))) : (react_1["default"].createElement("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" }, displayPlans.map(function (plan, i) { return (react_1["default"].createElement(framer_motion_1.motion.div, { key: plan.price_id, initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { delay: i * 0.1 }, whileHover: { y: -8 } },
                 react_1["default"].createElement("div", { className: "relative h-full rounded-2xl p-8 border transition-all duration-300 " + (plan.popular
                         ? 'bg-gradient-to-b from-blue-500/10 to-transparent border-blue-500 shadow-lg shadow-blue-500/20'
                         : 'bg-white/5 border-white/10 hover:border-white/20') },
@@ -758,7 +725,7 @@ function Pricing(_a) {
                         react_1["default"].createElement("h3", { className: "text-lg font-semibold mb-2" }, plan.name),
                         react_1["default"].createElement("div", { className: "flex items-baseline gap-1" },
                             react_1["default"].createElement("span", { className: "text-4xl font-bold" }, plan.price),
-                            plan.price !== "€0" && plan.price !== "$0" && react_1["default"].createElement("span", { className: "text-gray-400" }, plan.frequency || '/mo'))),
+                            plan.frequency && react_1["default"].createElement("span", { className: "text-gray-400" }, plan.frequency))),
                     react_1["default"].createElement("ul", { className: "space-y-3 mb-8" }, plan.features.map(function (feature, idx) { return (react_1["default"].createElement(framer_motion_1.motion.li, { key: feature, initial: { opacity: 0, x: -10 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { delay: i * 0.1 + idx * 0.05 }, className: "flex items-center gap-2 text-sm text-gray-300" },
                         react_1["default"].createElement(lucide_react_1.Check, { className: "w-4 h-4 text-blue-400" }),
                         feature)); })),
@@ -777,7 +744,7 @@ function FinalCTA(_a) {
         return finalCTAFallback.en;
     };
     var ctaText = getFinalCTAText();
-    return (react_1["default"].createElement("section", { className: "py-32 relative overflow-hidden" },
+    return (react_1["default"].createElement("section", { className: "py-20 md:py-32 relative overflow-hidden" },
         react_1["default"].createElement("div", { className: "absolute inset-0" },
             react_1["default"].createElement("div", { className: "absolute inset-0 bg-gradient-to-b from-blue-950/20 via-blue-900/20 to-transparent" }),
             react_1["default"].createElement("div", { className: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-3xl" })),
@@ -793,8 +760,8 @@ function Footer(_a) {
     var locale = _a.locale;
     return (react_1["default"].createElement("footer", { className: "border-t border-white/10 py-16" },
         react_1["default"].createElement("div", { className: "max-w-7xl mx-auto px-6" },
-            react_1["default"].createElement("div", { className: "grid md:grid-cols-4 gap-12" },
-                react_1["default"].createElement("div", null,
+            react_1["default"].createElement("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12" },
+                react_1["default"].createElement("div", { className: "sm:col-span-2 lg:col-span-1" },
                     react_1["default"].createElement("div", { className: "flex items-center gap-2 mb-4" },
                         react_1["default"].createElement("div", { className: "w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center" },
                             react_1["default"].createElement(lucide_react_1.FileJson, { className: "h-5 w-5 text-white" })),
@@ -806,18 +773,7 @@ function Footer(_a) {
                         react_1["default"].createElement("li", null,
                             react_1["default"].createElement("a", { href: "#features", className: "hover:text-white transition" }, "Features")),
                         react_1["default"].createElement("li", null,
-                            react_1["default"].createElement("a", { href: "#pricing", className: "hover:text-white transition" }, "Pricing")),
-                        react_1["default"].createElement("li", null,
-                            react_1["default"].createElement("a", { href: "#api", className: "hover:text-white transition" }, "API")))),
-                react_1["default"].createElement("div", null,
-                    react_1["default"].createElement("h4", { className: "font-semibold mb-4" }, "Company"),
-                    react_1["default"].createElement("ul", { className: "space-y-2 text-sm text-gray-400" },
-                        react_1["default"].createElement("li", null,
-                            react_1["default"].createElement("a", { href: "#", className: "hover:text-white transition" }, "About")),
-                        react_1["default"].createElement("li", null,
-                            react_1["default"].createElement("a", { href: "#", className: "hover:text-white transition" }, "Blog")),
-                        react_1["default"].createElement("li", null,
-                            react_1["default"].createElement("a", { href: "#", className: "hover:text-white transition" }, "Contact")))),
+                            react_1["default"].createElement("a", { href: "#pricing", className: "hover:text-white transition" }, "Pricing")))),
                 react_1["default"].createElement("div", null,
                     react_1["default"].createElement("h4", { className: "font-semibold mb-4" }, "Legal"),
                     react_1["default"].createElement("ul", { className: "space-y-2 text-sm text-gray-400" },
@@ -827,7 +783,7 @@ function Footer(_a) {
                             react_1["default"].createElement("a", { href: "/" + locale + "/terms", className: "hover:text-white transition" }, "Terms"))))),
             react_1["default"].createElement(separator_1.Separator, { className: "my-12 bg-white/10" }),
             react_1["default"].createElement("div", { className: "text-center text-sm text-gray-400" },
-                react_1["default"].createElement("p", null, " 2024 DOCSET. All rights reserved.")))));
+                react_1["default"].createElement("p", null, " 2025 DOCSET. All rights reserved.")))));
 }
 function DemoModal(_a) {
     var _this = this;

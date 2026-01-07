@@ -27,6 +27,9 @@ Route::get('translations/{locale}', [TranslationController::class, 'show']);
 // Stripe prices (public)
 Route::get('stripe/prices', [StripePriceController::class, 'index']);
 
+// Public plans (for landing page)
+Route::get('plans', [\App\Http\Controllers\PlanController::class, 'index']);
+
 // API v1 routes (JWT-based, JSON-only)
 Route::prefix('v1')->name('api.v1.')->middleware([\App\Http\Middleware\ApiV1JsonResponse::class])->group(function () {
     // Public auth routes

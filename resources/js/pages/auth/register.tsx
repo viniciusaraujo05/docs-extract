@@ -169,19 +169,6 @@ export default function Register({ canRegister }: RegisterProps) {
                                     </motion.div>
                                 ))}
                             </div>
-
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.8 }}
-                                className="mt-10 p-6 bg-white/10 backdrop-blur-sm rounded-xl border border-white/10"
-                            >
-                                <p className="text-sm text-blue-100 mb-2">Trusted by</p>
-                                <p className="text-4xl font-bold">2,500+</p>
-                                <p className="text-sm text-blue-100 mt-2">
-                                    teams processing millions of documents monthly
-                                </p>
-                            </motion.div>
                         </motion.div>
                     </div>
                 </motion.div>

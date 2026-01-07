@@ -186,7 +186,7 @@ const productFlowFallback = {
 const codeExampleFallback = {
   en: {
     badge: "Developer API",
-    title: "Built for developers",
+    title: "Built for data extraction",
     subtitle: "Use DOCSET via UI or integrate it using a simple REST API. JSON responses, webhooks, and more.",
     cta: "Try demo",
     tabs: { upload: "Upload", retrieve: "Retrieve" },
@@ -226,36 +226,15 @@ const finalCTAFallback = {
 };
 
 const headerNavFallback = {
-  en: { features: "Features", pricing: "Pricing", api: "API", docs: "Docs", login: "Login", startFree: "Start free", dashboard: "Dashboard" },
-  'pt-BR': { features: "Recursos", pricing: "Preços", api: "API", docs: "Docs", login: "Entrar", startFree: "Começar grátis", dashboard: "Painel" },
-  'pt-PT': { features: "Recursos", pricing: "Preços", api: "API", docs: "Docs", login: "Entrar", startFree: "Começar grátis", dashboard: "Painel" },
+  en: { features: "Features", pricing: "Pricing", api: "API", login: "Login", startFree: "Start free", dashboard: "Dashboard" },
+  'pt-BR': { features: "Recursos", pricing: "Preços", api: "API", login: "Entrar", startFree: "Começar grátis", dashboard: "Painel" },
+  'pt-PT': { features: "Recursos", pricing: "Preços", api: "API", login: "Entrar", startFree: "Começar grátis", dashboard: "Painel" },
 };
 
 const miscFallback = {
-  en: { builtForDevelopers: "Built for developers", mostPopular: "Most popular" },
-  'pt-BR': { builtForDevelopers: "Feito para desenvolvedores", mostPopular: "Mais popular" },
-  'pt-PT': { builtForDevelopers: "Feito para programadores", mostPopular: "Mais popular" },
-};
-
-const planFeaturesMapping: any = {
-  en: {
-    'FREE': ["Limited usage", "All core features", "API access"],
-    'STARTER': ["Higher limits", "Priority support", "API access"],
-    'PRO': ["Recommended", "Advanced features", "API access"],
-    'BUSINESS': ["High volume", "Custom limits", "API access"],
-  },
-  'pt-BR': {
-    'FREE': ["Uso limitado", "Todos os recursos", "Acesso à API"],
-    'STARTER': ["Limites maiores", "Suporte prioritário", "Acesso à API"],
-    'PRO': ["Recomendado", "Recursos avançados", "Acesso à API"],
-    'BUSINESS': ["Alto volume", "Limites personalizados", "Acesso à API"],
-  },
-  'pt-PT': {
-    'FREE': ["Uso limitado", "Todos os recursos", "Acesso à API"],
-    'STARTER': ["Limites maiores", "Suporte prioritário", "Acesso à API"],
-    'PRO': ["Recomendado", "Recursos avançados", "Acesso à API"],
-    'BUSINESS': ["Alto volume", "Limites personalizados", "Acesso à API"],
-  },
+    en: { builtForDevelopers: "Built for data extraction", mostPopular: "Most popular" },
+    'pt-BR': { builtForDevelopers: "Feito para extração de dados", mostPopular: "Mais popular" },
+    'pt-PT': { builtForDevelopers: "Feito para extração de dados", mostPopular: "Mais popular" },
 };
 
 export default function Welcome() {
@@ -397,6 +376,7 @@ function Header({
   isAuthenticated?: boolean;
 }) {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const getHeaderText = () => {
     if (locale === 'pt-BR' || locale === 'pt') return headerNavFallback['pt-BR'];
@@ -425,89 +405,209 @@ function Header({
   };
 
   return (
-    <motion.header
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/10" : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-              <FileJson className="h-5 w-5 text-white" />
-            </div>
-            <span className="font-bold text-lg">DOCSET</span>
-          </motion.div>
-
-          <nav className="hidden md:flex gap-6 text-sm">
-            <a href="#features" className="text-gray-400 hover:text-white transition">{headerText.features}</a>
-            <a href="#pricing" className="text-gray-400 hover:text-white transition">{headerText.pricing}</a>
-            <a href="#api" className="text-gray-400 hover:text-white transition">{headerText.api}</a>
-            <a href="https://docs.docset.app" target="_blank" rel="noopener" className="text-gray-400 hover:text-white transition">{headerText.docs}</a>
-          </nav>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Select value={locale} onValueChange={onLocaleChange}>
-            <SelectTrigger className="w-[160px] bg-white/5 border-white/10 text-white">
-              <SelectValue>
-                <span className="flex items-center gap-2">
-                  <span>{getLocaleFlag(locale)}</span>
-                  <span className="text-sm">{getLocaleLabel(locale).split(' ')[0]}</span>
-                </span>
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent className="bg-zinc-900 border-white/10">
-              <SelectItem value="en" className="text-white">
-                <span className="flex items-center gap-2">
-                  🇬🇧 <span>English</span>
-                </span>
-              </SelectItem>
-              <SelectItem value="pt-BR" className="text-white">
-                <span className="flex items-center gap-2">
-                  🇧🇷 <span>Português (BR)</span>
-                </span>
-              </SelectItem>
-              <SelectItem value="pt-PT" className="text-white">
-                <span className="flex items-center gap-2">
-                  🇵🇹 <span>Português (PT)</span>
-                </span>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          {isAuthenticated ? (
-            <Button
-              onClick={() => router.visit(`/${locale.split('-')[0]}/dashboard`)}
-              className="bg-blue-500 hover:bg-blue-600 text-white"
+    <>
+      <motion.header
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+          scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/10" : "bg-transparent"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => router.visit(`/${locale.split('-')[0]}`)}
             >
-              {headerText.dashboard}
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                <FileJson className="h-5 w-5 text-white" />
+              </div>
+              <span className="font-bold text-lg">DOCSET</span>
+            </motion.div>
+
+            <nav className="hidden md:flex gap-6 text-sm">
+              <a href="#features" className="text-gray-400 hover:text-white transition">{headerText.features}</a>
+              <a href="#pricing" className="text-gray-400 hover:text-white transition">{headerText.pricing}</a>
+              <a href="#api" className="text-gray-400 hover:text-white transition">{headerText.api}</a>
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3">
+              <Select value={locale} onValueChange={onLocaleChange}>
+                <SelectTrigger className="w-[160px] bg-white/5 border-white/10 text-white">
+                  <SelectValue>
+                    <span className="flex items-center gap-2">
+                      <span>{getLocaleFlag(locale)}</span>
+                      <span className="text-sm">{getLocaleLabel(locale).split(' ')[0]}</span>
+                    </span>
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-white/10">
+                  <SelectItem value="en" className="text-white">
+                    <span className="flex items-center gap-2">
+                      🇬🇧 <span>English</span>
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="pt-BR" className="text-white">
+                    <span className="flex items-center gap-2">
+                      🇧🇷 <span>Português (BR)</span>
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="pt-PT" className="text-white">
+                    <span className="flex items-center gap-2">
+                      🇵🇹 <span>Português (PT)</span>
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
+              {isAuthenticated ? (
+                <Button
+                  onClick={() => router.visit(`/${locale.split('-')[0]}/dashboard`)}
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  {headerText.dashboard}
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    variant="ghost"
+                    onClick={() => router.visit(`/${locale.split('-')[0]}/login`)}
+                    className="text-white hover:bg-white/10"
+                  >
+                    {headerText.login}
+                  </Button>
+                  <Button
+                    onClick={() => router.visit(`/${locale.split('-')[0]}/register`)}
+                    className="bg-white text-black hover:bg-gray-200"
+                  >
+                    {headerText.startFree}
+                  </Button>
+                </>
+              )}
+            </div>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden text-white"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="h-6 w-6" />
             </Button>
-          ) : (
-            <>
+          </div>
+        </div>
+      </motion.header>
+
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed inset-0 z-[60] bg-zinc-950 flex flex-col md:hidden"
+          >
+            <div className="flex items-center justify-between p-6 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                  <FileJson className="h-5 w-5 text-white" />
+                </div>
+                <span className="font-bold text-lg">DOCSET</span>
+              </div>
               <Button
                 variant="ghost"
-                onClick={() => router.visit(`/${locale.split('-')[0]}/login`)}
-                className="hidden md:inline-flex text-white hover:bg-white/10"
+                size="icon"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-white"
               >
-                {headerText.login}
+                <X className="h-6 w-6" />
               </Button>
-              <Button
-                onClick={() => router.visit(`/${locale.split('-')[0]}/register`)}
-                className="bg-white text-black hover:bg-gray-200"
-              >
-                {headerText.startFree}
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-    </motion.header>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+              <nav className="flex flex-col gap-6 text-xl">
+                <a
+                  href="#features"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-gray-400 hover:text-white transition"
+                >
+                  {headerText.features}
+                </a>
+                <a
+                  href="#pricing"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-gray-400 hover:text-white transition"
+                >
+                  {headerText.pricing}
+                </a>
+                <a
+                  href="#api"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-gray-400 hover:text-white transition"
+                >
+                  {headerText.api}
+                </a>
+              </nav>
+
+              <div className="space-y-6 pt-8 border-t border-white/10">
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-500 uppercase tracking-wider">Language</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {['en', 'pt-BR', 'pt-PT'].map((loc) => (
+                      <button
+                        key={loc}
+                        onClick={() => {
+                          onLocaleChange(loc);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`flex items-center gap-3 p-3 rounded-lg transition ${
+                          locale === loc ? 'bg-blue-500/10 text-blue-400' : 'text-gray-400 hover:bg-white/5'
+                        }`}
+                      >
+                        <span className="text-xl">{getLocaleFlag(loc)}</span>
+                        <span>{getLocaleLabel(loc)}</span>
+                        {locale === loc && <Check className="ml-auto h-4 w-4" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-3 pt-4">
+                  {isAuthenticated ? (
+                    <Button
+                      onClick={() => router.visit(`/${locale.split('-')[0]}/dashboard`)}
+                      className="w-full bg-blue-500 hover:bg-blue-600 text-white h-12 text-lg"
+                    >
+                      {headerText.dashboard}
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outline"
+                        onClick={() => router.visit(`/${locale.split('-')[0]}/login`)}
+                        className="w-full text-white border-white/10 hover:bg-white/5 h-12 text-lg"
+                      >
+                        {headerText.login}
+                      </Button>
+                      <Button
+                        onClick={() => router.visit(`/${locale.split('-')[0]}/register`)}
+                        className="w-full bg-white text-black hover:bg-gray-200 h-12 text-lg"
+                      >
+                        {headerText.startFree}
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
@@ -521,7 +621,7 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
   const heroRaw = getHeroText();
 
   return (
-    <section className="relative overflow-hidden pt-32 pb-24">
+    <section className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24">
       <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-transparent to-transparent" />
       <div className="absolute inset-0">
         <motion.div 
@@ -566,7 +666,7 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
             })()}
           </Badge>
 
-          <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-6">
             {heroRaw.title}
           </h1>
 
@@ -634,7 +734,7 @@ function AnimatedProductDemo() {
       <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10 pointer-events-none" />
       
       <motion.div
-        className="bg-zinc-900 rounded-2xl border border-white/10 p-8 shadow-2xl"
+        className="bg-zinc-900 rounded-2xl border border-white/10 p-4 sm:p-8 shadow-2xl"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
       >
@@ -786,7 +886,7 @@ function ProductFlow({ locale }: { locale: string }) {
   const iconMap = [Upload, Eye, Database];
 
   return (
-    <section className="py-32 relative overflow-hidden">
+    <section className="py-20 md:py-32 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-20">
           <Badge className="mb-6 bg-blue-500/10 text-blue-300 border-blue-500/20">
@@ -797,7 +897,7 @@ function ProductFlow({ locale }: { locale: string }) {
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {flowText.steps.map((item, i) => (
             <motion.div
               key={item.step}
@@ -833,7 +933,7 @@ function Features({ locale }: { locale: string }) {
   const featuresText = getFeaturesText();
 
   return (
-    <section id="features" className="py-32 relative">
+    <section id="features" className="py-20 md:py-32 relative">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
@@ -841,7 +941,7 @@ function Features({ locale }: { locale: string }) {
           </h2>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {featuresText.items.map((feature, i) => (
             <motion.div
               key={feature.title}
@@ -902,7 +1002,7 @@ function CodeExample({ locale, onOpenDemo }: { locale: string; onOpenDemo: () =>
   };
 
   return (
-    <section id="api" className="py-32 relative overflow-hidden">
+    <section id="api" className="py-20 md:py-32 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-950/10 to-transparent" />
       
       <div className="max-w-6xl mx-auto px-6 relative">
@@ -979,40 +1079,31 @@ function Pricing({ locale }: { locale: string }) {
   };
 
   const pricingText = getPricingText();
-  const [stripePrices, setStripePrices] = useState<any[]>([]);
+  const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStripePrices = async () => {
+    const fetchPlans = async () => {
       try {
-        const response = await fetch('/api/stripe/prices');
+        const response = await fetch(`/api/plans?locale=${locale}`);
         const data = await response.json();
-        if (data.success && data.prices && data.prices.length > 0) {
-          setStripePrices(data.prices);
+        if (data && Object.keys(data).length > 0) {
+          // Convert object to array and sort by order
+          const plansArray = Object.values(data).map((plan: any, index) => ({
+            ...plan,
+            order: plan.id === 'free' ? 0 : plan.id === 'starter' ? 1 : plan.id === 'pro' ? 2 : 3,
+          }));
+          setPlans(plansArray.sort((a: any, b: any) => a.order - b.order));
         }
       } catch (error) {
-        console.error('Error fetching Stripe prices:', error);
+        console.error('Error fetching plans:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStripePrices();
-  }, []);
-
-  const formatPrice = (amount: number, currency: string) => {
-    return new Intl.NumberFormat(locale === 'pt' ? 'pt-PT' : 'en-US', {
-      style: 'currency',
-      currency: currency.toUpperCase(),
-    }).format(amount / 100);
-  };
-
-  const normalizePlanName = (name?: string | null) =>
-    (name ?? '')
-      .toString()
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]/g, '');
+    fetchPlans();
+  }, [locale]);
 
   const getRecurringText = (recurring: any) => {
     if (!recurring) return '';
@@ -1033,61 +1124,18 @@ function Pricing({ locale }: { locale: string }) {
     return `/${count} ${interval}s`;
   };
 
-  const buildPlansFromStripe = () => {
-    const localeKey = locale === 'pt-BR' ? 'pt-BR' : locale === 'pt-PT' ? 'pt-PT' : 'en';
-    const nameMapping = planNamesMapping[localeKey] || planNamesMapping.en;
-    const featuresMapping = planFeaturesMapping[localeKey] || planFeaturesMapping.en;
-
-    // Adicionar plano FREE manualmente
-    const freePlan = {
-      name: nameMapping['FREE'],
-      price: '€0',
-      frequency: '',
-      price_id: 'free',
-      popular: false,
-      features: featuresMapping['FREE'],
-      order: 0,
-    };
-
-    if (!stripePrices || stripePrices.length === 0) {
-      return [freePlan];
-    }
-
-    // Remover duplicados mantendo o de menor preço
-    const uniquePlans = new Map();
-    stripePrices.forEach(stripePrice => {
-      const planKey = stripePrice.plan_name;
-      const existing = uniquePlans.get(planKey);
-      
-      if (!existing || stripePrice.unit_amount < existing.unit_amount) {
-        uniquePlans.set(planKey, stripePrice);
-      }
-    });
-
-    // Mapear planos do Stripe
-    const stripePlans = Array.from(uniquePlans.values()).map(stripePrice => {
-      const planKey = stripePrice.plan_name;
-      const orderMap: any = { 'STARTER': 1, 'PRO': 2, 'BUSINESS': 3 };
-      
-      return {
-        name: nameMapping[planKey] || stripePrice.product_name,
-        price: formatPrice(stripePrice.unit_amount, stripePrice.currency),
-        frequency: getRecurringText(stripePrice.recurring),
-        price_id: stripePrice.id,
-        popular: planKey === 'PRO',
-        features: featuresMapping[planKey] || stripePrice.features || [],
-        order: orderMap[planKey] || 99,
-      };
-    });
-
-    // Combinar FREE + Stripe e ordenar
-    return [freePlan, ...stripePlans].sort((a, b) => a.order - b.order);
-  };
-
-  const displayPlans = buildPlansFromStripe();
+  const displayPlans = plans.map(plan => ({
+    name: plan.display_name || plan.name,
+    price: plan.price,
+    frequency: plan.recurring ? getRecurringText(plan.recurring) : '',
+    price_id: plan.price_id || plan.id,
+    popular: plan.recommended || false,
+    features: plan.features || [],
+    order: plan.order || 0,
+  }));
 
   return (
-    <section id="pricing" className="py-32 relative">
+    <section id="pricing" className="py-20 md:py-32 relative">
       <div className="max-w-6xl mx-auto px-6">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -1103,12 +1151,12 @@ function Pricing({ locale }: { locale: string }) {
           <div className="text-center py-12">
             <p className="text-gray-400">Loading pricing...</p>
           </div>
-        ) : displayPlans.length === 0 ? (
+        ) : plans.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-400">No pricing plans available</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {displayPlans.map((plan, i) => (
             <motion.div
               key={plan.price_id}
@@ -1146,7 +1194,7 @@ function Pricing({ locale }: { locale: string }) {
                   <h3 className="text-lg font-semibold mb-2">{plan.name}</h3>
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold">{plan.price}</span>
-                    {plan.price !== "€0" && plan.price !== "$0" && <span className="text-gray-400">{(plan as any).frequency || '/mo'}</span>}
+                    {plan.frequency && <span className="text-gray-400">{plan.frequency}</span>}
                   </div>
                 </div>
 
@@ -1201,7 +1249,7 @@ function FinalCTA({ locale }: { locale: string }) {
   const ctaText = getFinalCTAText();
 
   return (
-    <section className="py-32 relative overflow-hidden">
+    <section className="py-20 md:py-32 relative overflow-hidden">
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-blue-900/20 to-transparent" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-3xl" />
@@ -1237,8 +1285,8 @@ function Footer({ locale }: { locale: string }) {
   return (
     <footer className="border-t border-white/10 py-16">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid md:grid-cols-4 gap-12">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+          <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                 <FileJson className="h-5 w-5 text-white" />
@@ -1255,16 +1303,6 @@ function Footer({ locale }: { locale: string }) {
             <ul className="space-y-2 text-sm text-gray-400">
               <li><a href="#features" className="hover:text-white transition">Features</a></li>
               <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
-              <li><a href="#api" className="hover:text-white transition">API</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Company</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-white transition">About</a></li>
-              <li><a href="#" className="hover:text-white transition">Blog</a></li>
-              <li><a href="#" className="hover:text-white transition">Contact</a></li>
             </ul>
           </div>
 
@@ -1280,7 +1318,7 @@ function Footer({ locale }: { locale: string }) {
         <Separator className="my-12 bg-white/10" />
 
         <div className="text-center text-sm text-gray-400">
-          <p> 2024 DOCSET. All rights reserved.</p>
+          <p> 2025 DOCSET. All rights reserved.</p>
         </div>
       </div>
     </footer>

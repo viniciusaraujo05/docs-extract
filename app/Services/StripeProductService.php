@@ -13,6 +13,7 @@ class StripeProductService
     public function __construct()
     {
         $this->productMapping = [
+            config('stripe-products.products.free') => 'FREE',
             config('stripe-products.products.starter') => 'STARTER',
             config('stripe-products.products.pro') => 'PRO',
             config('stripe-products.products.business') => 'BUSINESS',
@@ -30,6 +31,7 @@ class StripeProductService
 
         return collect($prices->data)
             ->filter(fn ($price) => $price->recurring && isset($this->productMapping[$price->product->id]))
+            ->sortByDesc('unit_amount')
             ->map(fn ($price) => $this->formatPrice($price))
             ->values();
     }

@@ -23,7 +23,6 @@ import { Link, usePage } from '@inertiajs/react';
 import { BarChart3, FileText, Menu, Plus, Code2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import AppLogo from './app-logo';
-import AppLogoIcon from './app-logo-icon';
 
 // Navigation items will be translated in component
 
@@ -85,7 +84,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                 <SheetTitle className="sr-only">Menu de Navegação</SheetTitle>
                                 <SheetHeader className="border-b p-4">
                                     <Link href={`/${locale}/dashboard`} className="flex items-center gap-2">
-                                        <AppLogoIcon className="h-6 w-6" />
+                                        <img src="/docset.png" alt="Docset Logo" className="h-6 w-6" />
                                         <span className="font-semibold">DocExtract</span>
                                     </Link>
                                 </SheetHeader>
