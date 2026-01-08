@@ -54,6 +54,8 @@ var react_2 = require("@inertiajs/react");
 var button_1 = require("@/components/ui/button");
 var badge_1 = require("@/components/ui/badge");
 var config_1 = require("@/i18n/config");
+var SEOHead_1 = require("@/components/seo/SEOHead");
+var seo_1 = require("@/utils/seo");
 var dialog_1 = require("@/components/ui/dialog");
 var select_1 = require("@/components/ui/select");
 var input_1 = require("@/components/ui/input");
@@ -330,14 +332,19 @@ function Welcome() {
             return 'en';
         return locale === 'pt' && ptVariant === 'pt-BR' ? 'pt-BR' : 'pt-PT';
     };
+    var fullLocale = getFullLocale();
+    var seoContent = seo_1.getSEOContent(fullLocale);
+    var structuredData = seo_1.generateStructuredData(fullLocale);
+    var alternateLocales = seo_1.getAlternateLocales(fullLocale);
     return (react_1["default"].createElement("div", { className: "bg-black text-white antialiased" },
+        react_1["default"].createElement(SEOHead_1["default"], { title: seoContent.title, description: seoContent.description, keywords: seoContent.keywords, locale: fullLocale, alternateLocales: alternateLocales, structuredData: structuredData, ogType: "website" }),
         react_1["default"].createElement(Header, { locale: getCurrentLocaleValue(), onLocaleChange: handleLocaleChange, theme: theme, onToggleTheme: toggleTheme, isAuthenticated: isAuthenticated }),
-        react_1["default"].createElement(Hero, { locale: getFullLocale(), onOpenDemo: function () { return setShowDemo(true); } }),
-        react_1["default"].createElement(ProductFlow, { locale: getFullLocale() }),
-        react_1["default"].createElement(Features, { locale: getFullLocale() }),
-        react_1["default"].createElement(CodeExample, { locale: getFullLocale(), onOpenDemo: function () { return setShowDemo(true); } }),
-        react_1["default"].createElement(Pricing, { locale: getFullLocale() }),
-        react_1["default"].createElement(FinalCTA, { locale: getFullLocale() }),
+        react_1["default"].createElement(Hero, { locale: fullLocale, onOpenDemo: function () { return setShowDemo(true); } }),
+        react_1["default"].createElement(ProductFlow, { locale: fullLocale }),
+        react_1["default"].createElement(Features, { locale: fullLocale }),
+        react_1["default"].createElement(CodeExample, { locale: fullLocale, onOpenDemo: function () { return setShowDemo(true); } }),
+        react_1["default"].createElement(Pricing, { locale: fullLocale }),
+        react_1["default"].createElement(FinalCTA, { locale: fullLocale }),
         react_1["default"].createElement(Footer, { locale: locale }),
         showDemo && (react_1["default"].createElement(DemoModal, { onClose: function () { return setShowDemo(false); }, locale: locale, onDemoComplete: function () {
                 setShowDemo(false);
@@ -451,6 +458,7 @@ function Hero(_a) {
         return heroFallback.en;
     };
     var heroRaw = getHeroText();
+    var seoContent = seo_1.getSEOContent(locale);
     return (react_1["default"].createElement("section", { className: "relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24" },
         react_1["default"].createElement("div", { className: "absolute inset-0 bg-gradient-to-b from-blue-950/20 via-transparent to-transparent" }),
         react_1["default"].createElement("div", { className: "absolute inset-0" },
@@ -482,7 +490,7 @@ function Hero(_a) {
                             return miscFallback['pt-PT'].builtForDevelopers;
                         return miscFallback.en.builtForDevelopers;
                     })()),
-                react_1["default"].createElement("h1", { className: "text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-6" }, heroRaw.title),
+                react_1["default"].createElement("h1", { className: "text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-6" }, seoContent.h1),
                 react_1["default"].createElement("p", { className: "text-xl text-gray-400 leading-relaxed mb-10 max-w-3xl mx-auto" }, heroRaw.subtitle),
                 react_1["default"].createElement("div", { className: "flex flex-col sm:flex-row items-center justify-center gap-4" },
                     react_1["default"].createElement(framer_motion_1.motion.div, { whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } },

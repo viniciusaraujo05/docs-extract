@@ -1,0 +1,22 @@
+{
+  "name": "DOCSET - Document Data Platform",
+  "short_name": "DOCSET",
+  "description": "Turn PDFs and images into structured, usable data. Define custom fields, review extracted data, and export or integrate via API.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/docset.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

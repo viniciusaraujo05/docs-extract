@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { setPortugueseVariant } from "@/i18n/config";
+import SEOHead from "@/components/seo/SEOHead";
+import { getSEOContent, generateStructuredData, getAlternateLocales } from "@/utils/seo";
 import {
   Dialog,
   DialogContent,
@@ -338,8 +340,22 @@ export default function Welcome() {
     return locale === 'pt' && ptVariant === 'pt-BR' ? 'pt-BR' : 'pt-PT';
   };
 
+  const fullLocale = getFullLocale();
+  const seoContent = getSEOContent(fullLocale);
+  const structuredData = generateStructuredData(fullLocale);
+  const alternateLocales = getAlternateLocales(fullLocale);
+
   return (
     <div className="bg-black text-white antialiased">
+      <SEOHead
+        title={seoContent.title}
+        description={seoContent.description}
+        keywords={seoContent.keywords}
+        locale={fullLocale}
+        alternateLocales={alternateLocales}
+        structuredData={structuredData}
+        ogType="website"
+      />
       <Header
         locale={getCurrentLocaleValue()}
         onLocaleChange={handleLocaleChange}
@@ -347,12 +363,12 @@ export default function Welcome() {
         onToggleTheme={toggleTheme}
         isAuthenticated={isAuthenticated}
       />
-      <Hero locale={getFullLocale()} onOpenDemo={() => setShowDemo(true)} />
-      <ProductFlow locale={getFullLocale()} />
-      <Features locale={getFullLocale()} />
-      <CodeExample locale={getFullLocale()} onOpenDemo={() => setShowDemo(true)} />
-      <Pricing locale={getFullLocale()} />
-      <FinalCTA locale={getFullLocale()} />
+      <Hero locale={fullLocale} onOpenDemo={() => setShowDemo(true)} />
+      <ProductFlow locale={fullLocale} />
+      <Features locale={fullLocale} />
+      <CodeExample locale={fullLocale} onOpenDemo={() => setShowDemo(true)} />
+      <Pricing locale={fullLocale} />
+      <FinalCTA locale={fullLocale} />
       <Footer locale={locale} />
       {showDemo && (
         <DemoModal
@@ -625,6 +641,7 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
   };
   
   const heroRaw = getHeroText();
+  const seoContent = getSEOContent(locale);
 
   return (
     <section className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24">
@@ -673,7 +690,7 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
           </Badge>
 
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-6">
-            {heroRaw.title}
+            {seoContent.h1}
           </h1>
 
           <p className="text-xl text-gray-400 leading-relaxed mb-10 max-w-3xl mx-auto">
