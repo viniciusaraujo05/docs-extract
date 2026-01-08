@@ -119,16 +119,22 @@ const pricingFallback = {
     title: "Simple pricing",
     subtitle: "All features on every plan",
     cta: "Get started",
+    freeForever: "Free forever",
+    limitsRenewMonthly: "* Limits renew monthly",
   },
   'pt-BR': {
     title: "Preços simples",
     subtitle: "Todos os recursos em cada plano",
     cta: "Começar",
+    freeForever: "Grátis para sempre",
+    limitsRenewMonthly: "* Os limites renovam mensalmente",
   },
   'pt-PT': {
     title: "Preços simples",
     subtitle: "Todos os recursos em cada plano",
     cta: "Começar",
+    freeForever: "Grátis para sempre",
+    limitsRenewMonthly: "* Os limites renovam mensalmente",
   },
 };
 
@@ -1125,9 +1131,10 @@ function Pricing({ locale }: { locale: string }) {
   };
 
   const displayPlans = plans.map(plan => ({
+    id: plan.id,
     name: plan.display_name || plan.name,
-    price: plan.price,
-    frequency: plan.recurring ? getRecurringText(plan.recurring) : '',
+    price: plan.id === 'free' ? '0' : plan.price,
+    frequency: plan.id === 'free' ? pricingText.freeForever : (plan.recurring ? getRecurringText(plan.recurring) : ''),
     price_id: plan.price_id || plan.id,
     popular: plan.recommended || false,
     features: plan.features || [],
@@ -1156,83 +1163,100 @@ function Pricing({ locale }: { locale: string }) {
             <p className="text-gray-400">No pricing plans available</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {displayPlans.map((plan, i) => (
-            <motion.div
-              key={plan.price_id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              whileHover={{ y: -8 }}
-            >
-              <div
-                className={`relative h-full rounded-2xl p-8 border transition-all duration-300 ${
-                  plan.popular
-                    ? 'bg-gradient-to-b from-blue-500/10 to-transparent border-blue-500 shadow-lg shadow-blue-500/20'
-                    : 'bg-white/5 border-white/10 hover:border-white/20'
-                }`}
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {displayPlans.map((plan, i) => (
+              <motion.div
+                key={plan.price_id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ y: -8 }}
               >
-                {plan.popular && (
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="absolute -top-4 left-1/2 -translate-x-1/2"
-                  >
-                    <Badge className="bg-blue-500 text-white border-0">
-                      {(() => {
-                        if (locale === 'pt-BR' || locale === 'pt') return miscFallback['pt-BR'].mostPopular;
-                        if (locale === 'pt-PT') return miscFallback['pt-PT'].mostPopular;
-                        return miscFallback.en.mostPopular;
-                      })()}
-                    </Badge>
-                  </motion.div>
-                )}
-                
-                <div className="mb-8">
-                  <h3 className="text-lg font-semibold mb-2">{plan.name}</h3>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    {plan.frequency && <span className="text-gray-400">{plan.frequency}</span>}
-                  </div>
-                </div>
-
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, idx) => (
-                    <motion.li 
-                      key={feature} 
-                      initial={{ opacity: 0, x: -10 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.1 + idx * 0.05 }}
-                      className="flex items-center gap-2 text-sm text-gray-300"
-                    >
-                      <Check className="w-4 h-4 text-blue-400" />
-                      {feature}
-                    </motion.li>
-                  ))}
-                </ul>
-
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <div
+                  className={`relative h-full rounded-2xl p-8 border transition-all duration-300 ${
+                    plan.popular
+                      ? 'bg-gradient-to-b from-blue-500/10 to-transparent border-blue-500 shadow-lg shadow-blue-500/20'
+                      : 'bg-white/5 border-white/10 hover:border-white/20'
+                  }`}
                 >
-                  <Button
-                    onClick={() => router.visit(`/${locale}/register`)}
-                    className={`w-full ${
-                      plan.popular
-                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                        : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
-                    }`}
+                  {plan.popular && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.5 }}
+                      className="absolute -top-4 left-1/2 -translate-x-1/2"
+                    >
+                      <Badge className="bg-blue-500 text-white border-0">
+                        {(() => {
+                          if (locale === 'pt-BR' || locale === 'pt') return miscFallback['pt-BR'].mostPopular;
+                          if (locale === 'pt-PT') return miscFallback['pt-PT'].mostPopular;
+                          return miscFallback.en.mostPopular;
+                        })()}
+                      </Badge>
+                    </motion.div>
+                  )}
+                  
+                  <div className="mb-8">
+                    <h3 className="text-lg font-semibold mb-2">{plan.name}</h3>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl font-bold">{plan.price}</span>
+                      {plan.frequency && (
+                        <span className={plan.id === 'free' ? "text-blue-400 text-sm font-medium ml-1" : "text-gray-400"}>
+                          {plan.frequency}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, idx) => (
+                      <motion.li 
+                        key={feature} 
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.1 + idx * 0.05 }}
+                        className="flex items-center gap-2 text-sm text-gray-300"
+                      >
+                        <Check className="w-4 h-4 text-blue-400" />
+                        {feature}
+                      </motion.li>
+                    ))}
+                  </ul>
+
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    {pricingText.cta}
-                  </Button>
-                </motion.div>
-              </div>
+                    <Button
+                      onClick={() => router.visit(`/${locale}/register`)}
+                      className={`w-full ${
+                        plan.popular
+                          ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                          : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                      }`}
+                    >
+                      {pricingText.cta}
+                    </Button>
+                  </motion.div>
+                </div>
+              </motion.div>
+              ))}
+            </div>
+            
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="mt-12 text-center"
+            >
+              <p className="text-gray-500 text-sm italic">
+                {pricingText.limitsRenewMonthly}
+              </p>
             </motion.div>
-          ))}
-          </div>
+          </>
         )}
       </div>
     </section>

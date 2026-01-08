@@ -120,17 +120,23 @@ var pricingFallback = {
     en: {
         title: "Simple pricing",
         subtitle: "All features on every plan",
-        cta: "Get started"
+        cta: "Get started",
+        freeForever: "Free forever",
+        limitsRenewMonthly: "* Limits renew monthly"
     },
     'pt-BR': {
         title: "Preços simples",
         subtitle: "Todos os recursos em cada plano",
-        cta: "Começar"
+        cta: "Começar",
+        freeForever: "Grátis para sempre",
+        limitsRenewMonthly: "* Os limites renovam mensalmente"
     },
     'pt-PT': {
         title: "Preços simples",
         subtitle: "Todos os recursos em cada plano",
-        cta: "Começar"
+        cta: "Começar",
+        freeForever: "Grátis para sempre",
+        limitsRenewMonthly: "* Os limites renovam mensalmente"
     }
 };
 var planNamesMapping = {
@@ -694,9 +700,10 @@ function Pricing(_a) {
         return "/" + count + " " + interval + "s";
     };
     var displayPlans = plans.map(function (plan) { return ({
+        id: plan.id,
         name: plan.display_name || plan.name,
-        price: plan.price,
-        frequency: plan.recurring ? getRecurringText(plan.recurring) : '',
+        price: plan.id === 'free' ? '0' : plan.price,
+        frequency: plan.id === 'free' ? pricingText.freeForever : (plan.recurring ? getRecurringText(plan.recurring) : ''),
         price_id: plan.price_id || plan.id,
         popular: plan.recommended || false,
         features: plan.features || [],
@@ -709,30 +716,33 @@ function Pricing(_a) {
                 react_1["default"].createElement("p", { className: "text-xl text-gray-400" }, pricingText.subtitle)),
             loading ? (react_1["default"].createElement("div", { className: "text-center py-12" },
                 react_1["default"].createElement("p", { className: "text-gray-400" }, "Loading pricing..."))) : plans.length === 0 ? (react_1["default"].createElement("div", { className: "text-center py-12" },
-                react_1["default"].createElement("p", { className: "text-gray-400" }, "No pricing plans available"))) : (react_1["default"].createElement("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" }, displayPlans.map(function (plan, i) { return (react_1["default"].createElement(framer_motion_1.motion.div, { key: plan.price_id, initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { delay: i * 0.1 }, whileHover: { y: -8 } },
-                react_1["default"].createElement("div", { className: "relative h-full rounded-2xl p-8 border transition-all duration-300 " + (plan.popular
-                        ? 'bg-gradient-to-b from-blue-500/10 to-transparent border-blue-500 shadow-lg shadow-blue-500/20'
-                        : 'bg-white/5 border-white/10 hover:border-white/20') },
-                    plan.popular && (react_1["default"].createElement(framer_motion_1.motion.div, { initial: { opacity: 0, scale: 0 }, animate: { opacity: 1, scale: 1 }, transition: { delay: 0.5 }, className: "absolute -top-4 left-1/2 -translate-x-1/2" },
-                        react_1["default"].createElement(badge_1.Badge, { className: "bg-blue-500 text-white border-0" }, (function () {
-                            if (locale === 'pt-BR' || locale === 'pt')
-                                return miscFallback['pt-BR'].mostPopular;
-                            if (locale === 'pt-PT')
-                                return miscFallback['pt-PT'].mostPopular;
-                            return miscFallback.en.mostPopular;
-                        })()))),
-                    react_1["default"].createElement("div", { className: "mb-8" },
-                        react_1["default"].createElement("h3", { className: "text-lg font-semibold mb-2" }, plan.name),
-                        react_1["default"].createElement("div", { className: "flex items-baseline gap-1" },
-                            react_1["default"].createElement("span", { className: "text-4xl font-bold" }, plan.price),
-                            plan.frequency && react_1["default"].createElement("span", { className: "text-gray-400" }, plan.frequency))),
-                    react_1["default"].createElement("ul", { className: "space-y-3 mb-8" }, plan.features.map(function (feature, idx) { return (react_1["default"].createElement(framer_motion_1.motion.li, { key: feature, initial: { opacity: 0, x: -10 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { delay: i * 0.1 + idx * 0.05 }, className: "flex items-center gap-2 text-sm text-gray-300" },
-                        react_1["default"].createElement(lucide_react_1.Check, { className: "w-4 h-4 text-blue-400" }),
-                        feature)); })),
-                    react_1["default"].createElement(framer_motion_1.motion.div, { whileHover: { scale: 1.02 }, whileTap: { scale: 0.98 } },
-                        react_1["default"].createElement(button_1.Button, { onClick: function () { return react_2.router.visit("/" + locale + "/register"); }, className: "w-full " + (plan.popular
-                                ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                                : 'bg-white/10 hover:bg-white/20 text-white border border-white/20') }, pricingText.cta))))); }))))));
+                react_1["default"].createElement("p", { className: "text-gray-400" }, "No pricing plans available"))) : (react_1["default"].createElement(react_1["default"].Fragment, null,
+                react_1["default"].createElement("div", { className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" }, displayPlans.map(function (plan, i) { return (react_1["default"].createElement(framer_motion_1.motion.div, { key: plan.price_id, initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true }, transition: { delay: i * 0.1 }, whileHover: { y: -8 } },
+                    react_1["default"].createElement("div", { className: "relative h-full rounded-2xl p-8 border transition-all duration-300 " + (plan.popular
+                            ? 'bg-gradient-to-b from-blue-500/10 to-transparent border-blue-500 shadow-lg shadow-blue-500/20'
+                            : 'bg-white/5 border-white/10 hover:border-white/20') },
+                        plan.popular && (react_1["default"].createElement(framer_motion_1.motion.div, { initial: { opacity: 0, scale: 0 }, animate: { opacity: 1, scale: 1 }, transition: { delay: 0.5 }, className: "absolute -top-4 left-1/2 -translate-x-1/2" },
+                            react_1["default"].createElement(badge_1.Badge, { className: "bg-blue-500 text-white border-0" }, (function () {
+                                if (locale === 'pt-BR' || locale === 'pt')
+                                    return miscFallback['pt-BR'].mostPopular;
+                                if (locale === 'pt-PT')
+                                    return miscFallback['pt-PT'].mostPopular;
+                                return miscFallback.en.mostPopular;
+                            })()))),
+                        react_1["default"].createElement("div", { className: "mb-8" },
+                            react_1["default"].createElement("h3", { className: "text-lg font-semibold mb-2" }, plan.name),
+                            react_1["default"].createElement("div", { className: "flex items-baseline gap-1" },
+                                react_1["default"].createElement("span", { className: "text-4xl font-bold" }, plan.price),
+                                plan.frequency && (react_1["default"].createElement("span", { className: plan.id === 'free' ? "text-blue-400 text-sm font-medium ml-1" : "text-gray-400" }, plan.frequency)))),
+                        react_1["default"].createElement("ul", { className: "space-y-3 mb-8" }, plan.features.map(function (feature, idx) { return (react_1["default"].createElement(framer_motion_1.motion.li, { key: feature, initial: { opacity: 0, x: -10 }, whileInView: { opacity: 1, x: 0 }, viewport: { once: true }, transition: { delay: i * 0.1 + idx * 0.05 }, className: "flex items-center gap-2 text-sm text-gray-300" },
+                            react_1["default"].createElement(lucide_react_1.Check, { className: "w-4 h-4 text-blue-400" }),
+                            feature)); })),
+                        react_1["default"].createElement(framer_motion_1.motion.div, { whileHover: { scale: 1.02 }, whileTap: { scale: 0.98 } },
+                            react_1["default"].createElement(button_1.Button, { onClick: function () { return react_2.router.visit("/" + locale + "/register"); }, className: "w-full " + (plan.popular
+                                    ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                                    : 'bg-white/10 hover:bg-white/20 text-white border border-white/20') }, pricingText.cta))))); })),
+                react_1["default"].createElement(framer_motion_1.motion.div, { initial: { opacity: 0 }, whileInView: { opacity: 1 }, viewport: { once: true }, className: "mt-12 text-center" },
+                    react_1["default"].createElement("p", { className: "text-gray-500 text-sm italic" }, pricingText.limitsRenewMonthly)))))));
 }
 function FinalCTA(_a) {
     var locale = _a.locale;

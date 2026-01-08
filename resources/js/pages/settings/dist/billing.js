@@ -52,11 +52,11 @@ var lucide_react_1 = require("lucide-react");
 var sonner_1 = require("sonner");
 function BillingIndex() {
     var _this = this;
-    var _a, _b, _c, _d, _e, _f, _g, _h;
-    var _j = react_i18next_1.useTranslation(), t = _j.t, i18n = _j.i18n;
+    var _a, _b, _c, _d, _e, _f;
+    var _g = react_i18next_1.useTranslation(), t = _g.t, i18n = _g.i18n;
     var page = react_2.usePage();
     var auth = page.props.auth;
-    var _k = react_1.useState('pt'), locale = _k[0], setLocale = _k[1];
+    var _h = react_1.useState('pt'), locale = _h[0], setLocale = _h[1];
     react_1.useEffect(function () {
         var savedLocale = localStorage.getItem('selected-locale') || 'pt';
         setLocale(savedLocale);
@@ -66,31 +66,29 @@ function BillingIndex() {
         { title: t('Settings'), href: "/" + locale + "/settings/billing" },
         { title: t('Billing', 'Billing'), href: "/" + locale + "/settings/billing" },
     ];
-    var _l = react_1.useState(true), loading = _l[0], setLoading = _l[1];
-    var _m = react_1.useState('free'), currentPlan = _m[0], setCurrentPlan = _m[1];
-    var _o = react_1.useState(null), planData = _o[0], setPlanData = _o[1];
-    var _p = react_1.useState({ documents: 0, models: 0, api_requests: 0, api_keys: 0 }), usage = _p[0], setUsage = _p[1];
-    var _q = react_1.useState({
+    var _j = react_1.useState(true), loading = _j[0], setLoading = _j[1];
+    var _k = react_1.useState('free'), currentPlan = _k[0], setCurrentPlan = _k[1];
+    var _l = react_1.useState(null), planData = _l[0], setPlanData = _l[1];
+    var _m = react_1.useState({ documents: 0, models: 0, api_requests: 0 }), usage = _m[0], setUsage = _m[1];
+    var _o = react_1.useState({
         documents: 0,
         models: 0,
-        api_requests: 0,
-        api_keys: 0
-    }), usagePercentages = _q[0], setUsagePercentages = _q[1];
-    var _r = react_1.useState(null), nextBillingDate = _r[0], setNextBillingDate = _r[1];
-    var _s = react_1.useState(false), isTrial = _s[0], setIsTrial = _s[1];
-    var _t = react_1.useState(false), isCanceled = _t[0], setIsCanceled = _t[1];
-    var _u = react_1.useState(null), upcomingInvoice = _u[0], setUpcomingInvoice = _u[1];
-    var _v = react_1.useState([]), invoices = _v[0], setInvoices = _v[1];
-    var _w = react_1.useState(false), showUpgradeDialog = _w[0], setShowUpgradeDialog = _w[1];
-    var _x = react_1.useState(false), showCancelDialog = _x[0], setShowCancelDialog = _x[1];
-    var _y = react_1.useState([]), availablePlans = _y[0], setAvailablePlans = _y[1];
-    var _z = react_1.useState(null), error = _z[0], setError = _z[1];
+        api_requests: 0
+    }), usagePercentages = _o[0], setUsagePercentages = _o[1];
+    var _p = react_1.useState(null), nextBillingDate = _p[0], setNextBillingDate = _p[1];
+    var _q = react_1.useState(false), isTrial = _q[0], setIsTrial = _q[1];
+    var _r = react_1.useState(false), isCanceled = _r[0], setIsCanceled = _r[1];
+    var _s = react_1.useState(null), upcomingInvoice = _s[0], setUpcomingInvoice = _s[1];
+    var _t = react_1.useState([]), invoices = _t[0], setInvoices = _t[1];
+    var _u = react_1.useState(false), showUpgradeDialog = _u[0], setShowUpgradeDialog = _u[1];
+    var _v = react_1.useState(false), showCancelDialog = _v[0], setShowCancelDialog = _v[1];
+    var _w = react_1.useState([]), availablePlans = _w[0], setAvailablePlans = _w[1];
+    var _x = react_1.useState(null), error = _x[0], setError = _x[1];
     // Default limits for free plan
     var defaultLimits = {
         documents: 20,
         models: 2,
-        api_requests: 100,
-        api_keys: 1
+        api_requests: 100
     };
     react_1.useEffect(function () {
         fetchData();
@@ -143,14 +141,12 @@ function BillingIndex() {
                         setUsage({
                             documents: ((_f = usageData.usage.documents) === null || _f === void 0 ? void 0 : _f.used) || 0,
                             models: ((_g = usageData.usage.models) === null || _g === void 0 ? void 0 : _g.used) || 0,
-                            api_requests: ((_h = usageData.usage.api_requests) === null || _h === void 0 ? void 0 : _h.used) || 0,
-                            api_keys: 0
+                            api_requests: ((_h = usageData.usage.api_requests) === null || _h === void 0 ? void 0 : _h.used) || 0
                         });
                         setUsagePercentages({
                             documents: ((_j = usageData.usage.documents) === null || _j === void 0 ? void 0 : _j.percentage) || 0,
                             models: ((_k = usageData.usage.models) === null || _k === void 0 ? void 0 : _k.percentage) || 0,
-                            api_requests: ((_l = usageData.usage.api_requests) === null || _l === void 0 ? void 0 : _l.percentage) || 0,
-                            api_keys: 0
+                            api_requests: ((_l = usageData.usage.api_requests) === null || _l === void 0 ? void 0 : _l.percentage) || 0
                         });
                         if ((_m = usageData.period) === null || _m === void 0 ? void 0 : _m.end) {
                             endDate = new Date(usageData.period.end);
@@ -355,7 +351,7 @@ function BillingIndex() {
                                 React.createElement(button_1.Button, { onClick: function () { return setShowUpgradeDialog(true); }, className: "gap-2" },
                                     React.createElement(lucide_react_1.TrendingUp, { className: "h-4 w-4" }),
                                     currentPlan === 'free' ? t('billing.upgrade_plan', 'Upgrade Plan') : t('billing.change_plan', 'Change Plan')))))),
-                React.createElement("div", { className: "grid gap-6 md:grid-cols-2" },
+                React.createElement("div", { className: "grid gap-6 md:grid-cols-3" },
                     React.createElement(card_1.Card, null,
                         React.createElement(card_1.CardHeader, null,
                             React.createElement(card_1.CardTitle, { className: "flex items-center gap-2" },
@@ -418,23 +414,7 @@ function BillingIndex() {
                                     React.createElement(lucide_react_1.AlertCircle, { className: "h-4 w-4" }),
                                     React.createElement(alert_1.AlertDescription, null, (usagePercentages === null || usagePercentages === void 0 ? void 0 : usagePercentages.api_requests) >= 95
                                         ? "You've reached your API requests limit. Upgrade to continue using the API."
-                                        : "You're approaching your API requests limit. Consider upgrading soon.")))))),
-                    React.createElement(card_1.Card, null,
-                        React.createElement(card_1.CardHeader, null,
-                            React.createElement(card_1.CardTitle, { className: "flex items-center gap-2" },
-                                React.createElement(lucide_react_1.Key, { className: "h-5 w-5" }),
-                                t('billing.api_keys', 'API Keys'))),
-                        React.createElement(card_1.CardContent, null,
-                            React.createElement("div", { className: "space-y-3" },
-                                React.createElement("div", { className: "flex justify-between text-sm" },
-                                    React.createElement("span", null,
-                                        (usage === null || usage === void 0 ? void 0 : usage.api_keys) || 0,
-                                        " of ",
-                                        ((_g = planData === null || planData === void 0 ? void 0 : planData.limits) === null || _g === void 0 ? void 0 : _g.api_keys) === -1 ? '∞' : (((_h = planData === null || planData === void 0 ? void 0 : planData.limits) === null || _h === void 0 ? void 0 : _h.api_keys) || defaultLimits.api_keys)),
-                                    React.createElement("span", { className: getUsageColor((usagePercentages === null || usagePercentages === void 0 ? void 0 : usagePercentages.api_keys) || 0) },
-                                        ((usagePercentages === null || usagePercentages === void 0 ? void 0 : usagePercentages.api_keys) || 0).toFixed(0),
-                                        "%")),
-                                React.createElement(progress_1.Progress, { value: (usagePercentages === null || usagePercentages === void 0 ? void 0 : usagePercentages.api_keys) || 0, className: "h-2" }))))),
+                                        : "You're approaching your API requests limit. Consider upgrading soon."))))))),
                 upcomingInvoice && upcomingInvoice.amount !== undefined && (React.createElement(card_1.Card, null,
                     React.createElement(card_1.CardHeader, null,
                         React.createElement(card_1.CardTitle, { className: "flex items-center gap-2" },

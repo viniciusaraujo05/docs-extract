@@ -46,7 +46,6 @@ class CheckUsageLimit
                 'documents' => __('documents'),
                 'models' => __('models'),
                 'reports' => __('reports'),
-                'api_keys' => __('API keys'),
                 'api_requests' => __('API requests'),
             ];
             

@@ -153,7 +153,6 @@ class SubscriptionService
             'models' => $usage->models_count,
             'api_requests' => $usage->api_requests_count,
             'reports' => $usage->reports_count,
-            'api_keys' => ApiClient::where('user_id', $user->id)->count(),
             default => 0,
         };
 
@@ -183,7 +182,6 @@ class SubscriptionService
             'models' => $usage->models_count,
             'api_requests' => $usage->api_requests_count,
             'reports' => $usage->reports_count,
-            'api_keys' => ApiClient::where('user_id', $user->id)->count(),
             default => 0,
         };
 

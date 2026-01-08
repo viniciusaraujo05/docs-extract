@@ -58,14 +58,12 @@ interface Usage {
   documents: number;
   models: number;
   api_requests: number;
-  api_keys: number;
 }
 
 interface UsagePercentages {
   documents: number;
   models: number;
   api_requests: number;
-  api_keys: number;
 }
 
 interface Invoice {
@@ -97,12 +95,11 @@ export default function BillingIndex() {
   const [loading, setLoading] = useState(true);
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [planData, setPlanData] = useState<Plan | null>(null);
-  const [usage, setUsage] = useState<Usage>({ documents: 0, models: 0, api_requests: 0, api_keys: 0 });
+  const [usage, setUsage] = useState<Usage>({ documents: 0, models: 0, api_requests: 0 });
   const [usagePercentages, setUsagePercentages] = useState<UsagePercentages>({
     documents: 0,
     models: 0,
     api_requests: 0,
-    api_keys: 0,
   });
   const [nextBillingDate, setNextBillingDate] = useState<string | null>(null);
   const [isTrial, setIsTrial] = useState(false);
@@ -119,7 +116,6 @@ export default function BillingIndex() {
     documents: 20,
     models: 2,
     api_requests: 100,
-    api_keys: 1,
   };
 
   useEffect(() => {
@@ -170,14 +166,12 @@ export default function BillingIndex() {
             documents: usageData.usage.documents?.used || 0,
             models: usageData.usage.models?.used || 0,
             api_requests: usageData.usage.api_requests?.used || 0,
-            api_keys: 0,
           });
           
           setUsagePercentages({
             documents: usageData.usage.documents?.percentage || 0,
             models: usageData.usage.models?.percentage || 0,
             api_requests: usageData.usage.api_requests?.percentage || 0,
-            api_keys: 0,
           });
 
           if (usageData.period?.end) {
@@ -389,7 +383,7 @@ export default function BillingIndex() {
         </Card>
 
         {/* Usage Overview */}
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-3">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -485,29 +479,6 @@ export default function BillingIndex() {
                     </AlertDescription>
                   </Alert>
                 )}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Key className="h-5 w-5" />
-                {t('billing.api_keys', 'API Keys')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span>{usage?.api_keys || 0} of {planData?.limits?.api_keys === -1 ? '∞' : (planData?.limits?.api_keys || defaultLimits.api_keys)}</span>
-                  <span className={getUsageColor(usagePercentages?.api_keys || 0)}>
-                    {(usagePercentages?.api_keys || 0).toFixed(0)}%
-                  </span>
-                </div>
-                <Progress
-                  value={usagePercentages?.api_keys || 0}
-                  className="h-2"
-                />
               </div>
             </CardContent>
           </Card>

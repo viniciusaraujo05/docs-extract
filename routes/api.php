@@ -71,7 +71,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('reports/configurations/{configuration}/generate', [ReportConfigurationController::class, 'generate'])->middleware(['usage.limit:reports']);
 
     // Documents API
-    Route::post('documents/analyze', [ExtractionController::class, 'analyze'])->middleware(['track.usage:api_requests', 'usage.limit:api_requests']);
-    Route::post('documents/extract', [ExtractionController::class, 'extract'])->middleware(['track.usage:api_requests', 'usage.limit:api_requests']);
+    Route::post('documents/analyze', [ExtractionController::class, 'analyze']);
+    Route::post('documents/extract', [ExtractionController::class, 'extract']);
     Route::get('documents/check-name', [DocumentController::class, 'checkName']);
 });
