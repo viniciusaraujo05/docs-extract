@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Actions\Documents\ExtractAndStoreDocumentAction;
 use App\Actions\Documents\StoreDocumentAction;
 use App\Enums\HttpResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\ExtractDocumentRequest;
 use App\Http\Requests\Api\V1\UploadDocumentRequest;
 use App\Models\ApiClient;
 use App\Models\Document;
@@ -25,6 +27,7 @@ final class DocumentControllerApi extends Controller
     public function __construct(
         private readonly StoreDocumentAction $storeDocumentAction,
         private readonly DocumentRepository $documentRepository,
+        private readonly ExtractAndStoreDocumentAction $extractAndStoreDocumentAction,
     ) {}
 
     /**
@@ -107,7 +110,6 @@ final class DocumentControllerApi extends Controller
             [
                 'data' => [
                     'id' => $document->id,
-                    'public_id' => $document->public_id,
                     'name' => $document->name,
                     'document_type' => $document->documentType?->name,
                     'status' => $document->status,
@@ -329,6 +331,64 @@ final class DocumentControllerApi extends Controller
             ],
             HttpResponse::OK->value
         );
+    }
+
+    /**
+     * Extração e armazenamento de documento.
+     *
+     * POST /api/v1/documents/extract
+     *
+     * Processa o documento imediatamente usando um modelo (document_type),
+     * extrai os dados conforme o schema do modelo e armazena.
+     * Retorna o documento completo com dados extraídos.
+     */
+    public function extract(ExtractDocumentRequest $request): JsonResponse
+    {
+        /** @var ApiClient $apiClient */
+        $apiClient = auth('api')->user();
+
+        $file = $request->file('file');
+        $documentTypeId = $request->integer('document_type_id');
+        $forceOverwrite = $request->boolean('force_overwrite', false);
+
+        try {
+            $document = $this->extractAndStoreDocumentAction->execute(
+                user: $apiClient->user,
+                file: $file,
+                documentTypeId: $documentTypeId,
+                forceOverwrite: $forceOverwrite,
+            );
+
+            return response()->json(
+                HttpResponse::CREATED->json(
+                    data: [
+                        'id' => $document->id,
+                        'name' => $document->name,
+                        'document_type' => $document->documentType?->name,
+                        'status' => $document->status,
+                        'extracted_data' => $document->extracted_data,
+                        'created_at' => $document->created_at?->toISOString(),
+                    ],
+                    message: 'Document extracted and stored successfully.'
+                ),
+                HttpResponse::CREATED->value
+            );
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(
+                HttpResponse::BAD_REQUEST->json(
+                    message: $e->getMessage()
+                ),
+                HttpResponse::BAD_REQUEST->value
+            );
+        } catch (\Exception $e) {
+            return response()->json(
+                HttpResponse::INTERNAL_SERVER_ERROR->json(
+                    message: 'Failed to extract and store document.',
+                    meta: ['error' => $e->getMessage()]
+                ),
+                HttpResponse::INTERNAL_SERVER_ERROR->value
+            );
+        }
     }
 
     /**

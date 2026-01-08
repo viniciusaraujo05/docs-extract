@@ -1,71 +1,44 @@
-import { useTranslation } from 'react-i18next';
-
-export interface ApiEndpoint {
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE';
-    path: string;
-    description: string;
-    requiresAuth: boolean;
-    requestBody?: {
-        type: string;
-        fields?: Array<{
-            name: string;
-            type: string;
-            required: boolean;
-            description: string;
-        }>;
-    };
-    queryParams?: Array<{
-        name: string;
-        type: string;
-        required: boolean;
-        description: string;
-    }>;
-    responses: Array<{
-        status: number;
-        description: string;
-        example: object;
-    }>;
-}
-
-export const useApiDocumentation = () => {
-    const { t } = useTranslation();
-
-    const gettingStarted = {
+"use strict";
+exports.__esModule = true;
+exports.useApiDocumentation = void 0;
+var react_i18next_1 = require("react-i18next");
+exports.useApiDocumentation = function () {
+    var t = react_i18next_1.useTranslation().t;
+    var gettingStarted = {
         title: t('Getting Started'),
         steps: [
             {
                 number: 1,
                 title: t('Create API Client'),
-                description: t('Navigate to the API Clients tab and create your first API client. Save the client_id and client_secret securely - the secret is only shown once.'),
+                description: t('Navigate to the API Clients tab and create your first API client. Save the client_id and client_secret securely - the secret is only shown once.')
             },
             {
                 number: 2,
                 title: t('Obtain JWT Token'),
                 description: t('Use your credentials to obtain a JWT token that will be used to authenticate all subsequent requests.'),
-                endpoint: '/api/v1/auth/token',
+                endpoint: '/api/v1/auth/token'
             },
             {
                 number: 3,
                 title: t('Create Document Type (Model)'),
                 description: t('Define a document type with custom fields that the AI will extract. This is required before extracting documents.'),
-                endpoint: '/api/v1/document-types',
+                endpoint: '/api/v1/document-types'
             },
             {
                 number: 4,
                 title: t('Extract Document'),
                 description: t('Upload a document and extract data instantly using your document type. The AI will extract fields according to your model schema.'),
-                endpoint: '/api/v1/documents/extract',
+                endpoint: '/api/v1/documents/extract'
             },
             {
                 number: 5,
                 title: t('Refresh Token'),
                 description: t('Tokens expire after 60 minutes. Use the refresh endpoint to obtain a new token before expiration.'),
-                endpoint: '/api/v1/auth/refresh',
+                endpoint: '/api/v1/auth/refresh'
             },
-        ],
+        ]
     };
-
-    const endpoints: Record<string, ApiEndpoint> = {
+    var endpoints = {
         'auth.token': {
             method: 'POST',
             path: '/api/v1/auth/token',
@@ -78,15 +51,15 @@ export const useApiDocumentation = () => {
                         name: 'client_id',
                         type: 'string',
                         required: true,
-                        description: t('Your API client ID'),
+                        description: t('Your API client ID')
                     },
                     {
                         name: 'client_secret',
                         type: 'string',
                         required: true,
-                        description: t('Your API client secret'),
+                        description: t('Your API client secret')
                     },
-                ],
+                ]
             },
             responses: [
                 {
@@ -95,18 +68,18 @@ export const useApiDocumentation = () => {
                     example: {
                         access_token: 'eyJ0eXAiOiJKV1QiLCJhbGc...',
                         token_type: 'Bearer',
-                        expires_in: 3600,
-                    },
+                        expires_in: 3600
+                    }
                 },
                 {
                     status: 401,
                     description: t('Invalid credentials, client disabled, or IP not allowed'),
                     example: {
                         success: false,
-                        message: 'Invalid credentials, client disabled, or IP not allowed.',
-                    },
+                        message: 'Invalid credentials, client disabled, or IP not allowed.'
+                    }
                 },
-            ],
+            ]
         },
         'auth.refresh': {
             method: 'POST',
@@ -120,8 +93,8 @@ export const useApiDocumentation = () => {
                     example: {
                         access_token: 'eyJ0eXAiOiJKV1QiLCJhbGc...',
                         token_type: 'Bearer',
-                        expires_in: 3600,
-                    },
+                        expires_in: 3600
+                    }
                 },
                 {
                     status: 401,
@@ -129,10 +102,10 @@ export const useApiDocumentation = () => {
                     example: {
                         success: false,
                         message: 'Unauthenticated.',
-                        error: 'Unauthenticated.',
-                    },
+                        error: 'Unauthenticated.'
+                    }
                 },
-            ],
+            ]
         },
         'auth.logout': {
             method: 'POST',
@@ -144,8 +117,8 @@ export const useApiDocumentation = () => {
                     status: 200,
                     description: t('Token revoked successfully'),
                     example: {
-                        message: 'Token revoked successfully.',
-                    },
+                        message: 'Token revoked successfully.'
+                    }
                 },
                 {
                     status: 401,
@@ -153,10 +126,10 @@ export const useApiDocumentation = () => {
                     example: {
                         success: false,
                         message: 'Unauthenticated.',
-                        error: 'Unauthenticated.',
-                    },
+                        error: 'Unauthenticated.'
+                    }
                 },
-            ],
+            ]
         },
         'documents.index': {
             method: 'GET',
@@ -168,7 +141,7 @@ export const useApiDocumentation = () => {
                     name: 'per_page',
                     type: 'integer',
                     required: false,
-                    description: t('Number of items per page (1-100, default: 20)'),
+                    description: t('Number of items per page (1-100, default: 20)')
                 },
             ],
             responses: [
@@ -187,20 +160,20 @@ export const useApiDocumentation = () => {
                                     extracted_data: {
                                         invoice_number: 'INV-2025-001',
                                         total: 1500.0,
-                                        date: '2025-01-20',
+                                        date: '2025-01-20'
                                     },
                                     created_at: '2025-01-24T14:30:22.000000Z',
-                                    updated_at: '2025-01-24T14:30:45.000000Z',
+                                    updated_at: '2025-01-24T14:30:45.000000Z'
                                 },
                             ],
                             pagination: {
                                 current_page: 1,
                                 last_page: 3,
                                 per_page: 20,
-                                total: 45,
-                            },
-                        },
-                    },
+                                total: 45
+                            }
+                        }
+                    }
                 },
                 {
                     status: 401,
@@ -208,10 +181,10 @@ export const useApiDocumentation = () => {
                     example: {
                         success: false,
                         message: 'Unauthenticated.',
-                        error: 'Unauthenticated.',
-                    },
+                        error: 'Unauthenticated.'
+                    }
                 },
-            ],
+            ]
         },
         'documents.show': {
             method: 'GET',
@@ -233,15 +206,15 @@ export const useApiDocumentation = () => {
                                 invoice_number: 'INV-2025-001',
                                 total: 1500.0,
                                 date: '2025-01-20',
-                                vendor: 'Acme Corp',
+                                vendor: 'Acme Corp'
                             },
                             file_path: '/storage/documents/invoice.pdf',
                             file_size: 245678,
                             mime_type: 'application/pdf',
                             created_at: '2025-01-24T14:30:22.000000Z',
-                            updated_at: '2025-01-24T14:30:45.000000Z',
-                        },
-                    },
+                            updated_at: '2025-01-24T14:30:45.000000Z'
+                        }
+                    }
                 },
                 {
                     status: 401,
@@ -249,18 +222,18 @@ export const useApiDocumentation = () => {
                     example: {
                         success: false,
                         message: 'Unauthenticated.',
-                        error: 'Unauthenticated.',
-                    },
+                        error: 'Unauthenticated.'
+                    }
                 },
                 {
                     status: 404,
                     description: t('Document not found or access denied'),
                     example: {
                         success: false,
-                        message: 'Document not found or access denied.',
-                    },
+                        message: 'Document not found or access denied.'
+                    }
                 },
-            ],
+            ]
         },
         'documents.filter': {
             method: 'GET',
@@ -272,25 +245,25 @@ export const useApiDocumentation = () => {
                     name: 'document_type',
                     type: 'string',
                     required: false,
-                    description: t('Filter by document type name'),
+                    description: t('Filter by document type name')
                 },
                 {
                     name: 'start_date',
                     type: 'string',
                     required: false,
-                    description: t('Filter documents created after this date (YYYY-MM-DD)'),
+                    description: t('Filter documents created after this date (YYYY-MM-DD)')
                 },
                 {
                     name: 'end_date',
                     type: 'string',
                     required: false,
-                    description: t('Filter documents created before this date (YYYY-MM-DD)'),
+                    description: t('Filter documents created before this date (YYYY-MM-DD)')
                 },
                 {
                     name: 'name',
                     type: 'string',
                     required: false,
-                    description: t('Filter by document name (partial match)'),
+                    description: t('Filter by document name (partial match)')
                 },
             ],
             responses: [
@@ -308,18 +281,18 @@ export const useApiDocumentation = () => {
                                     status: 'completed',
                                     extracted_data: {
                                         invoice_number: 'INV-2025-001',
-                                        total: 1500.0,
+                                        total: 1500.0
                                     },
-                                    created_at: '2025-01-24T14:30:22.000000Z',
+                                    created_at: '2025-01-24T14:30:22.000000Z'
                                 },
                             ],
                             total: 1,
                             filters_applied: {
                                 document_type: 'Invoice',
-                                start_date: '2025-01-01',
-                            },
-                        },
-                    },
+                                start_date: '2025-01-01'
+                            }
+                        }
+                    }
                 },
                 {
                     status: 401,
@@ -327,8 +300,8 @@ export const useApiDocumentation = () => {
                     example: {
                         success: false,
                         message: 'Unauthenticated.',
-                        error: 'Unauthenticated.',
-                    },
+                        error: 'Unauthenticated.'
+                    }
                 },
                 {
                     status: 422,
@@ -337,11 +310,11 @@ export const useApiDocumentation = () => {
                         success: false,
                         message: 'Validation failed.',
                         errors: {
-                            start_date: ['The start date must be a valid date.'],
-                        },
-                    },
+                            start_date: ['The start date must be a valid date.']
+                        }
+                    }
                 },
-            ],
+            ]
         },
         'documents.searchByName': {
             method: 'GET',
@@ -353,7 +326,7 @@ export const useApiDocumentation = () => {
                     name: 'name',
                     type: 'string',
                     required: true,
-                    description: t('Document name to search for (partial match)'),
+                    description: t('Document name to search for (partial match)')
                 },
             ],
             responses: [
@@ -370,12 +343,12 @@ export const useApiDocumentation = () => {
                                     document_type: 'Invoice',
                                     status: 'completed',
                                     extracted_data: {},
-                                    created_at: '2025-01-24T14:30:22.000000Z',
+                                    created_at: '2025-01-24T14:30:22.000000Z'
                                 },
                             ],
-                            total: 1,
-                        },
-                    },
+                            total: 1
+                        }
+                    }
                 },
                 {
                     status: 401,
@@ -383,8 +356,8 @@ export const useApiDocumentation = () => {
                     example: {
                         success: false,
                         message: 'Unauthenticated.',
-                        error: 'Unauthenticated.',
-                    },
+                        error: 'Unauthenticated.'
+                    }
                 },
                 {
                     status: 422,
@@ -393,11 +366,11 @@ export const useApiDocumentation = () => {
                         success: false,
                         message: 'Validation failed.',
                         errors: {
-                            name: ['The name field is required.'],
-                        },
-                    },
+                            name: ['The name field is required.']
+                        }
+                    }
                 },
-            ],
+            ]
         },
         'documents.searchByDate': {
             method: 'POST',
@@ -411,15 +384,15 @@ export const useApiDocumentation = () => {
                         name: 'start_date',
                         type: 'string',
                         required: true,
-                        description: t('Start date (YYYY-MM-DD)'),
+                        description: t('Start date (YYYY-MM-DD)')
                     },
                     {
                         name: 'end_date',
                         type: 'string',
                         required: true,
-                        description: t('End date (YYYY-MM-DD)'),
+                        description: t('End date (YYYY-MM-DD)')
                     },
-                ],
+                ]
             },
             responses: [
                 {
@@ -435,16 +408,16 @@ export const useApiDocumentation = () => {
                                     document_type: 'Invoice',
                                     status: 'completed',
                                     extracted_data: {},
-                                    created_at: '2025-01-24T14:30:22.000000Z',
+                                    created_at: '2025-01-24T14:30:22.000000Z'
                                 },
                             ],
                             total: 1,
                             date_range: {
                                 start: '2025-01-01',
-                                end: '2025-01-31',
-                            },
-                        },
-                    },
+                                end: '2025-01-31'
+                            }
+                        }
+                    }
                 },
                 {
                     status: 401,
@@ -452,8 +425,8 @@ export const useApiDocumentation = () => {
                     example: {
                         success: false,
                         message: 'Unauthenticated.',
-                        error: 'Unauthenticated.',
-                    },
+                        error: 'Unauthenticated.'
+                    }
                 },
                 {
                     status: 422,
@@ -462,11 +435,11 @@ export const useApiDocumentation = () => {
                         success: false,
                         message: 'Validation failed.',
                         errors: {
-                            start_date: ['The start date field is required.'],
-                        },
-                    },
+                            start_date: ['The start date field is required.']
+                        }
+                    }
                 },
-            ],
+            ]
         },
         'documents.extract': {
             method: 'POST',
@@ -480,21 +453,21 @@ export const useApiDocumentation = () => {
                         name: 'file',
                         type: 'file',
                         required: true,
-                        description: t('Document file (PDF, JPG, JPEG, PNG, WEBP) - Max 10MB'),
+                        description: t('Document file (PDF, JPG, JPEG, PNG, WEBP) - Max 10MB')
                     },
                     {
                         name: 'document_type_id',
                         type: 'integer',
                         required: true,
-                        description: t('ID of the document type (model) to use for extraction'),
+                        description: t('ID of the document type (model) to use for extraction')
                     },
                     {
                         name: 'force_overwrite',
                         type: 'boolean',
                         required: false,
-                        description: t('If true, replaces existing document with same name (default: false)'),
+                        description: t('If true, replaces existing document with same name (default: false)')
                     },
-                ],
+                ]
             },
             responses: [
                 {
@@ -513,19 +486,19 @@ export const useApiDocumentation = () => {
                                 date: '2024-01-08',
                                 total: 1500.0,
                                 vendor: 'ACME Corp',
-                                confidence: 95,
+                                confidence: 95
                             },
-                            created_at: '2024-01-08T17:30:00.000Z',
-                        },
-                    },
+                            created_at: '2024-01-08T17:30:00.000Z'
+                        }
+                    }
                 },
                 {
                     status: 400,
                     description: t('Invalid document type or duplicate document'),
                     example: {
                         success: false,
-                        message: "A document with the name 'invoice' already exists. Use force_overwrite=true to replace it.",
-                    },
+                        message: "A document with the name 'invoice' already exists. Use force_overwrite=true to replace it."
+                    }
                 },
                 {
                     status: 422,
@@ -534,11 +507,11 @@ export const useApiDocumentation = () => {
                         success: false,
                         message: 'The given data was invalid.',
                         errors: {
-                            document_type_id: ['Document type (model) is required.'],
-                        },
-                    },
+                            document_type_id: ['Document type (model) is required.']
+                        }
+                    }
                 },
-            ],
+            ]
         },
         'documentTypes.index': {
             method: 'GET',
@@ -562,21 +535,21 @@ export const useApiDocumentation = () => {
                                         name: 'invoice_number',
                                         type: 'string',
                                         description: 'Invoice number',
-                                        required: true,
+                                        required: true
                                     },
                                     {
                                         name: 'total',
                                         type: 'number',
                                         description: 'Total amount',
-                                        required: true,
+                                        required: true
                                     },
                                 ],
-                                created_at: '2024-01-08T17:30:00.000Z',
+                                created_at: '2024-01-08T17:30:00.000Z'
                             },
-                        ],
-                    },
+                        ]
+                    }
                 },
-            ],
+            ]
         },
         'documentTypes.store': {
             method: 'POST',
@@ -590,21 +563,21 @@ export const useApiDocumentation = () => {
                         name: 'name',
                         type: 'string',
                         required: true,
-                        description: t('Document type name (e.g., "Invoice", "Receipt")'),
+                        description: t('Document type name (e.g., "Invoice", "Receipt")')
                     },
                     {
                         name: 'description',
                         type: 'string',
                         required: false,
-                        description: t('Optional description'),
+                        description: t('Optional description')
                     },
                     {
                         name: 'fields',
                         type: 'array',
                         required: true,
-                        description: t('Array of field definitions that AI will extract'),
+                        description: t('Array of field definitions that AI will extract')
                     },
-                ],
+                ]
             },
             responses: [
                 {
@@ -622,22 +595,22 @@ export const useApiDocumentation = () => {
                                     name: 'invoice_number',
                                     type: 'string',
                                     description: 'Invoice number',
-                                    required: true,
+                                    required: true
                                 },
                                 {
                                     name: 'date',
                                     type: 'date',
-                                    required: true,
+                                    required: true
                                 },
                                 {
                                     name: 'total',
                                     type: 'number',
-                                    required: true,
+                                    required: true
                                 },
                             ],
-                            created_at: '2024-01-08T17:30:00.000Z',
-                        },
-                    },
+                            created_at: '2024-01-08T17:30:00.000Z'
+                        }
+                    }
                 },
                 {
                     status: 422,
@@ -647,11 +620,11 @@ export const useApiDocumentation = () => {
                         message: 'The given data was invalid.',
                         errors: {
                             name: ['Document type name is required.'],
-                            fields: ['At least one field is required.'],
-                        },
-                    },
+                            fields: ['At least one field is required.']
+                        }
+                    }
                 },
-            ],
+            ]
         },
         'documentTypes.show': {
             method: 'GET',
@@ -673,22 +646,22 @@ export const useApiDocumentation = () => {
                                 {
                                     name: 'invoice_number',
                                     type: 'string',
-                                    required: true,
+                                    required: true
                                 },
                             ],
-                            created_at: '2024-01-08T17:30:00.000Z',
-                        },
-                    },
+                            created_at: '2024-01-08T17:30:00.000Z'
+                        }
+                    }
                 },
                 {
                     status: 404,
                     description: t('Document type not found'),
                     example: {
                         success: false,
-                        message: 'Document type not found.',
-                    },
+                        message: 'Document type not found.'
+                    }
                 },
-            ],
+            ]
         },
         'documentTypes.update': {
             method: 'PUT',
@@ -702,21 +675,21 @@ export const useApiDocumentation = () => {
                         name: 'name',
                         type: 'string',
                         required: false,
-                        description: t('Updated name'),
+                        description: t('Updated name')
                     },
                     {
                         name: 'description',
                         type: 'string',
                         required: false,
-                        description: t('Updated description'),
+                        description: t('Updated description')
                     },
                     {
                         name: 'fields',
                         type: 'array',
                         required: false,
-                        description: t('Updated field definitions'),
+                        description: t('Updated field definitions')
                     },
-                ],
+                ]
             },
             responses: [
                 {
@@ -728,11 +701,11 @@ export const useApiDocumentation = () => {
                         data: {
                             id: 5,
                             name: 'Commercial Invoice',
-                            updated_at: '2024-01-08T18:00:00.000Z',
-                        },
-                    },
+                            updated_at: '2024-01-08T18:00:00.000Z'
+                        }
+                    }
                 },
-            ],
+            ]
         },
         'documentTypes.destroy': {
             method: 'DELETE',
@@ -745,70 +718,66 @@ export const useApiDocumentation = () => {
                     description: t('Document type deleted successfully'),
                     example: {
                         success: true,
-                        message: 'Document type deleted successfully.',
-                    },
+                        message: 'Document type deleted successfully.'
+                    }
                 },
                 {
                     status: 404,
                     description: t('Document type not found'),
                     example: {
                         success: false,
-                        message: 'Document type not found.',
-                    },
+                        message: 'Document type not found.'
+                    }
                 },
-            ],
-        },
+            ]
+        }
     };
-
-    const securityNotes = [
+    var securityNotes = [
         {
             title: t('Token Expiration'),
-            description: t('JWT tokens expire after 60 minutes. Use the refresh endpoint to obtain a new token before expiration.'),
+            description: t('JWT tokens expire after 60 minutes. Use the refresh endpoint to obtain a new token before expiration.')
         },
         {
             title: t('Rate Limiting'),
-            description: t('API has a rate limit of 60 requests per minute per client. Responses with status 429 indicate the limit has been exceeded.'),
+            description: t('API has a rate limit of 60 requests per minute per client. Responses with status 429 indicate the limit has been exceeded.')
         },
         {
             title: t('IP Whitelist'),
-            description: t('Optionally configure allowed IPs for your API client to restrict access from specific locations.'),
+            description: t('Optionally configure allowed IPs for your API client to restrict access from specific locations.')
         },
         {
             title: t('Secure Storage'),
-            description: t('Client secrets are hashed with bcrypt before storage. Never share your client_secret publicly.'),
+            description: t('Client secrets are hashed with bcrypt before storage. Never share your client_secret publicly.')
         },
     ];
-
-    const documentStatuses = [
+    var documentStatuses = [
         { status: 'pending', description: t('Document queued for processing') },
         { status: 'processing', description: t('Document is being processed') },
         { status: 'completed', description: t('Processing completed successfully') },
         { status: 'failed', description: t('Processing failed (check error_message)') },
     ];
-
-    const endpointCategories = {
+    var endpointCategories = {
         authentication: {
             title: t('Authentication'),
             description: t('Endpoints for obtaining and managing JWT tokens'),
-            endpoints: ['auth.token', 'auth.refresh', 'auth.logout'],
+            endpoints: ['auth.token', 'auth.refresh', 'auth.logout']
         },
         documentTypes: {
             title: t('Document Types (Models)'),
             description: t('Create and manage document types with custom fields for AI extraction'),
-            endpoints: ['documentTypes.index', 'documentTypes.store', 'documentTypes.show', 'documentTypes.update', 'documentTypes.destroy'],
+            endpoints: ['documentTypes.index', 'documentTypes.store', 'documentTypes.show', 'documentTypes.update', 'documentTypes.destroy']
         },
         documents: {
             title: t('Documents'),
             description: t('Upload, extract, search and manage documents'),
-            endpoints: ['documents.extract', 'documents.index', 'documents.show', 'documents.filter', 'documents.searchByName', 'documents.searchByDate'],
-        },
+            endpoints: ['documents.extract', 'documents.index', 'documents.show', 'documents.filter', 'documents.searchByName', 'documents.searchByDate']
+        }
     };
-
     return {
-        gettingStarted,
-        endpoints,
-        endpointCategories,
-        securityNotes,
-        documentStatuses,
+        gettingStarted: gettingStarted,
+        endpoints: endpoints,
+        endpointCategories: endpointCategories,
+        securityNotes: securityNotes,
+        documentStatuses: documentStatuses
     };
 };

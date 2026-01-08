@@ -140,5 +140,11 @@
     "emails.security_change.title": "Alteração de Segurança Detectada",
     "emails.security_change.content": "Seu :field foi alterado com sucesso.",
     "emails.security_change.warning": "Se você não realizou esta alteração, entre em contato com nosso suporte imediatamente.",
-    "emails.security_change.button": "Contatar Suporte"
+    "emails.security_change.button": "Entrar em Contato com Suporte",
+    "Yes": "Sim",
+    "No": "Não",
+    "Field": "Campo",
+    "Parameter": "Parâmetro",
+    "Responses": "Respostas",
+    "Required": "Obrigatório"
 }

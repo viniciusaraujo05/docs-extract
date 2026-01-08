@@ -47,7 +47,7 @@ export default function ApiIndex() {
     const [selectedEndpoint, setSelectedEndpoint] = useState<string>('auth.token');
     const [selectedResponseCode, setSelectedResponseCode] = useState<number>(200);
 
-    const { gettingStarted, endpoints, securityNotes, documentStatuses } = useApiDocumentation();
+    const { gettingStarted, endpoints, endpointCategories, securityNotes, documentStatuses } = useApiDocumentation();
     const createForm = useForm({});
     const deleteForm = useForm({});
     const regenerateForm = useForm({});
@@ -130,11 +130,12 @@ export default function ApiIndex() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('API')} />
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">{t('API')}</h1>
-                    <p className="text-muted-foreground mt-2">{t('Manage your API credentials and explore the documentation')}</p>
-                </div>
+            <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div className="space-y-6">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">{t('API')}</h1>
+                        <p className="text-muted-foreground mt-2">{t('Manage your API credentials and explore the documentation')}</p>
+                    </div>
 
                 <Tabs defaultValue="getting-started" className="space-y-6">
                     <TabsList className="grid w-full grid-cols-4">
@@ -288,28 +289,36 @@ export default function ApiIndex() {
                                     </div>
                                 </div>
                                 <Separator />
-                                <div className="space-y-3">
-                                    {endpointKeys.map((key) => {
-                                        const endpoint = endpoints[key];
-                                        const isSelected = selectedEndpoint === key;
-                                        return (
-                                            <Collapsible key={key} open={isSelected} onOpenChange={(open) => open && setSelectedEndpoint(key)}>
-                                                <Card>
-                                                    <CollapsibleTrigger asChild>
-                                                        <button className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors">
-                                                            <div className="flex items-center gap-3">
-                                                                <Badge variant={endpoint.method === 'GET' ? 'secondary' : endpoint.method === 'POST' ? 'default' : 'destructive'}>{endpoint.method}</Badge>
-                                                                <div>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <span className="font-mono font-semibold">{endpoint.path}</span>
-                                                                        {endpoint.requiresAuth && <Badge variant="outline" className="text-xs">JWT</Badge>}
-                                                                    </div>
-                                                                    <p className="text-sm text-muted-foreground mt-1">{endpoint.description}</p>
-                                                                </div>
-                                                            </div>
-                                                            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isSelected ? 'rotate-180' : ''}`} />
-                                                        </button>
-                                                    </CollapsibleTrigger>
+                                <div className="space-y-6">
+                                    {Object.entries(endpointCategories).map(([categoryKey, category]) => (
+                                        <div key={categoryKey} className="space-y-3">
+                                            <div>
+                                                <h3 className="text-lg font-semibold">{category.title}</h3>
+                                                <p className="text-sm text-muted-foreground">{category.description}</p>
+                                            </div>
+                                            <div className="space-y-3">
+                                                {category.endpoints.map((key) => {
+                                                    const endpoint = endpoints[key];
+                                                    if (!endpoint) return null;
+                                                    const isSelected = selectedEndpoint === key;
+                                                    return (
+                                                        <Collapsible key={key} open={isSelected} onOpenChange={(open) => open && setSelectedEndpoint(key)}>
+                                                            <Card>
+                                                                <CollapsibleTrigger asChild>
+                                                                    <button className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <Badge variant={endpoint.method === 'GET' ? 'secondary' : endpoint.method === 'POST' ? 'default' : endpoint.method === 'PUT' ? 'default' : 'destructive'}>{endpoint.method}</Badge>
+                                                                            <div>
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <span className="font-mono font-semibold">{endpoint.path}</span>
+                                                                                    {endpoint.requiresAuth && <Badge variant="outline" className="text-xs">JWT</Badge>}
+                                                                                </div>
+                                                                                <p className="text-sm text-muted-foreground mt-1">{endpoint.description}</p>
+                                                                            </div>
+                                                                        </div>
+                                                                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isSelected ? 'rotate-180' : ''}`} />
+                                                                    </button>
+                                                                </CollapsibleTrigger>
                                                     <CollapsibleContent>
                                                         <div className="space-y-4 px-4 pb-4">
                                                             <Separator />
@@ -331,7 +340,7 @@ export default function ApiIndex() {
                                                                                     <tr key={field.name} className="border-b last:border-0">
                                                                                         <td className="px-3 py-2 font-mono">{field.name}</td>
                                                                                         <td className="px-3 py-2 text-muted-foreground">{field.type}</td>
-                                                                                        <td className="px-3 py-2"><Badge variant={field.required ? 'destructive' : 'secondary'} className="text-xs">{field.required ? 'Yes' : 'No'}</Badge></td>
+                                                                                        <td className="px-3 py-2"><Badge variant={field.required ? 'destructive' : 'secondary'} className="text-xs">{field.required ? t('Yes') : t('No')}</Badge></td>
                                                                                         <td className="px-3 py-2 text-muted-foreground">{field.description}</td>
                                                                                     </tr>
                                                                                 ))}
@@ -358,7 +367,7 @@ export default function ApiIndex() {
                                                                                     <tr key={param.name} className="border-b last:border-0">
                                                                                         <td className="px-3 py-2 font-mono">{param.name}</td>
                                                                                         <td className="px-3 py-2 text-muted-foreground">{param.type}</td>
-                                                                                        <td className="px-3 py-2"><Badge variant={param.required ? 'destructive' : 'secondary'} className="text-xs">{param.required ? 'Yes' : 'No'}</Badge></td>
+                                                                                        <td className="px-3 py-2"><Badge variant={param.required ? 'destructive' : 'secondary'} className="text-xs">{param.required ? t('Yes') : t('No')}</Badge></td>
                                                                                         <td className="px-3 py-2 text-muted-foreground">{param.description}</td>
                                                                                     </tr>
                                                                                 ))}
@@ -395,11 +404,14 @@ export default function ApiIndex() {
                                                             </div>
                                                         </div>
                                                     </CollapsibleContent>
-                                                </Card>
-                                            </Collapsible>
-                                        );
-                                    })}
-                                </div>
+                                                                </Card>
+                                                            </Collapsible>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                             </CardContent>
                         </Card>
                     </TabsContent>
@@ -426,6 +438,7 @@ export default function ApiIndex() {
                         </Card>
                     </TabsContent>
                 </Tabs>
+                </div>
             </div>
         </AppLayout>
     );

@@ -140,5 +140,11 @@
     "emails.security_change.title": "Security Change Detected",
     "emails.security_change.content": "Your :field has been successfully changed.",
     "emails.security_change.warning": "If you did not perform this change, please contact our support team immediately.",
-    "emails.security_change.button": "Contact Support"
+    "emails.security_change.button": "Contact Support",
+    "Yes": "Yes",
+    "No": "No",
+    "Field": "Field",
+    "Parameter": "Parameter",
+    "Responses": "Responses",
+    "Required": "Required"
 }
