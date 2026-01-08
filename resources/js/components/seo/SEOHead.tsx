@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 
 interface SEOHeadProps {
   title: string;
@@ -25,9 +25,18 @@ export default function SEOHead({
   structuredData,
   noindex = false,
 }: SEOHeadProps) {
+  const { url: pageUrl, props } = usePage<{ appUrl?: string }>();
+  const baseUrlFromProps = props.appUrl;
+  const siteUrl =
+    baseUrlFromProps ||
+    (typeof window !== 'undefined' ? window.location.origin : '') ||
+    'https://docset.com';
+  const path =
+    typeof window !== 'undefined'
+      ? window.location.pathname + window.location.search
+      : pageUrl || '/';
   const fullTitle = title.includes('DOCSET') ? title : `${title} | DOCSET`;
-  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://docset.com';
-  const fullCanonical = canonical || (typeof window !== 'undefined' ? window.location.href : siteUrl);
+  const fullCanonical = canonical || `${siteUrl}${path}`;
   const fullOgImage = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
 
   return (

@@ -3,9 +3,16 @@ exports.__esModule = true;
 var react_1 = require("@inertiajs/react");
 function SEOHead(_a) {
     var title = _a.title, description = _a.description, keywords = _a.keywords, canonical = _a.canonical, _b = _a.ogImage, ogImage = _b === void 0 ? '/docset.png' : _b, _c = _a.ogType, ogType = _c === void 0 ? 'website' : _c, _d = _a.locale, locale = _d === void 0 ? 'en' : _d, _e = _a.alternateLocales, alternateLocales = _e === void 0 ? [] : _e, structuredData = _a.structuredData, _f = _a.noindex, noindex = _f === void 0 ? false : _f;
+    var _g = react_1.usePage(), pageUrl = _g.url, props = _g.props;
+    var baseUrlFromProps = props.appUrl;
+    var siteUrl = baseUrlFromProps ||
+        (typeof window !== 'undefined' ? window.location.origin : '') ||
+        'https://docset.com';
+    var path = typeof window !== 'undefined'
+        ? window.location.pathname + window.location.search
+        : pageUrl || '/';
     var fullTitle = title.includes('DOCSET') ? title : title + " | DOCSET";
-    var siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://docset.com';
-    var fullCanonical = canonical || (typeof window !== 'undefined' ? window.location.href : siteUrl);
+    var fullCanonical = canonical || "" + siteUrl + path;
     var fullOgImage = ogImage.startsWith('http') ? ogImage : "" + siteUrl + ogImage;
     return (React.createElement(react_1.Head, null,
         React.createElement("title", null, fullTitle),

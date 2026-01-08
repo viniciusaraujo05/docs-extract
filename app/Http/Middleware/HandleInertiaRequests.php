@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Helpers\SeoHelper;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -38,6 +39,9 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $locale = $request->route('locale') ?? 'en';
+        $seoContent = SeoHelper::getContent($locale);
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -50,6 +54,17 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
                 'newClient' => $request->session()->get('newClient'),
+            ],
+            'seo' => [
+                'title' => $seoContent['title'],
+                'description' => $seoContent['description'],
+                'keywords' => $seoContent['keywords'],
+                'locale' => $locale,
+                'url' => $request->url(),
+                'canonical' => $request->url(),
+                'ogImage' => config('app.url') . '/docset.png',
+                'structuredData' => SeoHelper::generateStructuredData($locale),
+                'alternateLocales' => SeoHelper::getAlternateLocales($locale),
             ],
         ];
     }

@@ -15,6 +15,11 @@ use Laravel\Fortify\Features;
 // SEO Routes
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
+// Cookie Consent Routes
+Route::post('/cookie-consent/accept', [\App\Http\Controllers\CookieConsentController::class, 'accept'])->name('cookie.accept');
+Route::post('/cookie-consent/reject', [\App\Http\Controllers\CookieConsentController::class, 'reject'])->name('cookie.reject');
+Route::get('/cookie-consent/status', [\App\Http\Controllers\CookieConsentController::class, 'status'])->name('cookie.status');
+
 Route::get('/', function () {
     return Inertia::render('welcome', [
         'canRegister' => Features::enabled(Features::registration()),
