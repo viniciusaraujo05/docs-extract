@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamp('period_start');
             $table->timestamp('period_end');
             $table->timestamps();
-            
+
             $table->unique(['user_id', 'billing_period']);
             $table->index(['user_id', 'period_start']);
         });

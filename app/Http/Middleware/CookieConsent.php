@@ -12,7 +12,7 @@ class CookieConsent
     {
         $response = $next($request);
 
-        if (!$request->hasCookie('cookie_consent')) {
+        if (! $request->hasCookie('cookie_consent')) {
             $response->withCookie(cookie()->forever('cookie_consent_pending', true));
         }
 

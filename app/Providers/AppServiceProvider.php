@@ -2,14 +2,14 @@
 
 namespace App\Providers;
 
-use App\Models\User;
 use App\Models\Document;
 use App\Models\DocumentType;
 use App\Models\ReportAnalysis;
-use App\Observers\UserObserver;
+use App\Models\User;
 use App\Observers\DocumentObserver;
 use App\Observers\DocumentTypeObserver;
 use App\Observers\ReportAnalysisObserver;
+use App\Observers\UserObserver;
 use App\Services\TranslationCacheService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\URL;

@@ -21,12 +21,12 @@ class UsageController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         // Get current usage and remaining quota
         $usage = $this->usageTrackingService->getCurrentUsage($user);
         $remaining = $this->usageTrackingService->getRemainingQuota($user);
         $limits = $this->subscriptionService->getUserPlanLimits($user);
-        
+
         // Build usage data for each resource
         $usageData = [];
         foreach ($limits as $resource => $limit) {
@@ -53,7 +53,7 @@ class UsageController extends Controller
                 ];
             }
         }
-        
+
         return response()->json([
             'success' => true,
             'usage' => $usageData,
@@ -76,7 +76,7 @@ class UsageController extends Controller
         if ($limit === -1) {
             return 0; // unlimited
         }
-        
+
         return $limit > 0 ? min(100, ($used / $limit) * 100) : 0;
     }
 
@@ -88,7 +88,7 @@ class UsageController extends Controller
         if ($limit === -1) {
             return false; // unlimited
         }
-        
+
         return $used >= ($limit * 0.8);
     }
 
@@ -100,7 +100,7 @@ class UsageController extends Controller
         if ($limit === -1) {
             return false; // unlimited
         }
-        
+
         return $used >= $limit;
     }
 }

@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class StripePlanService
 {
@@ -17,26 +15,26 @@ class StripePlanService
             // Get prices from Stripe API directly
             $stripeProductService = app(\App\Services\StripeProductService::class);
             $stripePrices = $stripeProductService->getActivePrices()->keyBy('product_id');
-            
+
             // Get plans from config and merge with real prices
             $plans = [];
             $planConfig = config('plans.plans');
-            
+
             foreach ($planConfig as $planKey => $config) {
                 $stripeProductId = $config['stripe_product_id'] ?? null;
-                
+
                 // Skip if no stripe product ID
-                if (!$stripeProductId) {
+                if (! $stripeProductId) {
                     continue;
                 }
-                
+
                 $price = $stripePrices[$stripeProductId] ?? null;
-                
+
                 // Get translated values based on locale
                 $displayName = $this->getTranslatedValue($config['display_name'] ?? [], $locale, $config['name']);
                 $tagline = $this->getTranslatedValue($config['tagline'] ?? [], $locale, '');
                 $features = $this->getTranslatedValue($config['features'] ?? [], $locale, []);
-                
+
                 $plans[$planKey] = [
                     'id' => $planKey,
                     'name' => $config['name'],
@@ -57,16 +55,16 @@ class StripePlanService
                     'tagline' => $tagline,
                 ];
             }
-            
+
             return $plans;
         } catch (\Exception $e) {
-            \Log::error("Error fetching plans from Stripe: " . $e->getMessage());
-            
+            \Log::error('Error fetching plans from Stripe: '.$e->getMessage());
+
             // Return config plans as fallback
             return $this->getConfigPlans($locale);
         }
     }
-    
+
     /**
      * Get plans from config as fallback
      */
@@ -74,13 +72,13 @@ class StripePlanService
     {
         $plans = [];
         $planConfig = config('plans.plans');
-        
+
         foreach ($planConfig as $planKey => $config) {
             // Get translated values based on locale
             $displayName = $this->getTranslatedValue($config['display_name'] ?? [], $locale, $config['name']);
             $tagline = $this->getTranslatedValue($config['tagline'] ?? [], $locale, '');
             $features = $this->getTranslatedValue($config['features'] ?? [], $locale, []);
-            
+
             $plans[$planKey] = [
                 'id' => $planKey,
                 'name' => $config['name'],
@@ -99,10 +97,10 @@ class StripePlanService
                 'tagline' => $tagline,
             ];
         }
-        
+
         return $plans;
     }
-    
+
     /**
      * Get translated value from config array based on locale
      */
@@ -112,23 +110,23 @@ class StripePlanService
         if (isset($translations[$locale])) {
             return $translations[$locale];
         }
-        
+
         // Try base locale (e.g., 'pt' from 'pt-BR')
         $baseLocale = explode('-', $locale)[0];
         if (isset($translations[$baseLocale])) {
             return $translations[$baseLocale];
         }
-        
+
         // Try pt-BR as fallback for pt
         if ($baseLocale === 'pt' && isset($translations['pt-BR'])) {
             return $translations['pt-BR'];
         }
-        
+
         // Fallback to English
         if (isset($translations['en'])) {
             return $translations['en'];
         }
-        
+
         return $default;
     }
 
@@ -138,6 +136,7 @@ class StripePlanService
     public function getPlan(string $planKey, string $locale = 'en'): ?array
     {
         $plans = $this->getAllPlans($locale);
+
         return $plans[$planKey] ?? null;
     }
 
@@ -158,9 +157,9 @@ class StripePlanService
             'USD' => '$',
             'EUR' => '€',
         ];
-        
-        $symbol = $symbols[strtoupper($currency)] ?? strtoupper($currency) . ' ';
-        
-        return $symbol . number_format($amount / 100, 2);
+
+        $symbol = $symbols[strtoupper($currency)] ?? strtoupper($currency).' ';
+
+        return $symbol.number_format($amount / 100, 2);
     }
 }

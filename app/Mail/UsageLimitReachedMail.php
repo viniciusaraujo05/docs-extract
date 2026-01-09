@@ -13,6 +13,7 @@ class UsageLimitReachedMail extends Mailable
     use Queueable, SerializesModels;
 
     public $plan;
+
     public $locale;
 
     public function __construct($plan, $locale = null)
@@ -41,6 +42,7 @@ class UsageLimitReachedMail extends Mailable
     public function build()
     {
         app()->setLocale($this->locale);
+
         return $this;
     }
 }

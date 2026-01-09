@@ -7,7 +7,6 @@ namespace App\Services\Extractors;
 use App\Contracts\TextExtractorInterface;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Imagick;
 use RuntimeException;
 use Smalot\PdfParser\Parser;
@@ -90,7 +89,7 @@ final class PdfTextExtractor implements TextExtractorInterface
             }
 
             // Outros erros
-            throw new RuntimeException('Erro ao processar PDF: ' . $errorMsg);
+            throw new RuntimeException('Erro ao processar PDF: '.$errorMsg);
         }
     }
 
@@ -158,10 +157,10 @@ final class PdfTextExtractor implements TextExtractorInterface
         $images = [];
 
         try {
-            if (!class_exists('Imagick')) {
+            if (! class_exists('Imagick')) {
                 throw new RuntimeException('Imagick class not available');
             }
-            
+
             $imagick = new \Imagick;
             $imagick->setResolution(150, 150); // DPI para boa qualidade
             $imagick->readImage($path);
@@ -234,7 +233,7 @@ final class PdfTextExtractor implements TextExtractorInterface
      */
     private function extractWithImagick(string $path, string $filename): string
     {
-        if (!class_exists('Imagick')) {
+        if (! class_exists('Imagick')) {
             throw new RuntimeException('Imagick não está disponível');
         }
 
@@ -242,20 +241,20 @@ final class PdfTextExtractor implements TextExtractorInterface
             $imagick = new \Imagick;
             $imagick->setResolution(300, 300);
             $imagick->readImage($path);
-            
+
             // Tenta OCR básico se disponível
             if (method_exists($imagick, 'setImageAlphaChannel')) {
                 $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_REMOVE);
             }
-            
+
             $imagick->setImageFormat('txt');
             $text = $imagick->getImagesBlob();
-            
+
             // Se não conseguiu extrair texto, retorna mensagem informativa
             if (empty(trim($text)) || mb_strlen(trim($text)) < 10) {
                 return "Documento: {$filename}\n\n[PDF baseado em imagem - não foi possível extrair texto automaticamente]\n\nSugestão: Converta o PDF para imagem (JPG/PNG) e tente novamente.";
             }
-            
+
             return $text;
         } catch (Throwable $e) {
             throw new RuntimeException(

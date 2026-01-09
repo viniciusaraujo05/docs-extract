@@ -3,7 +3,6 @@
 namespace App\Actions;
 
 use App\Services\ExtractionService;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Action to extract structured data from text using AI.
@@ -16,16 +15,16 @@ class ExtractDocumentData
 
     /**
      * Extracts structured data from text based on provided fields.
-     * 
-     * @param string $text The text to extract data from
-     * @param array $fields The fields to extract
+     *
+     * @param  string  $text  The text to extract data from
+     * @param  array  $fields  The fields to extract
      * @return array Extracted data with confidence
      */
     public function execute(string $text, array $fields): array
     {
         try {
             $result = $this->extractionService->extract($text, ['fields' => $fields]);
-            
+
             return [
                 'success' => true,
                 'data' => $result['data'] ?? $result,

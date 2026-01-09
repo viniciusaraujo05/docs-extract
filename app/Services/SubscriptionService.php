@@ -2,11 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\ApiClient;
-use App\Models\DocumentType;
 use App\Models\PlanUsage;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 
 class SubscriptionService
 {
@@ -28,7 +25,7 @@ class SubscriptionService
         $subscription = $user->subscription('default');
         $invoices = $user->invoices();
         $upcomingInvoice = null;
-        
+
         if ($subscription && $subscription->active()) {
             try {
                 $upcomingInvoice = $user->upcomingInvoice();
@@ -148,7 +145,7 @@ class SubscriptionService
 
         // Get current usage from PlanUsage
         $usage = PlanUsage::getOrCreateForUser($user);
-        $currentUsage = match($feature) {
+        $currentUsage = match ($feature) {
             'documents' => $usage->documents_count,
             'models' => $usage->models_count,
             'api_requests' => $usage->api_requests_count,
@@ -177,7 +174,7 @@ class SubscriptionService
 
         // Get current usage from PlanUsage
         $usage = PlanUsage::getOrCreateForUser($user);
-        $currentUsage = match($feature) {
+        $currentUsage = match ($feature) {
             'documents' => $usage->documents_count,
             'models' => $usage->models_count,
             'api_requests' => $usage->api_requests_count,

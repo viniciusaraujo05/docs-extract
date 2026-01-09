@@ -13,6 +13,7 @@ class PaymentFailedMail extends Mailable
     use Queueable, SerializesModels;
 
     public $days;
+
     public $locale;
 
     public function __construct($days = 7, $locale = null)
@@ -41,6 +42,7 @@ class PaymentFailedMail extends Mailable
     public function build()
     {
         app()->setLocale($this->locale);
+
         return $this;
     }
 }

@@ -39,6 +39,7 @@ class WelcomeMail extends Mailable
     public function build()
     {
         app()->setLocale($this->locale);
+
         return $this;
     }
 }

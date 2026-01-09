@@ -2,9 +2,8 @@
 
 namespace App\Models;
 
-use App\Mail\VerificationMail;
 use App\Mail\PasswordResetMail;
-use Illuminate\Support\Facades\Mail;
+use App\Mail\VerificationMail;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,13 +11,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Cashier\Billable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use Billable, HasFactory, Notifiable, TwoFactorAuthenticatable, MustVerifyEmailTrait;
+    use Billable, HasFactory, MustVerifyEmailTrait, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -77,7 +77,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendEmailVerificationNotification()
     {
         $locale = $this->locale ?? app()->getLocale();
-        
+
         $url = \Illuminate\Support\Facades\URL::temporarySignedRoute(
             'locale.verification.verify',
             now()->addMinutes(config('auth.verification.expire', 60)),
@@ -104,7 +104,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $url = url(route('locale.password.reset', [
             'locale' => $locale,
             'token' => $token,
-        ], false)) . '?email=' . urlencode($this->getEmailForPasswordReset());
+        ], false)).'?email='.urlencode($this->getEmailForPasswordReset());
 
         Mail::to($this->email)->send(new PasswordResetMail($url, 60, $locale));
     }

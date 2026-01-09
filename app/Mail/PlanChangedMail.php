@@ -13,7 +13,9 @@ class PlanChangedMail extends Mailable
     use Queueable, SerializesModels;
 
     public $old;
+
     public $new;
+
     public $locale;
 
     public function __construct($old, $new, $locale = null)
@@ -43,6 +45,7 @@ class PlanChangedMail extends Mailable
     public function build()
     {
         app()->setLocale($this->locale);
+
         return $this;
     }
 }

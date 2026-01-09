@@ -12,54 +12,162 @@ class SitemapController extends Controller
     public function index(): Response
     {
         $baseUrl = config('app.url');
-        
+        $lastmod = now()->toAtomString();
+
         // Define all public pages with their priority and change frequency
         $pages = [
-            // Homepage in both languages
-            ['url' => '/', 'priority' => '1.0', 'changefreq' => 'daily'],
-            ['url' => '/en', 'priority' => '1.0', 'changefreq' => 'daily'],
-            ['url' => '/pt', 'priority' => '1.0', 'changefreq' => 'daily'],
-            
-            // Privacy and Terms pages
-            ['url' => '/en/privacy', 'priority' => '0.5', 'changefreq' => 'monthly'],
-            ['url' => '/pt/privacy', 'priority' => '0.5', 'changefreq' => 'monthly'],
-            ['url' => '/en/terms', 'priority' => '0.5', 'changefreq' => 'monthly'],
-            ['url' => '/pt/terms', 'priority' => '0.5', 'changefreq' => 'monthly'],
-            
-            // Auth pages (lower priority)
-            ['url' => '/en/login', 'priority' => '0.3', 'changefreq' => 'monthly'],
-            ['url' => '/pt/login', 'priority' => '0.3', 'changefreq' => 'monthly'],
-            ['url' => '/en/register', 'priority' => '0.7', 'changefreq' => 'monthly'],
-            ['url' => '/pt/register', 'priority' => '0.7', 'changefreq' => 'monthly'],
+            // Homepage in both languages (highest priority)
+            [
+                'url' => '/',
+                'priority' => '1.0',
+                'changefreq' => 'daily',
+                'alternates' => true,
+                'images' => ['/docset.png'],
+            ],
+            [
+                'url' => '/en',
+                'priority' => '1.0',
+                'changefreq' => 'daily',
+                'alternates' => true,
+                'images' => ['/docset.png'],
+            ],
+            [
+                'url' => '/pt',
+                'priority' => '1.0',
+                'changefreq' => 'daily',
+                'alternates' => true,
+                'images' => ['/docset.png'],
+            ],
+
+            // Landing page sections (important for SEO)
+            [
+                'url' => '/en#features',
+                'priority' => '0.9',
+                'changefreq' => 'weekly',
+                'alternates' => true,
+            ],
+            [
+                'url' => '/pt#features',
+                'priority' => '0.9',
+                'changefreq' => 'weekly',
+                'alternates' => true,
+            ],
+            [
+                'url' => '/en#pricing',
+                'priority' => '0.9',
+                'changefreq' => 'weekly',
+                'alternates' => true,
+            ],
+            [
+                'url' => '/pt#pricing',
+                'priority' => '0.9',
+                'changefreq' => 'weekly',
+                'alternates' => true,
+            ],
+            [
+                'url' => '/en#api',
+                'priority' => '0.8',
+                'changefreq' => 'weekly',
+                'alternates' => true,
+            ],
+            [
+                'url' => '/pt#api',
+                'priority' => '0.8',
+                'changefreq' => 'weekly',
+                'alternates' => true,
+            ],
+
+            // Auth pages (medium priority for registration)
+            [
+                'url' => '/en/register',
+                'priority' => '0.8',
+                'changefreq' => 'monthly',
+                'alternates' => false,
+            ],
+            [
+                'url' => '/pt/register',
+                'priority' => '0.8',
+                'changefreq' => 'monthly',
+                'alternates' => false,
+            ],
+            [
+                'url' => '/en/login',
+                'priority' => '0.4',
+                'changefreq' => 'monthly',
+                'alternates' => false,
+            ],
+            [
+                'url' => '/pt/login',
+                'priority' => '0.4',
+                'changefreq' => 'monthly',
+                'alternates' => false,
+            ],
+
+            // Legal pages (lower priority)
+            [
+                'url' => '/en/privacy',
+                'priority' => '0.5',
+                'changefreq' => 'monthly',
+                'alternates' => false,
+            ],
+            [
+                'url' => '/pt/privacy',
+                'priority' => '0.5',
+                'changefreq' => 'monthly',
+                'alternates' => false,
+            ],
+            [
+                'url' => '/en/terms',
+                'priority' => '0.5',
+                'changefreq' => 'monthly',
+                'alternates' => false,
+            ],
+            [
+                'url' => '/pt/terms',
+                'priority' => '0.5',
+                'changefreq' => 'monthly',
+                'alternates' => false,
+            ],
         ];
 
-        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
-        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"' . "\n";
-        $xml .= '        xmlns:xhtml="http://www.w3.org/1999/xhtml"' . "\n";
-        $xml .= '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n";
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'."\n";
+        $xml .= '        xmlns:xhtml="http://www.w3.org/1999/xhtml"'."\n";
+        $xml .= '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">'."\n";
 
         foreach ($pages as $page) {
             $xml .= "  <url>\n";
             $xml .= "    <loc>{$baseUrl}{$page['url']}</loc>\n";
-            $xml .= "    <lastmod>" . now()->toAtomString() . "</lastmod>\n";
+            $xml .= "    <lastmod>{$lastmod}</lastmod>\n";
             $xml .= "    <changefreq>{$page['changefreq']}</changefreq>\n";
             $xml .= "    <priority>{$page['priority']}</priority>\n";
-            
-            // Add alternate language links for homepage
-            if (in_array($page['url'], ['/', '/en', '/pt'])) {
+
+            // Add alternate language links for pages that support it
+            if ($page['alternates']) {
                 $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"{$baseUrl}/en\" />\n";
                 $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"pt-BR\" href=\"{$baseUrl}/pt\" />\n";
                 $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"pt-PT\" href=\"{$baseUrl}/pt\" />\n";
                 $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"{$baseUrl}/en\" />\n";
             }
-            
+
+            // Add images if present
+            if (isset($page['images'])) {
+                foreach ($page['images'] as $image) {
+                    $xml .= "    <image:image>\n";
+                    $xml .= "      <image:loc>{$baseUrl}{$image}</image:loc>\n";
+                    $xml .= "      <image:title>DOCSET - Document Data Extraction Platform</image:title>\n";
+                    $xml .= "      <image:caption>DOCSET logo - Extract structured data from PDFs and images</image:caption>\n";
+                    $xml .= "    </image:image>\n";
+                }
+            }
+
             $xml .= "  </url>\n";
         }
 
         $xml .= '</urlset>';
 
         return response($xml, 200)
-            ->header('Content-Type', 'application/xml')
+            ->header('Content-Type', 'application/xml; charset=UTF-8')
             ->header('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
     }
 
@@ -69,7 +177,7 @@ class SitemapController extends Controller
     public function robots(): Response
     {
         $baseUrl = config('app.url');
-        
+
         $content = "# DOCSET - Document Data Platform\n";
         $content .= "# Robots.txt for optimal SEO crawling\n\n";
         $content .= "# Allow all crawlers\n";

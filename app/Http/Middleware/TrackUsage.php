@@ -22,7 +22,7 @@ class TrackUsage
     {
         // Get response first
         $response = $next($request);
-        
+
         // Only track if request was successful and authenticated user exists
         if ($response->isSuccessful() && $user = $request->user()) {
             // Track for web users (User model)
@@ -34,7 +34,7 @@ class TrackUsage
                 $this->usageTrackingService->trackUsage($user->user, $resource);
             }
         }
-        
+
         return $response;
     }
 }

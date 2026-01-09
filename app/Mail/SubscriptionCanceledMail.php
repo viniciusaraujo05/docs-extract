@@ -13,6 +13,7 @@ class SubscriptionCanceledMail extends Mailable
     use Queueable, SerializesModels;
 
     public $date;
+
     public $locale;
 
     public function __construct($date, $locale = null)
@@ -41,6 +42,7 @@ class SubscriptionCanceledMail extends Mailable
     public function build()
     {
         app()->setLocale($this->locale);
+
         return $this;
     }
 }

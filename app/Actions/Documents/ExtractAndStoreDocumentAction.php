@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Documents;
 
 use App\Models\Document;
-use App\Models\ExtractionSchema;
 use App\Models\User;
 use App\Repositories\DocumentRepository;
 use App\Repositories\DocumentTypeRepository;
@@ -46,7 +45,7 @@ final readonly class ExtractAndStoreDocumentAction
         // Verifica se já existe documento com mesmo nome
         $originalFilename = $file->getClientOriginalName();
         $displayName = pathinfo($originalFilename, PATHINFO_FILENAME);
-        
+
         $exists = $this->documentRepository->existsByNameForUser($originalFilename, $user->id, $displayName);
 
         if ($exists) {
@@ -66,7 +65,7 @@ final readonly class ExtractAndStoreDocumentAction
 
         // Get document type and validate ownership
         $documentType = $this->documentTypeRepository->findById($documentTypeId);
-        
+
         if (! $documentType || $documentType->user_id !== $user->id) {
             throw new \InvalidArgumentException('Invalid document type or you do not have permission to use it.');
         }

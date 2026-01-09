@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\DebugPdfController;
 use App\Http\Controllers\Api\ExtractionController;
 use App\Http\Controllers\Api\GeolocationController;
 use App\Http\Controllers\Api\TranslationController;

@@ -13,6 +13,7 @@ class UsageTrackingService
     public function trackUsage(User $user, string $resource, int $count = 1): bool
     {
         $usage = PlanUsage::getOrCreateForUser($user);
+
         return $usage->incrementUsage($resource, $count);
     }
 
@@ -22,7 +23,7 @@ class UsageTrackingService
     public function getCurrentUsage(User $user): array
     {
         $usage = PlanUsage::getOrCreateForUser($user);
-        
+
         return [
             'documents' => $usage->documents_count,
             'models' => $usage->models_count,
@@ -40,7 +41,7 @@ class UsageTrackingService
     {
         $usage = PlanUsage::getOrCreateForUser($user);
         $limits = app(SubscriptionService::class)->getUserPlanLimits($user);
-        
+
         $remaining = [];
         foreach ($limits as $resource => $limit) {
             // Only process numeric limits (skip arrays like 'exports' and booleans like 'webhooks')
@@ -50,7 +51,7 @@ class UsageTrackingService
                 $remaining[$resource] = $limit; // Pass through non-numeric values
             }
         }
-        
+
         return $remaining;
     }
 
@@ -62,11 +63,11 @@ class UsageTrackingService
         $usage = PlanUsage::getOrCreateForUser($user);
         $limits = app(SubscriptionService::class)->getUserPlanLimits($user);
         $limit = $limits[$resource] ?? 0;
-        
+
         if ($limit === -1) {
             return true; // unlimited
         }
-        
+
         return $usage->getRemaining($resource, $limit) >= $count;
     }
 
@@ -77,22 +78,22 @@ class UsageTrackingService
     public function resetExpiredPeriods(): int
     {
         $resetCount = 0;
-        
+
         // Get all usage records where period_end is in the past
         $expiredUsages = PlanUsage::where('period_end', '<', now())
             ->where('billing_period', '!=', now()->format('Y-m'))
             ->get();
-        
+
         foreach ($expiredUsages as $usage) {
             $user = $usage->user;
             $newUsage = PlanUsage::getOrCreateForUser($user);
-            
+
             // Only reset if we created a new period
             if ($newUsage->id !== $usage->id) {
                 $resetCount++;
             }
         }
-        
+
         return $resetCount;
     }
 }

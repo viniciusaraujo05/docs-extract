@@ -28,6 +28,11 @@ class SetLocale
             return $next($request);
         }
 
+        // Allow SEO files (sitemap, robots) without locale redirect
+        if ($request->is('sitemap.xml') || $request->is('robots.txt')) {
+            return $next($request);
+        }
+
         // If URL doesn't have locale and it's not an API route, redirect to localized URL
         if (! $request->route('locale') && ! $request->is('api/*') && ! $request->is('/')) {
             $path = $request->path();

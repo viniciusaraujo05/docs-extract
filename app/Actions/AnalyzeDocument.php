@@ -22,8 +22,8 @@ class AnalyzeDocument
 
     /**
      * Analyzes a document and returns detected fields.
-     * 
-     * @param UploadedFile $file The document file
+     *
+     * @param  UploadedFile  $file  The document file
      * @return array{fields: array, text: string, message: string|null}
      */
     public function execute(UploadedFile $file): array
@@ -31,26 +31,26 @@ class AnalyzeDocument
         // Try normal extraction first
         try {
             $text = $this->textExtractor->extract($file);
-            
+
             if ($text === '') {
                 throw new \RuntimeException('No text extracted');
             }
-            
+
             // If we got text, detect fields
             $fields = $this->fieldDetector->detect($text);
-            
+
             return [
                 'fields' => $fields,
                 'text' => mb_substr($text, 0, 1000),
                 'message' => null,
             ];
-            
+
         } catch (\Throwable $e) {
             // If extraction failed and it's a PDF, try conversion
             if ($file->getMimeType() === 'application/pdf') {
                 return $this->handlePdfConversion($file);
             }
-            
+
             // For non-PDF files or if conversion fails, return error
             throw $e;
         }
@@ -69,13 +69,13 @@ class AnalyzeDocument
                 'message' => 'PDF is too large for automatic analysis. Please convert to images manually.',
             ];
         }
-        
+
         // Try conversion
         $text = $this->pdfConversionService->extractWithConversion($file);
-        
+
         // Detect fields from converted text
         $fields = $this->fieldDetector->detect($text);
-        
+
         return [
             'fields' => $fields,
             'text' => mb_substr($text, 0, 1000),

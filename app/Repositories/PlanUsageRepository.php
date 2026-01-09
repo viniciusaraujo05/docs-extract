@@ -21,6 +21,7 @@ class PlanUsageRepository
     public function incrementUsage(User $user, string $resource, int $count = 1): bool
     {
         $planUsage = $this->getOrCreateForUser($user);
+
         return $planUsage->incrementUsage($resource, $count);
     }
 
@@ -30,6 +31,7 @@ class PlanUsageRepository
     public function decrementUsage(User $user, string $resource, int $count = 1): bool
     {
         $planUsage = $this->getOrCreateForUser($user);
+
         return $planUsage->decrementUsage($resource, $count);
     }
 
@@ -40,7 +42,7 @@ class PlanUsageRepository
     {
         $planUsage = $this->getOrCreateForUser($user);
         $column = "{$resource}_count";
-        
+
         return $planUsage->$column ?? 0;
     }
 
@@ -50,6 +52,7 @@ class PlanUsageRepository
     public function getRemaining(User $user, string $resource, int $limit): int
     {
         $planUsage = $this->getOrCreateForUser($user);
+
         return $planUsage->getRemaining($resource, $limit);
     }
 }

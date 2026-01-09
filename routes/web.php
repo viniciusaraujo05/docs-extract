@@ -68,12 +68,12 @@ Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 
         'update' => 'documents.update',
         'destroy' => 'documents.destroy',
     ])->parameters(['documents' => 'document']);
-    
+
     // Apply usage limit only to store route (creating new documents)
     Route::post('documents', [DocumentController::class, 'store'])
         ->name('documents.store')
         ->middleware(['usage.limit:documents']);
-    
+
     Route::get('documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
     Route::put('documents/{document}/data', [DocumentController::class, 'updateData'])->name('documents.updateData');
     Route::post('documents/{document}/reprocess', [DocumentController::class, 'reprocess'])->name('documents.reprocess');
@@ -194,7 +194,7 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
         Route::get('/invoices', [PlanController::class, 'invoices'])->name('invoices');
         Route::post('/cancel-subscription', [SubscriptionController::class, 'cancelSubscription'])->name('cancel-subscription');
     });
-    
+
     // Usage API route
     Route::middleware(['auth'])->get('api/usage', [\App\Http\Controllers\Api\UsageController::class, 'index'])->name('api.usage');
 });

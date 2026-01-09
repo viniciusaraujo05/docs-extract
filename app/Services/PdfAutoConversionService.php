@@ -2,15 +2,13 @@
 
 namespace App\Services;
 
-use App\Services\PdfToImageService;
-use App\Services\TextExtractorManager;
 use Illuminate\Http\UploadedFile;
 use RuntimeException;
 use Throwable;
 
 /**
  * Service responsible for automatic PDF to image conversion when text extraction fails.
- * 
+ *
  * This service handles the fallback mechanism for PDFs that cannot be processed
  * through normal text extraction methods. It converts PDFs to images and attempts
  * OCR extraction as a last resort.
@@ -24,9 +22,10 @@ class PdfAutoConversionService
 
     /**
      * Attempts to extract text from PDF by converting to images.
-     * 
-     * @param UploadedFile $file The PDF file
+     *
+     * @param  UploadedFile  $file  The PDF file
      * @return string Extracted text
+     *
      * @throws RuntimeException When conversion fails
      */
     public function extractWithConversion(UploadedFile $file): string
@@ -50,10 +49,10 @@ class PdfAutoConversionService
             foreach ($imageFiles as $index => $imageFile) {
                 try {
                     $text = $this->textExtractor->extract($imageFile);
-                    
-                    if (!empty(trim($text))) {
-                        $allText[] = "--- Page " . ($index + 1) . " ---\n" . $text;
-                        
+
+                    if (! empty(trim($text))) {
+                        $allText[] = '--- Page '.($index + 1)." ---\n".$text;
+
                         if (mb_strlen($text) > $maxLength) {
                             $maxLength = mb_strlen($text);
                             $bestText = $text;
@@ -65,7 +64,7 @@ class PdfAutoConversionService
             }
 
             // Use the best text found or combine all
-            $finalText = !empty($allText) ? implode("\n\n", $allText) : $bestText;
+            $finalText = ! empty($allText) ? implode("\n\n", $allText) : $bestText;
 
             if (empty(trim($finalText))) {
                 throw new RuntimeException('No text could be extracted from converted images');
@@ -75,7 +74,7 @@ class PdfAutoConversionService
 
         } catch (Throwable $e) {
             throw new RuntimeException(
-                'Failed to process PDF even after conversion to images: ' . $e->getMessage()
+                'Failed to process PDF even after conversion to images: '.$e->getMessage()
             );
         } finally {
             // Always cleanup temporary files
@@ -95,9 +94,9 @@ class PdfAutoConversionService
 
         // Don't attempt if it's clearly a protected PDF error
         $errorMsg = strtolower($extractionError->getMessage());
-        
-        if (str_contains($errorMsg, 'secured') || 
-            str_contains($errorMsg, 'password') || 
+
+        if (str_contains($errorMsg, 'secured') ||
+            str_contains($errorMsg, 'password') ||
             str_contains($errorMsg, 'protegido')) {
             return false;
         }

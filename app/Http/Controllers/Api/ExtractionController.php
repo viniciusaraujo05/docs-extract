@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Actions\AnalyzeDocument;
-use App\Actions\ExtractDocumentData;
-use App\Actions\FormatErrorMessage;
 use App\Http\Controllers\Controller;
 use App\Services\DocumentExtractionService;
 use App\Services\FieldDetectorService;
@@ -46,15 +44,15 @@ final class ExtractionController extends Controller
         try {
             /** @var UploadedFile $file */
             $file = $request->file('file');
-            
+
             $result = $this->analyzeAction->execute($file);
-            
+
             return $this->successResponse(
                 $result['fields'],
                 $result['text'],
                 $result['message']
             );
-            
+
         } catch (Throwable $e) {
             return $this->successResponse(
                 $this->fieldDetector->getDefaultFields(),
@@ -66,7 +64,7 @@ final class ExtractionController extends Controller
 
     /**
      * Extracts structured data from a document.
-     * 
+     *
      * Attempts normal extraction first, then tries PDF to image conversion
      * if the initial extraction fails and the file is a PDF.
      */
@@ -78,16 +76,16 @@ final class ExtractionController extends Controller
             $fields = json_decode($fields, true, 512, JSON_THROW_ON_ERROR);
             $request->merge(['fields' => $fields]);
         }
-        
+
         $validated = $this->validateFileAndFields($request);
-        
+
         try {
             /** @var UploadedFile $file */
             $file = $request->file('file');
             $fields = $validated['fields'];
-            
+
             $result = $this->extractionService->extract($file, $fields);
-            
+
             if ($result['success']) {
                 return response()->json([
                     'success' => true,
@@ -104,7 +102,7 @@ final class ExtractionController extends Controller
                     'suggestions' => $result['suggestions'] ?? [],
                 ], 200);
             }
-            
+
         } catch (\JsonException $e) {
             return response()->json([
                 'success' => false,

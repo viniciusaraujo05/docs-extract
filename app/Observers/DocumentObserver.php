@@ -30,7 +30,7 @@ class DocumentObserver
             $usage = PlanUsage::getOrCreateForUser($document->user);
             $usage->incrementUsage('documents');
         }
-        
+
         // If document was processed successfully, count as API request
         if ($document->wasChanged('status') && $document->status === 'completed') {
             $usage = PlanUsage::getOrCreateForUser($document->user);

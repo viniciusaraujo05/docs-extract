@@ -25,7 +25,7 @@ class SeoHelper
         ];
 
         $localeKey = $locale === 'pt' ? 'pt-BR' : ($locale === 'pt-PT' ? 'pt-PT' : 'en');
-        
+
         return $content[$localeKey] ?? $content['en'];
     }
 
@@ -40,7 +40,7 @@ class SeoHelper
             '@graph' => [
                 [
                     '@type' => 'WebSite',
-                    '@id' => $siteUrl . '/#website',
+                    '@id' => $siteUrl.'/#website',
                     'url' => $siteUrl,
                     'name' => 'DOCSET',
                     'description' => $content['description'],
@@ -49,19 +49,19 @@ class SeoHelper
                         '@type' => 'SearchAction',
                         'target' => [
                             '@type' => 'EntryPoint',
-                            'urlTemplate' => $siteUrl . '/search?q={search_term_string}',
+                            'urlTemplate' => $siteUrl.'/search?q={search_term_string}',
                         ],
                         'query-input' => 'required name=search_term_string',
                     ],
                 ],
                 [
                     '@type' => 'Organization',
-                    '@id' => $siteUrl . '/#organization',
+                    '@id' => $siteUrl.'/#organization',
                     'name' => 'DOCSET',
                     'url' => $siteUrl,
                     'logo' => [
                         '@type' => 'ImageObject',
-                        'url' => $siteUrl . '/docset.png',
+                        'url' => $siteUrl.'/docset.png',
                         'width' => 512,
                         'height' => 512,
                     ],
@@ -69,16 +69,16 @@ class SeoHelper
                 ],
                 [
                     '@type' => 'WebPage',
-                    '@id' => $siteUrl . '/#webpage',
+                    '@id' => $siteUrl.'/#webpage',
                     'url' => $siteUrl,
                     'name' => $content['title'],
                     'description' => $content['description'],
                     'inLanguage' => $localeCode,
                     'isPartOf' => [
-                        '@id' => $siteUrl . '/#website',
+                        '@id' => $siteUrl.'/#website',
                     ],
                     'about' => [
-                        '@id' => $siteUrl . '/#organization',
+                        '@id' => $siteUrl.'/#organization',
                     ],
                 ],
                 [
@@ -103,7 +103,7 @@ class SeoHelper
                         'CSV export',
                         'Webhook support',
                     ],
-                    'screenshot' => $siteUrl . '/docset.png',
+                    'screenshot' => $siteUrl.'/docset.png',
                 ],
             ],
         ];
@@ -115,11 +115,11 @@ class SeoHelper
     {
         $siteUrl = config('app.url', 'https://docset.com');
         $locales = [
-            ['locale' => 'en', 'url' => $siteUrl . '/en'],
-            ['locale' => 'pt-BR', 'url' => $siteUrl . '/pt'],
-            ['locale' => 'pt-PT', 'url' => $siteUrl . '/pt'],
+            ['locale' => 'en', 'url' => $siteUrl.'/en'],
+            ['locale' => 'pt-BR', 'url' => $siteUrl.'/pt'],
+            ['locale' => 'pt-PT', 'url' => $siteUrl.'/pt'],
         ];
-        
-        return array_filter($locales, fn($l) => $l['locale'] !== $currentLocale);
+
+        return array_filter($locales, fn ($l) => $l['locale'] !== $currentLocale);
     }
 }

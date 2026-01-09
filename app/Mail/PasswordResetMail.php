@@ -13,7 +13,9 @@ class PasswordResetMail extends Mailable
     use Queueable, SerializesModels;
 
     public $url;
+
     public $count;
+
     public $locale;
 
     public function __construct($url, $count = 60, $locale = null)
@@ -43,6 +45,7 @@ class PasswordResetMail extends Mailable
     public function build()
     {
         app()->setLocale($this->locale);
+
         return $this;
     }
 }

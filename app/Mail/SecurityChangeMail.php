@@ -13,6 +13,7 @@ class SecurityChangeMail extends Mailable
     use Queueable, SerializesModels;
 
     public $field;
+
     public $locale;
 
     public function __construct($field, $locale = null)
@@ -41,6 +42,7 @@ class SecurityChangeMail extends Mailable
     public function build()
     {
         app()->setLocale($this->locale);
+
         return $this;
     }
 }

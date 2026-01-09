@@ -41,8 +41,8 @@ class CookieConsentController extends Controller
         $pending = $request->cookie('cookie_consent_pending');
 
         return response()->json([
-            'hasConsent' => !is_null($consent),
-            'pending' => !is_null($pending),
+            'hasConsent' => ! is_null($consent),
+            'pending' => ! is_null($pending),
             'preferences' => $consent ? json_decode($consent, true) : null,
         ]);
     }

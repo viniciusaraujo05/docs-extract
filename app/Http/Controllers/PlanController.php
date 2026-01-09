@@ -3,17 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\ApiClient;
-use App\Models\DocumentType;
 use App\Models\PlanUsage;
 use App\Models\User;
 use App\Services\StripePlanService;
 use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
-use Laravel\Cashier\Subscription;
 
 class PlanController extends Controller
 {
@@ -29,15 +26,15 @@ class PlanController extends Controller
     {
         // Get locale from request, default to 'en'
         $locale = $request->input('locale', 'en');
-        
+
         // Normalize locale (convert 'pt' to 'pt-BR')
         if ($locale === 'pt') {
             $locale = 'pt-BR';
         }
-        
+
         // Get plans from Stripe with real-time pricing
         $plans = $this->stripePlanService->getAllPlans($locale);
-        
+
         return response()->json($plans);
     }
 
@@ -48,29 +45,31 @@ class PlanController extends Controller
     {
         $user = $request->user();
         $subscription = $user->subscription('default');
-        
+
         // Get locale from request or fallback to app locale
         $locale = $request->input('locale', app()->getLocale());
-        if ($locale === 'pt') $locale = 'pt-BR';
+        if ($locale === 'pt') {
+            $locale = 'pt-BR';
+        }
 
         $currentPlanKey = 'free';
-        
+
         if ($subscription && $subscription->active()) {
             $productId = $subscription->items->first()->stripe_product;
             $currentPlanKey = config('plans.product_mapping')[$productId] ?? 'free';
         }
-        
+
         // Get translated plan data
         $planData = $this->stripePlanService->getPlan($currentPlanKey, $locale);
-        
+
         // If plan data not found via Stripe service, fallback to config directly but with translation
-        if (!$planData) {
+        if (! $planData) {
             $plans = $this->stripePlanService->getAllPlans($locale);
             $planData = $plans[$currentPlanKey] ?? null;
         }
 
         // Ensure we still have some data even if fallback failed
-        if (!$planData) {
+        if (! $planData) {
             $planData = config("plans.plans.{$currentPlanKey}");
         }
 
@@ -96,9 +95,10 @@ class PlanController extends Controller
                 } else {
                     $usagePercentages[$limit] = 0; // array or other, treat as available
                 }
+
                 continue;
             }
-            
+
             if ($value === -1) {
                 $usagePercentages[$limit] = 0; // unlimited
             } elseif ($value === 0) {
@@ -137,23 +137,23 @@ class PlanController extends Controller
     public function upcomingInvoice(Request $request): JsonResponse
     {
         $user = $request->user();
-        
-        if (!$user->subscribed('default')) {
+
+        if (! $user->subscribed('default')) {
             return response()->json(null);
         }
 
         try {
             $invoice = $user->upcomingInvoice();
             $amount = $invoice->total();
-            
+
             return response()->json([
-                'amount' => is_numeric($amount) ? (int)$amount : 0,
+                'amount' => is_numeric($amount) ? (int) $amount : 0,
                 'currency' => strtoupper($invoice->currency),
                 'date' => $invoice->date()->format('F j, Y'),
                 'items' => collect($invoice->invoiceItems())->map(function ($item) {
                     return [
                         'description' => $item->description,
-                        'amount' => is_numeric($item->total()) ? (int)$item->total() : 0,
+                        'amount' => is_numeric($item->total()) ? (int) $item->total() : 0,
                         'currency' => strtoupper($item->currency),
                     ];
                 })->toArray(),
@@ -171,9 +171,10 @@ class PlanController extends Controller
         $user = $request->user();
         $invoices = $user->invoices()->map(function ($invoice) {
             $amount = $invoice->total();
+
             return [
                 'id' => $invoice->id,
-                'amount' => is_numeric($amount) ? (int)$amount : 0,
+                'amount' => is_numeric($amount) ? (int) $amount : 0,
                 'currency' => strtoupper($invoice->currency),
                 'date' => $invoice->date()->format('F j, Y'),
                 'status' => $invoice->status,

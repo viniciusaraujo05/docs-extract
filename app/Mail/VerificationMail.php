@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -14,7 +13,9 @@ class VerificationMail extends Mailable
     use Queueable, SerializesModels;
 
     public $url;
+
     public $count;
+
     public $locale;
 
     public function __construct($url, $count = 60, $locale = null)
@@ -44,6 +45,7 @@ class VerificationMail extends Mailable
     public function build()
     {
         app()->setLocale($this->locale);
+
         return $this;
     }
 }

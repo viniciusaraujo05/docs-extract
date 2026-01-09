@@ -13,7 +13,9 @@ class PaymentSuccessMail extends Mailable
     use Queueable, SerializesModels;
 
     public $plan;
+
     public $date;
+
     public $locale;
 
     public function __construct($plan, $date, $locale = null)
@@ -43,6 +45,7 @@ class PaymentSuccessMail extends Mailable
     public function build()
     {
         app()->setLocale($this->locale);
+
         return $this;
     }
 }

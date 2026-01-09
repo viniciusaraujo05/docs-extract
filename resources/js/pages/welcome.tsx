@@ -47,12 +47,7 @@ import {
   Menu,
   ChevronDown,
   Play,
-  Boxes,
-  GitBranch,
   X,
-  Moon,
-  Sun,
-  DollarSign,
   Settings,
   Lock,
   Layers,
@@ -442,8 +437,12 @@ function Header({
               className="flex items-center gap-2 cursor-pointer"
               onClick={() => router.visit(`/${locale.split('-')[0]}`)}
             >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                <FileJson className="h-5 w-5 text-white" />
+              <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white/10">
+                <img
+                  src="/docset.png"
+                  alt="Docset"
+                  className="h-full w-full object-contain"
+                />
               </div>
               <span className="font-bold text-lg">DOCSET</span>
             </motion.div>

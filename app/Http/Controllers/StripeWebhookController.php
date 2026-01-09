@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\PaymentSuccessMail;
 use App\Mail\PaymentFailedMail;
-use App\Mail\SubscriptionCanceledMail;
+use App\Mail\PaymentSuccessMail;
 use App\Mail\PlanChangedMail;
+use App\Mail\SubscriptionCanceledMail;
 use Illuminate\Support\Facades\Mail;
-use App\Models\User;
 use Laravel\Cashier\Http\Controllers\WebhookController as CashierController;
 
 class StripeWebhookController extends CashierController
@@ -23,7 +22,7 @@ class StripeWebhookController extends CashierController
         $response = parent::handleCustomerSubscriptionUpdated($payload);
 
         $user = $this->getUserByStripeId($payload['data']['object']['customer']);
-        
+
         if ($user) {
             // Check if it was a plan change (upgrade/downgrade)
             // This is a simplified check, in a real scenario you might compare old/new prices
@@ -38,7 +37,7 @@ class StripeWebhookController extends CashierController
         $response = parent::handleCustomerSubscriptionDeleted($payload);
 
         $user = $this->getUserByStripeId($payload['data']['object']['customer']);
-        
+
         if ($user) {
             $date = now()->format('d/m/Y');
             Mail::to($user->email)->send(new SubscriptionCanceledMail($date));
@@ -50,7 +49,7 @@ class StripeWebhookController extends CashierController
     public function handleInvoicePaymentSucceeded(array $payload)
     {
         $user = $this->getUserByStripeId($payload['data']['object']['customer']);
-        
+
         if ($user) {
             $planName = $user->subscription('default')->type ?? 'Plan';
             $date = now()->format('d/m/Y');
@@ -63,7 +62,7 @@ class StripeWebhookController extends CashierController
     public function handleInvoicePaymentFailed(array $payload)
     {
         $user = $this->getUserByStripeId($payload['data']['object']['customer']);
-        
+
         if ($user) {
             Mail::to($user->email)->send(new PaymentFailedMail(7));
         }

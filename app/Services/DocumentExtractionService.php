@@ -4,11 +4,7 @@ namespace App\Services;
 
 use App\Actions\ExtractDocumentData;
 use App\Actions\FormatErrorMessage;
-use App\Services\PdfAutoConversionService;
-use App\Services\PdfValidationService;
-use App\Services\TextExtractorManager;
 use Illuminate\Http\UploadedFile;
-use RuntimeException;
 
 /**
  * Service to handle document extraction with automatic fallbacks.
@@ -25,9 +21,9 @@ class DocumentExtractionService
 
     /**
      * Extracts data from document with smart fallbacks.
-     * 
-     * @param UploadedFile $file The document file
-     * @param array $fields Fields to extract
+     *
+     * @param  UploadedFile  $file  The document file
+     * @param  array  $fields  Fields to extract
      * @return array{success: bool, data?: array, confidence?: int|null, error?: string}
      */
     public function extract(UploadedFile $file, array $fields): array
@@ -35,36 +31,36 @@ class DocumentExtractionService
         // For PDFs, check extractability first to save OpenAI credits
         if ($file->getMimeType() === 'application/pdf') {
             $validation = $this->pdfValidationService->validatePdfExtractability($file);
-            
+
             // If PDF is definitely not extractable, skip straight to conversion
             if ($this->pdfValidationService->isPdfDefinitelyNotExtractable($file)) {
                 return $this->extractFromConvertedPdf($file, $fields);
             }
         }
-        
+
         // Try normal extraction first
         try {
             $text = $this->textExtractor->extract($file);
             $text = $this->ensureTextExists($text, $file);
-            
+
             // Extract structured data
             $result = $this->extractDataAction->execute($text, $fields);
-            
+
             return [
                 'success' => true,
                 'data' => $result['data'],
                 'confidence' => $result['confidence'],
             ];
-            
+
         } catch (\Throwable $e) {
             // If it's a PDF, try conversion as fallback
             if ($file->getMimeType() === 'application/pdf') {
                 return $this->extractFromConvertedPdf($file, $fields, $e);
             }
-            
+
             // Format and return error
             $errorResponse = $this->formatErrorAction->execute($e, false);
-            
+
             return [
                 'success' => false,
                 'error' => $errorResponse['error'],
@@ -93,7 +89,7 @@ class DocumentExtractionService
                     ],
                 ];
             }
-            
+
             $text = $this->pdfConversionService->extractWithConversion($file);
             $result = $this->extractDataAction->execute($text, $fields);
 

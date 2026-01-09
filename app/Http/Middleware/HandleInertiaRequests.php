@@ -62,7 +62,7 @@ class HandleInertiaRequests extends Middleware
                 'locale' => $locale,
                 'url' => $request->url(),
                 'canonical' => $request->url(),
-                'ogImage' => config('app.url') . '/docset.png',
+                'ogImage' => config('app.url').'/docset.png',
                 'structuredData' => SeoHelper::generateStructuredData($locale),
                 'alternateLocales' => SeoHelper::getAlternateLocales($locale),
             ],

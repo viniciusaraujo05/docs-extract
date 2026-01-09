@@ -6,7 +6,6 @@ use App\Models\ApiClient;
 use App\Services\UsageLimitService;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 
 class CheckUsageLimit
 {
@@ -20,8 +19,8 @@ class CheckUsageLimit
     public function handle(Request $request, Closure $next, string $resource)
     {
         $user = $request->user();
-        
-        if (!$user) {
+
+        if (! $user) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -33,7 +32,7 @@ class CheckUsageLimit
             $actualUser = $user->user;
         }
 
-        if (!$actualUser) {
+        if (! $actualUser) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -41,24 +40,24 @@ class CheckUsageLimit
         if ($this->usageLimitService->hasReachedLimit($actualUser, $resource)) {
             $limits = app(\App\Services\SubscriptionService::class)->getUserPlanLimits($actualUser);
             $limit = $limits[$resource] ?? 0;
-            
+
             $resourceNames = [
                 'documents' => __('documents'),
                 'models' => __('models'),
                 'reports' => __('reports'),
                 'api_requests' => __('API requests'),
             ];
-            
+
             $message = __(":resource limit reached. You've used all :limit :resource included in your plan. Upgrade to continue.", [
                 'resource' => $resourceNames[$resource] ?? $resource,
                 'limit' => $limit,
             ]);
-            
+
             // If this is an Inertia request, redirect back with error
             if ($request->header('X-Inertia')) {
                 return redirect()->back()->with('error', $message);
             }
-            
+
             // Otherwise return JSON for API requests
             return response()->json([
                 'error' => $message,

@@ -26,7 +26,7 @@ class CheckPlanLimits
         // Check if user has reached the limit for the specified feature
         if ($this->subscriptionService->hasReachedLimit($user, $feature)) {
             $planName = $this->subscriptionService->getUserPlanName($user);
-            
+
             return Redirect::route('billing', ['locale' => app()->getLocale()])
                 ->with('error', "You've reached the {$feature} limit for your {$planName} plan. Upgrade to continue.");
         }

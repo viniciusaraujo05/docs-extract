@@ -6,11 +6,10 @@ use App\Actions\Usage\DecrementUsageAction;
 use App\Actions\Usage\IncrementUsageAction;
 use App\Mail\UsageLimitReachedMail;
 use App\Mail\UsageWarningMail;
-use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use App\Repositories\PlanUsageRepository;
-use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Mail;
 
 class UsageLimitService
 {
@@ -41,12 +40,12 @@ class UsageLimitService
 
         // If limit is boolean (like webhooks), check if it's enabled
         if (is_bool($limit)) {
-            return !$limit;
+            return ! $limit;
         }
 
         // For numeric limits, check current usage
         $usage = $this->planUsageRepository->getUsage($user, $resource);
-        
+
         return $usage >= $limit;
     }
 
@@ -62,7 +61,7 @@ class UsageLimitService
             return PHP_INT_MAX;
         }
 
-        if (!is_numeric($limit)) {
+        if (! is_numeric($limit)) {
             return 0;
         }
 

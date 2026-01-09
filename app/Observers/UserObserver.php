@@ -2,9 +2,9 @@
 
 namespace App\Observers;
 
-use App\Models\User;
-use App\Mail\WelcomeMail;
 use App\Mail\SecurityChangeMail;
+use App\Mail\WelcomeMail;
+use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 
 class UserObserver
@@ -16,7 +16,7 @@ class UserObserver
     {
         // 1. Welcome Email (after confirmation)
         if ($user->wasChanged('email_verified_at') && $user->email_verified_at !== null) {
-            Mail::to($user->email)->send(new WelcomeMail());
+            Mail::to($user->email)->send(new WelcomeMail);
         }
 
         // 2. Security Change: Password

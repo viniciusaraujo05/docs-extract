@@ -97,6 +97,7 @@ final class DocumentController extends Controller
         $subscriptionService = app(\App\Services\SubscriptionService::class);
         if ($subscriptionService->hasReachedLimit($user, 'documents')) {
             $planName = $subscriptionService->getUserPlanName($user);
+
             return redirect()->back()
                 ->with('error', "You've reached the document limit for your {$planName} plan. Upgrade to continue uploading documents.");
         }

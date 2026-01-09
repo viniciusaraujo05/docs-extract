@@ -13,7 +13,9 @@ class UsageWarningMail extends Mailable
     use Queueable, SerializesModels;
 
     public $used;
+
     public $total;
+
     public $locale;
 
     public function __construct($used, $total, $locale = null)
@@ -43,6 +45,7 @@ class UsageWarningMail extends Mailable
     public function build()
     {
         app()->setLocale($this->locale);
+
         return $this;
     }
 }
