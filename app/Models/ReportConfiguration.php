@@ -66,11 +66,14 @@ final class ReportConfiguration extends Model
 
     /**
      * Get documents based on selection mode.
+     * 
+     * SECURITY: Filters by user_id to prevent cross-user data access
      */
     public function getDocumentsQuery(): Builder
     {
         $query = Document::query()
             ->where('document_type_id', $this->document_type_id)
+            ->where('user_id', $this->user_id)
             ->where('status', 'completed')
             ->whereNotNull('extracted_data');
 

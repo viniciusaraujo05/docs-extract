@@ -148,7 +148,7 @@ final class ReportService
         int $limit = 10
     ): array {
         // Use repository to get completed documents
-        $allDocuments = $this->documentRepository->getCompletedByDocumentType($documentType->id);
+        $allDocuments = $this->documentRepository->getCompletedByDocumentType($documentType->id, auth()->id());
 
         // Apply filters
         if ($selectionMode === 'filtered') {

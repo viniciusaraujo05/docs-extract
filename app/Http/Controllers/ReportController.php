@@ -53,7 +53,13 @@ final class ReportController extends Controller
     {
         $this->authorize('view', $documentType);
 
-        $documents = $this->documentRepository->getCompletedByDocumentType($documentType->id);
+        /** @var User $user */
+        $user = $request->user();
+        
+        $documents = $this->documentRepository->getCompletedByDocumentType(
+            $documentType->id,
+            $user->id
+        );
         $fields = $documentType->fields ?? [];
         $aggregatedData = $this->aggregateReportDataAction->execute($documents, $fields);
 
@@ -78,7 +84,13 @@ final class ReportController extends Controller
     {
         $this->authorize('view', $documentType);
 
-        $documents = $this->documentRepository->getCompletedByDocumentType($documentType->id);
+        /** @var User $user */
+        $user = $request->user();
+        
+        $documents = $this->documentRepository->getCompletedByDocumentType(
+            $documentType->id,
+            $user->id
+        );
         $fields = $documentType->fields ?? [];
         $filename = $this->exportReportAction->generateFilename($documentType);
 
@@ -118,7 +130,10 @@ final class ReportController extends Controller
             /** @var User $user */
             $user = $request->user();
             $instructions = (string) $request->input('instructions', '');
-            $documents = $this->documentRepository->getCompletedByDocumentType($documentType->id);
+            $documents = $this->documentRepository->getCompletedByDocumentType(
+                $documentType->id,
+                $user->id
+            );
             $fields = $documentType->fields ?? [];
             $aggregatedData = $this->aggregateReportDataAction->execute($documents, $fields);
 

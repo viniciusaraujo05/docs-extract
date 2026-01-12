@@ -49,11 +49,14 @@ final readonly class DocumentRepository
 
     /**
      * Busca documentos completos por tipo de documento.
+     * 
+     * SECURITY: Filters by user_id to prevent cross-user data access
      */
-    public function getCompletedByDocumentType(int $documentTypeId): Collection
+    public function getCompletedByDocumentType(int $documentTypeId, int $userId): Collection
     {
         return Document::query()
             ->where('document_type_id', $documentTypeId)
+            ->where('user_id', $userId)
             ->where('status', 'completed')
             ->whereNotNull('extracted_data')
             ->orderByDesc('created_at')
@@ -62,11 +65,14 @@ final readonly class DocumentRepository
 
     /**
      * Busca documentos completos por tipo para seleção manual.
+     * 
+     * SECURITY: Filters by user_id to prevent cross-user data access
      */
-    public function getForManualSelection(int $documentTypeId): Collection
+    public function getForManualSelection(int $documentTypeId, int $userId): Collection
     {
         return Document::query()
             ->where('document_type_id', $documentTypeId)
+            ->where('user_id', $userId)
             ->where('status', 'completed')
             ->whereNotNull('extracted_data')
             ->orderByDesc('created_at')

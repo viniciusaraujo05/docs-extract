@@ -143,7 +143,13 @@ final class ReportConfigurationController extends Controller
     {
         $this->authorize('view', $documentType);
 
-        $documents = $this->documentRepository->getForManualSelection($documentType->id);
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+
+        $documents = $this->documentRepository->getForManualSelection(
+            $documentType->id,
+            $user->id
+        );
 
         return response()->json([
             'documents' => $documents->map(fn ($doc) => [
