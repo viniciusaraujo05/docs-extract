@@ -570,6 +570,7 @@
       "secondary": "Falar com vendas"
     },
     "pricing": {
+      "mostPopular": "Mais Popular",
       "title": "Preços claros e defensáveis",
       "subtitle": "Comece grátis, cresça com limites previsíveis e desbloqueie acesso à API quando importar.",
       "plans": [

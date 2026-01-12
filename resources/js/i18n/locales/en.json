@@ -546,6 +546,7 @@
             ]
         },
         "pricing": {
+            "mostPopular": "Most Popular",
             "title": "Clear, defensible pricing",
             "subtitle": "Start free, grow with predictable limits and unlock API access when it matters.",
             "plans": [

@@ -54,191 +54,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const heroFallback = {
-  en: {
-    title: "Turn documents into structured data",
-    subtitle: "DOCSET extracts data from recurring PDFs and images. Define your schema, review every field, and export via UI or API.",
-    cta_primary: "Start free",
-    cta_demo: "Try demo",
-  },
-  'pt-BR': {
-    title: "Transforme documentos em dados estruturados",
-    subtitle: "DOCSET extrai dados de PDFs e imagens recorrentes. Defina seu esquema, revise cada campo e exporte via UI ou API.",
-    cta_primary: "Começar grátis",
-    cta_demo: "Ver demonstração",
-  },
-  'pt-PT': {
-    title: "Transforme documentos em dados estruturados",
-    subtitle: "DOCSET extrai dados de PDFs e imagens recorrentes. Defina o seu esquema, reveja cada campo e exporte via UI ou API.",
-    cta_primary: "Começar grátis",
-    cta_demo: "Ver demonstração",
-  },
-};
-
-const featuresFallback = {
-  en: {
-    title: "Everything you need",
-    items: [
-      { icon: Upload, title: "Upload PDFs & Images", desc: "Drag and drop documents or use our API to submit files programmatically." },
-      { icon: Settings, title: "Custom schemas", desc: "Define text, number, or date fields. Reuse templates across documents." },
-      { icon: Eye, title: "Manual review", desc: "Review extracted data side-by-side with the original document before saving." },
-      { icon: Database, title: "Structured history", desc: "Access your data through reports, exports, or our REST API." },
-      { icon: Code, title: "Developer-first API", desc: "Simple REST API with JSON responses. Built for automation and integration." },
-      { icon: Shield, title: "Privacy & security", desc: "Your data is encrypted. We never train models on your documents." },
-    ],
-  },
-  'pt-BR': {
-    title: "Tudo que você precisa",
-    items: [
-      { icon: Upload, title: "Upload de PDFs e Imagens", desc: "Arraste e solte documentos ou use nossa API para enviar arquivos programaticamente." },
-      { icon: Settings, title: "Esquemas personalizados", desc: "Defina campos de texto, número ou data. Reutilize templates entre documentos." },
-      { icon: Eye, title: "Revisão manual", desc: "Revise os dados extraídos lado a lado com o documento original antes de salvar." },
-      { icon: Database, title: "Histórico estruturado", desc: "Acesse seus dados através de relatórios, exportações ou nossa API REST." },
-      { icon: Code, title: "API para desenvolvedores", desc: "API REST simples com respostas JSON. Construída para automação e integração." },
-      { icon: Shield, title: "Privacidade e segurança", desc: "Seus dados são criptografados. Nunca treinamos modelos com seus documentos." },
-    ],
-  },
-  'pt-PT': {
-    title: "Tudo o que precisa",
-    items: [
-      { icon: Upload, title: "Upload de PDFs e Imagens", desc: "Arraste e largue documentos ou use a nossa API para enviar ficheiros programaticamente." },
-      { icon: Settings, title: "Esquemas personalizados", desc: "Defina campos de texto, número ou data. Reutilize modelos entre documentos." },
-      { icon: Eye, title: "Revisão manual", desc: "Reveja os dados extraídos lado a lado com o documento original antes de guardar." },
-      { icon: Database, title: "Histórico estruturado", desc: "Aceda aos seus dados através de relatórios, exportações ou a nossa API REST." },
-      { icon: Code, title: "API para programadores", desc: "API REST simples com respostas JSON. Construída para automação e integração." },
-      { icon: Shield, title: "Privacidade e segurança", desc: "Os seus dados são encriptados. Nunca treinamos modelos com os seus documentos." },
-    ],
-  },
-};
-
-const pricingFallback = {
-  en: {
-    title: "Simple pricing",
-    subtitle: "All features on every plan",
-    cta: "Get started",
-    freeForever: "Free forever",
-    limitsRenewMonthly: "* Limits renew monthly",
-  },
-  'pt-BR': {
-    title: "Preços simples",
-    subtitle: "Todos os recursos em cada plano",
-    cta: "Começar",
-    freeForever: "Grátis para sempre",
-    limitsRenewMonthly: "* Os limites renovam mensalmente",
-  },
-  'pt-PT': {
-    title: "Preços simples",
-    subtitle: "Todos os recursos em cada plano",
-    cta: "Começar",
-    freeForever: "Grátis para sempre",
-    limitsRenewMonthly: "* Os limites renovam mensalmente",
-  },
-};
-
-const planNamesMapping: any = {
-  en: {
-    'FREE': 'Free',
-    'STARTER': 'Starter', 
-    'PRO': 'Pro',
-    'BUSINESS': 'Business',
-  },
-  'pt-BR': {
-    'FREE': 'Grátis',
-    'STARTER': 'Starter',
-    'PRO': 'Pro', 
-    'BUSINESS': 'Business',
-  },
-  'pt-PT': {
-    'FREE': 'Grátis',
-    'STARTER': 'Starter',
-    'PRO': 'Pro',
-    'BUSINESS': 'Business',
-  },
-};
-
-const productFlowFallback = {
-  en: {
-    badge: "How it works",
-    title: "Three simple steps",
-    steps: [
-      { step: "01", title: "Upload documents", description: "Send PDFs or images via UI or API. We process asynchronously." },
-      { step: "02", title: "Review & approve", description: "Verify extracted data with side-by-side document preview." },
-      { step: "03", title: "Export or integrate", description: "Download as CSV/JSON or use our REST API for automation." },
-    ],
-  },
-  'pt-BR': {
-    badge: "Como funciona",
-    title: "Três passos simples",
-    steps: [
-      { step: "01", title: "Envie documentos", description: "Envie PDFs ou imagens via UI ou API. Processamos de forma assíncrona." },
-      { step: "02", title: "Revise e aprove", description: "Verifique os dados extraídos com visualização lado a lado do documento." },
-      { step: "03", title: "Exporte ou integre", description: "Baixe como CSV/JSON ou use nossa API REST para automação." },
-    ],
-  },
-  'pt-PT': {
-    badge: "Como funciona",
-    title: "Três passos simples",
-    steps: [
-      { step: "01", title: "Envie documentos", description: "Envie PDFs ou imagens via UI ou API. Processamos de forma assíncrona." },
-      { step: "02", title: "Reveja e aprove", description: "Verifique os dados extraídos com visualização lado a lado do documento." },
-      { step: "03", title: "Exporte ou integre", description: "Descarregue como CSV/JSON ou use a nossa API REST para automação." },
-    ],
-  },
-};
-
-const codeExampleFallback = {
-  en: {
-    badge: "Developer API",
-    title: "Built for data extraction",
-    subtitle: "Use DOCSET via UI or integrate it using a simple REST API. JSON responses, webhooks, and more.",
-    cta: "Try demo",
-    tabs: { upload: "Upload", retrieve: "Retrieve" },
-  },
-  'pt-BR': {
-    badge: "API para desenvolvedores",
-    title: "Feito para desenvolvedores",
-    subtitle: "Use DOCSET via UI ou integre usando uma API REST simples. Respostas JSON, webhooks e mais.",
-    cta: "Ver demonstração",
-    tabs: { upload: "Enviar", retrieve: "Recuperar" },
-  },
-  'pt-PT': {
-    badge: "API para programadores",
-    title: "Feito para programadores",
-    subtitle: "Use DOCSET via UI ou integre usando uma API REST simples. Respostas JSON, webhooks e mais.",
-    cta: "Ver demonstração",
-    tabs: { upload: "Enviar", retrieve: "Recuperar" },
-  },
-};
-
-const finalCTAFallback = {
-  en: {
-    title: "Start using DOCSET today",
-    subtitle: "No credit card required. Start extracting structured data in minutes.",
-    cta: "Get started for free",
-  },
-  'pt-BR': {
-    title: "Comece a usar DOCSET hoje",
-    subtitle: "Sem cartão de crédito. Comece a extrair dados estruturados em minutos.",
-    cta: "Começar grátis",
-  },
-  'pt-PT': {
-    title: "Comece a usar DOCSET hoje",
-    subtitle: "Sem cartão de crédito. Comece a extrair dados estruturados em minutos.",
-    cta: "Começar grátis",
-  },
-};
-
-const headerNavFallback = {
-  en: { features: "Features", pricing: "Pricing", api: "API", login: "Login", startFree: "Start free", dashboard: "Dashboard" },
-  'pt-BR': { features: "Recursos", pricing: "Preços", api: "API", login: "Entrar", startFree: "Começar grátis", dashboard: "Painel" },
-  'pt-PT': { features: "Recursos", pricing: "Preços", api: "API", login: "Entrar", startFree: "Começar grátis", dashboard: "Painel" },
-};
-
-const miscFallback = {
-    en: { builtForDevelopers: "Built for data extraction", mostPopular: "Most popular" },
-    'pt-BR': { builtForDevelopers: "Feito para extração de dados", mostPopular: "Mais popular" },
-    'pt-PT': { builtForDevelopers: "Feito para extração de dados", mostPopular: "Mais popular" },
-};
+// Fallbacks removed to use direct translation keys
 
 export default function Welcome() {
   const { t, i18n } = useTranslation();
@@ -395,10 +211,17 @@ function Header({
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const { t } = useTranslation();
+
   const getHeaderText = () => {
-    if (locale === 'pt-BR' || locale === 'pt') return headerNavFallback['pt-BR'];
-    if (locale === 'pt-PT') return headerNavFallback['pt-PT'];
-    return headerNavFallback.en;
+    return {
+      features: t('landing.nav.product'),  // Mapping generic features to product as per json
+      pricing: t('landing.nav.pricing'),
+      api: t('API'),
+      login: t('Login'),
+      startFree: t('landing.hero.cta_primary'), // Reuse primary CTA or specific key if exists. Using Start Free from JSON
+      dashboard: t('Dashboard')
+    };
   };
   
   const headerText = getHeaderText();
@@ -633,78 +456,91 @@ function Header({
 }
 
 function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }) {
+  const { t } = useTranslation();
+  const { scrollY } = useScroll();
+  const rotateX = useTransform(scrollY, [0, 500], [20, 0]);
+  const scale = useTransform(scrollY, [0, 500], [1, 0.9]);
+  
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStep((prev) => (prev + 1) % 3);
+    }, 3000); 
+    return () => clearInterval(interval);
+  }, []);
+  
   const getHeroText = () => {
-    if (locale === 'pt-BR' || locale === 'pt') return heroFallback['pt-BR'];
-    if (locale === 'pt-PT') return heroFallback['pt-PT'];
-    return heroFallback.en;
+    return {
+      title: t('landing.hero.title'),
+      highlight: t('landing.hero.highlight'),
+      subtitle: t('landing.hero.subtitle'),
+      cta_primary: t('landing.hero.cta_primary'),
+      cta_demo: t('landing.hero.cta_secondary'),
+      eyebrow: t('landing.hero.eyebrow')
+    };
   };
   
   const heroRaw = getHeroText();
-  const seoContent = getSEOContent(locale);
 
   return (
-    <section className="relative overflow-hidden pt-24 pb-16 md:pt-32 md:pb-24">
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-transparent to-transparent" />
-      <div className="absolute inset-0">
-        <motion.div 
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div 
-          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-700/20 rounded-full blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.5, 0.3, 0.5],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1
-          }}
-        />
-      </div>
+    <section className="relative overflow-hidden pt-24 pb-20 md:pt-32 md:pb-24 bg-black selection:bg-blue-500/30">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-zinc-950 to-zinc-950" />
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+      
+      {/* Grid Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
 
-      <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <Badge className="mb-6 bg-blue-500/10 text-blue-300 border-blue-500/20 hover:bg-blue-500/20">
-            <Sparkles className="w-3 h-3 mr-1" />
-            {(() => {
-              if (locale === 'pt-BR' || locale === 'pt') return miscFallback['pt-BR'].builtForDevelopers;
-              if (locale === 'pt-PT') return miscFallback['pt-PT'].builtForDevelopers;
-              return miscFallback.en.builtForDevelopers;
-            })()}
-          </Badge>
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="flex flex-col items-center text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Badge className="mb-6 bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20 px-3 py-1 text-xs backdrop-blur-md">
+              <Sparkles className="w-3 h-3 mr-2 text-blue-400" />
+              {heroRaw.eyebrow}
+            </Badge>
+          </motion.div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-6">
-            {seoContent.h1}
-          </h1>
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white via-white/90 to-white/70 max-w-4xl"
+          >
+            {heroRaw.title} <br className="hidden md:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">
+              {heroRaw.highlight}
+            </span>
+          </motion.h1>
 
-          <p className="text-xl text-gray-400 leading-relaxed mb-10 max-w-3xl mx-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-lg md:text-xl text-zinc-400 leading-relaxed mb-10 max-w-2xl mx-auto"
+          >
             {heroRaw.subtitle}
-          </p>
+          </motion.p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto"
+          >
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              className="w-full sm:w-auto"
             >
               <Button
                 size="lg"
                 onClick={() => router.visit(`/${locale}/register`)}
-                className="bg-white text-black hover:bg-gray-200 px-8 h-12 text-base font-medium shadow-lg shadow-white/20"
+                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 h-12 text-base font-semibold shadow-[0_0_40px_-10px_rgba(37,99,235,0.5)] border border-blue-500/20 rounded-xl"
               >
                 {heroRaw.cta_primary}
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -714,194 +550,245 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              className="w-full sm:w-auto"
             >
               <Button
                 size="lg"
                 variant="outline"
                 onClick={onOpenDemo}
-                className="border-white/20 text-white hover:bg-white/10 px-8 h-12 text-base font-medium"
+                className="w-full sm:w-auto border-white/10 bg-white/5 hover:bg-white/10 text-white px-8 h-12 text-base font-semibold backdrop-blur-sm rounded-xl"
               >
-                <Play className="mr-2 h-4 w-4" />
+                <Play className="mr-2 h-4 w-4 fill-current" />
                 {heroRaw.cta_demo}
               </Button>
             </motion.div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mt-20"
+          style={{ rotateX, scale, perspective: 1000 }}
+          initial={{ opacity: 0, y: 100, rotateX: 20 }}
+          animate={{ opacity: 1, y: 0, rotateX: 20 }}
+          transition={{ duration: 1, delay: 0.4, type: "spring", bounce: 0.2 }}
+          className="mt-20 relative perspective-1000 mx-auto max-w-5xl"
         >
-          <AnimatedProductDemo />
+          {/* Main 3D Container with Glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[400px] bg-blue-500/20 rounded-[100px] blur-[80px] pointer-events-none" />
+          
+          <div className="relative z-10 rounded-2xl border border-white/10 bg-zinc-950/80 backdrop-blur-xl shadow-2xl shadow-blue-500/10 overflow-hidden ring-1 ring-white/10 group">
+             
+             {/* Header Bar */}
+             <div className="flex border-b border-white/10 bg-white/5 px-4 py-3 items-center gap-3 relative z-20">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-500/50" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/50" />
+                </div>
+                
+                {/* Step Indicators in Header */}
+                <div className="flex-1 flex justify-center gap-2">
+                    {['Upload', 'Process', 'Export'].map((label, i) => (
+                        <div key={label} className={`flex items-center gap-2 px-3 py-1 rounded-full border transition-all duration-500 ${
+                            step === i 
+                            ? 'bg-blue-500/20 border-blue-500/50 text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.3)]' 
+                            : 'bg-transparent border-transparent text-gray-600'
+                        }`}>
+                            <div className={`w-1.5 h-1.5 rounded-full ${step === i ? 'bg-blue-500 animate-pulse' : 'bg-gray-700'}`} />
+                            <span className="text-[10px] font-mono uppercase tracking-wider">{label}</span>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="w-16"></div> {/* Spacer for balance */}
+              </div>
+
+            {/* Dynamic "Virtual Document" Stage */}
+            <div className="relative aspect-[16/9] bg-zinc-900/50 flex items-center justify-center overflow-hidden">
+                <AnimatePresence mode="wait">
+                    {step === 0 && (
+                        <motion.div 
+                            key="step-upload"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="flex flex-col items-center justify-center w-full h-full relative"
+                        >
+                            {/* Drop Zone Animation */}
+                            <motion.div 
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                transition={{ duration: 0.5 }}
+                                className="w-64 h-80 border-2 border-dashed border-white/20 rounded-xl flex flex-col items-center justify-center bg-white/5"
+                            >
+                                <motion.div
+                                    initial={{ y: -50, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    transition={{ duration: 0.8, type: "spring" }}
+                                >
+                                    <FileText className="w-16 h-16 text-blue-400 mb-4" />
+                                </motion.div>
+                                <div className="space-y-2 text-center">
+                                    <div className="w-32 h-2 bg-white/10 rounded-full overflow-hidden mx-auto">
+                                        <motion.div 
+                                            initial={{ width: "0%" }}
+                                            animate={{ width: "100%" }}
+                                            transition={{ duration: 2, ease: "easeInOut" }}
+                                            className="h-full bg-blue-500"
+                                        />
+                                    </div>
+                                    <p className="text-xs text-gray-400 font-mono">Uploading...</p>
+                                </div>
+                            </motion.div>
+                            
+                            {/* Floating Particles */}
+                            {[...Array(5)].map((_, i) => (
+                                <motion.div
+                                    key={i}
+                                    className="absolute w-1 h-1 bg-blue-400 rounded-full"
+                                    initial={{ 
+                                        x: (Math.random() - 0.5) * 300, 
+                                        y: 100, 
+                                        opacity: 0 
+                                    }}
+                                    animate={{ 
+                                        y: -200, 
+                                        opacity: [0, 1, 0] 
+                                    }}
+                                    transition={{ 
+                                        duration: 2 + Math.random(), 
+                                        repeat: Infinity,
+                                        delay: Math.random() * 2 
+                                    }}
+                                />
+                            ))}
+                        </motion.div>
+                    )}
+
+                    {step === 1 && (
+                        <motion.div 
+                            key="step-process"
+                            className="relative w-64 h-80 bg-white rounded-xl shadow-2xl overflow-hidden"
+                            initial={{ scale: 0.9, opacity: 0, rotateX: 20 }}
+                            animate={{ scale: 1, opacity: 1, rotateX: 0 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                        >
+                             {/* Document Content Simulation */}
+                             <div className="p-6 space-y-4 opacity-50 blur-[0.5px]">
+                                <div className="w-16 h-4 bg-gray-200 rounded" />
+                                <div className="space-y-2">
+                                    <div className="w-full h-2 bg-gray-100 rounded" />
+                                    <div className="w-full h-2 bg-gray-100 rounded" />
+                                    <div className="w-2/3 h-2 bg-gray-100 rounded" />
+                                </div>
+                                <div className="flex justify-between pt-8">
+                                    <div className="w-20 h-2 bg-gray-100 rounded" />
+                                    <div className="w-10 h-2 bg-gray-200 rounded" />
+                                </div>
+                                 <div className="space-y-2 pt-4">
+                                    <div className="w-full h-2 bg-gray-100 rounded" />
+                                    <div className="w-full h-2 bg-gray-100 rounded" />
+                                </div>
+                             </div>
+
+                             {/* Scanner Beam */}
+                             <motion.div 
+                                initial={{ top: "-10%" }}
+                                animate={{ top: "120%" }}
+                                transition={{ duration: 2, ease: "linear", repeat: Infinity }}
+                                className="absolute left-0 w-full h-20 bg-gradient-to-b from-blue-500/0 via-blue-500/20 to-blue-500/0 border-b border-blue-400/50 shadow-[0_0_20px_rgba(59,130,246,0.3)] z-10"
+                             />
+                             
+                             {/* Highlighted Fields appearing after scan */}
+                             <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.5 }}
+                                className="absolute top-[20%] left-6 right-6 h-8 border-2 border-green-500/50 bg-green-500/10 rounded flex items-center justify-center"
+                             >
+                                <span className="text-[10px] text-green-700 font-bold bg-white/80 px-1 rounded">INVOICE #9923</span>
+                             </motion.div>
+
+                             <motion.div 
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 1 }}
+                                className="absolute bottom-20 right-6 w-24 h-8 border-2 border-green-500/50 bg-green-500/10 rounded flex items-center justify-center"
+                             >
+                                <span className="text-[10px] text-green-700 font-bold bg-white/80 px-1 rounded">$2,450.00</span>
+                             </motion.div>
+                        </motion.div>
+                    )}
+
+                    {step === 2 && (
+                        <motion.div 
+                            key="step-export"
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="w-full max-w-lg p-6"
+                        >
+                            <div className="bg-zinc-950 rounded-xl border border-blue-500/30 overflow-hidden shadow-[0_0_50px_rgba(59,130,246,0.15)]">
+                                <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
+                                    <div className="flex gap-1.5">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-slate-600" />
+                                        <div className="w-2.5 h-2.5 rounded-full bg-slate-600" />
+                                    </div>
+                                    <span className="text-[10px] text-green-400 font-mono">200 OK</span>
+                                </div>
+                                <div className="p-4 font-mono text-sm relative">
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ duration: 0.5 }}
+                                    >
+                                        <span className="text-purple-400">{"{"}</span><br/>
+                                        &nbsp;&nbsp;<span className="text-blue-400">"id"</span>: <span className="text-green-300">"inv_9923"</span>,<br/>
+                                        &nbsp;&nbsp;<span className="text-blue-400">"date"</span>: <span className="text-green-300">"2024-03-12"</span>,<br/>
+                                        &nbsp;&nbsp;<span className="text-blue-400">"total"</span>: <span className="text-orange-300">2450.00</span>,<br/>
+                                        &nbsp;&nbsp;<span className="text-blue-400">"items"</span>: <span className="text-purple-400">["service_a", "service_b"]</span><br/>
+                                        <span className="text-purple-400">{"}"}</span>
+                                    </motion.div>
+                                    
+                                    {/* Action Buttons */}
+                                    <motion.div 
+                                        initial={{ y: 20, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 0.5 }}
+                                        className="absolute bottom-4 right-4 flex gap-2"
+                                    >
+                                        <div className="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg flex items-center gap-1">
+                                            <Download className="w-3 h-3" /> JSON
+                                        </div>
+                                    </motion.div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+            
+            {/* Overlay gradient for better blend */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+          </div>
         </motion.div>
       </div>
     </section>
   );
 }
 
-function AnimatedProductDemo() {
-  const [step, setStep] = useState(0);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStep((prev) => (prev + 1) % 3);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="relative">
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10 pointer-events-none" />
-      
-      <motion.div
-        className="bg-zinc-900 rounded-2xl border border-white/10 p-4 sm:p-8 shadow-2xl"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-      >
-        <div className="flex gap-2 mb-6">
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
-                step === i ? 'bg-blue-500' : 'bg-white/10'
-              }`}
-            />
-          ))}
-        </div>
-
-        <AnimatePresence mode="wait">
-          {step === 0 && (
-            <motion.div
-              key="upload"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-4"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                  <Upload className="w-5 h-5 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">1. Upload document</h3>
-                  <p className="text-sm text-gray-400">PDF, JPG, or PNG</p>
-                </div>
-              </div>
-              <div className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center">
-                <FileText className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-400 text-sm">invoice_march_2024.pdf</p>
-                <div className="mt-4 h-2 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-blue-500"
-                    initial={{ width: 0 }}
-                    animate={{ width: "100%" }}
-                    transition={{ duration: 1.5 }}
-                  />
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {step === 1 && (
-            <motion.div
-              key="define"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-4"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                  <Settings className="w-5 h-5 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">2. Define & review fields</h3>
-                  <p className="text-sm text-gray-400">Edit extracted data</p>
-                </div>
-              </div>
-              <div className="grid gap-3">
-                {[
-                  { label: "Invoice Number", value: "#INV-2024-001" },
-                  { label: "Total Amount", value: "€12,450.00" },
-                  { label: "Date", value: "2024-01-05" },
-                ].map((field, i) => (
-                  <motion.div
-                    key={field.label}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    className="bg-white/5 rounded-lg p-4 flex items-center justify-between border border-white/10"
-                  >
-                    <div>
-                      <p className="text-xs text-gray-400">{field.label}</p>
-                      <p className="font-mono font-medium">{field.value}</p>
-                    </div>
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {step === 2 && (
-            <motion.div
-              key="export"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-4"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                  <Database className="w-5 h-5 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">3. Export or use API</h3>
-                  <p className="text-sm text-gray-400">Get structured data</p>
-                </div>
-              </div>
-              <div className="bg-zinc-950 rounded-lg p-6 border border-white/10">
-                <pre className="text-xs font-mono text-gray-300 overflow-x-auto">
-                  <code>{`{
-  "invoice_number": "#INV-2024-001",
-  "amount": 12450.00,
-  "date": "2024-01-05",
-  "status": "validated"
-}`}</code>
-                </pre>
-              </div>
-              <div className="flex gap-2">
-                {[
-                  { icon: Download, label: "CSV" },
-                  { icon: FileJson, label: "JSON" },
-                  { icon: Code, label: "API" },
-                ].map((item) => (
-                  <Button
-                    key={item.label}
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 border-white/10 text-white hover:bg-white/5"
-                  >
-                    <item.icon className="w-4 h-4 mr-2" />
-                    {item.label}
-                  </Button>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    </div>
-  );
-}
 
 function ProductFlow({ locale }: { locale: string }) {
+  const { t } = useTranslation();
   const getProductFlowText = () => {
-    if (locale === 'pt-BR' || locale === 'pt') return productFlowFallback['pt-BR'];
-    if (locale === 'pt-PT') return productFlowFallback['pt-PT'];
-    return productFlowFallback.en;
+    return {
+        badge: t('landing.howItWorks.title'),
+        title: t('landing.howItWorks.subtitle'),
+        steps: [
+            { step: "01", title: t('landing.howItWorks.steps.0.title'), description: t('landing.howItWorks.steps.0.desc') },
+            { step: "02", title: t('landing.howItWorks.steps.2.title'), description: t('landing.howItWorks.steps.2.desc') },
+            { step: "03", title: t('landing.howItWorks.steps.3.title'), description: t('landing.howItWorks.steps.3.desc') },
+        ]
+    };
   };
   
   const flowText = getProductFlowText();
@@ -946,24 +833,39 @@ function ProductFlow({ locale }: { locale: string }) {
 }
 
 function Features({ locale }: { locale: string }) {
+  const { t } = useTranslation();
   const getFeaturesText = () => {
-    if (locale === 'pt-BR' || locale === 'pt') return featuresFallback['pt-BR'];
-    if (locale === 'pt-PT') return featuresFallback['pt-PT'];
-    return featuresFallback.en;
+    return {
+        title: t('landing.features.title'),
+        subtitle: t('landing.features.subtitle'),
+        items: [
+            { icon: Upload, title: t('landing.features.sections.0.title'), desc: t('landing.features.sections.0.items.0'), className: "md:col-span-2" },
+            { icon: Settings, title: t('landing.features.sections.1.title'), desc: t('landing.features.sections.1.items.0'), className: "" },
+            { icon: Eye, title: t('landing.features.sections.3.title'), desc: t('landing.features.sections.3.items.0'), className: "" },
+            { icon: Database, title: t('landing.features.sections.4.title'), desc: t('landing.features.sections.4.items.0'), className: "md:col-span-2" },
+            { icon: Code, title: t('landing.features.sections.5.title'), desc: t('landing.features.sections.5.items.0'), className: "md:col-span-2" },
+            { icon: Shield, title: t('landing.features.sections.6.title'), desc: t('landing.features.sections.6.items.0'), className: "" },
+        ]
+    };
   };
   
   const featuresText = getFeaturesText();
 
   return (
-    <section id="features" className="py-20 md:py-32 relative">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+    <section id="features" className="py-24 md:py-32 relative bg-zinc-950/50">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+      
+      <div className="max-w-7xl mx-auto px-6 relative">
+        <div className="text-center mb-20 max-w-3xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70">
             {featuresText.title}
           </h2>
+          <p className="text-xl text-gray-400">
+            {featuresText.subtitle}
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {featuresText.items.map((feature, i) => (
             <motion.div
               key={feature.title}
@@ -971,12 +873,17 @@ function Features({ locale }: { locale: string }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
-              className="group"
+              whileHover={{ y: -5 }}
+              className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 transition-colors hover:bg-white/10 hover:shadow-2xl hover:shadow-blue-500/10 ${feature.className}`}
             >
-              <div className="bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-blue-500/50 transition-all duration-300">
-                <feature.icon className="w-8 h-8 text-blue-400 mb-4" />
-                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{feature.desc}</p>
+              <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px] group-hover:bg-blue-500/20 transition-all duration-500" />
+              
+              <div className="relative z-10">
+                <div className="mb-6 inline-flex rounded-xl bg-blue-500/10 p-3 text-blue-400 ring-1 ring-inset ring-blue-500/20">
+                    <feature.icon className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-white group-hover:text-blue-200 transition-colors">{feature.title}</h3>
+                <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">{feature.desc}</p>
               </div>
             </motion.div>
           ))}
@@ -987,10 +894,15 @@ function Features({ locale }: { locale: string }) {
 }
 
 function CodeExample({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }) {
+  const { t } = useTranslation();
   const getCodeExampleText = () => {
-    if (locale === 'pt-BR' || locale === 'pt') return codeExampleFallback['pt-BR'];
-    if (locale === 'pt-PT') return codeExampleFallback['pt-PT'];
-    return codeExampleFallback.en;
+    return {
+      badge: t('landing.integration.title'),
+      title: t('landing.integration.title'),
+      subtitle: t('landing.integration.subtitle'),
+      cta: t('landing.hero.cta_secondary'), // reusing "Try demo" / "Watch demo"
+      tabs: { upload: t('landing.howItWorks.steps.0.title'), retrieve: t('landing.integration.cards.2.title').split(' ')[0] }, // "Upload", "Structured" (approx)
+    };
   };
   
   const codeText = getCodeExampleText();
@@ -1094,10 +1006,15 @@ function CodeExample({ locale, onOpenDemo }: { locale: string; onOpenDemo: () =>
 }
 
 function Pricing({ locale }: { locale: string }) {
+  const { t } = useTranslation();
   const getPricingText = () => {
-    if (locale === 'pt-BR' || locale === 'pt') return pricingFallback['pt-BR'];
-    if (locale === 'pt-PT') return pricingFallback['pt-PT'];
-    return pricingFallback.en;
+    return {
+      title: t('landing.pricing.title'),
+      subtitle: t('landing.pricing.subtitle'),
+      cta: t('landing.pricing.plans.0.cta'), // "Start free"
+      freeForever: t('landing.pricing.plans.0.price'), // Use price display or custom "Free"
+      limitsRenewMonthly: t('landing.pricing.disclaimer'),
+    };
   };
 
   const pricingText = getPricingText();
@@ -1158,16 +1075,16 @@ function Pricing({ locale }: { locale: string }) {
   }));
 
   return (
-    <section id="pricing" className="py-20 md:py-32 relative">
+    <section id="pricing" className="py-20 md:py-24 relative">
       <div className="max-w-6xl mx-auto px-6">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-20"
+          className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">{pricingText.title}</h2>
-          <p className="text-xl text-gray-400">{pricingText.subtitle}</p>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4">{pricingText.title}</h2>
+          <p className="text-lg text-gray-400">{pricingText.subtitle}</p>
         </motion.div>
 
         {loading ? (
@@ -1180,7 +1097,7 @@ function Pricing({ locale }: { locale: string }) {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {displayPlans.map((plan, i) => (
               <motion.div
                 key={plan.price_id}
@@ -1188,56 +1105,55 @@ function Pricing({ locale }: { locale: string }) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                whileHover={{ y: -8 }}
+                whileHover={{ y: -5 }}
               >
                 <div
-                  className={`relative h-full rounded-2xl p-8 border transition-all duration-300 ${
+                  className={`relative h-full rounded-2xl p-6 border transition-all duration-300 group overflow-hidden ${
                     plan.popular
-                      ? 'bg-gradient-to-b from-blue-500/10 to-transparent border-blue-500 shadow-lg shadow-blue-500/20'
-                      : 'bg-white/5 border-white/10 hover:border-white/20'
+                      ? 'bg-blue-900/10 border-blue-500/50 shadow-lg shadow-blue-500/10'
+                      : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
                   }`}
                 >
+                  {/* Hover Glow Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:via-blue-500/5 group-hover:to-blue-500/10 transition-all duration-500" />
+                  
                   {plan.popular && (
+                    <>
                     <motion.div 
                       initial={{ opacity: 0, scale: 0 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.5 }}
-                      className="absolute -top-4 left-1/2 -translate-x-1/2"
+                      className="absolute -top-3 left-1/2 -translate-x-1/2 z-10"
                     >
-                      <Badge className="bg-blue-500 text-white border-0">
-                        {(() => {
-                          if (locale === 'pt-BR' || locale === 'pt') return miscFallback['pt-BR'].mostPopular;
-                          if (locale === 'pt-PT') return miscFallback['pt-PT'].mostPopular;
-                          return miscFallback.en.mostPopular;
-                        })()}
-                      </Badge>
                     </motion.div>
+                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-50" />
+                    </>
                   )}
                   
-                  <div className="mb-8">
-                    <h3 className="text-lg font-semibold mb-2">{plan.name}</h3>
+                  <div className="mb-6 relative z-10">
+                    <h3 className={`text-base font-semibold mb-2 ${plan.popular ? 'text-blue-200' : 'text-white'}`}>{plan.name}</h3>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold">{plan.price}</span>
+                      <span className="text-3xl font-bold">{plan.price}</span>
                       {plan.frequency && (
-                        <span className={plan.id === 'free' ? "text-blue-400 text-sm font-medium ml-1" : "text-gray-400"}>
+                        <span className={plan.id === 'free' ? "text-blue-400 text-xs font-medium ml-1" : "text-gray-400 text-sm"}>
                           {plan.frequency}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature, idx) => (
+                  <ul className="space-y-3 mb-8 relative z-10">
+                    {plan.features.map((feature: string, idx: number) => (
                       <motion.li 
                         key={feature} 
                         initial={{ opacity: 0, x: -10 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: i * 0.1 + idx * 0.05 }}
-                        className="flex items-center gap-2 text-sm text-gray-300"
+                        className="flex items-start gap-2 text-xs text-gray-300"
                       >
-                        <Check className="w-4 h-4 text-blue-400" />
-                        {feature}
+                        <Check className={`w-3.5 h-3.5 mt-0.5 ${plan.popular ? 'text-blue-400' : 'text-gray-500'}`} />
+                        <span className="leading-tight">{feature}</span>
                       </motion.li>
                     ))}
                   </ul>
@@ -1245,13 +1161,14 @@ function Pricing({ locale }: { locale: string }) {
                   <motion.div
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    className="relative z-10"
                   >
                     <Button
                       onClick={() => router.visit(`/${locale}/register`)}
-                      className={`w-full ${
+                      className={`w-full h-10 text-sm font-medium ${
                         plan.popular
-                          ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                          : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                          ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/25'
+                          : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'
                       }`}
                     >
                       {pricingText.cta}
@@ -1266,9 +1183,9 @@ function Pricing({ locale }: { locale: string }) {
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              className="mt-12 text-center"
+              className="mt-8 text-center"
             >
-              <p className="text-gray-500 text-sm italic">
+              <p className="text-gray-500 text-xs italic">
                 {pricingText.limitsRenewMonthly}
               </p>
             </motion.div>
@@ -1279,11 +1196,15 @@ function Pricing({ locale }: { locale: string }) {
   );
 }
 
+
 function FinalCTA({ locale }: { locale: string }) {
+  const { t } = useTranslation();
   const getFinalCTAText = () => {
-    if (locale === 'pt-BR' || locale === 'pt') return finalCTAFallback['pt-BR'];
-    if (locale === 'pt-PT') return finalCTAFallback['pt-PT'];
-    return finalCTAFallback.en;
+    return {
+      title: t('landing.cta.title'),
+      subtitle: t('landing.cta.subtitle'),
+      cta: t('landing.cta.primary'),
+    };
   };
   
   const ctaText = getFinalCTAText();
@@ -1322,8 +1243,11 @@ function FinalCTA({ locale }: { locale: string }) {
 }
 
 function Footer({ locale }: { locale: string }) {
+  const { t } = useTranslation();
   return (
-    <footer className="border-t border-white/10 py-16">
+    <footer className="border-t border-white/10 py-16 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-t from-blue-950/20 to-transparent pointer-events-none" />
+
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
           <div className="sm:col-span-2 lg:col-span-1">
@@ -1334,23 +1258,23 @@ function Footer({ locale }: { locale: string }) {
               <span className="font-bold text-lg">DOCSET</span>
             </div>
             <p className="text-sm text-gray-400">
-              Turn documents into structured data
+              {t('landing.hero.subtitle')}
             </p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Product</h4>
+            <h4 className="font-semibold mb-4">{t('landing.nav.product')}</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#features" className="hover:text-white transition">Features</a></li>
-              <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
+              <li><a href="#features" className="hover:text-white transition">{t('landing.nav.control')}</a></li>
+              <li><a href="#pricing" className="hover:text-white transition">{t('landing.nav.pricing')}</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Legal</h4>
+            <h4 className="font-semibold mb-4">{t('Legal')}</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href={`/${locale}/privacy`} className="hover:text-white transition">Privacy</a></li>
-              <li><a href={`/${locale}/terms`} className="hover:text-white transition">Terms</a></li>
+              <li><a href={`/${locale}/privacy`} className="hover:text-white transition">{t('Privacy Policy')}</a></li>
+              <li><a href={`/${locale}/terms`} className="hover:text-white transition">{t('Terms of Service')}</a></li>
             </ul>
           </div>
         </div>
@@ -1358,7 +1282,7 @@ function Footer({ locale }: { locale: string }) {
         <Separator className="my-12 bg-white/10" />
 
         <div className="text-center text-sm text-gray-400">
-          <p> 2025 DOCSET. All rights reserved.</p>
+          <p>© 2025 DOCSET. {t('All rights reserved.')}</p>
         </div>
       </div>
     </footer>
@@ -1388,7 +1312,7 @@ function DemoModal({
       const selectedFile = e.target.files[0];
       
       if (selectedFile.size > MAX_FILE_SIZE) {
-        setError('File size must not exceed 5MB');
+        setError(t('File too large', { size: 5 }));
         setFile(null);
         e.target.value = '';
         return;
@@ -1402,7 +1326,7 @@ function DemoModal({
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      setError('File size must not exceed 5MB');
+        setError(t('File too large', { size: 5 }));
       return;
     }
 
@@ -1426,22 +1350,22 @@ function DemoModal({
 
       if (!response.ok) {
         if (response.status === 429) {
-          toast.error('You have already used the demo. Please register to continue using DOCSET.');
+          toast.error(t('Demo already used. Please register to continue.'));
           setTimeout(() => {
             onClose();
             router.visit(`/${locale}/register`);
           }, 2500);
           return;
         }
-        throw new Error(data.message || 'Extraction failed');
+        throw new Error(data.message || t('document_processing_error')); // Fallback or key? "Extraction failed" isn't in JSON directly but "document_processing_error" is close/better
       }
 
       setResult(data.data);
-      toast.success('Data extracted successfully!');
+      toast.success(t('Data Extracted Successfully!'));
     } catch (error: any) {
       console.error('Demo extraction error:', error);
-      setError(error.message || 'An error occurred');
-      toast.error(error.message || 'An error occurred');
+      setError(error.message || t('document_processing_error'));
+      toast.error(error.message || t('document_processing_error'));
     } finally {
       setProcessing(false);
     }
@@ -1451,9 +1375,9 @@ function DemoModal({
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-zinc-900 border-white/10 text-white">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Try DOCSET Demo</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">{t('Try DocSet Demo')}</DialogTitle>
           <DialogDescription className="text-gray-400">
-            Upload a document to see how DOCSET extracts data automatically
+            {t('Upload a document to see how DocSet extracts data automatically. This is a one-time free demo.')}
           </DialogDescription>
         </DialogHeader>
 
@@ -1472,10 +1396,10 @@ function DemoModal({
                 htmlFor="demo-file"
                 className="cursor-pointer text-blue-400 hover:text-blue-300 font-semibold text-lg"
               >
-                Click to upload
+                {t('Click to upload')}
               </Label>
               <p className="text-sm text-gray-400 mt-3">
-                PDF, JPG, PNG (max 5MB)
+                {t('PDF, JPG, PNG (max 10MB)')} 
               </p>
               {file && (
                 <motion.div
@@ -1508,12 +1432,12 @@ function DemoModal({
               {processing ? (
                 <>
                   <Sparkles className="mr-2 h-5 w-5 animate-spin" />
-                  Processing...
+                  {t('Processing...')}
                 </>
               ) : (
                 <>
                   <Sparkles className="mr-2 h-5 w-5" />
-                  Extract Data
+                  {t('Extract Data')}
                 </>
               )}
             </Button>
@@ -1528,8 +1452,8 @@ function DemoModal({
               <div className="flex items-center gap-3 mb-6">
                 <CheckCircle className="h-10 w-10 text-green-500" />
                 <div>
-                  <h3 className="text-xl font-bold text-green-400">Data Extracted Successfully!</h3>
-                  <p className="text-sm text-gray-400">Review the extracted fields below</p>
+                  <h3 className="text-xl font-bold text-green-400">{t('Data Extracted Successfully!')}</h3>
+                  <p className="text-sm text-gray-400">{t('landing.howItWorks.steps.2.desc')}</p> {/* Reusing "Review & approve" desc approx or just leave hardcoded if no exact match */}
                 </div>
               </div>
               <div className="space-y-3">
@@ -1550,9 +1474,9 @@ function DemoModal({
             </motion.div>
 
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6">
-              <p className="font-medium mb-2 text-blue-300">🎉 Demo completed!</p>
+              <p className="font-medium mb-2 text-blue-300">{t('🎉 Demo completed!')}</p>
               <p className="text-sm text-gray-400">
-                Register now to unlock unlimited processing and all features
+                {t('Register now to unlock unlimited document processing with advanced features.')}
               </p>
             </div>
 
@@ -1561,7 +1485,7 @@ function DemoModal({
               className="w-full bg-white text-black hover:bg-gray-200" 
               size="lg"
             >
-              Register to Continue
+              {t('Register to Continue')}
               <ArrowRight className="ml-2" />
             </Button>
           </div>
