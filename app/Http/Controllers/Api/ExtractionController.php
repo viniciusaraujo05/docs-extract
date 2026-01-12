@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Actions\AnalyzeDocument;
+use App\Actions\Documents\ExtractFromUploadedFileAction;
 use App\Http\Controllers\Controller;
-use App\Services\DocumentExtractionService;
 use App\Services\FieldDetectorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,8 +27,8 @@ final class ExtractionController extends Controller
 
     public function __construct(
         private readonly FieldDetectorService $fieldDetector,
-        private readonly DocumentExtractionService $extractionService,
         private readonly AnalyzeDocument $analyzeAction,
+        private readonly ExtractFromUploadedFileAction $extractAction,
     ) {}
 
     /**
@@ -65,8 +65,7 @@ final class ExtractionController extends Controller
     /**
      * Extracts structured data from a document.
      *
-     * Attempts normal extraction first, then tries PDF to image conversion
-     * if the initial extraction fails and the file is a PDF.
+     * Uses Vision Strategy for images and Text Strategy for PDFs.
      */
     public function extract(Request $request): JsonResponse
     {
@@ -83,25 +82,16 @@ final class ExtractionController extends Controller
             /** @var UploadedFile $file */
             $file = $request->file('file');
             $fields = $validated['fields'];
+            $user = auth()->user();
 
-            $result = $this->extractionService->extract($file, $fields);
+            // Call the extraction action
+            $result = $this->extractAction->execute($user, $file, $fields);
 
             if ($result['success']) {
-                return response()->json([
-                    'success' => true,
-                    'extracted_data' => $result['data'],
-                    'confidence' => $result['confidence'],
-                    'raw_text_preview' => $result['raw_text_preview'] ?? '',
-                    'conversion_note' => $result['conversion_note'] ?? null,
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'error' => $result['error'],
-                    'error_type' => $result['error_type'] ?? 'processing_error',
-                    'suggestions' => $result['suggestions'] ?? [],
-                ], 200);
+                return response()->json($result);
             }
+
+            return response()->json($result, 200);
 
         } catch (\JsonException $e) {
             return response()->json([

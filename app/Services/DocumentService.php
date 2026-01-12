@@ -59,18 +59,34 @@ final class DocumentService
 
     public function processDocument(Document $document): Document
     {
+        Log::info('DocumentService::processDocument START', [
+            'document_id' => $document->id,
+            'mime_type' => $document->mime_type,
+            'status' => $document->status
+        ]);
+        
         $document->markAsProcessing();
 
         try {
             // Get appropriate strategy
             $strategy = $this->extractionStrategyFactory->getStrategy($document);
             
-            Log::info("Processing document {$document->id} using " . get_class($strategy));
+            Log::info("Processing document {$document->id} using " . get_class($strategy), [
+                'strategy' => get_class($strategy),
+                'schema_fields_count' => count($document->schema_used['fields'] ?? [])
+            ]);
 
             $result = $strategy->extract(
                 $document, 
                 $document->schema_used ?? $this->getDefaultSchema($document->type)
             );
+
+            Log::info('DocumentService: Extraction result received', [
+                'document_id' => $document->id,
+                'has_data' => !empty($result['data']),
+                'has_raw_text' => !empty($result['raw_text']),
+                'data_keys' => array_keys($result['data'] ?? [])
+            ]);
 
             // Save raw text if available
             if (!empty($result['raw_text'])) {
@@ -82,8 +98,16 @@ final class DocumentService
             );
 
             $document->increment('credits_used');
+            
+            Log::info('DocumentService::processDocument COMPLETED', [
+                'document_id' => $document->id,
+                'final_status' => $document->fresh()->status
+            ]);
         } catch (\Exception $e) {
-            Log::error("Document processing failed: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error("Document processing failed: " . $e->getMessage(), [
+                'document_id' => $document->id,
+                'trace' => $e->getTraceAsString()
+            ]);
             $document->markAsFailed($e->getMessage());
         }
 

@@ -22,8 +22,18 @@ final class VisionStrategy implements ExtractionStrategyInterface
     public function supports(Document $document): bool
     {
         $mime = $document->mime_type;
-        // Supports images directly, or PDFs if we can convert them
-        return str_starts_with($mime, 'image/') || ($mime === 'application/pdf' && class_exists(Pdf::class));
+        
+        // Always support images (they don't need PDF conversion)
+        if (str_starts_with($mime, 'image/')) {
+            return true;
+        }
+        
+        // Support PDFs only if we can convert them to images
+        if ($mime === 'application/pdf' && class_exists(Pdf::class)) {
+            return true;
+        }
+        
+        return false;
     }
 
     public function extract(Document $document, array $schema): array
@@ -52,14 +62,23 @@ final class VisionStrategy implements ExtractionStrategyInterface
     {
         $path = Storage::disk('local')->path($document->file_path);
         $images = [];
+        
+        Log::info("VisionStrategy: Processing document", [
+            'mime_type' => $document->mime_type,
+            'path' => $path,
+            'exists' => file_exists($path)
+        ]);
 
         if (str_starts_with($document->mime_type, 'image/')) {
             // Check dimensions and slice if necessary
             if ($this->isLongImage($path)) {
+                Log::info("VisionStrategy: Image is long, slicing");
                 $images = $this->sliceImage($path);
             } else {
+                Log::info("VisionStrategy: Loading image normally");
                 $images[] = base64_encode(file_get_contents($path));
             }
+            Log::info("VisionStrategy: Prepared " . count($images) . " image slice(s)");
         } elseif ($document->mime_type === 'application/pdf') {
             try {
                 // Check if Ghostscript is available before trying specific PDF tools if needed, 
@@ -157,21 +176,27 @@ final class VisionStrategy implements ExtractionStrategyInterface
     private function processWithVision(array $base64Images, array $schema): array
     {
         $apiKey = config('services.openai.api_key');
-        $model = config('services.openai.model', 'gpt-4o'); // Default to vision capable model
+        $model = config('services.openai.model', 'gpt-4o');
+        
+        // Build field list from schema
+        $fieldsList = collect($schema['fields'] ?? [])
+            ->map(fn($f) => "- {$f['name']} ({$f['type']}): {$f['label']}")
+            ->implode("\n");
 
+        // Build user content array with text first, then images
         $userContent = [
             [
                 'type' => 'text',
-                'text' => $this->promptFactory->createExtractionPrompt('The document is provided in the attached images. Please analyze them sequentially to extract the data.', $schema)
+                'text' => "Extract the following fields from the document image(s):\n\n{$fieldsList}\n\nReturn a JSON object with 'extracted_data' containing the field values, and 'confidence' (0-100).",
             ]
         ];
 
+        // Add all images to the content
         foreach ($base64Images as $img) {
             $userContent[] = [
                 'type' => 'image_url',
                 'image_url' => [
                     'url' => "data:image/jpeg;base64,{$img}",
-                    'detail' => 'high',
                 ]
             ];
         }
@@ -182,7 +207,7 @@ final class VisionStrategy implements ExtractionStrategyInterface
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => $model,
                 'messages' => [
-                    ['role' => 'system', 'content' => $this->promptFactory->getSystemPrompt()],
+                    ['role' => 'system', 'content' => 'You are an expert at extracting structured data from document images. Return only valid JSON.'],
                     ['role' => 'user', 'content' => $userContent],
                 ],
                 'temperature' => 0.0,
