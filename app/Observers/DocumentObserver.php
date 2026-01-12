@@ -12,6 +12,9 @@ class DocumentObserver
      */
     public function created(Document $document): void
     {
+        // Dispatch webhook event
+        \App\Events\DocumentLifecycle::dispatch($document, 'document.created', $document->status);
+
         // Only increment document count if document has extracted_data (was saved)
         // Don't count documents that are just uploaded but not saved yet
         if ($document->extracted_data !== null) {
@@ -25,6 +28,11 @@ class DocumentObserver
      */
     public function updated(Document $document): void
     {
+        // Dispatch webhook event only if relevant fields changed
+        if ($document->wasChanged(['status', 'extracted_data'])) {
+            \App\Events\DocumentLifecycle::dispatch($document, 'document.updated', $document->status);
+        }
+
         // If document was just saved (extracted_data was added), count it
         if ($document->wasChanged('extracted_data') && $document->extracted_data !== null) {
             $usage = PlanUsage::getOrCreateForUser($document->user);
@@ -43,7 +51,7 @@ class DocumentObserver
      */
     public function deleted(Document $document): void
     {
-        // Optionally decrement count if you want to allow deletion to free up limit
-        // Currently keeping it simple - once counted, stays counted
+        // Dispatch webhook event
+        \App\Events\DocumentLifecycle::dispatch($document, 'document.deleted', $document->status);
     }
 }

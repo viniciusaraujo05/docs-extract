@@ -37,7 +37,12 @@ class AppServiceProvider extends ServiceProvider
         DocumentType::observe(DocumentTypeObserver::class);
         ReportAnalysis::observe(ReportAnalysisObserver::class);
 
-        // Só aquece o cache de traduções se não estiver rodando via CLI (evita erro no build)
+        // Register events
+        \Illuminate\Support\Facades\Event::listen(
+            \App\Events\DocumentLifecycle::class,
+            \App\Listeners\TriggerDocumentWebhooks::class,
+        );
+
         if (! $this->app->runningInConsole()) {
             $translationCache->warm(config('app.available_locales', ['pt', 'en']));
         }

@@ -61,6 +61,25 @@ class ExtractionSchema extends Model
         ];
     }
 
+    public static function getDefaultMarketReportSchema(): array
+    {
+        return [
+            'fields' => [
+                ['name' => 'period', 'type' => 'string', 'label' => 'Período Analisado'],
+                ['name' => 'gross_sales', 'type' => 'number', 'label' => 'Vendas Brutas'],
+                ['name' => 'units_sold', 'type' => 'number', 'label' => 'Unidades Vendidas'],
+                ['name' => 'average_ticket', 'type' => 'number', 'label' => 'Ticket Médio'],
+                ['name' => 'visits', 'type' => 'number', 'label' => 'Visitas'],
+                ['name' => 'conversion_rate', 'type' => 'number', 'label' => 'Taxa de Conversão (%)'],
+                ['name' => 'top_listings', 'type' => 'array', 'label' => 'Top Anúncios', 'items' => [
+                    ['name' => 'title', 'type' => 'string'],
+                    ['name' => 'sales', 'type' => 'number'],
+                    ['name' => 'visits', 'type' => 'number'],
+                ]],
+            ],
+        ];
+    }
+
     protected function casts(): array
     {
         return [

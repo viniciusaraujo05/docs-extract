@@ -51,6 +51,7 @@ final class DocumentService
         return match ($type) {
             'invoice' => ExtractionSchema::getDefaultInvoiceSchema(),
             'receipt' => ExtractionSchema::getDefaultReceiptSchema(),
+            'market_report' => ExtractionSchema::getDefaultMarketReportSchema(),
             default => ['fields' => []],
         };
     }
@@ -62,10 +63,17 @@ final class DocumentService
         try {
             $rawText = $this->extractText($document);
             $this->documentRepository->update($document, ['raw_text' => $rawText]);
+            
+            // Pass image path if it's an image file
+            $imagePath = null;
+            if (str_starts_with($document->mime_type, 'image/')) {
+                $imagePath = Storage::disk('local')->path($document->file_path);
+            }
 
             $result = $this->extractionService->extract(
                 $rawText,
-                $document->schema_used ?? $this->getDefaultSchema($document->type)
+                $document->schema_used ?? $this->getDefaultSchema($document->type),
+                $imagePath
             );
 
             $document->markAsCompleted(

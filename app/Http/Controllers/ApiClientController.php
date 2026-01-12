@@ -39,9 +39,14 @@ class ApiClientController extends Controller
                 'created_at' => $client->created_at?->toISOString(),
             ]);
 
+        $webhooks = \App\Models\WebhookEndpoint::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return Inertia::render('api/index', [
             'locale' => $locale,
             'clients' => $clients,
+            'webhooks' => $webhooks,
         ]);
     }
 

@@ -1,3 +1,4 @@
+
 import AppLayout from '@/layouts/app-layout';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import apiRoutes from '@/routes/api';
@@ -10,12 +11,35 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Copy, Key, Plus, Trash2, AlertCircle, ChevronDown, BookOpen, Shield, FileText, RefreshCw } from 'lucide-react';
+import { Copy, Key, Plus, Trash2, AlertCircle, ChevronDown, BookOpen, Shield, FileText, RefreshCw, Radio } from 'lucide-react';
 import { useCallback, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { type BreadcrumbItem } from '@/types';
 import { useApiDocumentation } from '@/components/api/ApiDocumentation';
+import { Input } from '@/components/ui/input';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { cn } from '@/lib/utils';
+
+
+interface WebhookEndpoint {
+    id: number;
+    url: string;
+    secret: string;
+    events: string[];
+    is_active: boolean;
+    created_at: string;
+}
 
 interface ApiClient {
     id: number;
@@ -34,6 +58,7 @@ interface NewClient extends ApiClient {
 
 interface PageProps {
     clients: ApiClient[];
+    webhooks: WebhookEndpoint[];
     flash?: {
         newClient?: NewClient;
     };
@@ -42,7 +67,7 @@ interface PageProps {
 export default function ApiIndex() {
     const { t } = useTranslation();
     const page = usePage<PageProps & { locale?: string }>();
-    const { clients, flash } = page.props;
+    const { clients, webhooks, flash } = page.props;
     const locale = page.props.locale ?? 'pt';
     const [selectedEndpoint, setSelectedEndpoint] = useState<string>('auth.token');
     const [selectedResponseCode, setSelectedResponseCode] = useState<number>(200);
@@ -51,6 +76,9 @@ export default function ApiIndex() {
     const createForm = useForm({});
     const deleteForm = useForm({});
     const regenerateForm = useForm({});
+    const createWebhookForm = useForm({ url: '' });
+    const deleteWebhookForm = useForm({});
+    const regenerateWebhookForm = useForm({});
     const newClient = flash?.newClient;
     const [shownSecrets, setShownSecrets] = useState<Set<number>>(new Set());
 
@@ -118,6 +146,57 @@ export default function ApiIndex() {
         [locale, regenerateForm, t],
     );
 
+    const handleCreateWebhook = (e: React.FormEvent) => {
+        e.preventDefault();
+        createWebhookForm.post(`/${locale}/api/webhooks`, {
+            onSuccess: () => {
+                toast.success(t('Webhook created successfully!'));
+                createWebhookForm.reset();
+            },
+            onError: () => toast.error(t('Failed to create webhook.')),
+        });
+    };
+
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [showRegenerateDialog, setShowRegenerateDialog] = useState(false);
+    const [selectedWebhook, setSelectedWebhook] = useState<WebhookEndpoint | null>(null);
+
+    const checkDeleteWebhook = (webhook: WebhookEndpoint) => {
+        setSelectedWebhook(webhook);
+        setShowDeleteDialog(true);
+    };
+
+    const confirmDeleteWebhook = () => {
+        if (!selectedWebhook) return;
+        
+        deleteWebhookForm.delete(`/${locale}/api/webhooks/${selectedWebhook.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success(t('Webhook deleted successfully!'));
+                setShowDeleteDialog(false);
+                setSelectedWebhook(null);
+            },
+        });
+    };
+
+    const checkRegenerateSecret = (webhook: WebhookEndpoint) => {
+        setSelectedWebhook(webhook);
+        setShowRegenerateDialog(true);
+    };
+
+    const confirmRegenerateSecret = () => {
+        if (!selectedWebhook) return;
+
+        regenerateWebhookForm.post(`/${locale}/api/webhooks/${selectedWebhook.id}/regenerate`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success(t('Webhook secret regenerated!'));
+                setShowRegenerateDialog(false);
+                setSelectedWebhook(null);
+            },
+        });
+    };
+
     const copyToClipboard = (text: string, label: string) => {
         navigator.clipboard.writeText(text);
         toast.success(`${label} ${t('copied to clipboard!')}`);
@@ -137,13 +216,41 @@ export default function ApiIndex() {
                         <p className="text-muted-foreground mt-2">{t('Manage your API credentials and explore the documentation')}</p>
                     </div>
 
-                <Tabs defaultValue="getting-started" className="space-y-6">
-                    <TabsList className="grid w-full grid-cols-4">
-                        <TabsTrigger value="getting-started"><BookOpen className="mr-2 h-4 w-4" />{t('Getting Started')}</TabsTrigger>
-                        <TabsTrigger value="clients"><Key className="mr-2 h-4 w-4" />{t('API Clients')}</TabsTrigger>
-                        <TabsTrigger value="docs"><FileText className="mr-2 h-4 w-4" />{t('Documentation')}</TabsTrigger>
-                        <TabsTrigger value="security"><Shield className="mr-2 h-4 w-4" />{t('Security')}</TabsTrigger>
+                <Tabs defaultValue="getting-started" className="flex flex-col md:flex-row gap-8 items-start">
+                    <TabsList className="flex flex-row md:flex-col h-auto w-full md:w-64 shrink-0 rounded-none border-b md:border-b-0 md:border-r bg-transparent p-0 justify-start space-x-2 md:space-x-0 md:space-y-2 mb-6 md:mb-0">
+                        <TabsTrigger 
+                            value="getting-started" 
+                            className="w-full justify-start rounded-md px-4 py-2 hover:bg-muted/50 data-[state=active]:bg-muted data-[state=active]:shadow-none border-l-2 border-transparent data-[state=active]:border-primary transition-all"
+                        >
+                            <BookOpen className="mr-2 h-4 w-4" />{t('Getting Started')}
+                        </TabsTrigger>
+                        <TabsTrigger 
+                            value="clients" 
+                            className="w-full justify-start rounded-md px-4 py-2 hover:bg-muted/50 data-[state=active]:bg-muted data-[state=active]:shadow-none border-l-2 border-transparent data-[state=active]:border-primary transition-all"
+                        >
+                            <Key className="mr-2 h-4 w-4" />{t('API Clients')}
+                        </TabsTrigger>
+                        <TabsTrigger 
+                            value="webhooks" 
+                            className="w-full justify-start rounded-md px-4 py-2 hover:bg-muted/50 data-[state=active]:bg-muted data-[state=active]:shadow-none border-l-2 border-transparent data-[state=active]:border-primary transition-all"
+                        >
+                            <Radio className="mr-2 h-4 w-4" />{t('Webhooks')}
+                        </TabsTrigger>
+                        <TabsTrigger 
+                            value="docs" 
+                            className="w-full justify-start rounded-md px-4 py-2 hover:bg-muted/50 data-[state=active]:bg-muted data-[state=active]:shadow-none border-l-2 border-transparent data-[state=active]:border-primary transition-all"
+                        >
+                            <FileText className="mr-2 h-4 w-4" />{t('Documentation')}
+                        </TabsTrigger>
+                        <TabsTrigger 
+                            value="security" 
+                            className="w-full justify-start rounded-md px-4 py-2 hover:bg-muted/50 data-[state=active]:bg-muted data-[state=active]:shadow-none border-l-2 border-transparent data-[state=active]:border-primary transition-all"
+                        >
+                            <Shield className="mr-2 h-4 w-4" />{t('Security')}
+                        </TabsTrigger>
                     </TabsList>
+                    
+                    <div className="flex-1 min-w-0">
 
                     <TabsContent value="getting-started" className="space-y-4">
                         <Card>
@@ -272,6 +379,242 @@ export default function ApiIndex() {
                                 )}
                             </CardContent>
                         </Card>
+                    </TabsContent>
+
+                    <TabsContent value="webhooks" className="space-y-4">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>{t('Webhooks')}</CardTitle>
+                                <CardDescription>{t('Receive real-time notifications when your documents are processed')}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="rounded-lg border bg-card p-6">
+                                    <form onSubmit={handleCreateWebhook} className="flex gap-4 items-end">
+                                        <div className="flex-1 space-y-2">
+                                            <Label htmlFor="webhook-url">{t('Webhook URL')}</Label>
+                                            <input
+                                                id="webhook-url"
+                                                type="url"
+                                                placeholder="https://your-api.com/webhooks/docset"
+                                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                value={createWebhookForm.data.url}
+                                                onChange={(e) => createWebhookForm.setData('url', e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <Button type="submit" disabled={createWebhookForm.processing}>
+                                            <Plus className="mr-2 h-4 w-4" />{createWebhookForm.processing ? t('Adding...') : t('Add Webhook')}
+                                        </Button>
+                                    </form>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <h3 className="font-semibold text-lg">{t('Active Webhooks')}</h3>
+                                    {webhooks.length === 0 ? (
+                                        <div className="text-center py-8 text-muted-foreground border rounded-lg border-dashed">
+                                            {t('No webhooks configured yet.')}
+                                        </div>
+                                    ) : (
+                                        <div className="grid gap-4">
+                                            {webhooks.map((webhook) => (
+                                                <div key={webhook.id} className="rounded-lg border p-4 flex flex-col gap-4">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-4">
+                                                        <div className="space-y-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="font-mono text-sm break-all">{webhook.url}</div>
+                                                                {webhook.is_active && (
+                                                                    <div className="flex items-center gap-1.5 ml-2">
+                                                                        <span className="relative flex h-2.5 w-2.5">
+                                                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                                                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                                                                        </span>
+                                                                        <span className="text-xs text-muted-foreground">{t('Active')}</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-sm text-muted-foreground">
+                                                                {t('Created')} {new Date(webhook.created_at).toLocaleDateString()}
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <Button 
+                                                                variant="outline" 
+                                                                size="sm"
+                                                                onClick={() => checkRegenerateSecret(webhook)}
+                                                                disabled={regenerateWebhookForm.processing}
+                                                            >
+                                                                <RefreshCw className={cn("h-4 w-4 mr-2", regenerateWebhookForm.processing && "animate-spin")} />
+                                                                {t('Regenerate Secret')}
+                                                            </Button>
+                                                            <Button 
+                                                                variant="destructive" 
+                                                                size="sm"
+                                                                onClick={() => checkDeleteWebhook(webhook)}
+                                                                disabled={deleteWebhookForm.processing}
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="space-y-2 bg-muted/30 p-3 rounded-md">
+                                                        <label className="text-sm font-medium flex items-center gap-2">
+                                                            {t('Signing Secret')}
+                                                            <Badge variant="outline" className="text-[10px] h-5">HMAC-SHA256</Badge>
+                                                        </label>
+                                                        <div className="flex items-center gap-2">
+                                                            <input
+                                                                type="text"
+                                                                value={webhook.secret}
+                                                                readOnly
+                                                                className="flex h-9 w-full rounded-md border border-input bg-background/50 px-3 py-1 text-sm font-mono text-muted-foreground"
+                                                            />
+                                                            <Button size="icon" variant="ghost" className="h-9 w-9" onClick={() => copyToClipboard(webhook.secret, t('Secret'))}>
+                                                                <Copy className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {t('Use this secret to verify the X-Webhook-Signature header.')}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <Separator />
+
+                                <div className="space-y-4">
+                                    <h3 className="font-semibold text-lg">{t('Integration Guide')}</h3>
+                                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                                        <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+                                            <h4 className="font-medium flex items-center gap-2">
+                                                <Shield className="h-4 w-4" />
+                                                {t('Verifying Signatures')}
+                                            </h4>
+                                            <p className="text-sm text-muted-foreground">
+                                                {t('Secure your webhook endpoint by verifying the signature included in the request headers.')}
+                                            </p>
+                                            
+                                            <div className="space-y-2">
+                                                <Label>{t('PHP (Laravel) Example')}</Label>
+                                                <div className="rounded-md bg-stone-900 border border-stone-800 p-3 overflow-x-auto">
+<pre className="text-xs font-mono text-stone-50 leading-relaxed">
+{`$payload = $request->getContent();
+$signature = $request->header('X-Webhook-Signature');
+$secret = 'whsec_...'; // Your signing secret
+
+$computedSignature = hash_hmac('sha256', $payload, $secret);
+
+if (!hash_equals($signature, $computedSignature)) {
+    abort(403, 'Invalid signature');
+}`}
+</pre>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label>{t('Node.js (Express) Example')}</Label>
+                                                <div className="rounded-md bg-stone-900 border border-stone-800 p-3 overflow-x-auto">
+<pre className="text-xs font-mono text-stone-50 leading-relaxed">
+{`const crypto = require('crypto');
+
+const payload = JSON.stringify(req.body);
+const signature = req.headers['x-webhook-signature'];
+const secret = 'whsec_...';
+
+const computed = crypto
+  .createHmac('sha256', secret)
+  .update(payload)
+  .digest('hex');
+
+if (signature !== computed) {
+  throw new Error('Invalid signature');
+}`}
+</pre>
+                                                </div>
+                                            </div>
+
+                                            <Separator className="my-6 border-stone-800" />
+
+                                            <div className="space-y-3">
+                                                <h4 className="font-medium flex items-center gap-2">
+                                                    <FileText className="h-4 w-4" />
+                                                    {t('Events & Payload Reference')}
+                                                </h4>
+                                                
+                                                <div className="grid gap-3 sm:grid-cols-3 my-4">
+                                                    <div className="rounded border border-stone-800 bg-stone-900/50 p-3">
+                                                        <Badge variant="outline" className="mb-2 border-stone-700 text-stone-300">document.created</Badge>
+                                                        <p className="text-xs text-muted-foreground">{t('Fired immediately when a new document is uploaded.')}</p>
+                                                    </div>
+                                                    <div className="rounded border border-stone-800 bg-stone-900/50 p-3">
+                                                        <Badge variant="outline" className="mb-2 border-stone-700 text-stone-300">document.updated</Badge>
+                                                        <p className="text-xs text-muted-foreground">{t('Fired when status marks as completed or data is extracted.')}</p>
+                                                    </div>
+                                                    <div className="rounded border border-stone-800 bg-stone-900/50 p-3">
+                                                        <Badge variant="outline" className="mb-2 border-stone-700 text-stone-300">document.deleted</Badge>
+                                                        <p className="text-xs text-muted-foreground">{t('Fired when a document is permanently deleted.')}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2">
+                                                    <Label>{t('Payload Structure')}</Label>
+                                                    <div className="rounded-md bg-stone-900 border border-stone-800 p-3 overflow-x-auto">
+<pre className="text-xs font-mono text-stone-50 leading-relaxed">
+{`{
+  "event": "document.updated",
+  "created_at": "2024-03-20T10:00:00Z",
+  "data": {
+    "id": 12345, // Document ID
+    "type": "document",
+    "status": "completed" // processing, completed, failed
+  }
+}`}
+</pre>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>{t('Are you sure?')}</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        {t('This action cannot be undone. This will permanently delete the webhook endpoint.')}
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                                    <AlertDialogAction onClick={confirmDeleteWebhook} className="bg-destructive hover:bg-destructive/90">
+                                        {t('Delete')}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+
+                        <AlertDialog open={showRegenerateDialog} onOpenChange={setShowRegenerateDialog}>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>{t('Regenerate Secret')}</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        {t('This will invalidate the current secret key immediately. Any active integrations will stop working until updated with the new secret.')}
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                                    <AlertDialogAction onClick={confirmRegenerateSecret}>
+                                        {t('Regenerate')}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </TabsContent>
 
                     <TabsContent value="docs" className="space-y-4">
@@ -437,6 +780,7 @@ export default function ApiIndex() {
                             </CardContent>
                         </Card>
                     </TabsContent>
+                    </div>
                 </Tabs>
                 </div>
             </div>

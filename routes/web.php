@@ -16,9 +16,18 @@ use Laravel\Fortify\Features;
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 // Cookie Consent Routes
-Route::post('/cookie-consent/accept', [\App\Http\Controllers\CookieConsentController::class, 'accept'])->name('cookie.accept');
-Route::post('/cookie-consent/reject', [\App\Http\Controllers\CookieConsentController::class, 'reject'])->name('cookie.reject');
-Route::get('/cookie-consent/status', [\App\Http\Controllers\CookieConsentController::class, 'status'])->name('cookie.status');
+// Cookie Consent Routes
+Route::middleware('web')->group(function () {
+    Route::post('/cookie-consent/accept', [\App\Http\Controllers\CookieConsentController::class, 'accept'])->name('cookie.accept');
+    Route::post('/cookie-consent/reject', [\App\Http\Controllers\CookieConsentController::class, 'reject'])->name('cookie.reject');
+    Route::get('/cookie-consent/status', [\App\Http\Controllers\CookieConsentController::class, 'status'])->name('cookie.status');
+});
+
+Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->group(function () {
+    Route::post('/cookie-consent/accept', [\App\Http\Controllers\CookieConsentController::class, 'accept'])->name('cookie.accept.locale');
+    Route::post('/cookie-consent/reject', [\App\Http\Controllers\CookieConsentController::class, 'reject'])->name('cookie.reject.locale');
+    Route::get('/cookie-consent/status', [\App\Http\Controllers\CookieConsentController::class, 'status'])->name('cookie.status.locale');
+});
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -78,7 +87,6 @@ Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 
     Route::put('documents/{document}/data', [DocumentController::class, 'updateData'])->name('documents.updateData');
     Route::post('documents/{document}/reprocess', [DocumentController::class, 'reprocess'])->name('documents.reprocess');
 
-    // Document Types (Models)
     Route::resource('document-types', DocumentTypeController::class)->names([
         'index' => 'document-types.index',
         'create' => 'document-types.create',
@@ -87,13 +95,23 @@ Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 
         'edit' => 'document-types.edit',
         'update' => 'document-types.update',
         'destroy' => 'document-types.destroy',
-    ])->parameters(['document-types' => 'documentType'])->middleware(['usage.limit:models']);
+    ])->parameters(['document-types' => 'documentType']);
+    
+    // Apply usage limit only to store route
+    Route::post('document-types', [DocumentTypeController::class, 'store'])
+        ->name('document-types.store')
+        ->middleware(['usage.limit:models']);
 
     // API Clients Management
     Route::get('api', [ApiClientController::class, 'index'])->name('api.index');
     Route::post('api/clients', [ApiClientController::class, 'store'])->name('api.clients.store');
     Route::post('api/clients/{apiClient}/regenerate', [ApiClientController::class, 'regenerate'])->name('api.clients.regenerate');
     Route::delete('api/clients/{apiClient}', [ApiClientController::class, 'destroy'])->name('api.clients.destroy');
+
+    // Webhook Endpoints Management
+    Route::post('api/webhooks', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'store'])->name('api.webhooks.store');
+    Route::delete('api/webhooks/{webhookEndpoint}', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'destroy'])->name('api.webhooks.destroy');
+    Route::post('api/webhooks/{webhookEndpoint}/regenerate', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'regenerateSecret'])->name('api.webhooks.regenerate');
 
     // Settings Routes
     Route::get('settings/billing', [PlanController::class, 'billing'])->name('settings.billing');
