@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Api\CreateApiClientAction;
+use App\Actions\Api\RegenerateApiClientSecretAction;
+use App\Http\Requests\StoreApiClientRequest;
 use App\Models\ApiClient;
-use App\Repositories\ApiClientRepository;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ApiClientController extends Controller
 {
     public function __construct(
-        private readonly ApiClientRepository $repository,
+        private readonly CreateApiClientAction $createApiClientAction,
+        private readonly RegenerateApiClientSecretAction $regenerateApiClientSecretAction,
     ) {}
 
     public function index(Request $request, string $locale): Response
@@ -43,35 +45,19 @@ class ApiClientController extends Controller
         ]);
     }
 
-    public function store(Request $request, string $locale): RedirectResponse
+    public function store(StoreApiClientRequest $request, string $locale): RedirectResponse
     {
         $user = $request->user();
-        $validated = $request->validate([
-            'name' => ['nullable', 'string', 'max:255'],
-            'contact_email' => ['nullable', 'email', 'max:255'],
-        ]);
+        
+        $result = $this->createApiClientAction->execute(
+            user: $user,
+            name: $request->validated('name'),
+            contactEmail: $request->validated('contact_email'),
+            userAgent: $request->userAgent()
+        );
 
-        $name = $validated['name'] ?? null;
-        if ($name === null || trim($name) === '') {
-            $name = 'API Client - '.$user->name;
-        }
-
-        $contactEmail = $validated['contact_email'] ?? $user->email;
-        $plainSecret = Str::random(40);
-
-        $client = $this->repository->create([
-            'user_id' => $user->id,
-            'name' => $name,
-            'contact_email' => $contactEmail,
-            'client_id' => 'client_'.Str::random(32),
-            'client_secret' => $plainSecret,
-            'status' => 'active',
-            'rate_limit_per_minute' => 60,
-            'metadata' => [
-                'created_via' => 'web',
-                'user_agent' => $request->userAgent(),
-            ],
-        ]);
+        $client = $result['client'];
+        $plainSecret = $result['plainTextSecret'];
 
         return back()->with([
             'success' => 'API Client created successfully!',
@@ -89,30 +75,18 @@ class ApiClientController extends Controller
 
     public function destroy(Request $request, string $locale, ApiClient $apiClient): RedirectResponse
     {
-        $user = $request->user();
+        $this->authorize('delete', $apiClient);
 
-        if ($apiClient->user_id !== $user->id) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $this->repository->delete($apiClient);
+        $apiClient->delete();
 
         return back()->with('success', 'API Client deleted successfully.');
     }
 
     public function regenerate(Request $request, string $locale, ApiClient $apiClient): RedirectResponse
     {
-        $user = $request->user();
+        $this->authorize('update', $apiClient);
 
-        if ($apiClient->user_id !== $user->id) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $plainSecret = Str::random(40);
-
-        $this->repository->update($apiClient, [
-            'client_secret' => $plainSecret,
-        ]);
+        $plainSecret = $this->regenerateApiClientSecretAction->execute($apiClient);
 
         return back()->with([
             'success' => 'API Client secret regenerated successfully!',

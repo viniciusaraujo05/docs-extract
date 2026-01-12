@@ -84,31 +84,7 @@ final class ReportController extends Controller
 
         return response()->streamDownload(function () use ($documents, $fields) {
             $handle = fopen('php://output', 'w');
-
-            // Header row
-            $headers = ['ID', 'Nome do Documento', 'Data de Criação'];
-            foreach ($fields as $field) {
-                $headers[] = $field['label'] ?? $field['name'];
-            }
-            fputcsv($handle, $headers);
-
-            // Data rows
-            foreach ($documents as $doc) {
-                $row = [
-                    $doc->id,
-                    $doc->name,
-                    $doc->created_at?->format('d/m/Y H:i'),
-                ];
-
-                $extractedData = $doc->extracted_data ?? [];
-                foreach ($fields as $field) {
-                    $value = $extractedData[$field['name']] ?? '';
-                    $row[] = is_array($value) ? json_encode($value) : $value;
-                }
-
-                fputcsv($handle, $row);
-            }
-
+            $this->exportReportAction->writeToHandle($handle, $documents, $fields);
             fclose($handle);
         }, $filename, [
             'Content-Type' => 'text/csv',

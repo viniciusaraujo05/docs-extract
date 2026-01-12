@@ -193,4 +193,58 @@ class SubscriptionService
         // TODO: Implement API usage tracking
         return 0;
     }
+
+    /**
+     * Get complete usage data including percentages
+     */
+    public function getUsageData(User $user, ?array $planData = null): array
+    {
+        $planUsage = PlanUsage::getOrCreateForUser($user);
+        
+        $usage = [
+            'documents' => $planUsage->documents_count,
+            'models' => $planUsage->models_count,
+            'api_requests' => $planUsage->api_requests_count,
+            'api_keys' => \App\Models\ApiClient::where('user_id', $user->id)->count(),
+        ];
+
+        // If plan data not provided, fetch it
+        if ($planData === null) {
+            $limits = $this->getUserPlanLimits($user);
+        } else {
+            $limits = $planData['limits'] ?? [];
+        }
+
+        $usagePercentages = [];
+        
+        foreach ($limits as $limit => $value) {
+            // Skip non-numeric limits (like exports array, webhooks boolean)
+            if (is_array($value) || is_bool($value)) {
+                if ($value === false) {
+                    $usagePercentages[$limit] = 100; // not available
+                } elseif ($value === true) {
+                    $usagePercentages[$limit] = 0; // available
+                } else {
+                    $usagePercentages[$limit] = 0; // array or other, treat as available
+                }
+
+                continue;
+            }
+
+            if ($value === -1) {
+                $usagePercentages[$limit] = 0; // unlimited
+            } elseif ($value === 0) {
+                $usagePercentages[$limit] = 100; // not available
+            } else {
+                // Check if the limit exists in usage array
+                $usageValue = isset($usage[$limit]) ? $usage[$limit] : 0;
+                $usagePercentages[$limit] = min(100, ($usageValue / $value) * 100);
+            }
+        }
+
+        return [
+            'usage' => $usage,
+            'usage_percentages' => $usagePercentages,
+        ];
+    }
 }

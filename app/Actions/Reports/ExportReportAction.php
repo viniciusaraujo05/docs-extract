@@ -20,13 +20,27 @@ final readonly class ExportReportAction
     public function execute(Collection $documents, array $fields): string
     {
         $output = fopen('php://temp', 'r+');
+        $this->writeToHandle($output, $documents, $fields);
+        rewind($output);
+        $csv = stream_get_contents($output);
+        fclose($output);
 
+        return $csv;
+    }
+
+    /**
+     * Escreve os dados CSV num resource handle (para streaming).
+     *
+     * @param resource $handle
+     */
+    public function writeToHandle($handle, Collection $documents, array $fields): void
+    {
         // Header row
         $headers = ['ID', 'Nome do Documento', 'Data de Criação'];
         foreach ($fields as $field) {
             $headers[] = $field['label'] ?? $field['name'];
         }
-        fputcsv($output, $headers);
+        fputcsv($handle, $headers);
 
         // Data rows
         foreach ($documents as $doc) {
@@ -39,17 +53,16 @@ final readonly class ExportReportAction
             $extractedData = $doc->extracted_data ?? [];
             foreach ($fields as $field) {
                 $value = $extractedData[$field['name']] ?? '';
-                $row[] = is_array($value) ? json_encode($value) : $value;
+                
+                if (is_array($value) || is_object($value)) {
+                    $value = json_encode($value, JSON_UNESCAPED_UNICODE);
+                }
+                
+                $row[] = $value;
             }
 
-            fputcsv($row, $row);
+            fputcsv($handle, $row);
         }
-
-        rewind($output);
-        $csv = stream_get_contents($output);
-        fclose($output);
-
-        return $csv;
     }
 
     /**

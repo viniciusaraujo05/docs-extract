@@ -216,24 +216,26 @@ export function ReportTableView({
 
         if (docsToExport.length === 0) return null;
 
-        const payload: Record<string, any> = {};
-        docsToExport.forEach((doc, idx) => {
-            const docKey = `${doc.name}_${idx + 1}`;
-            payload[docKey] = {
-                name: doc.name,
-                date: new Date(doc.created_at).toLocaleDateString('pt-PT'),
-                ...displayFields.reduce((acc, field) => ({
-                    ...acc,
-                    [field.label]: doc.data[field.name] ?? '',
-                }), {}),
-                ...calculatedFields.reduce((acc, calcField) => ({
-                    ...acc,
-                    [calcField.label]: calculateFieldValue(doc, calcField),
-                }), {}),
+        // Return array of objects where each object is a row
+        return docsToExport.map((doc) => {
+            const row: Record<string, any> = {
+                'ID': doc.id,
+                'Documento': doc.name,
+                'Data de Criação': new Date(doc.created_at).toLocaleDateString('pt-PT'),
             };
-        });
 
-        return payload;
+            // Add field values
+            displayFields.forEach(field => {
+                row[field.label] = doc.data[field.name] ?? '';
+            });
+
+            // Add calculated field values
+            calculatedFields.forEach(calcField => {
+                row[calcField.label] = calculateFieldValue(doc, calcField);
+            });
+
+            return row;
+        });
     }, [processedDocuments, selectedRows, displayFields, calculatedFields]);
 
     const getSortIcon = (fieldName: string) => {

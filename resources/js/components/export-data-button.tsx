@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 
 interface ExportDataButtonProps {
-  data: Record<string, any>;
+  data: Record<string, any> | Array<Record<string, any>>;
   filename?: string;
   disabled?: boolean;
   variant?: 'default' | 'outline' | 'ghost';
@@ -49,13 +49,47 @@ export function ExportDataButton({
   const exportToCSV = () => {
     try {
       setIsExporting(true);
-      const headers = Object.keys(data);
-      const values = Object.values(data);
       
-      const csvContent = [
-        headers.map(h => `"${h}"`).join(','),
-        values.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','),
-      ].join('\n');
+      let csvContent = '';
+      
+      if (Array.isArray(data)) {
+        // Array of objects - tabular format
+        if (data.length === 0) {
+          toast.error(t('No data to export'));
+          return;
+        }
+        
+        // Get headers from first object
+        const headers = Object.keys(data[0]);
+        
+        // Header row
+        csvContent = headers.map(h => `"${h}"`).join(',') + '\n';
+        
+        // Data rows
+        csvContent += data.map(row => {
+          return headers.map(header => {
+            const value = row[header];
+            // Handle different value types
+            if (value === null || value === undefined) return '""';
+            if (typeof value === 'object') return `"${JSON.stringify(value).replace(/"/g, '""')}"`;
+            return `"${String(value).replace(/"/g, '""')}"`;
+          }).join(',');
+        }).join('\n');
+        
+      } else {
+        // Single object - key-value format
+        const headers = Object.keys(data);
+        const values = Object.values(data);
+        
+        csvContent = [
+          headers.map(h => `"${h}"`).join(','),
+          values.map(v => {
+            if (v === null || v === undefined) return '""';
+            if (typeof v === 'object') return `"${JSON.stringify(v).replace(/"/g, '""')}"`;
+            return `"${String(v).replace(/"/g, '""')}"`;
+          }).join(','),
+        ].join('\n');
+      }
 
       downloadFile(csvContent, `${sanitizeFilename(filename)}.csv`, 'text/csv;charset=utf-8;');
       toast.success(t('Exported to CSV successfully!'));
@@ -71,10 +105,6 @@ export function ExportDataButton({
     try {
       setIsExporting(true);
       
-      // Criar workbook manualmente usando XML
-      const headers = Object.keys(data);
-      const values = Object.values(data);
-      
       let xmlContent = '<?xml version="1.0"?>\n';
       xmlContent += '<?mso-application progid="Excel.Sheet"?>\n';
       xmlContent += '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n';
@@ -82,21 +112,73 @@ export function ExportDataButton({
       xmlContent += '<Worksheet ss:Name="Data">\n';
       xmlContent += '<Table>\n';
       
-      // Header row
-      xmlContent += '<Row>\n';
-      headers.forEach(header => {
-        xmlContent += `<Cell><Data ss:Type="String">${escapeXml(header)}</Data></Cell>\n`;
-      });
-      xmlContent += '</Row>\n';
-      
-      // Data row
-      xmlContent += '<Row>\n';
-      values.forEach(value => {
-        const strValue = String(value);
-        const isNumber = !isNaN(Number(strValue)) && strValue.trim() !== '';
-        xmlContent += `<Cell><Data ss:Type="${isNumber ? 'Number' : 'String'}">${escapeXml(strValue)}</Data></Cell>\n`;
-      });
-      xmlContent += '</Row>\n';
+      if (Array.isArray(data)) {
+        // Array of objects - tabular format
+        if (data.length === 0) {
+          toast.error(t('No data to export'));
+          return;
+        }
+        
+        const headers = Object.keys(data[0]);
+        
+        // Header row
+        xmlContent += '<Row>\n';
+        headers.forEach(header => {
+          xmlContent += `<Cell><Data ss:Type="String">${escapeXml(header)}</Data></Cell>\n`;
+        });
+        xmlContent += '</Row>\n';
+        
+        // Data rows
+        data.forEach(row => {
+          xmlContent += '<Row>\n';
+          headers.forEach(header => {
+            const value = row[header];
+            let strValue = '';
+            
+            if (value === null || value === undefined) {
+              strValue = '';
+            } else if (typeof value === 'object') {
+              strValue = JSON.stringify(value);
+            } else {
+              strValue = String(value);
+            }
+            
+            const isNumber = !isNaN(Number(strValue)) && strValue.trim() !== '' && typeof value === 'number';
+            xmlContent += `<Cell><Data ss:Type="${isNumber ? 'Number' : 'String'}">${escapeXml(strValue)}</Data></Cell>\n`;
+          });
+          xmlContent += '</Row>\n';
+        });
+        
+      } else {
+        // Single object - key-value format
+        const headers = Object.keys(data);
+        const values = Object.values(data);
+        
+        // Header row
+        xmlContent += '<Row>\n';
+        headers.forEach(header => {
+          xmlContent += `<Cell><Data ss:Type="String">${escapeXml(header)}</Data></Cell>\n`;
+        });
+        xmlContent += '</Row>\n';
+        
+        // Data row
+        xmlContent += '<Row>\n';
+        values.forEach(value => {
+          let strValue = '';
+          
+          if (value === null || value === undefined) {
+            strValue = '';
+          } else if (typeof value === 'object') {
+            strValue = JSON.stringify(value);
+          } else {
+            strValue = String(value);
+          }
+          
+          const isNumber = !isNaN(Number(strValue)) && strValue.trim() !== '';
+          xmlContent += `<Cell><Data ss:Type="${isNumber ? 'Number' : 'String'}">${escapeXml(strValue)}</Data></Cell>\n`;
+        });
+        xmlContent += '</Row>\n';
+      }
       
       xmlContent += '</Table>\n';
       xmlContent += '</Worksheet>\n';
@@ -134,14 +216,53 @@ export function ExportDataButton({
     try {
       setIsExporting(true);
       let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
-      xmlContent += '<data>\n';
       
-      Object.entries(data).forEach(([key, value]) => {
-        const sanitizedKey = key.replace(/[^a-zA-Z0-9_]/g, '_');
-        xmlContent += `  <${sanitizedKey}>${escapeXml(String(value))}</${sanitizedKey}>\n`;
-      });
-      
-      xmlContent += '</data>';
+      if (Array.isArray(data)) {
+        // Array of objects - tabular format
+        xmlContent += '<records>\n';
+        
+        data.forEach((row, index) => {
+          xmlContent += `  <record index="${index + 1}">\n`;
+          Object.entries(row).forEach(([key, value]) => {
+            const sanitizedKey = key.replace(/[^a-zA-Z0-9_]/g, '_');
+            let strValue = '';
+            
+            if (value === null || value === undefined) {
+              strValue = '';
+            } else if (typeof value === 'object') {
+              strValue = JSON.stringify(value);
+            } else {
+              strValue = String(value);
+            }
+            
+            xmlContent += `    <${sanitizedKey}>${escapeXml(strValue)}</${sanitizedKey}>\n`;
+          });
+          xmlContent += '  </record>\n';
+        });
+        
+        xmlContent += '</records>';
+        
+      } else {
+        // Single object - key-value format
+        xmlContent += '<data>\n';
+        
+        Object.entries(data).forEach(([key, value]) => {
+          const sanitizedKey = key.replace(/[^a-zA-Z0-9_]/g, '_');
+          let strValue = '';
+          
+          if (value === null || value === undefined) {
+            strValue = '';
+          } else if (typeof value === 'object') {
+            strValue = JSON.stringify(value);
+          } else {
+            strValue = String(value);
+          }
+          
+          xmlContent += `  <${sanitizedKey}>${escapeXml(strValue)}</${sanitizedKey}>\n`;
+        });
+        
+        xmlContent += '</data>';
+      }
       
       downloadFile(xmlContent, `${sanitizeFilename(filename)}.xml`, 'application/xml');
       toast.success(t('Exported to XML successfully!'));
@@ -164,7 +285,7 @@ export function ExportDataButton({
       htmlContent += `  <title>${escapeHtml(filename)}</title>\n`;
       htmlContent += '  <style>\n';
       htmlContent += '    body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }\n';
-      htmlContent += '    .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }\n';
+      htmlContent += '    .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }\n';
       htmlContent += '    h1 { color: #333; border-bottom: 3px solid #2563eb; padding-bottom: 10px; }\n';
       htmlContent += '    table { width: 100%; border-collapse: collapse; margin-top: 20px; }\n';
       htmlContent += '    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }\n';
@@ -177,22 +298,74 @@ export function ExportDataButton({
       htmlContent += '  <div class="container">\n';
       htmlContent += `    <h1>${escapeHtml(filename)}</h1>\n`;
       htmlContent += '    <table>\n';
-      htmlContent += '      <thead>\n';
-      htmlContent += '        <tr>\n';
-      htmlContent += '          <th>Field</th>\n';
-      htmlContent += '          <th>Value</th>\n';
-      htmlContent += '        </tr>\n';
-      htmlContent += '      </thead>\n';
-      htmlContent += '      <tbody>\n';
       
-      Object.entries(data).forEach(([key, value]) => {
+      if (Array.isArray(data)) {
+        // Array of objects - tabular format
+        if (data.length > 0) {
+          const headers = Object.keys(data[0]);
+          
+          // Header row
+          htmlContent += '      <thead>\n';
+          htmlContent += '        <tr>\n';
+          headers.forEach(header => {
+            htmlContent += `          <th>${escapeHtml(header)}</th>\n`;
+          });
+          htmlContent += '        </tr>\n';
+          htmlContent += '      </thead>\n';
+          
+          // Data rows
+          htmlContent += '      <tbody>\n';
+          data.forEach(row => {
+            htmlContent += '        <tr>\n';
+            headers.forEach(header => {
+              const value = row[header];
+              let strValue = '';
+              
+              if (value === null || value === undefined) {
+                strValue = '';
+              } else if (typeof value === 'object') {
+                strValue = JSON.stringify(value);
+              } else {
+                strValue = String(value);
+              }
+              
+              htmlContent += `          <td>${escapeHtml(strValue)}</td>\n`;
+            });
+            htmlContent += '        </tr>\n';
+          });
+          htmlContent += '      </tbody>\n';
+        }
+        
+      } else {
+        // Single object - key-value format
+        htmlContent += '      <thead>\n';
         htmlContent += '        <tr>\n';
-        htmlContent += `          <td><strong>${escapeHtml(key)}</strong></td>\n`;
-        htmlContent += `          <td>${escapeHtml(String(value))}</td>\n`;
+        htmlContent += '          <th>Field</th>\n';
+        htmlContent += '          <th>Value</th>\n';
         htmlContent += '        </tr>\n';
-      });
+        htmlContent += '      </thead>\n';
+        htmlContent += '      <tbody>\n';
+        
+        Object.entries(data).forEach(([key, value]) => {
+          let strValue = '';
+          
+          if (value === null || value === undefined) {
+            strValue = '';
+          } else if (typeof value === 'object') {
+            strValue = JSON.stringify(value);
+          } else {
+            strValue = String(value);
+          }
+          
+          htmlContent += '        <tr>\n';
+          htmlContent += `          <td><strong>${escapeHtml(key)}</strong></td>\n`;
+          htmlContent += `          <td>${escapeHtml(strValue)}</td>\n`;
+          htmlContent += '        </tr>\n';
+        });
+        
+        htmlContent += '      </tbody>\n';
+      }
       
-      htmlContent += '      </tbody>\n';
       htmlContent += '    </table>\n';
       htmlContent += `    <div class="footer">Generated on ${new Date().toLocaleString()}</div>\n`;
       htmlContent += '  </div>\n';
