@@ -30,6 +30,20 @@ class AnalyzeDocument
     {
         // Try normal extraction first
         try {
+            $mime = $file->getMimeType();
+
+            // If it's an image, skip text extraction and use Vision
+            if (str_starts_with($mime, 'image/')) {
+                $base64 = base64_encode(file_get_contents($file->getRealPath()));
+                $fields = $this->fieldDetector->detectFromImage($base64);
+                
+                return [
+                    'fields' => $fields,
+                    'text' => '', // No text extracted for images in analysis phase
+                    'message' => 'Image analyzed using AI Vision',
+                ];
+            }
+
             $text = $this->textExtractor->extract($file);
 
             if ($text === '') {

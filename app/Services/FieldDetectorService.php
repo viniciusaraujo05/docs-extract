@@ -26,7 +26,59 @@ final class FieldDetectorService
      *
      * @throws RuntimeException Se a detecção falhar
      */
+    /**
+     * Detecta campos extraíveis no texto do documento.
+     *
+     * @param  string  $text  Texto do documento a analisar
+     * @return array<array{name: string, label: string, type: string}> Campos detectados
+     *
+     * @throws RuntimeException Se a detecção falhar
+     */
     public function detect(string $text): array
+    {
+        return $this->callOpenAi([
+            [
+                'role' => 'system',
+                'content' => $this->getSystemPrompt(),
+            ],
+            [
+                'role' => 'user',
+                'content' => "Analise este documento e identifique todos os campos de dados que podem ser extraídos:\n\n{$text}",
+            ],
+        ]);
+    }
+
+    /**
+     * Detecta campos extraíveis a partir de uma imagem.
+     * 
+     * @param string $base64Image Imagem em Base64
+     */
+    public function detectFromImage(string $base64Image): array
+    {
+        return $this->callOpenAi([
+            [
+                'role' => 'system',
+                'content' => $this->getSystemPrompt(),
+            ],
+            [
+                'role' => 'user',
+                'content' => [
+                    [
+                        'type' => 'text',
+                        'text' => 'Analise esta imagem de documento e identifique todos os campos de dados que podem ser extraídos.',
+                    ],
+                    [
+                        'type' => 'image_url',
+                        'image_url' => [
+                            'url' => "data:image/jpeg;base64,{$base64Image}",
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    private function callOpenAi(array $messages): array
     {
         $apiKey = $this->getApiKey();
 
@@ -34,17 +86,8 @@ final class FieldDetectorService
         $response = Http::withToken($apiKey)
             ->timeout(self::TIMEOUT)
             ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => config('services.openai.model', 'gpt-4o-mini'),
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => $this->getSystemPrompt(),
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => "Analise este documento e identifique todos os campos de dados que podem ser extraídos:\n\n{$text}",
-                    ],
-                ],
+                'model' => config('services.openai.model', 'gpt-4o'), // Use capable model
+                'messages' => $messages,
                 'temperature' => 0.1,
                 'response_format' => ['type' => 'json_object'],
             ]);

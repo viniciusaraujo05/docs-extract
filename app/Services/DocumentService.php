@@ -8,21 +8,22 @@ use App\Models\Document;
 use App\Models\ExtractionSchema;
 use App\Models\User;
 use App\Repositories\DocumentRepository;
+use App\Services\Extraction\ExtractionStrategyFactory;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 /**
- * Serviço para processamento de documentos.
+ * Service for document processing.
  *
- * Refatorado para usar Repository Pattern.
+ * Updated to use Extraction Strategies (Vision/Text).
  */
 final class DocumentService
 {
     public function __construct(
         private readonly DocumentRepository $documentRepository,
-        private readonly ExtractionService $extractionService,
-        private readonly ?EnhancedExtractionService $enhancedExtractionService = null,
+        private readonly ExtractionStrategyFactory $extractionStrategyFactory
     ) {}
 
     public function upload(UploadedFile $file, User $user, string $type = 'invoice', ?array $schema = null): Document
@@ -61,47 +62,32 @@ final class DocumentService
         $document->markAsProcessing();
 
         try {
-            $rawText = $this->extractText($document);
-            $this->documentRepository->update($document, ['raw_text' => $rawText]);
+            // Get appropriate strategy
+            $strategy = $this->extractionStrategyFactory->getStrategy($document);
             
-            // Pass image path if it's an image file
-            $imagePath = null;
-            if (str_starts_with($document->mime_type, 'image/')) {
-                $imagePath = Storage::disk('local')->path($document->file_path);
-            }
+            Log::info("Processing document {$document->id} using " . get_class($strategy));
 
-            $result = $this->extractionService->extract(
-                $rawText,
-                $document->schema_used ?? $this->getDefaultSchema($document->type),
-                $imagePath
+            $result = $strategy->extract(
+                $document, 
+                $document->schema_used ?? $this->getDefaultSchema($document->type)
             );
 
+            // Save raw text if available
+            if (!empty($result['raw_text'])) {
+                $this->documentRepository->update($document, ['raw_text' => $result['raw_text']]);
+            }
+
             $document->markAsCompleted(
-                $result['data'],
-                $result['confidence'] ?? null
+                $result['data']
             );
 
             $document->increment('credits_used');
         } catch (\Exception $e) {
+            Log::error("Document processing failed: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             $document->markAsFailed($e->getMessage());
         }
 
         return $document->fresh();
-    }
-
-    public function extractText(Document $document): string
-    {
-        $path = Storage::disk('local')->path($document->file_path);
-
-        if (str_contains($document->mime_type, 'pdf')) {
-            return $this->extractTextFromPdf($path);
-        }
-
-        if (str_starts_with($document->mime_type, 'image/')) {
-            return $this->extractTextFromImage($path);
-        }
-
-        return '';
     }
 
     public function updateExtractedData(Document $document, array $data): Document
@@ -128,25 +114,13 @@ final class DocumentService
 
         return $this->documentRepository->delete($document);
     }
-
-    private function extractTextFromPdf(string $path): string
+    
+    // Kept for backward compatibility if needed, but should be deprecated
+    public function extractText(Document $document): string
     {
-        // MVP: Usar biblioteca simples ou mock
-        // Em produção, usar Smalot/PdfParser ou serviço OCR
-        if (class_exists(\Smalot\PdfParser\Parser::class)) {
-            $parser = new \Smalot\PdfParser\Parser;
-            $pdf = $parser->parseFile($path);
-
-            return $pdf->getText();
-        }
-
-        // Mock para desenvolvimento
-        return "Texto extraído do PDF (mock).\nFatura nº 2024/001\nData: 15/12/2024\nFornecedor: Empresa ABC Lda\nNIF: 123456789\nTotal: 1230.00 EUR\nIVA: 230.00 EUR";
-    }
-
-    private function extractTextFromImage(string $path): string
-    {
-        // MVP: Mock - em produção usar Tesseract OCR ou serviço cloud
-        return "Texto extraído da imagem (mock).\nRecibo de compra\nData: 15/12/2024\nTotal: 45.50 EUR";
+        // This method is now legacy as extraction is handled by strategies which might not just produce text
+        // But for UI "preview" purposes, we might still want it.
+        // For now, return empty or implement a simple reader.
+        return ""; 
     }
 }
