@@ -13,7 +13,12 @@ class PromptFactory
 
     public function createExtractionPrompt(string $context, array $schema): string
     {
-        $fields = collect($schema['fields'] ?? [])->map(fn($f) => "- {$f['name']} ({$f['type']})")->implode("\n");
+        $fields = collect($schema['fields'] ?? [])->map(function($f) {
+            if (is_string($f)) {
+                return "- {$f} (string)";
+            }
+            return "- {$f['name']} ({$f['type']})";
+        })->implode("\n");
 
         return <<<PROMPT
 Extract the following fields from the document.

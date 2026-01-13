@@ -175,7 +175,7 @@ final class VisionStrategy implements ExtractionStrategyInterface
     private function processWithVision(array $base64Images, array $schema): array
     {
         $apiKey = config('services.openai.api_key');
-        $model = config('services.openai.model', 'gpt-4o');
+        $model = config('services.openai.model', 'gpt-4o-mini');
         
         // Build field list from schema
         $fieldsList = collect($schema['fields'] ?? [])

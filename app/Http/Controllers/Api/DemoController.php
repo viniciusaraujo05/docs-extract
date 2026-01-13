@@ -40,12 +40,9 @@ class DemoController extends Controller
             $analysis = $this->analyzeDocumentAction->execute($file);
             $detectedFields = $analysis['fields'];
             
-            // Extract just the field names for the strategy
-            $fieldNames = array_column($detectedFields, 'name');
-
             // 2. Extract data using the inferred fields
             // Pass null for user as this is a public demo
-            $result = $this->extractAction->execute(null, $file, $fieldNames);
+            $result = $this->extractAction->execute(null, $file, $detectedFields);
 
             if (!$result['success']) {
                 throw new \Exception($result['error'] ?? 'Extraction failed');
