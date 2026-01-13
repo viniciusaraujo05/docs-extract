@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a7a1e0e3db16cc2bd3f2ab54542da6bd",
+    "content-hash": "e26e0f4b6c485b3f3a9bf65ee48317bd",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4475,76 +4475,6 @@
                 "source": "https://github.com/smalot/pdfparser/tree/v2.12.2"
             },
             "time": "2025-09-04T08:49:09+00:00"
-        },
-        {
-            "name": "spatie/pdf-to-image",
-            "version": "3.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/spatie/pdf-to-image.git",
-                "reference": "acc31c5236180e475c09c1a5c68412876f0bd89a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/spatie/pdf-to-image/zipball/acc31c5236180e475c09c1a5c68412876f0bd89a",
-                "reference": "acc31c5236180e475c09c1a5c68412876f0bd89a",
-                "shasum": ""
-            },
-            "require": {
-                "ext-imagick": "*",
-                "php": "^8.2"
-            },
-            "require-dev": {
-                "pestphp/pest": "^2.34"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Spatie\\PdfToImage\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Freek Van der Herten",
-                    "email": "freek@spatie.be",
-                    "homepage": "https://spatie.be",
-                    "role": "Developer"
-                },
-                {
-                    "name": "Patrick Organ",
-                    "email": "patrick@permafrost.dev",
-                    "homepage": "https://permafrost.dev",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Convert a pdf to an image",
-            "homepage": "https://github.com/spatie/pdf-to-image",
-            "keywords": [
-                "convert",
-                "image",
-                "pdf",
-                "pdf-to-image",
-                "spatie"
-            ],
-            "support": {
-                "issues": "https://github.com/spatie/pdf-to-image/issues",
-                "source": "https://github.com/spatie/pdf-to-image/tree/3.1.0"
-            },
-            "funding": [
-                {
-                    "url": "https://spatie.be/open-source/support-us",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/spatie",
-                    "type": "github"
-                }
-            ],
-            "time": "2024-09-14T17:02:32+00:00"
         },
         {
             "name": "stripe/stripe-php",
@@ -12425,7 +12355,8 @@
     "prefer-lowest": false,
     "platform": {
         "php": "^8.5",
-        "ext-bcmath": "*"
+        "ext-bcmath": "*",
+        "ext-imagick": "*"
     },
     "platform-dev": {},
     "plugin-api-version": "2.9.0"

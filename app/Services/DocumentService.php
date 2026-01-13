@@ -26,27 +26,6 @@ final class DocumentService
         private readonly ExtractionStrategyFactory $extractionStrategyFactory
     ) {}
 
-    public function upload(UploadedFile $file, User $user, string $type = 'invoice', ?array $schema = null): Document
-    {
-        $filename = Str::uuid().'.'.$file->getClientOriginalExtension();
-        $path = $file->storeAs('documents/'.$user->id, $filename, 'local');
-
-        $schemaToUse = $schema ?? $this->getDefaultSchema($type);
-
-        return $this->documentRepository->create([
-            'user_id' => $user->id,
-            'organization_id' => $user->organization_id,
-            'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
-            'original_filename' => $file->getClientOriginalName(),
-            'file_path' => $path,
-            'mime_type' => $file->getMimeType(),
-            'file_size' => $file->getSize(),
-            'type' => $type,
-            'status' => 'pending',
-            'schema_used' => $schemaToUse,
-        ]);
-    }
-
     public function getDefaultSchema(string $type): array
     {
         return match ($type) {
@@ -137,14 +116,5 @@ final class DocumentService
         Storage::disk('local')->delete($document->file_path);
 
         return $this->documentRepository->delete($document);
-    }
-    
-    // Kept for backward compatibility if needed, but should be deprecated
-    public function extractText(Document $document): string
-    {
-        // This method is now legacy as extraction is handled by strategies which might not just produce text
-        // But for UI "preview" purposes, we might still want it.
-        // For now, return empty or implement a simple reader.
-        return ""; 
     }
 }

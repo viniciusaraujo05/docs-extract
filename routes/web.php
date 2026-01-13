@@ -223,6 +223,9 @@ Route::prefix('api/demo')->middleware(['throttle:3,60'])->group(function () {
     Route::get('check', [\App\Http\Controllers\Api\DemoController::class, 'checkAvailability']);
 });
 
+// Public Plans API
+Route::get('api/plans', [PlanController::class, 'index'])->name('api.plans.index');
+
 // Stripe Webhook (must be outside auth middleware and CSRF protection)
 Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('cashier.webhook');
 

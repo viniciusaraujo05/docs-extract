@@ -6,6 +6,7 @@ namespace App\Services;
 
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 /**
@@ -82,9 +83,11 @@ final class FieldDetectorService
     {
         $apiKey = $this->getApiKey();
 
+
         /** @var Response $response */
         $response = Http::withToken($apiKey)
             ->timeout(self::TIMEOUT)
+            ->withoutVerifying()
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => config('services.openai.model', 'gpt-4o'), // Use capable model
                 'messages' => $messages,

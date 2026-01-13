@@ -42,7 +42,7 @@ final class AnalyzeReportWithAIAction
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$apiKey,
                 'Content-Type' => 'application/json',
-            ])->timeout(60)->post(self::API_URL, [
+            ])->timeout(60)->withoutVerifying()->post(self::API_URL, [
                 'model' => self::MODEL,
                 'messages' => [
                     [

@@ -192,6 +192,7 @@ final class PdfTextExtractor implements TextExtractorInterface
         /** @var \Illuminate\Http\Client\Response $response */
         $response = Http::withToken($apiKey)
             ->timeout(self::VISION_TIMEOUT)
+            ->withoutVerifying()
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => config('services.openai.model', 'gpt-4o-mini'),
                 'messages' => [

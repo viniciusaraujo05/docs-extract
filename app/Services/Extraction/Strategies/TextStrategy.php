@@ -65,6 +65,7 @@ final class TextStrategy implements ExtractionStrategyInterface
          /** @var \Illuminate\Http\Client\Response $response */
          $response = Http::withToken($apiKey)
             ->timeout(120)
+            ->withoutVerifying()
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => $model,
                 'messages' => [

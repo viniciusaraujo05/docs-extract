@@ -10,7 +10,6 @@ use App\Services\AI\PromptFactory;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use Spatie\PdfToImage\Pdf;
 use RuntimeException;
 
 final class VisionStrategy implements ExtractionStrategyInterface
@@ -29,7 +28,7 @@ final class VisionStrategy implements ExtractionStrategyInterface
         }
         
         // Support PDFs only if we can convert them to images
-        if ($mime === 'application/pdf' && class_exists(Pdf::class)) {
+        if ($mime === 'application/pdf' && class_exists('Imagick')) {
             return true;
         }
         
@@ -81,24 +80,24 @@ final class VisionStrategy implements ExtractionStrategyInterface
             Log::info("VisionStrategy: Prepared " . count($images) . " image slice(s)");
         } elseif ($document->mime_type === 'application/pdf') {
             try {
-                // Check if Ghostscript is available before trying specific PDF tools if needed, 
-                // but Spatie PDF usually throws exception.
-                $pdf = new Pdf($path);
-                // Limit to first 5 pages for now to avoid huge payloads
-                $pageCount = $pdf->pageCount();
-                $pagesToProcess = min($pageCount, 5);
+                // Use centralized PDF to Image service
+                $fullPath = Storage::disk('local')->path($document->file_path);
                 
-                $tempDir = sys_get_temp_dir();
+                /** @var \App\Services\PdfToImageService $pdfService */
+                $pdfService = app(\App\Services\PdfToImageService::class);
                 
-                for ($i = 1; $i <= $pagesToProcess; $i++) {
-                    $tempImage = tempnam($tempDir, 'pdf_extract_') . '.jpg';
-                    $pdf->selectPage($i)->save($tempImage);
-                    $images[] = base64_encode(file_get_contents($tempImage));
-                    unlink($tempImage);
+                $imagePaths = $pdfService->convertPdf($fullPath);
+                
+                foreach ($imagePaths as $imagePath) {
+                    $images[] = base64_encode(file_get_contents($imagePath));
                 }
+                
+                // Cleanup temp images immediately after reading
+                $pdfService->cleanup($imagePaths);
+                
             } catch (\Exception $e) {
-                Log::warning("PDF to Image conversion failed (Ghostscript missing?): " . $e->getMessage());
-                return []; // Return empty, causing caller to maybe fallback
+                Log::warning("PDF to Image conversion failed: " . $e->getMessage());
+                return []; 
             }
         }
 
@@ -204,6 +203,7 @@ final class VisionStrategy implements ExtractionStrategyInterface
         /** @var \Illuminate\Http\Client\Response $response */
         $response = Http::withToken($apiKey)
             ->timeout(180)
+            ->withoutVerifying()
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => $model,
                 'messages' => [

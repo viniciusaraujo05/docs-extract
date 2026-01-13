@@ -12,7 +12,7 @@ import { AIAnalysisModal } from '@/components/reports/AIAnalysisModal';
 import { ExportDataButton } from '@/components/export-data-button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { Download, FileText, BarChart3, Calculator, Loader2, Settings2, Table2, PieChart, Palette, Sparkles } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -117,6 +117,29 @@ interface ReportConfig {
 export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
     const { t } = useTranslation();
     
+    // Check for pending subscription from registration
+    useEffect(() => {
+        const pendingPlan = localStorage.getItem('pending_plan');
+        const pendingPriceId = localStorage.getItem('pending_price_id');
+        const pendingPlanName = localStorage.getItem('pending_plan_name');
+        
+        if (pendingPlan) {
+            // Clear immediately
+            localStorage.removeItem('pending_plan');
+            localStorage.removeItem('pending_price_id');
+            localStorage.removeItem('pending_plan_name');
+            
+            if (pendingPlan !== 'free' && pendingPriceId) {
+                const currentPath = window.location.pathname;
+                const localeMatch = currentPath.match(/^\/([a-z]{2}(?:-[A-Z]{2})?)/);
+                const currentLocale = localeMatch ? localeMatch[1] : 'en';
+                
+                toast.info(t('Continuing to checkout...'));
+                router.visit(`/${currentLocale}/subscription/checkout?price_id=${pendingPriceId}&plan_name=${pendingPlanName || ''}`);
+            }
+        }
+    }, [t]);
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: t('Reports'), href: '/dashboard' },
     ];

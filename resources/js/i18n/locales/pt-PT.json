@@ -15,7 +15,6 @@
   "Login": "Iniciar sessão",
   "Register": "Registar",
   "Email": "E-mail",
-  "Password": "Senha",
   "Remember me": "Manter sessão iniciada",
   "Forgot your password?": "Esqueceu-se da senha?",
   "Already registered?": "Já está registado?",
@@ -402,7 +401,7 @@
       "title": "Transforme documentos caóticos",
       "highlight": "em dados fiáveis e utilizáveis",
       "subtitle": "Envie PDFs ou imagens, defina os campos que importam, reveja cada registo e entregue dados estruturados para relatórios ou integrações.",
-      "cta_primary": "Começar grátis",
+      "cta_primary": "Começar Agora",
       "cta_secondary": "Ver demonstração",
       "triggers": [
         "Sem implementação pesada",

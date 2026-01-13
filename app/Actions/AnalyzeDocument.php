@@ -3,7 +3,6 @@
 namespace App\Actions;
 
 use App\Services\FieldDetectorService;
-use App\Services\PdfAutoConversionService;
 use App\Services\PdfValidationService;
 use App\Services\TextExtractorManager;
 use Illuminate\Http\UploadedFile;
@@ -17,7 +16,6 @@ class AnalyzeDocument
         private readonly TextExtractorManager $textExtractor,
         private readonly FieldDetectorService $fieldDetector,
         private readonly PdfValidationService $pdfValidationService,
-        private readonly PdfAutoConversionService $pdfConversionService,
     ) {}
 
     /**
@@ -73,27 +71,54 @@ class AnalyzeDocument
     /**
      * Handles PDF conversion when normal extraction fails.
      */
+    /**
+     * Handles PDF conversion when normal extraction fails.
+     */
     private function handlePdfConversion(UploadedFile $file): array
     {
         // Check file size first
-        if ($file->getSize() > 5 * 1024 * 1024) { // 5MB
+        if ($file->getSize() > 10 * 1024 * 1024) { // 10MB limit
             return [
                 'fields' => $this->fieldDetector->getDefaultFields(),
                 'text' => '',
-                'message' => 'PDF is too large for automatic analysis. Please convert to images manually.',
+                'message' => 'PDF is too large for automatic analysis.',
             ];
         }
 
-        // Try conversion
-        $text = $this->pdfConversionService->extractWithConversion($file);
+        try {
+            /** @var \App\Services\PdfToImageService $pdfService */
+            $pdfService = app(\App\Services\PdfToImageService::class);
+            
+            // Convert first page only for analysis
+            $imagePaths = $pdfService->convertPdf($file);
+            
+            if (empty($imagePaths)) {
+                throw new \RuntimeException('Failed to convert PDF to image');
+            }
+            
+            // Use first page for detection
+            $firstPage = $imagePaths[0];
+            $base64 = base64_encode(file_get_contents($firstPage));
+            
+            // Clean up
+            $pdfService->cleanup($imagePaths);
+            
+            // Detect from image
+            $fields = $this->fieldDetector->detectFromImage($base64);
 
-        // Detect fields from converted text
-        $fields = $this->fieldDetector->detect($text);
-
-        return [
-            'fields' => $fields,
-            'text' => mb_substr($text, 0, 1000),
-            'message' => 'PDF was automatically converted from image for analysis',
-        ];
+            return [
+                'fields' => $fields,
+                'text' => '', // No text text for image analysis
+                'message' => 'PDF analyzed using AI Vision (converted to image)',
+            ];
+            
+        } catch (\Throwable $e) {
+            // Fallback
+             return [
+                'fields' => $this->fieldDetector->getDefaultFields(),
+                'text' => '',
+                'message' => 'Could not analyze PDF: ' . $e->getMessage(),
+            ];
+        }
     }
 }

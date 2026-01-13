@@ -25,21 +25,24 @@ final readonly class ExtractFromUploadedFileAction
     /**
      * Execute extraction from uploaded file.
      *
-     * @param User $user Current user
+     * @param ?User $user Current user (nullable for demo)
      * @param UploadedFile $file Uploaded document file
      * @param array $fields Schema fields to extract
      * @return array{success: bool, extracted_data?: array, confidence?: int, raw_text_preview?: string, error?: string}
      */
-    public function execute(User $user, UploadedFile $file, array $fields): array
+    public function execute(?User $user, UploadedFile $file, array $fields): array
     {
+        $userId = $user ? $user->id : 'guest';
+        $orgId = $user ? $user->organization_id : null;
+        
         $filename = Str::uuid()->toString() . '.' . $file->getClientOriginalExtension();
-        $filePath = $file->storeAs("temp_extractions/{$user->id}", $filename, 'local');
+        $filePath = $file->storeAs("temp_extractions/{$userId}", $filename, 'local');
 
         try {
             // Create temporary document model (not saved to DB)
             $tempDocument = new \App\Models\Document();
-            $tempDocument->user_id = $user->id;
-            $tempDocument->organization_id = $user->organization_id;
+            $tempDocument->user_id = $userId === 'guest' ? 0 : $userId;
+            $tempDocument->organization_id = $orgId;
             $tempDocument->name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $tempDocument->original_filename = $file->getClientOriginalName();
             $tempDocument->file_path = $filePath;

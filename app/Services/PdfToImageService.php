@@ -9,15 +9,18 @@ class PdfToImageService
 {
     /**
      * Converte PDF para imagens JPG
+     * 
+     * @param UploadedFile|string $file
      */
-    public function convertPdf(UploadedFile $file): array
+    public function convertPdf(UploadedFile|string $file): array
     {
         if (! class_exists('Imagick')) {
             throw new RuntimeException('Imagick não está disponível');
         }
 
-        $path = $file->getRealPath();
-        if ($path === false) {
+        $path = $file instanceof UploadedFile ? $file->getRealPath() : $file;
+        
+        if ($path === false || !file_exists($path)) {
             throw new RuntimeException('Não foi possível acessar o arquivo');
         }
 

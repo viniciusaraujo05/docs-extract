@@ -62,6 +62,22 @@ export default function Register({ canRegister }: RegisterProps) {
         setPasswordStrength(strength);
     }, [password]);
 
+    // Save plan intent if present
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const plan = params.get('plan');
+            const priceId = params.get('price_id');
+            const planName = params.get('plan_name') || plan;
+            
+            if (plan) {
+                localStorage.setItem('pending_plan', plan);
+                if (priceId) localStorage.setItem('pending_price_id', priceId);
+                if (planName) localStorage.setItem('pending_plan_name', planName);
+            }
+        }
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);

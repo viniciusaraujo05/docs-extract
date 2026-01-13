@@ -63,6 +63,17 @@ export default function CookieConsent({ locale = 'en' }: CookieConsentProps) {
 
   useEffect(() => {
     checkConsentStatus();
+
+    const handleOpenSettings = () => {
+      setShowBanner(true);
+      setShowSettings(true);
+    };
+
+    window.addEventListener('openCookieSettings', handleOpenSettings);
+
+    return () => {
+      window.removeEventListener('openCookieSettings', handleOpenSettings);
+    };
   }, []);
 
   const checkConsentStatus = async () => {
@@ -87,7 +98,7 @@ export default function CookieConsent({ locale = 'en' }: CookieConsentProps) {
     };
     
     try {
-      await axios.post('/cookie-consent/accept', { preferences: allAccepted });
+      await axios.post(`/${locale}/cookie-consent/accept`, { preferences: allAccepted });
       setShowBanner(false);
       setShowSettings(false);
     } catch (error) {
@@ -97,7 +108,7 @@ export default function CookieConsent({ locale = 'en' }: CookieConsentProps) {
 
   const handleRejectAll = async () => {
     try {
-      await axios.post('/cookie-consent/reject');
+      await axios.post(`/${locale}/cookie-consent/reject`);
       setShowBanner(false);
       setShowSettings(false);
     } catch (error) {
@@ -107,7 +118,7 @@ export default function CookieConsent({ locale = 'en' }: CookieConsentProps) {
 
   const handleSavePreferences = async () => {
     try {
-      await axios.post('/cookie-consent/accept', { preferences });
+      await axios.post(`/${locale}/cookie-consent/accept`, { preferences });
       setShowBanner(false);
       setShowSettings(false);
     } catch (error) {

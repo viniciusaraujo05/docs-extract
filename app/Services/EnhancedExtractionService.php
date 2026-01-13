@@ -140,6 +140,7 @@ final class EnhancedExtractionService
     {
         $response = Http::withToken($apiKey)
             ->timeout(self::TIMEOUT)
+            ->withoutVerifying()
             ->retry(3, 1000, function ($exception, $request) {
                 // Retry on timeout or rate limit
                 return $exception instanceof \Illuminate\Http\Client\ConnectionException

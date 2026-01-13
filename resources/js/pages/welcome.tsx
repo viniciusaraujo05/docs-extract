@@ -53,6 +53,7 @@ import {
   Layers,
 } from "lucide-react";
 import { toast } from "sonner";
+import CookieConsent from "@/components/CookieConsent";
 
 // Fallbacks removed to use direct translation keys
 
@@ -178,7 +179,7 @@ export default function Welcome() {
       <ProductFlow locale={fullLocale} />
       <Features locale={fullLocale} />
       <CodeExample locale={fullLocale} onOpenDemo={() => setShowDemo(true)} />
-      <Pricing locale={fullLocale} />
+      <Pricing locale={fullLocale} isAuthenticated={isAuthenticated} localeShort={locale} />
       <FinalCTA locale={fullLocale} />
       <Footer locale={locale} />
       {showDemo && (
@@ -191,6 +192,7 @@ export default function Welcome() {
           }}
         />
       )}
+      <CookieConsent locale={locale} />
     </div>
   );
 }
@@ -219,7 +221,7 @@ function Header({
       pricing: t('landing.nav.pricing'),
       api: t('API'),
       login: t('Login'),
-      startFree: t('landing.hero.cta_primary'), // Reuse primary CTA or specific key if exists. Using Start Free from JSON
+      startFree: t('Get Started'), 
       dashboard: t('Dashboard')
     };
   };
@@ -1005,7 +1007,7 @@ function CodeExample({ locale, onOpenDemo }: { locale: string; onOpenDemo: () =>
   );
 }
 
-function Pricing({ locale }: { locale: string }) {
+function Pricing({ locale, isAuthenticated, localeShort }: { locale: string; isAuthenticated: boolean; localeShort: string }) {
   const { t } = useTranslation();
   const getPricingText = () => {
     return {
@@ -1164,7 +1166,27 @@ function Pricing({ locale }: { locale: string }) {
                     className="relative z-10"
                   >
                     <Button
-                      onClick={() => router.visit(`/${locale}/register`)}
+                      onClick={() => {
+                        const baseUrl = isAuthenticated ? `/${locale}/subscription/checkout` : `/${locale}/register`;
+                        const params = new URLSearchParams();
+                        
+                        if (isAuthenticated) {
+                            if (plan.id !== 'free') {
+                                params.append('price_id', plan.price_id);
+                                params.append('plan_name', plan.name);
+                            } else {
+                                // Already on free/dashboard
+                                router.visit(`/${locale}/dashboard`);
+                                return;
+                            }
+                        } else {
+                            // Register flow - pass plan intet
+                            params.append('plan', plan.id);
+                            if (plan.price_id) params.append('price_id', plan.price_id);
+                        }
+                        
+                        router.visit(`${baseUrl}?${params.toString()}`);
+                      }}
                       className={`w-full h-10 text-sm font-medium ${
                         plan.popular
                           ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/25'
@@ -1244,45 +1266,74 @@ function FinalCTA({ locale }: { locale: string }) {
 
 function Footer({ locale }: { locale: string }) {
   const { t } = useTranslation();
+  
+  const handleOpenCookieSettings = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.dispatchEvent(new Event('openCookieSettings'));
+  };
+
   return (
-    <footer className="border-t border-white/10 py-16 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-t from-blue-950/20 to-transparent pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
-          <div className="sm:col-span-2 lg:col-span-1">
+    <footer className="bg-zinc-950 border-t border-white/10 py-12 px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+          <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                <FileJson className="h-5 w-5 text-white" />
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                <img src="/docset.png" alt="Docset" className="w-6 h-6" />
               </div>
-              <span className="font-bold text-lg">DOCSET</span>
+              <span className="font-bold text-xl">DOCSET</span>
             </div>
-            <p className="text-sm text-gray-400">
-              {t('landing.hero.subtitle')}
+            <p className="text-gray-400 text-sm mb-6">
+              Automated document processing powered by Advanced AI Vision.
             </p>
+          <div className="flex gap-4">
+              {/* Social Links would go here */}
+            </div>
           </div>
-
+          
           <div>
-            <h4 className="font-semibold mb-4">{t('landing.nav.product')}</h4>
+            <h3 className="font-semibold mb-4">Product</h3>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#features" className="hover:text-white transition">{t('landing.nav.control')}</a></li>
-              <li><a href="#pricing" className="hover:text-white transition">{t('landing.nav.pricing')}</a></li>
+              <li><a href="#features" className="hover:text-white transition">Features</a></li>
+              <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
+              <li><a href="#api" className="hover:text-white transition">API</a></li>
             </ul>
           </div>
-
+          
           <div>
-            <h4 className="font-semibold mb-4">{t('Legal')}</h4>
+            <h3 className="font-semibold mb-4">Resources</h3>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li><a href="#" className="hover:text-white transition">Documentation</a></li>
+              <li><a href="#" className="hover:text-white transition">Blog</a></li>
+              <li><a href="#" className="hover:text-white transition">Support</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h3 className="font-semibold mb-4">Legal</h3>
             <ul className="space-y-2 text-sm text-gray-400">
               <li><a href={`/${locale}/privacy`} className="hover:text-white transition">{t('Privacy Policy')}</a></li>
               <li><a href={`/${locale}/terms`} className="hover:text-white transition">{t('Terms of Service')}</a></li>
+              <li>
+                <button 
+                  onClick={handleOpenCookieSettings} 
+                  className="hover:text-white transition text-left"
+                >
+                  {locale === 'pt' ? 'Gerir Cookies' : 'Manage Cookies'}
+                </button>
+              </li>
             </ul>
           </div>
         </div>
-
-        <Separator className="my-12 bg-white/10" />
-
-        <div className="text-center text-sm text-gray-400">
-          <p>© 2025 DOCSET. {t('All rights reserved.')}</p>
+        
+        <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-gray-500">
+            © {new Date().getFullYear()} Docset. All rights reserved.
+          </p>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="w-2 h-2 rounded-full bg-green-500" />
+            <span>All systems operational</span>
+          </div>
         </div>
       </div>
     </footer>

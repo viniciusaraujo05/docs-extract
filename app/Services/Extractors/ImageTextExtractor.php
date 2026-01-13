@@ -49,6 +49,7 @@ final class ImageTextExtractor implements TextExtractorInterface
         /** @var Response $response */
         $response = Http::withToken($apiKey)
             ->timeout(self::TIMEOUT)
+            ->withoutVerifying()
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => config('services.openai.model', 'gpt-4o-mini'),
                 'messages' => [
