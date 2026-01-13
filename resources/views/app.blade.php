@@ -99,6 +99,18 @@
         <script type="application/ld+json">{!! $seoStructuredData !!}</script>
         @endif
 
+        {{-- Google Consent Mode v2 --}}
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('consent', 'default', {
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied',
+                'analytics_storage': 'denied',
+                'wait_for_update': 500
+            });
+        </script>
         <script type="text/javascript" charset="UTF-8" src="//cdn.cookie-script.com/s/515ed2cba50c7a9fc9f575d03a7aa1df.js"></script>
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
