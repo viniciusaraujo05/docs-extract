@@ -15,20 +15,6 @@ use Laravel\Fortify\Features;
 // SEO Routes
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
-// Cookie Consent Routes
-// Cookie Consent Routes
-Route::middleware('web')->group(function () {
-    Route::post('/cookie-consent/accept', [\App\Http\Controllers\CookieConsentController::class, 'accept'])->name('cookie.accept');
-    Route::post('/cookie-consent/reject', [\App\Http\Controllers\CookieConsentController::class, 'reject'])->name('cookie.reject');
-    Route::get('/cookie-consent/status', [\App\Http\Controllers\CookieConsentController::class, 'status'])->name('cookie.status');
-});
-
-Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->group(function () {
-    Route::post('/cookie-consent/accept', [\App\Http\Controllers\CookieConsentController::class, 'accept'])->name('cookie.accept.locale');
-    Route::post('/cookie-consent/reject', [\App\Http\Controllers\CookieConsentController::class, 'reject'])->name('cookie.reject.locale');
-    Route::get('/cookie-consent/status', [\App\Http\Controllers\CookieConsentController::class, 'status'])->name('cookie.status.locale');
-});
-
 Route::get('/', function () {
     return Inertia::render('welcome', [
         'canRegister' => Features::enabled(Features::registration()),

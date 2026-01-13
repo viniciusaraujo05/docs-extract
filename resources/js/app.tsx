@@ -8,7 +8,7 @@ import { createRoot } from 'react-dom/client';
 import { initializeTheme } from './hooks/use-appearance';
 import { Toaster } from './components/ui/sonner';
 import { ThemeProvider } from './components/theme-provider';
-import CookieConsent from './components/CookieConsent';
+
 
 const appName = import.meta.env.VITE_APP_NAME || 'DOCSET';
 
@@ -28,7 +28,7 @@ createInertiaApp({
                 <ThemeProvider defaultTheme="dark" storageKey="docset-theme">
                     <App {...props} />
                     <Toaster position="top-right" richColors closeButton />
-                    <CookieConsent locale={locale} />
+
                 </ThemeProvider>
             </StrictMode>,
         );

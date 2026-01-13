@@ -53,7 +53,7 @@ import {
   Layers,
 } from "lucide-react";
 import { toast } from "sonner";
-import CookieConsent from "@/components/CookieConsent";
+
 
 // Fallbacks removed to use direct translation keys
 
@@ -192,7 +192,7 @@ export default function Welcome() {
           }}
         />
       )}
-      <CookieConsent locale={locale} />
+
     </div>
   );
 }
