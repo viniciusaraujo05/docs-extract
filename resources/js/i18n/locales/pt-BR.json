@@ -347,314 +347,110 @@
       "pricing": "Preços"
     },
     "hero": {
-      "eyebrow": "Plataforma inteligente de extração de dados",
-      "title": "Transforme documentos caóticos",
-      "highlight": "em dados confiáveis e utilizáveis",
-      "subtitle": "Envie PDFs ou imagens, defina os campos que importam, revise cada registro e entregue dados estruturados para relatórios ou integrações.",
-      "cta_primary": "Começar Agora",
-      "cta_secondary": "Ver demo",
+      "eyebrow": "Confiado por 2.500+ equipes financeiras",
+      "title": "Recupere suas horas.",
+      "highlight": "Pare de digitar notas fiscais e recibos.",
+      "subtitle": "Converta qualquer PDF em Excel ou JSON em segundos. Sem código. Sem desenvolvedores. Apenas envie e exporte.",
+      "cta_primary": "Comece Grátis — Sem Cartão",
+      "cta_secondary": "Veja Como Funciona",
       "triggers": [
-        "Sem implementação pesada",
-        "Você define o modelo e edita antes de salvar",
-        "Relatórios e API sem BI complexo"
+        "Funciona em 2 minutos, não 2 semanas",
+        "Você controla quais dados extrair",
+        "Exporte para Excel, JSON ou seu sistema"
       ]
     },
-    "valueProps": {
+    "useCases": {
+      "title": "Pare de perder tempo com estas tarefas",
+      "subtitle": "Transforme horas de trabalho manual em segundos de extração automatizada",
       "items": [
         {
-          "title": "Economize horas toda semana",
-          "desc": "Automatize tudo que antes dependia de copiar e colar."
+          "title": "Processamento de Notas Fiscais",
+          "problem": "Digitando nomes de fornecedores, datas e itens no Excel?",
+          "solution": "Extraia tudo automaticamente de notas fiscais de fornecedores em qualquer formato.",
+          "benefit": "Processe 100 notas fiscais no tempo que levava para processar 5",
+          "cta": "Ver Demo de Nota Fiscal"
         },
         {
-          "title": "Modelos sob seu controle",
-          "desc": "Defina campos de texto, número ou data e reutilize sempre que precisar."
+          "title": "Recibos de Despesas",
+          "problem": "Correndo atrás da equipe por dados de recibos?",
+          "solution": "Envie fotos de recibos e obtenha dados estruturados prontos para sua ferramenta de despesas.",
+          "benefit": "Feche relatórios de despesas 10x mais rápido",
+          "cta": "Testar Upload de Recibos"
         },
         {
-          "title": "Revisão transparente",
-          "desc": "Compare documento vs. dados extraídos e aprove com confiança."
+          "title": "Verificação de Identidade",
+          "problem": "Digitando manualmente dados de CNH ou RG para KYC?",
+          "solution": "Extraia nomes, datas e números de qualquer documento de identidade em segundos.",
+          "benefit": "Verifique clientes sem o gargalo da digitação",
+          "cta": "Testar Extração de Documentos"
         },
         {
-          "title": "Pronto para relatórios e API",
-          "desc": "Histórico estruturado para dashboards simples, exportações ou integrações."
+          "title": "Documentos Personalizados",
+          "problem": "Tem tipos de documentos únicos?",
+          "solution": "Defina templates personalizados para contratos, formulários ou qualquer documento estruturado.",
+          "benefit": "Adapte a plataforma às suas necessidades específicas",
+          "cta": "Criar Template Personalizado"
         }
       ]
     },
-    "control": {
-      "title": "Controle de ponta a ponta",
-      "subtitle": "O usuário decide o que extrair, como revisar e quando ativar relatórios ou API.",
-      "items": [
+    "trust": {
+      "title": "Seus dados estão seguros conosco",
+      "subtitle": "Levamos segurança a sério para que você possa focar no seu trabalho",
+      "badges": [
         {
-          "label": "01",
-          "title": "Você define o esquema",
-          "desc": "Crie modelos com os campos certos (texto, número, data) e reutilize nos uploads."
+          "icon": "shield",
+          "title": "LGPD & Privacidade",
+          "text": "Seus documentos permanecem seus. Nunca usamos seus dados para treinar modelos de IA."
         },
         {
-          "label": "02",
-          "title": "Revise antes de salvar",
-          "desc": "Edite cada campo com contexto lado a lado e mantenha a propriedade do resultado."
+          "icon": "lock",
+          "title": "Criptografia Nível Bancário",
+          "text": "Tudo é criptografado (SSL 256-bit). Seus arquivos são armazenados com segurança e deletados automaticamente quando você quiser."
         },
         {
-          "label": "03",
-          "title": "Histórico estruturado",
-          "desc": "Status, reprocessamentos, exportações e API baseados nos dados que você curou."
-        }
-      ]
-    },
-    "features": {
-      "title": "Funcionalidades reais",
-      "subtitle": "Tudo que já entregamos (e o que está no roadmap próximo) para dar controle às equipes.",
-      "sections": [
-        {
-          "title": "📄 Documentos",
-          "items": [
-            "Upload de PDFs e imagens",
-            "Pré-visualização completa com zoom",
-            "Fila e histórico de status",
-            "Reprocessamento assíncrono",
-            "Armazenamento seguro com URLs temporárias"
-          ]
-        },
-        {
-          "title": "🧩 Modelos",
-          "items": [
-            "Campos personalizados (texto, número, data)",
-            "Modelos reutilizáveis",
-            "Validação automática",
-            "Base para extração e relatórios"
-          ]
-        },
-        {
-          "title": "🤖 Extração com IA",
-          "items": [
-            "Prompts baseados no modelo em PT/EN",
-            "OCR para PDFs difíceis",
-            "JSON alinhado ao seu esquema",
-            "Mensagens de erro claras",
-            "Limites por créditos/plano"
-          ]
-        },
-        {
-          "title": "✍️ Revisão e controle",
-          "items": [
-            "Campos editáveis antes de salvar",
-            "Indicadores de confiança por campo",
-            "O usuário decide o resultado final"
-          ]
-        },
-        {
-          "title": "📊 Relatórios",
-          "items": [
-            "Construídos a partir do histórico",
-            "Seleção manual ou automática",
-            "Filtros e agregações (soma, média, contagem, crescimento)",
-            "Gráficos simples + exportação CSV/Excel"
-          ]
-        },
-        {
-          "title": "🔌 API",
-          "items": [
-            "Upload via API com escolha de modelo",
-            "Endpoints de status",
-            "Retorno JSON pronto para sistemas",
-            "Limites por plano e API keys",
-            "Webhooks e múltiplas keys nos planos avançados"
-          ]
-        },
-        {
-          "title": "🔐 Segurança",
-          "items": [
-            "Storage seguro com links temporários",
-            "Usuários podem apagar tudo",
-            "Não usamos seus dados para treinar modelos públicos"
-          ]
-        }
-      ]
-    },
-    "howItWorks": {
-      "title": "Como funciona (3 passos + API)",
-      "subtitle": "Do documento à decisão sem fricção.",
-      "steps": [
-        {
-          "title": "Upload",
-          "desc": "Envie PDFs ou imagens. Processamento assíncrono com visibilidade de fila."
-        },
-        {
-          "title": "Definir campos",
-          "desc": "Escolha ou crie um modelo com os campos que importam."
-        },
-        {
-          "title": "Revisar & aprovar",
-          "desc": "Edite, valide e salve. Sem caixa-preta."
-        },
-        {
-          "title": "Relatar & integrar",
-          "desc": "Use o histórico para dashboards, exportações ou chamadas de API."
-        }
-      ]
-    },
-    "security": {
-      "title": "Segurança e governança",
-      "subtitle": "Armazenamento, privacidade e exclusão pensados para quem leva dados a sério.",
-      "cards": [
-        {
-          "title": "Armazenamento e privacidade",
-          "desc": "Criptografia, links temporários e acesso só para usuários autorizados."
-        },
-        {
-          "title": "Governança e controle",
-          "desc": "Histórico de auditoria, possibilidade de apagar tudo e zero uso dos seus dados para treinar modelos públicos."
-        }
-      ]
-    },
-    "integration": {
-      "title": "API quando você precisar",
-      "subtitle": "Disponível no PRO ou superior: upload, escolha de modelo, status e consumo do JSON.",
-      "cards": [
-        {
-          "title": "Upload + modelo",
-          "desc": "Envie o documento e escolha o template."
-        },
-        {
-          "title": "Rastreamento de status",
-          "desc": "Saiba exatamente quando terminou."
-        },
-        {
-          "title": "JSON estruturado",
-          "desc": "Receba campos exatamente como definiu no esquema."
+          "icon": "server",
+          "title": "Armazenamento em Datacenters da UE",
+          "text": "Todos os dados são armazenados em datacenters europeus seguindo regulamentações rigorosas da UE."
         }
       ],
-      "example_label": "Exemplo rápido",
-      "example_note": "Disponível para PRO, Business e Enterprise.",
-      "example_code": [
-        "curl -X POST https://api.getdata.com/upload \\",
-        "  -H \"Authorization: Bearer <API_KEY>\" \\",
-        "  -F \"file=@document.pdf\" \\",
-        "  -F \"model=invoice_v2\"",
-        "",
-        "curl -X GET https://api.getdata.com/status/<JOB_ID> \\",
-        "  -H \"Authorization: Bearer <API_KEY>\""
-      ]
-    },
-    "heroAnimation": {
-      "invoiceLabel": "Número da Fatura",
-      "invoiceValue": "#FAT-2024",
-      "totalLabel": "Valor Total",
-      "totalValue": "€12.450",
-      "success": "Dados extraídos com sucesso!"
-    },
-    "faq": {
-      "title": "Perguntas frequentes",
-      "items": [
-        {
-          "q": "Posso definir meus próprios campos?",
-          "a": "Sim. Você decide o esquema de cada modelo (texto, número, data) e reutiliza sempre que enviar novos documentos."
-        },
-        {
-          "q": "Preciso programar para usar a plataforma?",
-          "a": "Não. A interface permite enviar, revisar e exportar sem escrever uma linha de código. A API é opcional para automação avançada."
-        },
-        {
-          "q": "Meus dados estão seguros?",
-          "a": "Documentos são armazenados com segurança e links temporários. Você pode apagar tudo quando quiser e nunca usamos seus dados para treinar modelos públicos."
-        },
-        {
-          "q": "Quando devo fazer upgrade para um plano pago?",
-          "a": "Faça upgrade quando precisar de mais documentos, múltiplos modelos, relatórios salvos ou acesso à API. Você pode trocar de plano a qualquer momento."
-        }
-      ]
-    },
-    "cta": {
-      "title": "Pronto para estruturar seus documentos?",
-      "subtitle": "Comece grátis, revise cada campo e desbloqueie acesso à API quando o negócio precisar.",
-      "primary": "Começar grátis",
-      "secondary": "Falar com vendas"
+      "exports": "Formatos de exportação: Excel, CSV, JSON, XML"
     },
     "pricing": {
+      "eyebrow": "Preços",
       "mostPopular": "Mais Popular",
-      "title": "Preços claros e defensáveis",
-      "subtitle": "Comece grátis, cresça com limites previsíveis e desbloqueie acesso à API quando importar.",
-      "plans": [
+      "title": "Comece grátis. Faça upgrade quando estiver pronto.",
+      "subtitle": "Sem cartão de crédito. Cancele a qualquer momento. Todos os planos incluem exportação para Excel/JSON.",
+      "disclaimer": "Todos os planos: Criptografia SSL 256-bit • Conforme LGPD • Armazenamento na UE"
+    },
+    "valueProps": {
+      "title": "Por que equipes escolhem o DocSet",
+      "subtitle": "Benefícios reais que você verá desde o primeiro dia",
+      "items": [
         {
-          "name": "GRÁTIS",
-          "tagline": "Experimente o valor",
-          "price": "€0",
-          "frequency": "",
-          "highlight": false,
-          "cta": "Começar grátis",
-          "features": [
-            "20 documentos incluídos",
-            "1 modelo personalizado",
-            "Apenas interface",
-            "Sem relatórios salvos",
-            "Sem API"
-          ]
+          "icon": "clock",
+          "title": "Economize 40+ horas por mês",
+          "desc": "Pare de digitar notas fiscais manualmente. Sua equipe pode focar em revisar e aprovar, não em digitação.",
+          "proof": "Dados médios de clientes"
         },
         {
-          "name": "STARTER",
-          "tagline": "Para freelancers / uso pessoal",
-          "price": "€15",
-          "frequency": "/mês",
-          "highlight": false,
-          "cta": "Escolher Starter",
-          "features": [
-            "300 documentos",
-            "Até 5 modelos",
-            "Relatórios básicos",
-            "Exportação CSV / Excel",
-            "Interface completa",
-            "Sem API"
-          ]
+          "icon": "target",
+          "title": "99,8% de precisão",
+          "desc": "Nossa IA lê PDFs melhor do que humanos digitam. Você ainda revisa tudo antes de salvar.",
+          "proof": "Testado em 100k+ documentos"
         },
         {
-          "name": "PRO",
-          "tagline": "Plano principal",
-          "price": "€39",
-          "frequency": "/mês",
-          "highlight": true,
-          "cta": "Escolher Pro",
-          "features": [
-            "1.500 documentos",
-            "Modelos ilimitados",
-            "Relatórios avançados + campos calculados",
-            "Opções completas de exportação",
-            "API incluída (5.000 requisições / mês)",
-            "1 chave de API"
-          ]
+          "icon": "plug",
+          "title": "Funciona com suas ferramentas",
+          "desc": "Exporte para Excel, JSON ou conecte via API. Sem esperar desenvolvedores construírem integrações.",
+          "proof": "REST API incluída"
         },
         {
-          "name": "BUSINESS",
-          "tagline": "Para equipes e uso técnico",
-          "price": "€89",
-          "frequency": "/mês",
-          "highlight": false,
-          "cta": "Escolher Business",
-          "features": [
-            "5.000 documentos",
-            "Tudo do PRO",
-            "Recursos avançados de API",
-            "25.000 requisições / mês",
-            "Múltiplas chaves de API",
-            "Webhooks + processamento prioritário"
-          ]
-        },
-        {
-          "name": "ENTERPRISE",
-          "tagline": "Volume e SLA personalizados",
-          "price": "Personalizado",
-          "frequency": "",
-          "highlight": false,
-          "cta": "Falar conosco",
-          "features": [
-            "Volume de documentos personalizado",
-            "SLA dedicado",
-            "Contrato anual",
-            "Suporte dedicado",
-            "Onboarding e sucesso",
-            "Alinhamento de roadmap"
-          ]
+          "icon": "shield-check",
+          "title": "Seus dados permanecem privados",
+          "desc": "Nunca usamos seus documentos para treinar IA. Conforme LGPD, hospedado na UE, delete quando quiser.",
+          "proof": "SOC 2 em progresso"
         }
-      ],
-      "disclaimer": "Todos os planos incluem armazenamento seguro, fluxo de revisão manual e extração multilíngue."
+      ]
     }
   },
   "Try Again": "Tentar novamente",

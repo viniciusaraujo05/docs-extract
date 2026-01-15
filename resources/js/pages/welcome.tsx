@@ -51,6 +51,10 @@ import {
   Settings,
   Lock,
   Layers,
+  Receipt,
+  IdCard,
+  FileSpreadsheet,
+  FileCode,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -176,6 +180,8 @@ export default function Welcome() {
         isAuthenticated={isAuthenticated}
       />
       <Hero locale={fullLocale} onOpenDemo={() => setShowDemo(true)} />
+      <TrustSignals />
+      <UseCases />
       <ProductFlow locale={fullLocale} />
       <Features locale={fullLocale} />
       <CodeExample locale={fullLocale} onOpenDemo={() => setShowDemo(true)} />
@@ -464,11 +470,18 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
   const scale = useTransform(scrollY, [0, 500], [1, 0.9]);
   
   const [step, setStep] = useState(0);
+  const [formatIndex, setFormatIndex] = useState(0);
+
+  useEffect(() => {
+    // Step 2 animation no longer uses cycling formatIndex
+    // We can remove the formatIndex logic if it's not used elsewhere
+    // Keeping step cycle logic
+  }, [step]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setStep((prev) => (prev + 1) % 3);
-    }, 3000); 
+    }, 4000); // Slower cycle to let users appreciate the animations
     return () => clearInterval(interval);
   }, []);
   
@@ -726,43 +739,95 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
                             key="step-export"
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="w-full max-w-lg p-6"
+                            className="w-full h-full p-6 relative flex items-center justify-center"
                         >
-                            <div className="bg-zinc-950 rounded-xl border border-blue-500/30 overflow-hidden shadow-[0_0_50px_rgba(59,130,246,0.15)]">
-                                <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
-                                    <div className="flex gap-1.5">
-                                        <div className="w-2.5 h-2.5 rounded-full bg-slate-600" />
-                                        <div className="w-2.5 h-2.5 rounded-full bg-slate-600" />
-                                    </div>
-                                    <span className="text-[10px] text-green-400 font-mono">200 OK</span>
+                            {/* Floating "Surprise" Elements - Appearing sequentially */}
+                            
+                            {/* JSON Top Left */}
+                            <motion.div
+                                initial={{ x: -140, y: -80, opacity: 0, scale: 0.9 }}
+                                animate={{ x: -140, y: -80, opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.2 }}
+                                className="absolute bg-zinc-900 border border-blue-500/30 p-4 rounded-xl shadow-2xl w-48 z-10"
+                            >
+                                <div className="text-xs text-gray-400 font-mono mb-2 flex items-center gap-2">
+                                    <FileJson className="w-4 h-4 text-blue-400" /> 
+                                    <span className="text-blue-100">data.json</span>
                                 </div>
-                                <div className="p-4 font-mono text-sm relative">
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        transition={{ duration: 0.5 }}
-                                    >
-                                        <span className="text-purple-400">{"{"}</span><br/>
-                                        &nbsp;&nbsp;<span className="text-blue-400">"id"</span>: <span className="text-green-300">"inv_9923"</span>,<br/>
-                                        &nbsp;&nbsp;<span className="text-blue-400">"date"</span>: <span className="text-green-300">"2024-03-12"</span>,<br/>
-                                        &nbsp;&nbsp;<span className="text-blue-400">"total"</span>: <span className="text-orange-300">2450.00</span>,<br/>
-                                        &nbsp;&nbsp;<span className="text-blue-400">"items"</span>: <span className="text-purple-400">["service_a", "service_b"]</span><br/>
-                                        <span className="text-purple-400">{"}"}</span>
-                                    </motion.div>
+                                <div className="text-[10px] font-mono text-blue-300 bg-zinc-950/50 p-2 rounded border border-blue-500/10">
+                                    <div className="flex gap-1"><span className="text-blue-500">"id"</span>: <span className="text-orange-300">"INV-001"</span>,</div>
+                                    <div className="flex gap-1"><span className="text-blue-500">"total"</span>: <span className="text-orange-300">1250.00</span>,</div>
+                                    <div className="flex gap-1"><span className="text-blue-500">"status"</span>: <span className="text-green-400">"paid"</span></div>
+                                </div>
+                            </motion.div>
+
+                            {/* Excel/Table Bottom Right (Center-Right actually) */}
+                            <motion.div
+                                initial={{ x: 80, y: -40, opacity: 0, scale: 0.9 }}
+                                animate={{ x: 80, y: -40, opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.4 }}
+                                className="absolute bg-zinc-900 border border-emerald-500/30 p-4 rounded-xl shadow-2xl w-56 z-20"
+                            >
+                                <div className="text-xs text-gray-400 font-mono mb-2 flex items-center gap-2">
+                                    <FileSpreadsheet className="w-4 h-4 text-emerald-400" /> 
+                                    <span className="text-emerald-100">export.xlsx</span>
+                                </div>
+                                {/* Excel Grid Visualization */}
+                                <div className="grid grid-cols-3 gap-px bg-zinc-800 border border-zinc-800 rounded overflow-hidden text-[10px] font-mono">
+                                    {/* Header */}
+                                    <div className="bg-zinc-800/80 p-1.5 text-center text-gray-400">ID</div>
+                                    <div className="bg-zinc-800/80 p-1.5 text-center text-gray-400">Date</div>
+                                    <div className="bg-zinc-800/80 p-1.5 text-right text-gray-400">Total</div>
                                     
-                                    {/* Action Buttons */}
-                                    <motion.div 
-                                        initial={{ y: 20, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        transition={{ delay: 0.5 }}
-                                        className="absolute bottom-4 right-4 flex gap-2"
-                                    >
-                                        <div className="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg flex items-center gap-1">
-                                            <Download className="w-3 h-3" /> JSON
-                                        </div>
-                                    </motion.div>
+                                    {/* Row 1 */}
+                                    <div className="bg-zinc-950 p-1.5 text-gray-300">001</div>
+                                    <div className="bg-zinc-950 p-1.5 text-gray-500">Oct 24</div>
+                                    <div className="bg-zinc-950 p-1.5 text-right text-emerald-400">$1,250</div>
+
+                                    {/* Row 2 */}
+                                    <div className="bg-zinc-950 p-1.5 text-gray-300">002</div>
+                                    <div className="bg-zinc-950 p-1.5 text-gray-500">Oct 25</div>
+                                    <div className="bg-zinc-950 p-1.5 text-right text-emerald-400">$850</div>
                                 </div>
-                            </div>
+                            </motion.div>
+
+                            {/* XML Top Right-ish (shifted) */}
+                            <motion.div
+                                initial={{ x: 160, y: 70, opacity: 0, scale: 0.9 }}
+                                animate={{ x: 160, y: 70, opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.6 }}
+                                className="absolute bg-zinc-900 border border-purple-500/30 p-4 rounded-xl shadow-2xl w-44 z-10"
+                            >
+                                <div className="text-xs text-gray-400 font-mono mb-2 flex items-center gap-2">
+                                    <FileCode className="w-4 h-4 text-purple-400" /> 
+                                    <span className="text-purple-100">data.xml</span>
+                                </div>
+                                <div className="text-[10px] font-mono text-purple-300 bg-zinc-950/50 p-2 rounded border border-purple-500/10">
+                                    &lt;invoice&gt;<br/>
+                                    &nbsp;&nbsp;&lt;id&gt;001&lt;/id&gt;<br/>
+                                    &nbsp;&nbsp;&lt;total&gt;1250&lt;/total&gt;<br/>
+                                    &lt;/invoice&gt;
+                                </div>
+                            </motion.div>
+
+                            {/* CSV Bottom Left */}
+                            <motion.div
+                                initial={{ x: -100, y: 80, opacity: 0, scale: 0.9 }}
+                                animate={{ x: -100, y: 80, opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.8 }}
+                                className="absolute bg-zinc-900 border border-indigo-500/30 p-4 rounded-xl shadow-2xl w-48 z-10"
+                            >
+                                <div className="text-xs text-gray-400 font-mono mb-2 flex items-center gap-2">
+                                    <FileText className="w-4 h-4 text-indigo-400" /> 
+                                    <span className="text-indigo-100">data.csv</span>
+                                </div>
+                                <div className="text-[10px] font-mono text-indigo-300 bg-zinc-950/50 p-2 rounded border border-indigo-500/10 whitespace-pre">
+                                    id,date,total,status<br/>
+                                    001,2024-10-24,1250,paid<br/>
+                                    002,2024-10-25,850,paid
+                                </div>
+                            </motion.div>
+
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -778,6 +843,127 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
 }
 
 
+
+function TrustSignals() {
+  const { t } = useTranslation();
+  const trust = t('landing.trust', { returnObjects: true }) as any;
+  const iconMap: Record<string, any> = {
+    shield: Shield,
+    lock: Lock,
+    server: Server,
+  };
+
+  return (
+    <section className="py-10 border-y border-white/5 bg-black/50 backdrop-blur-sm relative z-20">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex flex-wrap justify-center gap-4 md:gap-8">
+               {trust.badges && Array.isArray(trust.badges) ? (
+                 trust.badges.map((badge: any, i: number) => {
+                   const Icon = iconMap[badge.icon] || Shield;
+                   const colors = ['text-green-400', 'text-blue-400', 'text-purple-400'];
+                   return (
+                     <div key={i} className="flex items-center gap-2 text-gray-400 bg-white/5 px-4 py-2 rounded-full border border-white/5">
+                       <Icon className={`w-4 h-4 ${colors[i] || 'text-gray-400'}`} />
+                       <span className="text-sm font-medium">{badge.title}</span>
+                     </div>
+                   );
+                 })
+               ) : (
+                 /* Fallback for old structure */
+                 <>
+                   <div className="flex items-center gap-2 text-gray-400 bg-white/5 px-4 py-2 rounded-full border border-white/5">
+                      <Shield className="w-4 h-4 text-green-400" />
+                      <span className="text-sm font-medium">{trust.badges?.gdpr || 'GDPR Compliant'}</span>
+                   </div>
+                   <div className="flex items-center gap-2 text-gray-400 bg-white/5 px-4 py-2 rounded-full border border-white/5">
+                      <Lock className="w-4 h-4 text-blue-400" />
+                      <span className="text-sm font-medium">{trust.badges?.encrypted || 'Encrypted Data'}</span>
+                   </div>
+                   <div className="flex items-center gap-2 text-gray-400 bg-white/5 px-4 py-2 rounded-full border border-white/5">
+                      <Server className="w-4 h-4 text-purple-400" />
+                      <span className="text-sm font-medium">{trust.badges?.no_training || 'Privacy Protected'}</span>
+                   </div>
+                 </>
+               )}
+            </div>
+            
+            <div className="flex items-center gap-4 text-gray-500 font-mono text-sm">
+                <span className="hidden lg:block opacity-50">{(trust.exports || 'Export:').split(':')[0]}:</span>
+                <div className="flex gap-4 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+                    <span className="font-bold flex items-center gap-2" title="Excel / CSV"><FileSpreadsheet className="w-4 h-4" /> XLS/CSV</span>
+                    <span className="font-bold flex items-center gap-2" title="JSON"><FileJson className="w-4 h-4" /> JSON</span>
+                    <span className="font-bold flex items-center gap-2" title="XML"><FileCode className="w-4 h-4" /> XML</span>
+                </div>
+            </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function UseCases() {
+  const { t } = useTranslation();
+  const content = t('landing.useCases', { returnObjects: true }) as any;
+  const icons = [FileText, Receipt, IdCard, Sparkles];
+
+  return (
+    <section className="py-24 bg-zinc-950 relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+            <div className="text-center mb-16">
+                 <h2 className="text-3xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70">{content.title}</h2>
+                 <p className="text-xl text-gray-400 max-w-2xl mx-auto">{content.subtitle}</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {content.items.map((item: any, i: number) => {
+                    const Icon = icons[i] || FileText;
+                    return (
+                        <motion.div 
+                            key={i}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: i * 0.1 }}
+                            className="bg-zinc-900/50 border border-white/10 p-6 rounded-2xl hover:bg-white/5 transition duration-300 group hover:border-blue-500/30 flex flex-col"
+                        >
+                            <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition-colors">
+                                <Icon className="w-6 h-6 text-blue-400" />
+                            </div>
+                            <h3 className="text-lg font-bold mb-3">{item.title}</h3>
+                            
+                            {/* Problem */}
+                            {item.problem && (
+                              <div className="mb-3 p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
+                                <p className="text-sm text-red-200/80">{item.problem}</p>
+                              </div>
+                            )}
+                            
+                            {/* Solution */}
+                            {item.solution && (
+                              <p className="text-sm text-gray-400 leading-relaxed mb-3">{item.solution}</p>
+                            )}
+                            
+                            {/* Benefit */}
+                            {item.benefit && (
+                              <div className="mt-auto p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-lg">
+                                <p className="text-sm font-medium text-emerald-200/90">✓ {item.benefit}</p>
+                              </div>
+                            )}
+                            
+                            {/* Old desc fallback if new structure not available */}
+                            {!item.problem && !item.solution && item.desc && (
+                              <p className="text-gray-400 leading-relaxed">{item.desc}</p>
+                            )}
+                        </motion.div>
+                    );
+                })}
+            </div>
+        </div>
+    </section>
+  );
+}
 
 function ProductFlow({ locale }: { locale: string }) {
   const { t } = useTranslation();
@@ -1007,35 +1193,38 @@ function CodeExample({ locale, onOpenDemo }: { locale: string; onOpenDemo: () =>
   );
 }
 
+interface Plan {
+  id: string;
+  name: string;
+  display_name: string;
+  tagline: string; 
+  description?: string;
+  price: string | null;
+  interval: string | null;
+  features: string[];
+  recommended: boolean;
+  price_id: string | null;
+}
+
 function Pricing({ locale, isAuthenticated, localeShort }: { locale: string; isAuthenticated: boolean; localeShort: string }) {
   const { t } = useTranslation();
-  const getPricingText = () => {
-    return {
-      title: t('landing.pricing.title'),
-      subtitle: t('landing.pricing.subtitle'),
-      cta: t('landing.pricing.plans.0.cta'), // "Start free"
-      freeForever: t('landing.pricing.plans.0.price'), // Use price display or custom "Free"
-      limitsRenewMonthly: t('landing.pricing.disclaimer'),
-    };
-  };
-
-  const pricingText = getPricingText();
-  const [plans, setPlans] = useState<any[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPlans = async () => {
       try {
-        const response = await fetch(`/api/plans?locale=${locale}`);
+        const response = await fetch(`/api/plans?locale=${localeShort}`, {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
         const data = await response.json();
-        if (data && Object.keys(data).length > 0) {
-          // Convert object to array and sort by order
-          const plansArray = Object.values(data).map((plan: any, index) => ({
-            ...plan,
-            order: plan.id === 'free' ? 0 : plan.id === 'starter' ? 1 : plan.id === 'pro' ? 2 : 3,
-          }));
-          setPlans(plansArray.sort((a: any, b: any) => a.order - b.order));
-        }
+        
+        // The API returns an object keyed by plan ID ('free': {...}, 'starter': {...})
+        // We convert it to an array for rendering
+        const plansArray = Object.values(data) as Plan[];
+        setPlans(plansArray);
       } catch (error) {
         console.error('Error fetching plans:', error);
       } finally {
@@ -1044,174 +1233,120 @@ function Pricing({ locale, isAuthenticated, localeShort }: { locale: string; isA
     };
 
     fetchPlans();
-  }, [locale]);
+  }, [localeShort]);
 
-  const getRecurringText = (recurring: any) => {
-    if (!recurring) return '';
-    const interval = recurring.interval;
-    const count = recurring.interval_count || 1;
-    
-    const intervalTexts: any = {
-      en: { month: '/mo', year: '/yr' },
-      'pt-BR': { month: '/mês', year: '/ano' },
-      'pt-PT': { month: '/mês', year: '/ano' },
-    };
-    
-    const localeTexts = intervalTexts[locale] || intervalTexts.en;
-    
-    if (count === 1) {
-      return localeTexts[interval] || `/${interval}`;
+  const handlePlanClick = (plan: Plan) => {
+    if (isAuthenticated) {
+        if (plan.price_id) {
+            router.visit(`/subscription/checkout?price_id=${plan.price_id}`);
+        } else {
+            router.visit('/dashboard');
+        }
+    } else {
+        router.visit(`/${locale}/register?plan=${plan.id}&price_id=${plan.price_id || ''}`);
     }
-    return `/${count} ${interval}s`;
   };
 
-  const displayPlans = plans.map(plan => ({
-    id: plan.id,
-    name: plan.display_name || plan.name,
-    price: plan.id === 'free' ? '0' : plan.price,
-    frequency: plan.id === 'free' ? pricingText.freeForever : (plan.recurring ? getRecurringText(plan.recurring) : ''),
-    price_id: plan.price_id || plan.id,
-    popular: plan.recommended || false,
-    features: plan.features || [],
-    order: plan.order || 0,
-  }));
+  const getCtaText = (plan: Plan) => {
+      if (plan.price === null || plan.id === 'business' || plan.id === 'enterprise') return 'Contact Sales';
+      if (parseFloat(plan.price?.replace(/[^0-9.]/g, '') || '0') === 0) return 'Start free';
+      return 'Start trial';
+  };
+
+  // Translation helpers for static strings
+  const titleText = t('landing.pricing.title');
+  const subtitleText = t('landing.pricing.subtitle');
+  const disclaimerText = t('landing.pricing.disclaimer');
 
   return (
-    <section id="pricing" className="py-20 md:py-24 relative">
-      <div className="max-w-6xl mx-auto px-6">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">{pricingText.title}</h2>
-          <p className="text-lg text-gray-400">{pricingText.subtitle}</p>
-        </motion.div>
+    <section className="py-24 bg-zinc-950 relative overflow-hidden" id="pricing">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05),transparent_70%)]" />
+      
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-3xl md:text-4xl font-bold text-white mb-6"
+          >
+            {titleText}
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-lg text-zinc-400"
+          >
+            {subtitleText}
+          </motion.p>
+        </div>
 
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-400">Loading pricing...</p>
-          </div>
-        ) : plans.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-400">No pricing plans available</p>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {displayPlans.map((plan, i) => (
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          {loading ? (
+             Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white/5 h-[500px] rounded-2xl animate-pulse" />
+             ))
+          ) : (
+            plans.map((plan, index) => (
               <motion.div
-                key={plan.price_id}
+                key={plan.id}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                whileHover={{ y: -5 }}
+                transition={{ delay: index * 0.1 }}
+                className={`relative p-8 rounded-2xl border ${
+                  plan.recommended
+                    ? 'bg-blue-600/10 border-blue-500/50 shadow-lg shadow-blue-500/10' 
+                    : 'bg-white/5 border-white/10 hover:border-white/20'
+                } backdrop-blur-sm transition-all duration-300 group hover:-translate-y-1 flex flex-col`}
               >
-                <div
-                  className={`relative h-full rounded-2xl p-6 border transition-all duration-300 group overflow-hidden ${
-                    plan.popular
-                      ? 'bg-blue-900/10 border-blue-500/50 shadow-lg shadow-blue-500/10'
-                      : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
-                  }`}
-                >
-                  {/* Hover Glow Effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:via-blue-500/5 group-hover:to-blue-500/10 transition-all duration-500" />
-                  
-                  {plan.popular && (
-                    <>
-                    <motion.div 
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.5 }}
-                      className="absolute -top-3 left-1/2 -translate-x-1/2 z-10"
-                    >
-                    </motion.div>
-                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-50" />
-                    </>
-                  )}
-                  
-                  <div className="mb-6 relative z-10">
-                    <h3 className={`text-base font-semibold mb-2 ${plan.popular ? 'text-blue-200' : 'text-white'}`}>{plan.name}</h3>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold">{plan.price}</span>
-                      {plan.frequency && (
-                        <span className={plan.id === 'free' ? "text-blue-400 text-xs font-medium ml-1" : "text-gray-400 text-sm"}>
-                          {plan.frequency}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <ul className="space-y-3 mb-8 relative z-10">
-                    {plan.features.map((feature: string, idx: number) => (
-                      <motion.li 
-                        key={feature} 
-                        initial={{ opacity: 0, x: -10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: i * 0.1 + idx * 0.05 }}
-                        className="flex items-start gap-2 text-xs text-gray-300"
-                      >
-                        <Check className={`w-3.5 h-3.5 mt-0.5 ${plan.popular ? 'text-blue-400' : 'text-gray-500'}`} />
-                        <span className="leading-tight">{feature}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
-
-                  <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="relative z-10"
-                  >
-                    <Button
-                      onClick={() => {
-                        const baseUrl = isAuthenticated ? `/${locale}/subscription/checkout` : `/${locale}/register`;
-                        const params = new URLSearchParams();
-                        
-                        if (isAuthenticated) {
-                            if (plan.id !== 'free') {
-                                params.append('price_id', plan.price_id);
-                                params.append('plan_name', plan.name);
-                            } else {
-                                // Already on free/dashboard
-                                router.visit(`/${locale}/dashboard`);
-                                return;
-                            }
-                        } else {
-                            // Register flow - pass plan intet
-                            params.append('plan', plan.id);
-                            if (plan.price_id) params.append('price_id', plan.price_id);
-                        }
-                        
-                        router.visit(`${baseUrl}?${params.toString()}`);
-                      }}
-                      className={`w-full h-10 text-sm font-medium ${
-                        plan.popular
-                          ? 'bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/25'
-                          : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'
-                      }`}
-                    >
-                      {pricingText.cta}
-                    </Button>
-                  </motion.div>
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold text-white mb-2">{plan.display_name}</h3>
+                  <p className="text-zinc-400 text-sm h-10">{plan.tagline || plan.description}</p>
                 </div>
+
+                <div className="mb-8">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-white">{plan.price || 'Custom'}</span>
+                    {plan.price && plan.interval && (
+                        <span className="text-zinc-500">/{plan.interval === 'year' ? 'yr' : 'mo'}</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4 mb-8 flex-1">
+                  {plan.features && plan.features.map((feature, i) => (
+                    <div key={i} className="flex items-start gap-3 text-sm text-zinc-300">
+                      <Check className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+                      <span>{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <Button 
+                  className={`w-full ${
+                    plan.recommended
+                      ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25' 
+                      : 'bg-white text-zinc-900 hover:bg-zinc-100'
+                  }`}
+                  onClick={() => handlePlanClick(plan)}
+                >
+                  {getCtaText(plan)}
+                </Button>
               </motion.div>
-              ))}
+            ))
+          )}
+        </div>
+        
+        {!loading && (
+            <div className="mt-12 text-center">
+                <p className="text-zinc-500 text-sm">
+                    {disclaimerText}
+                </p>
             </div>
-            
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="mt-8 text-center"
-            >
-              <p className="text-gray-500 text-xs italic">
-                {pricingText.limitsRenewMonthly}
-              </p>
-            </motion.div>
-          </>
         )}
       </div>
     </section>

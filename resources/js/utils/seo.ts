@@ -8,45 +8,39 @@ export interface SEOContent {
 
 export const seoContent = {
   en: {
-    title: 'DOCSET – Document Data Platform for PDFs and Images',
-    description: 'DOCSET turns PDFs and images into structured, usable data. Define custom fields, review extracted data, and export or integrate via API to automate recurring document workflows.',
-    keywords: 'PDF data extraction, extract data from PDF, PDF to structured data, document data extraction software, automated document processing, PDF OCR API, document parsing API, invoice data extraction, receipt OCR software, recurring document automation, PDF to Excel automation, extract custom fields from PDF, review extracted data before export, PDF data extraction with custom templates, document workflow automation tool, alternative to Docparser, zonal OCR API, Docparser alternative, best PDF extraction tool for developers, affordable document OCR API, PDF extraction REST API, document OCR webhook, structured data from images API, PDF parsing JSON response, batch PDF processing API',
-    h1: 'Document data platform for recurring PDFs and images',
+    title: 'Stop Typing Invoices & Receipts | PDF to Excel Converter - DocSet',
+    description: 'Turn PDFs into Excel in seconds. No coding required. Extract invoice data, receipts, and IDs automatically. Trusted by 2,500+ finance teams.',
+    keywords: 'invoice data entry automation, receipt scanner excel, PDF invoice to excel, automated invoice processing, expense receipt OCR, KYC document extraction, invoice OCR software',
+    h1: 'Stop Wasting Hours Typing Invoice Data',
     h2s: [
-      'Turn unstructured documents into reliable data',
-      'Custom data fields, instant review, and flexible exports',
-      'Automate recurring document workflows with API or UI',
-      'Built for recurring documents',
-      'Simple REST API with JSON responses',
-      'Privacy and security first',
+      'Turn PDF Invoices into Excel in Seconds',
+      'Process Expense Receipts 10x Faster',
+      'Extract Data from IDs and Passports for KYC',
+      'No Developers Needed • Export to Excel or JSON',
     ],
   },
   'pt-BR': {
-    title: 'DOCSET – Plataforma de dados de documentos para PDFs e imagens',
-    description: 'O DOCSET transforma PDFs e imagens em dados estruturados. Define campos personalizados, revê os dados extraídos e exporta relatórios para automatizar documentos recorrentes via interface ou API.',
-    keywords: 'plataforma de dados de documentos, extrair dados de PDF, extração de dados de documentos, software de extração de PDF, processar documentos automaticamente, PDF para dados estruturados, API de extração de PDF, OCR para faturas, automatizar recibos, extração de dados de contratos, PDF para Excel automático, extrair campos personalizados de PDF, revisar dados extraídos antes de guardar, alternativa ao Docparser, API de OCR para documentos recorrentes, API REST de extração de PDF, processar PDFs em lote, OCR com resposta JSON',
-    h1: 'Plataforma de dados de documentos para PDFs e imagens',
+    title: 'Pare de Digitar Notas Fiscais | Conversor PDF para Excel - DocSet',
+    description: 'Converta PDFs em Excel em segundos. Sem código. Extraia dados de notas fiscais, recibos e documentos automaticamente. Usado por 2.500+ equipes financeiras.',
+    keywords: 'automação nota fiscal, digitação automática nfe, PDF para Excel, OCR de recibos, extração de dados CNH, automação contas a pagar',
+    h1: 'Pare de Perder Horas Digitando Notas Fiscais',
     h2s: [
-      'Transforma documentos recorrentes em dados fiáveis',
-      'Campos personalizados, revisão rápida e exportação flexível',
-      'Elimina o trabalho manual em PDFs com uma interface simples ou API',
-      'Feito para documentos recorrentes',
-      'API REST simples com respostas JSON',
-      'Privacidade e segurança em primeiro lugar',
+      'Converta Notas Fiscais PDF em Excel em Segundos',
+      'Processe Recibos de Despesas 10x Mais Rápido',
+      'Extraia Dados de CNH e RG para KYC',
+      'Sem Desenvolvedores • Exporte para Excel ou JSON',
     ],
   },
   'pt-PT': {
-    title: 'DOCSET – Plataforma de dados de documentos para PDFs e imagens',
-    description: 'O DOCSET transforma PDFs e imagens em dados estruturados. Define campos personalizados, revê os dados extraídos e exporta relatórios para automatizar documentos recorrentes via interface ou API.',
-    keywords: 'plataforma de dados de documentos, extrair dados de PDF, extração de dados de documentos, software de extração de PDF, processar documentos automaticamente, PDF para dados estruturados, API de extração de PDF, OCR para faturas, automatizar recibos, extração de dados de contratos, PDF para Excel automático, extrair campos personalizados de PDF, revisar dados extraídos antes de guardar, alternativa ao Docparser, API de OCR para documentos recorrentes, API REST de extração de PDF, processar PDFs em lote, OCR com resposta JSON',
-    h1: 'Plataforma de dados de documentos para PDFs e imagens',
+    title: 'Pare de Digitar Faturas | Conversor PDF para Excel - DocSet',
+    description: 'Converta PDFs em Excel em segundos. Sem código. Extraia dados de faturas, recibos e documentos automaticamente. Usado por 2.500+ equipas financeiras.',
+    keywords: 'automação faturas, digitalização faturas excel, PDF para Excel, OCR recibos, extração dados cartão cidadão, automação contas a pagar',
+    h1: 'Pare de Perder Horas a Digitar Faturas',
     h2s: [
-      'Transforma documentos recorrentes em dados fiáveis',
-      'Campos personalizados, revisão rápida e exportação flexível',
-      'Elimina o trabalho manual em PDFs com uma interface simples ou API',
-      'Feito para documentos recorrentes',
-      'API REST simples com respostas JSON',
-      'Privacidade e segurança em primeiro lugar',
+      'Converta Faturas PDF em Excel em Segundos',
+      'Processe Recibos de Despesas 10x Mais Rápido',
+      'Extraia Dados de Cartões de Cidadão para KYC',
+      'Sem Programadores • Exporte para Excel ou JSON',
     ],
   },
 };
@@ -151,13 +145,15 @@ export function generateStructuredData(locale: string) {
   };
 }
 
-export function getAlternateLocales(currentLocale: string) {
+export function getAlternateLocales(currentPath: string = '/') {
   const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://docset.com';
-  const locales = [
-    { locale: 'en', url: `${siteUrl}/en` },
-    { locale: 'pt-BR', url: `${siteUrl}/pt` },
-    { locale: 'pt-PT', url: `${siteUrl}/pt` },
-  ];
   
-  return locales.filter(l => l.locale !== currentLocale);
+  // Return proper hreflang format with x-default
+  return [
+    { locale: 'en', hreflang: 'en', url: `${siteUrl}/en${currentPath}` },
+    { locale: 'pt-BR', hreflang: 'pt-BR', url: `${siteUrl}/pt${currentPath}` },
+    { locale: 'pt-PT', hreflang: 'pt-PT', url: `${siteUrl}/pt-pt${currentPath}` },
+    { locale: 'x-default', hreflang: 'x-default', url: `${siteUrl}/en${currentPath}` }, // Default to EN
+  ];
 }
+
