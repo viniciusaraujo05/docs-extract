@@ -95,9 +95,9 @@ final class FieldDetectorService
                 'response_format' => ['type' => 'json_object'],
             ]);
 
-        if (! $response->successful()) {
+        if (!$response->successful()) {
             throw new RuntimeException(
-                'OpenAI API error: '.$response->status().' '.$response->body()
+                'OpenAI API error: ' . $response->status() . ' ' . $response->body()
             );
         }
 
@@ -133,14 +133,23 @@ Sua tarefa é identificar TODOS os campos de dados presentes no documento que po
 
 REGRAS IMPORTANTES:
 1. PRIMEIRO, identifique o idioma principal do documento (português, inglês, espanhol, etc.)
-2. Use nomes de campos (name) em snake_case, baseados no conteúdo real do documento (preferencialmente em inglês para compatibilidade)
-3. O label deve estar NO MESMO IDIOMA do documento, ser descritivo e legível
-4. Identifique o tipo correto: string, number, date, boolean
+2. CRITICAL: Use field names (name) EXACTLY as they appear in the document logic (snake_case). Do NOT normalize or translate.
+   - If document says "Qty", name MUST be "qty" (not "quantity")
+   - If document says "Nr.", name MUST be "nr" (not "number")
+   - If document says "Valor", name MUST be "valor" (not "value")
+3. The label MUST be EXACTLY as displayed in the document
+4. Identifique o tipo correto: string, number, date, boolean, **array**
 5. Para valores monetários, use type "number"
 6. Para datas em qualquer formato, use type "date"
 7. Para campos como NIF, NISS, números de documento, use type "string"
 8. Seja ABRANGENTE - capture todos os campos relevantes do documento
 9. Preste atenção especial a: valores, datas, identificadores, nomes, endereços, totais, subtotais
+
+**DETECÇÃO DE TABELAS/LISTAS (MUITO IMPORTANTE):**
+10. Se o documento contém TABELAS ou LISTAS REPETIDAS (ex: itens de fatura, produtos, serviços), identifique-as como campos do tipo "array"
+11. Para campos do tipo "array", SEMPRE inclua a propriedade "items" com a estrutura das colunas
+12. Cada item dentro de "items" deve ter: name, label, type
+13. IMPORTANT: Use EXACT column headers as names. If column is "Qty", use "qty".
 
 EXEMPLOS de campos comuns:
 - Documentos em PORTUGUÊS: numero_fatura, data_emissao, nif_cliente, total_liquido
@@ -154,7 +163,18 @@ Retorne APENAS um objeto JSON válido com a estrutura:
   "fields": [
     {"name": "campo_exemplo", "label": "Campo Exemplo", "type": "string"},
     {"name": "valor_total", "label": "Valor Total", "type": "number"},
-    {"name": "data_documento", "label": "Data do Documento", "type": "date"}
+    {"name": "data_documento", "label": "Data do Documento", "type": "date"},
+    {
+      "name": "line_items",
+      "label": "Itens da Fatura",
+      "type": "array",
+      "items": [
+        {"name": "description", "label": "Descrição", "type": "string"},
+        {"name": "qty", "label": "Quantidade", "type": "number"},
+        {"name": "unit_price", "label": "Preço Unitário", "type": "number"},
+        {"name": "total", "label": "Total", "type": "number"}
+      ]
+    }
   ]
 }
 PROMPT;
@@ -172,16 +192,33 @@ PROMPT;
             $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
             $fields = $data['fields'] ?? $data;
 
-            if (! is_array($fields) || count($fields) === 0) {
+            if (!is_array($fields) || count($fields) === 0) {
                 return $this->getDefaultFields();
             }
 
-            return array_map(fn ($f) => [
-                'name' => $f['name'] ?? 'field',
-                'label' => $f['label'] ?? $f['name'] ?? 'Campo',
-                'type' => $f['type'] ?? 'string',
-            ], $fields);
+            return array_map(function ($f) {
+                $field = [
+                    'name' => $f['name'] ?? 'field',
+                    'label' => $f['label'] ?? $f['name'] ?? 'Campo',
+                    'type' => $f['type'] ?? 'string',
+                ];
+
+                // If type is array, include items structure
+                if ($field['type'] === 'array' && isset($f['items']) && is_array($f['items'])) {
+                    $field['items'] = array_map(fn($item) => [
+                        'name' => $item['name'] ?? 'field',
+                        'label' => $item['label'] ?? $item['name'] ?? 'Field',
+                        'type' => $item['type'] ?? 'string',
+                    ], $f['items']);
+                }
+
+                return $field;
+            }, $fields);
         } catch (\JsonException $e) {
+            Log::warning('Failed to parse field detector response', [
+                'error' => $e->getMessage(),
+                'content_preview' => mb_substr($content, 0, 200),
+            ]);
             return $this->getDefaultFields();
         }
     }

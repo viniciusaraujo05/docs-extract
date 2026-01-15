@@ -37,8 +37,9 @@ export interface ExtractionSchema {
 
 export interface SchemaField {
     name: string;
-    type: 'string' | 'number' | 'date' | 'boolean';
+    type: string;
     label?: string;
+    items?: SchemaField[]; // For array type fields
 }
 
 export interface DocumentsIndexProps {

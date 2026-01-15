@@ -42,7 +42,8 @@ final class EnhancedExtractionService
     public function __construct(
         private readonly ExtractionLoggerInterface $logger,
         private readonly FieldValidatorInterface $validator
-    ) {}
+    ) {
+    }
 
     /**
      * Extract structured data from document text.
@@ -157,7 +158,7 @@ final class EnhancedExtractionService
                 'response_format' => ['type' => 'json_object'],
             ]);
 
-        if (! $response->successful()) {
+        if (!$response->successful()) {
             $errorBody = $response->json() ?? [];
             $errorMessage = $errorBody['error']['message'] ?? $response->body();
 
@@ -179,9 +180,9 @@ final class EnhancedExtractionService
      */
     private function getSystemPrompt(): string
     {
-        return 'You are a specialized assistant for extracting structured data from documents. '.
-            'Always respond with valid JSON, without markdown or additional text. '.
-            'Extract exact values from the document. '.
+        return 'You are a specialized assistant for extracting structured data from documents. ' .
+            'Always respond with valid JSON, without markdown or additional text. ' .
+            'Extract exact values from the document. ' .
             'For each field, provide a confidence score (0-100) indicating how certain you are about the extracted value.';
     }
 
@@ -201,21 +202,11 @@ final class EnhancedExtractionService
         // Build field descriptions with enhanced metadata
         $fieldsDescription = collect($fields)
             ->map(function (array $field): string {
-                $description = "- {$field['name']} ({$field['type']})";
-
-                if (isset($field['label'])) {
-                    $description .= ": {$field['label']}";
+                if ($field['type'] === 'array') {
+                    return $this->buildArrayFieldDescription($field);
                 }
 
-                if (isset($field['pattern'])) {
-                    $description .= " [Pattern: {$field['pattern']}]";
-                }
-
-                if (isset($field['required']) && $field['required']) {
-                    $description .= ' [REQUIRED]';
-                }
-
-                return $description;
+                return $this->buildSimpleFieldDescription($field);
             })
             ->implode("\n");
 
@@ -223,7 +214,7 @@ final class EnhancedExtractionService
         $maxTextLength = 8000;
         if (mb_strlen($text) > $maxTextLength) {
             $halfLength = (int) ($maxTextLength / 2);
-            $text = mb_substr($text, 0, $halfLength)."\n\n[... middle section truncated ...]\n\n".mb_substr($text, -$halfLength);
+            $text = mb_substr($text, 0, $halfLength) . "\n\n[... middle section truncated ...]\n\n" . mb_substr($text, -$halfLength);
         }
 
         return <<<PROMPT
@@ -235,7 +226,7 @@ FIELDS TO EXTRACT:
 DOCUMENT TEXT:
 {$text}
 
-INSTRUCTIONS:
+CRITICAL INSTRUCTIONS:
 1. Return ONLY a valid JSON object
 2. Use null for fields not found in the document
 3. Format dates as YYYY-MM-DD
@@ -243,20 +234,100 @@ INSTRUCTIONS:
 5. Extract EXACT values from the document
 6. For each field, include a confidence score (0-100)
 7. Include an overall confidence score
+8. **IMPORTANT**: For array fields (tables/lists), extract ALL rows as an array of objects
+9. **CRITICAL**: Use EXACT field names as specified above - DO NOT abbreviate, rename, or "fix" fields
+   - If schema has "qty", return "qty". Do NOT change it to "quantity".
+   - If schema has "quantity", return "quantity". Do NOT abbreviate to "qty".
+   - RESPECT the provided field names completely.
 
 RESPONSE FORMAT:
 {
   "extracted_data": {
     "field_name": "value",
-    ...
+    "array_field": [
+      {"column1": "value1", "column2": "value2"},
+      {"column1": "value3", "column2": "value4"}
+    ]
   },
   "field_confidence": {
     "field_name": 95,
-    ...
+    "array_field": 90
   },
   "confidence": 85
 }
+
+EXAMPLE for invoice with line items:
+{
+  "extracted_data": {
+    "invoice_number": "INV-2024-001",
+    "line_items": [
+      {"description": "Product A", "quantity": 2, "unit_price": 50.00, "vat": 23, "line_total": 115.00},
+      {"description": "Product B", "quantity": 1, "unit_price": 100.00, "vat": 23, "line_total": 123.00}
+    ],
+    "total": 238.00
+  },
+  "field_confidence": {
+    "invoice_number": 100,
+    "line_items": 95,
+    "total": 100
+  },
+  "confidence": 98
+}
 PROMPT;
+    }
+
+    /**
+     * Build description for simple (non-array) field.
+     *
+     * @param  array{name: string, type: string, label?: string, pattern?: string, required?: bool}  $field  Field schema
+     * @return string Field description
+     */
+    private function buildSimpleFieldDescription(array $field): string
+    {
+        $description = "- {$field['name']} ({$field['type']})";
+
+        if (isset($field['label'])) {
+            $description .= ": {$field['label']}";
+        }
+
+        if (isset($field['pattern'])) {
+            $description .= " [Pattern: {$field['pattern']}]";
+        }
+
+        if (isset($field['required']) && $field['required']) {
+            $description .= ' [REQUIRED]';
+        }
+
+        return $description;
+    }
+
+    /**
+     * Build description for array field.
+     *
+     * @param  array{name: string, type: string, label?: string, items?: array<array{name: string, type: string, label?: string}>}  $field  Field schema
+     * @return string Field description
+     */
+    private function buildArrayFieldDescription(array $field): string
+    {
+        $itemsSchema = $field['items'] ?? [];
+
+        if (empty($itemsSchema)) {
+            return "- {$field['name']} (array): " . ($field['label'] ?? 'List of items');
+        }
+
+        $itemFields = collect($itemsSchema)
+            ->map(fn($item) => "{$item['name']} ({$item['type']})")
+            ->implode(', ');
+
+        $description = "- {$field['name']} (array of objects): [{$itemFields}]";
+
+        if (isset($field['label'])) {
+            $description .= " - {$field['label']}";
+        }
+
+        $description .= ' [EXTRACT_ALL_ROWS_FROM_TABLE]';
+
+        return $description;
     }
 
     /**
@@ -276,18 +347,55 @@ PROMPT;
         try {
             $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
 
+            $extractedData = $data['extracted_data'] ?? $data;
+
+            // Normalize all field names to lowercase to avoid case-sensitivity issues
+            $normalizedData = $this->normalizeFieldNames($extractedData);
+
             return [
-                'data' => $data['extracted_data'] ?? $data,
+                'data' => $normalizedData,
                 'confidence' => $data['confidence'] ?? null,
                 'field_confidence' => $data['field_confidence'] ?? [],
             ];
         } catch (JsonException $e) {
             Log::error('Invalid JSON from OpenAI', [
+                'content' => substr($content, 0, 500),
                 'error' => $e->getMessage(),
-                'content_preview' => mb_substr($content, 0, 200),
             ]);
-            throw new RuntimeException('AI response is not valid JSON');
+
+            throw new RuntimeException('Invalid JSON response from OpenAI: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Normalize all field names to lowercase recursively.
+     * This prevents case-sensitivity issues like "Qty" vs "qty".
+     */
+    private function normalizeFieldNames(array $data): array
+    {
+        $normalized = [];
+
+        foreach ($data as $key => $value) {
+            $lowercaseKey = strtolower($key);
+
+            if (is_array($value)) {
+                // Check if it's an associative array (object) or indexed array (list)
+                if (array_keys($value) === range(0, count($value) - 1)) {
+                    // It's an indexed array (list of items), normalize each item
+                    $normalized[$lowercaseKey] = array_map(
+                        fn($item) => is_array($item) ? $this->normalizeFieldNames($item) : $item,
+                        $value
+                    );
+                } else {
+                    // It's an associative array (object), normalize recursively
+                    $normalized[$lowercaseKey] = $this->normalizeFieldNames($value);
+                }
+            } else {
+                $normalized[$lowercaseKey] = $value;
+            }
+        }
+
+        return $normalized;
     }
 
     /**
@@ -306,10 +414,15 @@ PROMPT;
             $fieldName = $fieldSchema['name'];
             $value = $extractedData[$fieldName] ?? null;
 
-            // Validate field
-            $validationResult = $this->validator->validate($value, $fieldSchema);
+            // Handle array fields with specialized validator
+            if ($fieldSchema['type'] === 'array') {
+                $arrayValidator = app(\App\Services\Validation\ArrayFieldValidator::class);
+                $validationResult = $arrayValidator->validate($value, $fieldSchema);
+            } else {
+                $validationResult = $this->validator->validate($value, $fieldSchema);
+            }
 
-            if (! $validationResult['valid']) {
+            if (!$validationResult['valid']) {
                 $validationErrors[$fieldName] = $validationResult['errors'];
                 Log::warning('Field validation failed', [
                     'field' => $fieldName,

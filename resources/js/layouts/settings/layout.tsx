@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const [locale, setLocale] = useState('pt');
-    const t = useTranslation();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const savedLocale = localStorage.getItem('selected-locale') || 'pt';

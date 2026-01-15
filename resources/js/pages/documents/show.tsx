@@ -25,6 +25,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { usePage } from '@inertiajs/react';
 import { ExportDataButton } from '@/components/export-data-button';
+import { ArrayFieldModal } from '@/components/fields/ArrayFieldModal';
 
 
 function formatDate(dateString: string | null): string {
@@ -86,16 +87,22 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
     const schemaFields: SchemaField[] = document.schema_used?.fields || [];
     
     const getInitialData = () => {
-        const data: Record<string, string> = {};
+        const data: Record<string, any> = {}; // Changed from Record<string, string>
         schemaFields.forEach((field) => {
-            data[field.name] = String(document.extracted_data?.[field.name] ?? '');
+            const value = document.extracted_data?.[field.name];
+            // Preserve arrays and objects, don't convert to string
+            if (field.type === 'array' && Array.isArray(value)) {
+                data[field.name] = value;
+            } else {
+                data[field.name] = value ?? '';
+            }
         });
         return data;
     };
 
-    const [formData, setFormData] = useState<Record<string, string>>(getInitialData);
+    const [formData, setFormData] = useState<Record<string, any>>(getInitialData);
 
-    const handleFieldChange = (fieldName: string, value: string) => {
+    const handleFieldChange = (fieldName: string, value: any) => { // Changed from value: string
         setFormData((prev) => ({
             ...prev,
             [fieldName]: value,
@@ -348,21 +355,42 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                                         </p>
                                     ) : (
                                         <>
-                                            <div className="grid gap-4 sm:grid-cols-2">
+                                            <div className="space-y-6">
                                                 {schemaFields.map((field) => (
                                                     <div key={field.name} className="space-y-2">
                                                         <Label htmlFor={field.name}>
                                                             {getFieldLabel(field)}
                                                         </Label>
-                                                        <Input
-                                                            id={field.name}
-                                                            type={getInputType(field.type)}
-                                                            value={formData[field.name] || ''}
-                                                            onChange={(e) =>
-                                                                handleFieldChange(field.name, e.target.value)
-                                                            }
-                                                            step={field.type === 'number' ? '0.01' : undefined}
-                                                        />
+                                                        
+                                                        {/* Render array fields with modal table display */}
+                                                        {field.type === 'array' ? (
+                                                            <ArrayFieldModal
+                                                                field={{
+                                                                    name: field.name,
+                                                                    label: field.label || field.name,
+                                                                    items: (field.items || []).map(item => ({
+                                                                        name: item.name,
+                                                                        label: item.label || item.name,
+                                                                        type: item.type,
+                                                                    })),
+                                                                }}
+                                                                value={formData[field.name] as Array<Record<string, any>> || []}
+                                                                onChange={(newValue) => 
+                                                                    handleFieldChange(field.name, newValue)
+                                                                }
+                                                                readOnly={false}
+                                                            />
+                                                        ) : (
+                                                            <Input
+                                                                id={field.name}
+                                                                type={getInputType(field.type)}
+                                                                value={String(formData[field.name] || '')}
+                                                                onChange={(e) =>
+                                                                    handleFieldChange(field.name, e.target.value)
+                                                                }
+                                                                step={field.type === 'number' ? '0.01' : undefined}
+                                                            />
+                                                        )}
                                                     </div>
                                                 ))}
                                             </div>

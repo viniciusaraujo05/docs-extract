@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { type SchemaField, type DocumentType } from '@/types/extraction';
 import { DocumentPreview } from './DocumentPreview';
+import { ArrayFieldPreview } from '@/components/fields/ArrayFieldPreview';
 import { 
     ArrowLeft, 
     Check,
@@ -145,13 +146,27 @@ export function StepReview({
                                     <X className="h-3 w-3" />
                                 </Button>
                             </div>
-                            <Input
-                                id={field.name}
-                                type={getInputType(field.type)}
-                                value={String(extractedData[field.name] ?? '')}
-                                onChange={(e) => handleFieldChange(field, e.target.value)}
-                                className="transition-all focus:ring-2 focus:ring-primary/20"
-                            />
+
+                            {/* Conditional rendering based on field type */}
+                            {field.type === 'array' ? (
+                                <ArrayFieldPreview
+                                    field={{
+                                        name: field.name,
+                                        label: field.label,
+                                        items: field.items || [],
+                                    }}
+                                    value={(extractedData[field.name] as Array<Record<string, any>>) || []}
+                                    onChange={(value) => onUpdateField(field.name, value)}
+                                />
+                            ) : (
+                                <Input
+                                    id={field.name}
+                                    type={getInputType(field.type)}
+                                    value={String(extractedData[field.name] ?? '')}
+                                    onChange={(e) => handleFieldChange(field, e.target.value)}
+                                    className="transition-all focus:ring-2 focus:ring-primary/20"
+                                />
+                            )}
                         </div>
                     ))}
 

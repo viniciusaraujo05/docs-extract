@@ -334,6 +334,15 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
     }, []);
 
     /**
+     * Atualiza a estrutura de um campo (e.g., items para array fields)
+     */
+    const handleUpdateFieldStructure = useCallback((updatedField: SchemaField) => {
+        setFields(prev => prev.map(f => 
+            f.name === updatedField.name ? updatedField : f
+        ));
+    }, []);
+
+    /**
      * Adiciona todos os campos sugeridos
      */
     const handleAddAllSuggested = useCallback(() => {
@@ -595,6 +604,7 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
                         analyzing={analyzing}
                         processing={processing}
                         onAddField={handleAddField}
+                        onUpdateField={handleUpdateFieldStructure}
                         onRemoveField={handleRemoveField}
                         onAddAllSuggested={handleAddAllSuggested}
                         onBack={() => setStep(1)}

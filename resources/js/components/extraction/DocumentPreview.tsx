@@ -16,7 +16,7 @@ interface DocumentPreviewProps {
 export function DocumentPreview({ file, filePreview }: DocumentPreviewProps) {
   const { t } = useTranslation();
   const [imageScale, setImageScale] = useState(1);
-  const [pdfScale, setPdfScale] = useState(1.0);
+  const [pdfScale, setPdfScale] = useState(1.15);
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageWidth, setPageWidth] = useState(600);
@@ -28,16 +28,35 @@ export function DocumentPreview({ file, filePreview }: DocumentPreviewProps) {
   useEffect(() => {
     if (!containerRef.current) return;
 
+    let timeoutId: NodeJS.Timeout;
     const updateWidth = () => {
-      const width = Math.max(containerRef.current?.clientWidth || 600, 400);
-      setPageWidth(Math.min(width - 32, 800));
+      // Clear previous timeout
+      clearTimeout(timeoutId);
+      
+      // Debounce the resize
+      timeoutId = setTimeout(() => {
+        if (!containerRef.current) return;
+        const width = Math.max(containerRef.current?.clientWidth || 600, 400);
+        const newWidth = Math.min(width - 32, 800);
+        
+        // Only update if significantly different (avoid micro-updates)
+        setPageWidth((prev) => {
+          if (Math.abs(prev - newWidth) > 5) {
+            return newWidth;
+          }
+          return prev;
+        });
+      }, 100);
     };
 
     updateWidth();
     const resizeObserver = new ResizeObserver(updateWidth);
     resizeObserver.observe(containerRef.current);
 
-    return () => resizeObserver.disconnect();
+    return () => {
+      clearTimeout(timeoutId);
+      resizeObserver.disconnect();
+    };
   }, []);
 
   const handleOpenNewTab = useCallback(() => {
@@ -59,7 +78,7 @@ export function DocumentPreview({ file, filePreview }: DocumentPreviewProps) {
   }, []);
 
   const handlePdfZoomReset = useCallback(() => {
-    setPdfScale(1.0);
+    setPdfScale(1.15);
   }, []);
 
   const goToPrevPage = useCallback(() => {
@@ -122,7 +141,7 @@ export function DocumentPreview({ file, filePreview }: DocumentPreviewProps) {
             type="range"
             min="0.5"
             max="3"
-            step="0.05"
+            step="0.1"
             value={pdfScale}
             onChange={(e) => setPdfScale(parseFloat(e.target.value))}
             className="flex-1 h-1 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"

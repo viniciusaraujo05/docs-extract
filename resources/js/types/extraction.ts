@@ -6,9 +6,11 @@ export interface SchemaField {
     name: string;
     label: string;
     type: FieldType;
+    items?: SchemaField[];  // For array fields - defines sub-fields/columns
+    required?: boolean;
 }
 
-export type FieldType = 'string' | 'number' | 'date' | 'boolean';
+export type FieldType = 'string' | 'number' | 'date' | 'boolean' | 'array';
 
 export interface DocumentType {
     id: number;
@@ -55,10 +57,11 @@ export interface WizardState {
 }
 
 export const FIELD_TYPES: ReadonlyArray<{ value: FieldType; label: string }> = [
-    { value: 'string', label: 'Texto' },
-    { value: 'number', label: 'Número' },
-    { value: 'date', label: 'Data' },
-    { value: 'boolean', label: 'Sim/Não' },
+    { value: 'string', label: 'field_type_string' },
+    { value: 'number', label: 'field_type_number' },
+    { value: 'date', label: 'field_type_date' },
+    { value: 'boolean', label: 'field_type_boolean' },
+    { value: 'array', label: 'field_type_array' },
 ] as const;
 
 export const ACCEPTED_FILE_TYPES = '.pdf,.jpg,.jpeg,.png,.webp';

@@ -39,6 +39,18 @@ class ExtractionSchema extends Model
                 ['name' => 'invoice_number', 'type' => 'string', 'label' => 'Número da Fatura'],
                 ['name' => 'invoice_date', 'type' => 'date', 'label' => 'Data'],
                 ['name' => 'due_date', 'type' => 'date', 'label' => 'Data de Vencimento'],
+                [
+                    'name' => 'line_items',
+                    'type' => 'array',
+                    'label' => 'Itens da Fatura',
+                    'items' => [
+                        ['name' => 'description', 'type' => 'string', 'label' => 'Descrição'],
+                        ['name' => 'quantity', 'type' => 'number', 'label' => 'Quantidade'],
+                        ['name' => 'unit_price', 'type' => 'number', 'label' => 'Preço Unitário'],
+                        ['name' => 'tax_rate', 'type' => 'number', 'label' => 'Taxa IVA (%)'],
+                        ['name' => 'total', 'type' => 'number', 'label' => 'Total'],
+                    ],
+                ],
                 ['name' => 'subtotal', 'type' => 'number', 'label' => 'Subtotal'],
                 ['name' => 'vat_amount', 'type' => 'number', 'label' => 'IVA'],
                 ['name' => 'vat_rate', 'type' => 'number', 'label' => 'Taxa IVA (%)'],
@@ -71,11 +83,16 @@ class ExtractionSchema extends Model
                 ['name' => 'average_ticket', 'type' => 'number', 'label' => 'Ticket Médio'],
                 ['name' => 'visits', 'type' => 'number', 'label' => 'Visitas'],
                 ['name' => 'conversion_rate', 'type' => 'number', 'label' => 'Taxa de Conversão (%)'],
-                ['name' => 'top_listings', 'type' => 'array', 'label' => 'Top Anúncios', 'items' => [
-                    ['name' => 'title', 'type' => 'string'],
-                    ['name' => 'sales', 'type' => 'number'],
-                    ['name' => 'visits', 'type' => 'number'],
-                ]],
+                [
+                    'name' => 'top_listings',
+                    'type' => 'array',
+                    'label' => 'Top Anúncios',
+                    'items' => [
+                        ['name' => 'title', 'type' => 'string'],
+                        ['name' => 'sales', 'type' => 'number'],
+                        ['name' => 'visits', 'type' => 'number'],
+                    ]
+                ],
             ],
         ];
     }

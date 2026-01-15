@@ -29,7 +29,8 @@ final class ExtractionController extends Controller
         private readonly FieldDetectorService $fieldDetector,
         private readonly AnalyzeDocument $analyzeAction,
         private readonly ExtractFromUploadedFileAction $extractAction,
-    ) {}
+    ) {
+    }
 
     /**
      * Analisa um documento e detecta campos extraíveis.
@@ -144,7 +145,11 @@ final class ExtractionController extends Controller
             'fields' => 'required|array',
             'fields.*.name' => 'required|string',
             'fields.*.label' => 'required|string',
-            'fields.*.type' => 'required|string|in:string,number,date,email,phone,currency',
+            'fields.*.type' => 'required|string|in:string,number,date,email,phone,currency,array',
+            'fields.*.items' => 'array|nullable',  // For array fields
+            'fields.*.items.*.name' => 'required_with:fields.*.items|string',
+            'fields.*.items.*.label' => 'required_with:fields.*.items|string',
+            'fields.*.items.*.type' => 'required_with:fields.*.items|string|in:string,number,date',
         ], [
             'file.required' => 'Por favor, envie um documento.',
             'file.mimes' => 'Apenas arquivos PDF e imagens (JPG, PNG, WEBP) são suportados.',
