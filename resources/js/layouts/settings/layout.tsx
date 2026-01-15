@@ -5,9 +5,11 @@ import { cn, isSameUrl, resolveUrl } from '@/lib/utils';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const [locale, setLocale] = useState('pt');
+    const t = useTranslation();
 
     useEffect(() => {
         const savedLocale = localStorage.getItem('selected-locale') || 'pt';
@@ -16,32 +18,27 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
 
     const sidebarNavItems: NavItem[] = [
         {
-            title: 'Profile',
+            title: t('Profile'),
             href: `/${locale}/settings/profile`,
             icon: null,
         },
         {
-            title: 'Password',
+            title: t('Password'),
             href: `/${locale}/settings/password`,
             icon: null,
         },
         {
-            title: 'Two-Factor Auth',
-            href: `/${locale}/settings/two-factor`,
-            icon: null,
-        },
-        {
-            title: 'Billing',
+            title: t('Billing'),
             href: `/${locale}/settings/billing`,
             icon: null,
         },
         {
-            title: 'Appearance',
+            title: t('Appearance'),
             href: `/${locale}/settings/appearance`,
             icon: null,
         },
         {
-            title: 'Language',
+            title: t('Language'),
             href: `/${locale}/settings/language`,
             icon: null,
         },
