@@ -9,17 +9,17 @@ class SeoHelper
         $content = [
             'en' => [
                 'title' => 'Stop Typing Invoices & Receipts | PDF to Excel Converter - DocSet',
-                'description' => 'Turn PDFs into Excel in seconds. No coding required. Extract invoice data, receipts, and IDs automatically. Trusted by 2,500+ finance teams.',
+                'description' => 'Turn PDFs into Excel in seconds. No coding required. Extract invoice data, receipts, and IDs automatically with our PDF to Excel converter and invoice OCR software.',
                 'keywords' => 'invoice data entry automation, receipt scanner excel, PDF invoice to excel, automated invoice processing, expense receipt OCR, KYC document extraction, invoice OCR software, PDF to Excel converter, stop typing invoices, automate data entry, receipt scanner, ID verification OCR',
             ],
             'pt-BR' => [
                 'title' => 'Pare de Digitar Notas Fiscais | Conversor PDF para Excel - DocSet',
-                'description' => 'Converta PDFs em Excel em segundos. Sem código. Extraia dados de notas fiscais, recibos e documentos automaticamente. Usado por 2.500+ equipes financeiras.',
+                'description' => 'Converta PDFs em Excel em segundos. Sem código. Extraia dados de notas fiscais, recibos e documentos automaticamente com nosso conversor PDF para Excel e software de OCR.',
                 'keywords' => 'automação nota fiscal, digitação automática nfe, PDF para Excel, OCR de recibos, extração de dados CNH, automação contas a pagar, parar de digitar notas fiscais, automatizar entrada de dados, scanner de recibos',
             ],
             'pt-PT' => [
                 'title' => 'Pare de Digitar Faturas | Conversor PDF para Excel - DocSet',
-                'description' => 'Converta PDFs em Excel em segundos. Sem código. Extraia dados de faturas, recibos e documentos automaticamente. Usado por 2.500+ equipas financeiras.',
+                'description' => 'Converta PDFs em Excel em segundos. Sem código. Extraia dados de faturas, recibos e documentos automaticamente com nosso conversor PDF para Excel e software de OCR.',
                 'keywords' => 'automação faturas, digitalização faturas excel, PDF para Excel, OCR recibos, extração dados cartão cidadão, automação contas a pagar, parar de digitar faturas, automatizar introdução dados',
             ],
         ];
