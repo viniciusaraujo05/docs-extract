@@ -1,11 +1,11 @@
 "use strict";
 exports.__esModule = true;
 exports.ErrorAlert = void 0;
-var useTranslation_1 = require("@/hooks/useTranslation");
+var react_i18next_1 = require("react-i18next");
 var lucide_react_1 = require("lucide-react");
 function ErrorAlert(_a) {
     var error = _a.error, onDismiss = _a.onDismiss, _b = _a.showReload, showReload = _b === void 0 ? true : _b;
-    var t = useTranslation_1.useTranslation().t;
+    var t = react_i18next_1.useTranslation().t;
     return (React.createElement("div", { className: "mx-auto w-full max-w-2xl animate-in fade-in-50" },
         React.createElement("div", { className: "rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-left text-destructive" },
             React.createElement("div", { className: "flex gap-3" },
