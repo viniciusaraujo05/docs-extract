@@ -43,7 +43,8 @@ import { useTranslation } from 'react-i18next';
 interface SchemaField {
     name: string;
     label: string;
-    type: 'string' | 'number' | 'date';
+    type: 'string' | 'number' | 'date' | 'boolean' | 'array';
+    items?: SchemaField[];
 }
 
 interface FieldConfig {
@@ -94,6 +95,7 @@ interface ReportConfiguratorProps {
         selectedDocumentIds: number[];
         dateGrouping: 'day' | 'month' | 'year' | null;
         dateField: string | null;
+        analysisMode: string;
     }) => void;
     onPreviewRequest: () => void;
     loading?: boolean;
@@ -142,8 +144,7 @@ const SELECTION_MODES_CONFIG = [
 
 function getFieldIcon(type: string) {
     switch (type) {
-        case 'number': return Hash;
-        case 'date': return Calendar;
+        case 'array': return ListFilter;
         default: return Type;
     }
 }
@@ -161,6 +162,12 @@ function getFieldTypeInfo(type: string) {
                 labelKey: 'Date', 
                 color: 'bg-green-500/10 text-green-600 border-green-200',
                 descriptionKey: 'Can be grouped by period'
+            };
+        case 'array':
+            return {
+                labelKey: 'Table',
+                color: 'bg-indigo-500/10 text-indigo-600 border-indigo-200',
+                descriptionKey: 'Contains list of items'
             };
         default: 
             return { 
@@ -200,6 +207,58 @@ export function ReportConfigurator({
     const [selectedDocumentIds, setSelectedDocumentIds] = useState<number[]>([]);
     const [availableDocuments, setAvailableDocuments] = useState<DocumentOption[]>([]);
     const [loadingDocuments, setLoadingDocuments] = useState(false);
+
+    // Analysis Mode (Documents vs Table Items)
+    const [analysisMode, setAnalysisMode] = useState<string>('documents');
+
+    // Filter available fields based on analysis mode
+    const displayFields = useCallback(() => {
+        if (analysisMode === 'documents') {
+            return fields.filter(f => f.type !== 'array'); // Don't show arrays in chart config, they select context
+        }
+        const arrayField = fields.find(f => f.name === analysisMode);
+        return arrayField?.items || [];
+    }, [analysisMode, fields]);
+
+    const availableFieldsForConfig = displayFields();
+
+    // Auto-populate field config when available fields change (e.g. switching Analysis Mode)
+    useEffect(() => {
+        setFieldConfig(prev => {
+            const next = { ...prev };
+            let hasChanges = false;
+            
+            // Check if matches the current mode context (are there any visible fields belonging to the current available set?)
+            const currentModeCtxFields = availableFieldsForConfig.map(f => f.name);
+            const hasVisibleFieldsForMode = Object.entries(prev).some(([key, conf]) => 
+                currentModeCtxFields.includes(key) && conf.visible
+            );
+
+            availableFieldsForConfig.forEach((field, index) => {
+                // If field doesn't exist in config, OR if we have no visible fields for this mode (e.g. fresh switch), force enable
+                // We default to enabling the first 3 fields if no visibility is set for this context
+                const shouldBeVisible = !prev[field.name] || (!hasVisibleFieldsForMode && index < 3);
+
+                if (!next[field.name]) {
+                    next[field.name] = {
+                        visible: shouldBeVisible,
+                        aggregation: field.type === 'number' ? 'sum' : null,
+                        chartType: field.type === 'number' ? 'bar' : field.type === 'date' ? 'line' : 'pie',
+                    };
+                    hasChanges = true;
+                } else if (!hasVisibleFieldsForMode && index < 3 && !next[field.name].visible) {
+                    // Force visibility on existing config if context was switched and nothing is visible
+                    next[field.name] = { ...next[field.name], visible: true };
+                    hasChanges = true;
+                }
+            });
+            
+            return hasChanges ? next : prev;
+        });
+    }, [availableFieldsForConfig, analysisMode]);
+
+    // Identify array fields available for analysis
+    const arrayFields = fields.filter(f => f.type === 'array' && f.items && f.items.length > 0);
 
     // Date grouping
     const [dateGrouping, setDateGrouping] = useState<'day' | 'month' | 'year' | null>(null);
@@ -248,8 +307,9 @@ export function ReportConfigurator({
             selectedDocumentIds,
             dateGrouping,
             dateField,
+            analysisMode,
         });
-    }, [fieldConfig, selectionMode, dateFrom, dateTo, selectedDocumentIds, dateGrouping, dateField, onConfigChange]);
+    }, [fieldConfig, selectionMode, dateFrom, dateTo, selectedDocumentIds, dateGrouping, dateField, analysisMode, onConfigChange]);
 
     const handleFieldVisibilityChange = useCallback((fieldName: string, visible: boolean) => {
         setFieldConfig(prev => ({
@@ -437,9 +497,59 @@ export function ReportConfigurator({
                                 </div>
                             </div>
 
+                            {/* Analysis Mode Selector */}
+                            {arrayFields.length > 0 && (
+                                <div className="mb-6 p-4 border rounded-xl bg-background shadow-sm">
+                                    <Label className="text-sm font-medium mb-3 block">
+                                        {t('Contexto da Análise')}
+                                    </Label>
+                                    <div className="grid sm:grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => {
+                                                setAnalysisMode('documents');
+                                                // Reset specific configs if needed
+                                            }}
+                                            className={`p-3 rounded-lg border-2 text-left transition-all flex items-center gap-3 ${
+                                                analysisMode === 'documents'
+                                                    ? 'border-primary bg-primary/5'
+                                                    : 'border-muted hover:border-muted-foreground/30'
+                                            }`}
+                                        >
+                                            <div className={`p-2 rounded-md ${analysisMode === 'documents' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                                                <FileText className="h-4 w-4" />
+                                            </div>
+                                            <div>
+                                                <span className="font-medium block text-sm">{t('Documentos (Padrão)')}</span>
+                                                <span className="text-xs text-muted-foreground">{t('1 linha = 1 documento')}</span>
+                                            </div>
+                                        </button>
+
+                                        {arrayFields.map(field => (
+                                            <button
+                                                key={field.name}
+                                                onClick={() => setAnalysisMode(field.name)}
+                                                className={`p-3 rounded-lg border-2 text-left transition-all flex items-center gap-3 ${
+                                                    analysisMode === field.name
+                                                        ? 'border-primary bg-primary/5'
+                                                        : 'border-muted hover:border-muted-foreground/30'
+                                                }`}
+                                            >
+                                                <div className={`p-2 rounded-md ${analysisMode === field.name ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                                                    <ListFilter className="h-4 w-4" />
+                                                </div>
+                                                <div>
+                                                    <span className="font-medium block text-sm">{t('Itens de')} {field.label}</span>
+                                                    <span className="text-xs text-muted-foreground">{t('1 linha = 1 item')}</span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             <ScrollArea className="h-[350px] pr-4">
                                 <div className="space-y-3">
-                                    {fields.map(field => {
+                                    {availableFieldsForConfig.map(field => {
                                         const config = fieldConfig[field.name];
                                         const FieldIcon = getFieldIcon(field.type);
                                         const typeInfo = getFieldTypeInfo(field.type);
@@ -509,7 +619,7 @@ export function ReportConfigurator({
                                                                                             {t(agg.labelKey)}
                                                                                         </span>
                                                                                         <div>
-                                                                                            <span>{t(agg.label)}</span>
+                                                                                            <span>{t(agg.labelKey)}</span>
                                                                                         </div>
                                                                                     </div>
                                                                                 </SelectItem>
@@ -781,7 +891,7 @@ export function ReportConfigurator({
                                                     <SelectItem key={f.name} value={f.name}>
                                                         <div className="flex items-center gap-2">
                                                             <Calendar className="h-4 w-4" />
-                                                            {t(f.labelKey)}
+                                                            {t(f.label)}
                                                         </div>
                                                     </SelectItem>
                                                 ))}

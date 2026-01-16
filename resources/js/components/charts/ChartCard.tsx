@@ -33,32 +33,31 @@ interface ChartCardProps {
     onColorChange?: (color: string) => void;
 }
 
+// Robust Palette using Hex values to ensure visibility
 const COLORS = [
-    'hsl(var(--chart-1))',
-    'hsl(var(--chart-2))',
-    'hsl(var(--chart-3))',
-    'hsl(var(--chart-4))',
-    'hsl(var(--chart-5))',
-    '#8884d8',
-    '#82ca9d',
-    '#ffc658',
-    '#ff7300',
-    '#00C49F',
+    '#3b82f6', // Blue-500
+    '#ef4444', // Red-500
+    '#10b981', // Emerald-500
+    '#f59e0b', // Amber-500
+    '#8b5cf6', // Violet-500
+    '#ec4899', // Pink-500
+    '#06b6d4', // Cyan-500
+    '#84cc16', // Lime-500
+    '#6366f1', // Indigo-500
+    '#14b8a6', // Teal-500
 ];
 
 const COLOR_PRESETS = [
-    { name: 'Azul', value: 'hsl(var(--chart-1))' },
-    { name: 'Verde', value: 'hsl(var(--chart-2))' },
-    { name: 'Laranja', value: 'hsl(var(--chart-3))' },
-    { name: 'Roxo', value: 'hsl(var(--chart-4))' },
-    { name: 'Rosa', value: 'hsl(var(--chart-5))' },
-    { name: 'Azul Escuro', value: '#8884d8' },
-    { name: 'Verde Água', value: '#82ca9d' },
-    { name: 'Amarelo', value: '#ffc658' },
-    { name: 'Laranja Forte', value: '#ff7300' },
-    { name: 'Turquesa', value: '#00C49F' },
+    { name: 'Azul', value: '#3b82f6' },
+    { name: 'Verde', value: '#10b981' },
+    { name: 'Laranja', value: '#f59e0b' },
+    { name: 'Roxo', value: '#8b5cf6' },
+    { name: 'Rosa', value: '#ec4899' },
     { name: 'Vermelho', value: '#ef4444' },
+    { name: 'Ciano', value: '#06b6d4' },
+    { name: 'Lima', value: '#84cc16' },
     { name: 'Índigo', value: '#6366f1' },
+    { name: 'Cinza', value: '#64748b' },
 ];
 
 const chartTypeOptions = [
@@ -74,7 +73,7 @@ export function ChartCard({
     data, 
     chartType, 
     onChartTypeChange,
-    color = 'hsl(var(--chart-1))',
+    color = '#3b82f6',
     onColorChange
 }: ChartCardProps) {
     const renderChart = () => {

@@ -8,7 +8,7 @@ import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { type User } from '@/types';
 import { Link, router } from '@inertiajs/react';
-import { LogOut, Settings } from 'lucide-react';
+import { LifeBuoy, LogOut, Settings } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -50,6 +50,18 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                     >
                         <Settings className="mr-2" />
                         {t('Settings')}
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link
+                        className="block w-full"
+                        href={`/${locale}/support`}
+                        as="button"
+                        prefetch
+                        onClick={cleanup}
+                    >
+                        <LifeBuoy className="mr-2" />
+                        {t('Help & Support')}
                     </Link>
                 </DropdownMenuItem>
             </DropdownMenuGroup>

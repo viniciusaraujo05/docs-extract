@@ -9,20 +9,25 @@ import { ReportConfigurator } from '@/components/reports/ReportConfigurator';
 import { CalculatedFieldBuilder, type CalculatedField } from '@/components/reports/CalculatedFieldBuilder';
 import { ReportTableView } from '@/components/reports/ReportTableView';
 import { AIAnalysisModal } from '@/components/reports/AIAnalysisModal';
+import { TablesView } from '@/components/reports/TablesView';
 import { ExportDataButton } from '@/components/export-data-button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
-import { Download, FileText, BarChart3, Calculator, Loader2, Settings2, Table2, PieChart, Palette, Sparkles } from 'lucide-react';
+import { Download, FileText, BarChart3, Calculator, Loader2, Settings2, Table2, PieChart, Palette, Sparkles, Database } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import * as XLSX from 'xlsx';
+import { extractTableFields } from '@/utils/tableFieldProcessor';
+import { flattenReportData, groupFlattenedData } from '@/utils/reportDataFlattener';
+import { Badge } from '@/components/ui/badge';
 
 interface SchemaField {
     name: string;
     label: string;
-    type: 'string' | 'number' | 'date';
+    type: 'string' | 'number' | 'date' | 'boolean' | 'array';
+    items?: SchemaField[]; // For array fields
 }
 
 interface DocumentType {
@@ -104,6 +109,28 @@ interface FieldConfig {
     chartType: 'bar' | 'pie' | 'line' | 'area';
 }
 
+function getDefaultConfig(fields: SchemaField[]): ReportConfig {
+    const fieldConfig: Record<string, FieldConfig> = {};
+    fields.forEach(field => {
+        fieldConfig[field.name] = {
+            visible: field.type !== 'array', // Hide arrays from main charts by default
+            aggregation: field.type === 'number' ? 'sum' : null,
+            chartType: field.type === 'number' ? 'bar' : field.type === 'date' ? 'line' : 'pie',
+        };
+    });
+
+    return {
+        fieldConfig,
+        selectionMode: 'all',
+        dateFrom: null,
+        dateTo: null,
+        selectedDocumentIds: [],
+        dateGrouping: null,
+        dateField: null,
+        analysisMode: 'documents'
+    };
+}
+
 interface ReportConfig {
     fieldConfig: Record<string, FieldConfig>;
     selectionMode: 'all' | 'filtered' | 'manual';
@@ -112,6 +139,7 @@ interface ReportConfig {
     selectedDocumentIds: number[];
     dateGrouping: 'day' | 'month' | 'year' | null;
     dateField: string | null;
+    analysisMode: string;
 }
 
 export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
@@ -154,7 +182,7 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
     });
     const [showConfigurator, setShowConfigurator] = useState(false);
     const [currentConfig, setCurrentConfig] = useState<ReportConfig | null>(null);
-    const [activeView, setActiveView] = useState<'charts' | 'table'>('charts');
+    const [activeView, setActiveView] = useState<'charts' | 'table' | 'tables'>('charts');
     const [calculatedFields, setCalculatedFields] = useState<CalculatedField[]>([]);
     const [showAIAnalysis, setShowAIAnalysis] = useState(false);
     const [aiAnalysis, setAiAnalysis] = useState<any>(null);
@@ -164,6 +192,12 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
     const [loadingAnalysis, setLoadingAnalysis] = useState(false);
 
     const selectedType = documentTypes.find(t => t.id.toString() === selectedTypeId);
+
+    // Extract table fields from documents
+    const tableFields = useMemo(() => {
+        if (!reportData || !selectedType) return [];
+        return extractTableFields(reportData.documents, selectedType.fields);
+    }, [reportData, selectedType]);
 
     // Auto-save global color to localStorage
     useEffect(() => {
@@ -415,16 +449,21 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
     }, [selectedType]);
 
     useEffect(() => {
-        if (selectedTypeId) {
-            fetchReportData(selectedTypeId);
+        if (selectedTypeId && selectedType) {
+            // Auto-initialize config to show charts immediately
+            const defaultConfig = getDefaultConfig(selectedType.fields);
+            setCurrentConfig(defaultConfig);
+
+            fetchReportData(selectedTypeId, defaultConfig);
             fetchLatestAnalysis(selectedTypeId);
             setShowConfigurator(false);
         } else {
             setReportData(null);
             setAiAnalysis(null);
             setHasSavedAnalysis(false);
+            setCurrentConfig(null);
         }
-    }, [selectedTypeId]);
+    }, [selectedTypeId, selectedType]);
 
     const fetchLatestAnalysis = useCallback(async (typeId: string) => {
         setLoadingAnalysis(true);
@@ -544,6 +583,102 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
         }
         return [];
     };
+
+    // Unified Chart Data Adapter
+    const displayCharts = useMemo(() => {
+        if (!reportData || !currentConfig) return [];
+
+        // MODE 1: Deep Analysis (Table Items)
+        if (currentConfig.analysisMode && currentConfig.analysisMode !== 'documents') {
+            const arrayField = reportData.documentType.fields.find(f => f.name === currentConfig.analysisMode);
+            if (!arrayField) return [];
+
+            const flattened = flattenReportData(reportData.documents, arrayField.name);
+            
+            // Fields configured for charts
+            // CRITICAL: We must filter specific fields for this table. 
+            // The global config might contain fields from 'documents' or other tables.
+            const validTableFields = new Set(arrayField.items?.map(f => f.name) || []);
+            
+            const chartConfigs = Object.entries(currentConfig.fieldConfig)
+                .filter(([name, config]) => config.visible && config.chartType && validTableFields.has(name));
+            
+            console.log(`[DisplayCharts] Valid table fields:`, Array.from(validTableFields));
+            console.log(`[DisplayCharts] Filtered chart configs:`, chartConfigs.map(c => c[0]));
+
+            if (chartConfigs.length === 0) {
+                console.warn('[DisplayCharts] No visible chart configs match current table fields.');
+                return [];
+            }
+
+            // Grouping: Determine X Axis
+            // Try to find a string field in the table items to group by (e.g. Product Name)
+            // Fallback to Document Name if no string field found in table items
+            const itemStringFields = arrayField.items?.filter(f => f.type === 'string') || [];
+            const groupByField = itemStringFields.length > 0 ? itemStringFields[0].name : '_docName';
+            
+            const operations = chartConfigs.map(([_, conf]) => {
+                const agg = conf.aggregation || 'sum';
+                return (agg === 'growth' ? 'sum' : agg) as 'sum' | 'avg' | 'count';
+            });
+
+            console.log(`[DisplayCharts] Grouping by ${groupByField} with operations:`, operations);
+            const groupedData = groupFlattenedData(flattened, groupByField, operations);
+            console.log(`[DisplayCharts] Grouped data result:`, groupedData.length > 0 ? groupedData[0] : 'Empty');
+
+            return chartConfigs.map(([fieldName, config]) => {
+                const fieldDef = arrayField.items?.find(f => f.name === fieldName);
+                const fieldLabel = fieldDef?.label || fieldName;
+                const groupByLabel = arrayField.items?.find(f => f.name === groupByField)?.label || t('Document');
+
+                // Determine metric to show:
+                // 1. If field is the grouping key itself, show Count
+                // 2. If field is non-numeric (string/date), show Count
+                // 3. If field is numeric, show the Aggregated Sum (value property)
+                const isNumeric = fieldDef?.type === 'number';
+                const useCount = fieldName === groupByField || !isNumeric;
+
+                return {
+                    id: fieldName,
+                    title: `${fieldLabel} ${t('by')} ${groupByLabel}`,
+                    description: `${t('Analysis of')} ${flattened.length} ${t('items')}`,
+                    data: groupedData.map(d => ({ 
+                        name: d.name.length > 20 ? d.name.substring(0, 20) + '...' : d.name, 
+                        value: useCount ? d.count : ((d as any)[fieldName] || 0) 
+                    })),
+                    type: chartTypes[fieldName] || config.chartType || 'bar',
+                    color: chartColors[fieldName] || '#3b82f6'
+                };
+            });
+        }
+
+        // MODE 2: Standard Document Analysis
+        return Object.entries(reportData.aggregated).map(([fieldName, field]) => {
+            // Check visibility config
+            const config = currentConfig.fieldConfig[fieldName];
+            if (config && !config.visible) return null;
+
+            const chartData = getChartData(fieldName, field);
+            if (chartData.length === 0) return null;
+
+            let description = '';
+            if (field.type === 'number') {
+                description = `${t('Sum:')} ${formatNumber(field.sum!)} | ${t('Avg:')} ${formatNumber(field.avg!)}`;
+            } else if (field.uniqueCount) {
+                description = `${field.uniqueCount} ${t('unique values')}`;
+            }
+
+            return {
+                id: fieldName,
+                title: field.label,
+                description,
+                data: chartData,
+                type: chartTypes[fieldName] || config?.chartType || 'bar',
+                color: chartColors[fieldName] || globalColor || '#3b82f6'
+            };
+        }).filter((chart): chart is NonNullable<typeof chart> => chart !== null);
+
+    }, [reportData, currentConfig, chartTypes, chartColors, globalColor, t]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -729,7 +864,7 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                         </div>
 
                         {/* View Tabs */}
-                        <Tabs value={activeView} onValueChange={(v) => setActiveView(v as 'charts' | 'table')} className="w-full">
+                        <Tabs value={activeView} onValueChange={(v) => setActiveView(v as 'charts' | 'table' | 'tables')} className="w-full">
                             <div className="flex items-center justify-between mb-4">
                                 <TabsList>
                                     <TabsTrigger value="charts" className="gap-2">
@@ -739,6 +874,15 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                                     <TabsTrigger value="table" className="gap-2">
                                         <Table2 className="h-4 w-4" />
                                         {t('Table')}
+                                    </TabsTrigger>
+                                    <TabsTrigger value="tables" className="gap-2">
+                                        <Database className="h-4 w-4" />
+                                        {t('Tables')}
+                                        {tableFields.length > 0 && (
+                                            <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                                                {tableFields.length}
+                                            </Badge>
+                                        )}
                                     </TabsTrigger>
                                 </TabsList>
 
@@ -766,32 +910,20 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
 
                             {/* Charts View */}
                             <TabsContent value="charts" className="space-y-6 mt-0">
-                                {Object.keys(reportData.aggregated).length > 0 ? (
+                                {displayCharts.length > 0 ? (
                                     <div className="grid gap-6 md:grid-cols-2">
-                                        {Object.entries(reportData.aggregated).map(([fieldName, field]) => {
-                                            const chartData = getChartData(fieldName, field);
-                                            if (chartData.length === 0) return null;
-
-                                            let description = '';
-                                            if (field.type === 'number') {
-                                                description = `${t('Sum:')} ${formatNumber(field.sum!)} | ${t('Average')}: ${formatNumber(field.avg!)}`;
-                                            } else if (field.uniqueCount) {
-                                                description = `${field.uniqueCount} ${t('unique values')}`;
-                                            }
-
-                                            return (
-                                                <ChartCard
-                                                    key={fieldName}
-                                                    title={field.label}
-                                                    description={description}
-                                                    data={chartData}
-                                                    chartType={chartTypes[fieldName] || 'bar'}
-                                                    onChartTypeChange={(type) => handleChartTypeChange(fieldName, type)}
-                                                    color={chartColors[fieldName] || globalColor}
-                                                    onColorChange={(color) => setChartColors(prev => ({ ...prev, [fieldName]: color }))}
-                                                />
-                                            );
-                                        })}
+                                        {displayCharts.map((chart) => (
+                                            <ChartCard
+                                                key={chart.id}
+                                                title={chart.title}
+                                                description={chart.description}
+                                                data={chart.data}
+                                                chartType={chart.type}
+                                                onChartTypeChange={(type) => handleChartTypeChange(chart.id, type)}
+                                                color={chart.color}
+                                                onColorChange={(color) => setChartColors(prev => ({ ...prev, [chart.id]: color }))}
+                                            />
+                                        ))}
                                     </div>
                                 ) : (
                                     <Card>
@@ -832,6 +964,16 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                                         )}
                                     </div>
                                 </div>
+                            </TabsContent>
+
+                            {/* Tables View */}
+                            <TabsContent value="tables" className="space-y-4 mt-0">
+                                {selectedType && (
+                                    <TablesView
+                                        documents={reportData.documents}
+                                        fields={selectedType.fields}
+                                    />
+                                )}
                             </TabsContent>
                         </Tabs>
                     </>

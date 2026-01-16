@@ -11,7 +11,8 @@ import { useTranslation } from 'react-i18next';
 interface SchemaField {
     name: string;
     label: string;
-    type: 'string' | 'number' | 'date';
+    type: 'string' | 'number' | 'date' | 'boolean' | 'array';
+    items?: SchemaField[];
 }
 
 export interface CalculatedField {

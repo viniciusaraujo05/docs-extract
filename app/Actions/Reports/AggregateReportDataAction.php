@@ -25,10 +25,15 @@ final readonly class AggregateReportDataAction
             $fieldType = $field['type'] ?? 'string';
             $fieldLabel = $field['label'] ?? $fieldName;
 
+            // Skip array fields - they are handled separately on the frontend
+            if ($fieldType === 'array') {
+                continue;
+            }
+
             $values = $documents
                 ->pluck('extracted_data')
                 ->map(fn ($data) => $data[$fieldName] ?? null)
-                ->filter(fn ($v) => $v !== null && $v !== '');
+                ->filter(fn ($v) => $v !== null && $v !== '' && !is_array($v)); // Filter out arrays
 
             if ($values->isEmpty()) {
                 continue;

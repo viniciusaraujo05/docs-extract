@@ -18,11 +18,13 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import type { CalculatedField } from './CalculatedFieldBuilder';
+import { ArrayCellRenderer } from './ArrayCellRenderer';
 
 interface SchemaField {
     name: string;
     label: string;
-    type: 'string' | 'number' | 'date';
+    type: 'string' | 'number' | 'date' | 'boolean' | 'array';
+    items?: SchemaField[];
 }
 
 interface DocumentData {
@@ -345,7 +347,15 @@ export function ReportTableView({
                                     </TableCell>
                                     {displayFields.map(field => (
                                         <TableCell key={field.name}>
-                                            {formatValue(doc.data[field.name], field.type)}
+                                            {field.type === 'array' ? (
+                                                <ArrayCellRenderer 
+                                                    value={doc.data[field.name]} 
+                                                    field={field} 
+                                                    docName={doc.name} 
+                                                />
+                                            ) : (
+                                                formatValue(doc.data[field.name], field.type)
+                                            )}
                                         </TableCell>
                                     ))}
                                     {calculatedFields.map(calcField => (

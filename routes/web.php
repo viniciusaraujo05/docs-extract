@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -201,6 +202,10 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
 
     // Usage API route
     Route::middleware(['auth'])->get('api/usage', [\App\Http\Controllers\Api\UsageController::class, 'index'])->name('api.usage');
+
+    // Support
+    Route::get('support', [SupportController::class, 'create'])->name('support.create');
+    Route::post('support', [SupportController::class, 'store'])->name('support.store');
 });
 
 // Demo API routes (public, rate limited: 3 requests per hour)
