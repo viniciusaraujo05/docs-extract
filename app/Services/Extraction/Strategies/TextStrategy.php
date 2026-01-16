@@ -38,21 +38,39 @@ final class TextStrategy implements ExtractionStrategyInterface
 
     private function extractText(Document $document): string
     {
-        $path = Storage::disk(config('filesystems.default'))->path($document->file_path);
+        $disk = Storage::disk(config('filesystems.default'));
+        
+        // For remote storage (R2, S3), download to temp location first
+        $isRemote = !in_array(config('filesystems.default'), ['local', 'public']);
+        
+        if ($isRemote) {
+            $tempPath = storage_path('app/temp/' . basename($document->file_path));
+            @mkdir(dirname($tempPath), 0755, true);
+            file_put_contents($tempPath, $disk->get($document->file_path));
+            $path = $tempPath;
+        } else {
+            $path = $disk->path($document->file_path);
+        }
 
         try {
             if (str_contains($document->mime_type, 'pdf')) {
                 $parser = new Parser();
                 $pdf = $parser->parseFile($path);
-                return $pdf->getText();
+                $text = $pdf->getText();
+            } else {
+                $text = file_get_contents($path);
             }
+            
+            return $text;
         } catch (\Exception $e) {
-            Log::error("PDF Text extraction failed: " . $e->getMessage());
-            // Fallback or rethrow? For now, rethrow as this is the TextStrategy
+            Log::error("Text extraction failed: " . $e->getMessage());
             throw $e;
+        } finally {
+            // Cleanup temp file if we downloaded from remote storage
+            if ($isRemote && isset($tempPath) && file_exists($tempPath)) {
+                @unlink($tempPath);
+            }
         }
-
-        return file_get_contents($path);
     }
 
     private function processWithLLM(string $text, array $schema): array

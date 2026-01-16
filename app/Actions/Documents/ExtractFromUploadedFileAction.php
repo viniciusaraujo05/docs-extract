@@ -61,8 +61,8 @@ final readonly class ExtractFromUploadedFileAction
             $strategy = $this->strategyFactory->getStrategy($tempDocument);
             $result = $strategy->extract($tempDocument, ['fields' => $fields]);
 
-            // Clean up temp file
-            Storage::disk(config('filesystems.default'))->delete($filePath);
+            // Clean up temp file (always on local disk)
+            Storage::disk('local')->delete($filePath);
 
             Log::info('ExtractFromUploadedFileAction: Extraction completed', [
                 'has_data' => !empty($result['data']),
@@ -83,8 +83,8 @@ final readonly class ExtractFromUploadedFileAction
             ];
 
         } catch (\Throwable $e) {
-            // Clean up temp file on error
-            Storage::disk(config('filesystems.default'))->delete($filePath);
+            // Clean up temp file on error (always on local disk)
+            Storage::disk('local')->delete($filePath);
 
             Log::error('ExtractFromUploadedFileAction: Extraction failed', [
                 'error' => $e->getMessage(),

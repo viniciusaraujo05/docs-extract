@@ -59,45 +59,59 @@ final class VisionStrategy implements ExtractionStrategyInterface
      */
     private function getImagesFromDocument(Document $document): array
     {
-        $path = Storage::disk(config('filesystems.default'))->path($document->file_path);
+        $disk = Storage::disk(config('filesystems.default'));
         $images = [];
+        
+        // For remote storage (R2, S3), download to temp location first
+        $isRemote = !in_array(config('filesystems.default'), ['local', 'public']);
+        
+        if ($isRemote) {
+            $tempPath = storage_path('app/temp/' . basename($document->file_path));
+            @mkdir(dirname($tempPath), 0755, true);
+            file_put_contents($tempPath, $disk->get($document->file_path));
+            $path = $tempPath;
+        } else {
+            $path = $disk->path($document->file_path);
+        }
         
         Log::info("VisionStrategy: Processing document", [
             'mime_type' => $document->mime_type,
             'path' => $path,
+            'is_remote' => $isRemote,
             'exists' => file_exists($path)
         ]);
 
-        if (str_starts_with($document->mime_type, 'image/')) {
-            // Check dimensions and slice if necessary
-            if ($this->isLongImage($path)) {
-                Log::info("VisionStrategy: Image is long, slicing");
-                $images = $this->sliceImage($path);
-            } else {
-                Log::info("VisionStrategy: Loading image normally");
-                $images[] = base64_encode(file_get_contents($path));
-            }
-            Log::info("VisionStrategy: Prepared " . count($images) . " image slice(s)");
-        } elseif ($document->mime_type === 'application/pdf') {
-            try {
-                // Use centralized PDF to Image service
-                $fullPath = Storage::disk(config('filesystems.default'))->path($document->file_path);
-                
-                /** @var \App\Services\PdfToImageService $pdfService */
-                $pdfService = app(\App\Services\PdfToImageService::class);
-                
-                $imagePaths = $pdfService->convertPdf($fullPath);
-                
-                foreach ($imagePaths as $imagePath) {
-                    $images[] = base64_encode(file_get_contents($imagePath));
+        try {
+            if (str_starts_with($document->mime_type, 'image/')) {
+                if ($this->isLongImage($path)) {
+                    Log::info("VisionStrategy: Image is long, slicing");
+                    $images = $this->sliceImage($path);
+                } else {
+                    Log::info("VisionStrategy: Loading image normally");
+                    $images[] = base64_encode(file_get_contents($path));
                 }
-                
-                // Cleanup temp images immediately after reading
-                $pdfService->cleanup($imagePaths);
-                
-            } catch (\Exception $e) {
-                Log::warning("PDF to Image conversion failed: " . $e->getMessage());
-                return []; 
+                Log::info("VisionStrategy: Prepared " . count($images) . " image slice(s)");
+            } elseif ($document->mime_type === 'application/pdf') {
+                try {
+                    /** @var \App\Services\PdfToImageService $pdfService */
+                    $pdfService = app(\App\Services\PdfToImageService::class);
+                    
+                    $imagePaths = $pdfService->convertPdf($path);
+                    
+                    foreach ($imagePaths as $imagePath) {
+                        $images[] = base64_encode(file_get_contents($imagePath));
+                    }
+                    
+                    $pdfService->cleanup($imagePaths);
+                    
+                } catch (\Exception $e) {
+                    Log::warning("PDF to Image conversion failed: " . $e->getMessage());
+                }
+            }
+        } finally {
+            // Cleanup temp file if we downloaded from remote storage
+            if ($isRemote && isset($tempPath) && file_exists($tempPath)) {
+                @unlink($tempPath);
             }
         }
 
