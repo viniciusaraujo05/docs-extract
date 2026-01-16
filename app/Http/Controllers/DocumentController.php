@@ -158,15 +158,44 @@ final class DocumentController extends Controller
             ->with('success', 'Documento atualizado com sucesso.');
     }
 
-    public function preview(string $locale, string $document): BinaryFileResponse
+    public function preview(string $locale, string $document)
     {
         $documentModel = $this->documentRepository->findById($document);
 
         $this->authorize('view', $documentModel);
 
-        $path = Storage::disk(config('filesystems.default'))->path($documentModel->file_path);
+        $diskName = $documentModel->storage_disk ?? config('filesystems.default');
+        $disk = Storage::disk($diskName);
 
-        abort_unless(file_exists($path), 404, 'Ficheiro não encontrado');
+        if (!$disk->exists($documentModel->file_path)) {
+            abort(404, 'File not found');
+        }
+
+        // For remote storage (R2, S3), stream the file
+        if (!in_array($diskName, ['local', 'public'])) {
+            $stream = $disk->readStream($documentModel->file_path);
+            
+            if ($stream === false) {
+                abort(500, 'Failed to read file from storage');
+            }
+
+            return response()->stream(function () use ($stream) {
+                fpassthru($stream);
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+            }, 200, [
+                'Content-Type' => $documentModel->mime_type,
+                'Content-Disposition' => 'inline; filename="' . $documentModel->original_filename . '"',
+            ]);
+        }
+
+        // For local storage, use file response
+        $path = $disk->path($documentModel->file_path);
+        
+        if (!file_exists($path)) {
+            abort(404, 'File not found');
+        }
 
         return response()->file($path, [
             'Content-Type' => $documentModel->mime_type,
