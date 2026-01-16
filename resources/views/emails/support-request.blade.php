@@ -18,7 +18,7 @@
     </div>
 
     <h1>Mensagem:</h1>
-    <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+    <div class="message-box">
         {!! nl2br(e($data['message'])) !!}
     </div>
 
