@@ -72,6 +72,7 @@ final readonly class StoreDocumentAction
             'schema_used' => $schema,
             'extracted_data' => $extractedData,
             'processed_at' => $extractedData !== null ? now() : null,
+            'storage_disk' => config('filesystems.default'),
         ]);
 
         if ($extractedData === null && $dispatchJob) {
@@ -85,6 +86,6 @@ final readonly class StoreDocumentAction
     {
         $filename = Str::uuid()->toString().'.'.$file->getClientOriginalExtension();
 
-        return $file->storeAs("documents/{$userId}", $filename, 'local') ?: '';
+        return $file->storeAs("documents/{$userId}", $filename, config('filesystems.default')) ?: '';
     }
 }
