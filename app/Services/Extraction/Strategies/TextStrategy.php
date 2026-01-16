@@ -45,8 +45,23 @@ final class TextStrategy implements ExtractionStrategyInterface
         
         if ($isRemote) {
             $tempPath = storage_path('app/temp/' . basename($document->file_path));
-            @mkdir(dirname($tempPath), 0755, true);
-            file_put_contents($tempPath, $disk->get($document->file_path));
+            $tempDir = dirname($tempPath);
+            
+            if (!is_dir($tempDir)) {
+                mkdir($tempDir, 0755, true);
+            }
+            
+            $content = $disk->get($document->file_path);
+            if ($content === false || $content === null) {
+                throw new RuntimeException("Failed to download file from remote storage");
+            }
+            
+            $written = file_put_contents($tempPath, $content);
+            if ($written === false) {
+                throw new RuntimeException("Failed to write temp file: {$tempPath}");
+            }
+            
+            chmod($tempPath, 0644);
             $path = $tempPath;
         } else {
             $path = $disk->path($document->file_path);
