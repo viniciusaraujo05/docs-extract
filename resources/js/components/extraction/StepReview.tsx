@@ -155,7 +155,9 @@ export function StepReview({
                                         label: field.label,
                                         items: field.items || [],
                                     }}
-                                    value={(extractedData[field.name] as Array<Record<string, any>>) || []}
+                                    value={Array.isArray(extractedData[field.name]) 
+                                        ? (extractedData[field.name] as Array<Record<string, any>>) 
+                                        : []}
                                     onChange={(value) => onUpdateField(field.name, value)}
                                 />
                             ) : (

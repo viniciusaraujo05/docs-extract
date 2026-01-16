@@ -177,16 +177,57 @@ final class VisionStrategy implements ExtractionStrategyInterface
         $apiKey = config('services.openai.api_key');
         $model = config('services.openai.model', 'gpt-4o-mini');
         
-        // Build field list from schema
+        // Build field list from schema with detailed array field structure
         $fieldsList = collect($schema['fields'] ?? [])
-            ->map(fn($f) => "- {$f['name']} ({$f['type']}): {$f['label']}")
+            ->map(function($f) {
+                // For array fields, include sub-item structure
+                if ($f['type'] === 'array' && !empty($f['items'])) {
+                    $subFields = collect($f['items'])->map(function($item) {
+                        return "    * {$item['name']} ({$item['type']}): {$item['label']}";
+                    })->implode("\n");
+                    
+                    return "- {$f['name']} (array of objects): {$f['label']}\n{$subFields}";
+                }
+                
+                return "- {$f['name']} ({$f['type']}): {$f['label']}";
+            })
             ->implode("\n");
+
+        $instructions = <<<INSTRUCTIONS
+IMPORTANT INSTRUCTIONS:
+1. Extract ALL fields listed below from the document image(s).
+2. For ARRAY fields (tables/lists): 
+   - Extract ALL rows as an array of objects
+   - Each object MUST contain ALL specified sub-fields (columns), even if a cell is empty
+   - If a column value is missing/empty in the document, use null or empty string, but ALWAYS include the key
+   - Extract every single row from the table - be thorough and complete
+3. If a regular field is not found, use null.
+4. Format dates as YYYY-MM-DD.
+5. Return raw numeric values (e.g., 10.50 not \$10.50).
+6. Read carefully - some text may be small or low contrast. Use your OCR capabilities fully.
+
+FIELDS TO EXTRACT:
+{$fieldsList}
+
+Return a JSON object with 'extracted_data' containing the field values, and 'confidence' (0-100).
+
+Example for array fields (note ALL columns present even if some values are null):
+{
+  "extracted_data": {
+    "items": [
+      {"product": "Item 1", "quantity": 2, "price": 10.50, "notes": ""},
+      {"product": "Item 2", "quantity": null, "price": 25.00, "notes": "Urgent"}
+    ]
+  },
+  "confidence": 90
+}
+INSTRUCTIONS;
 
         // Build user content array with text first, then images
         $userContent = [
             [
                 'type' => 'text',
-                'text' => "Extract the following fields from the document image(s):\n\n{$fieldsList}\n\nReturn a JSON object with 'extracted_data' containing the field values, and 'confidence' (0-100).",
+                'text' => $instructions,
             ]
         ];
 
