@@ -79,10 +79,10 @@ final readonly class ExtractAndStoreDocumentAction
             schema: ['fields' => $documentType->fields ?? []],
             extractedData: null,
             forceOverwrite: $forceOverwrite,
+            dispatchJob: false, // Don't dispatch job - we process synchronously below
         );
         
         // Process synchronously immediately
-        // Even if job is queued, this will likely finish first and update status.
         return $this->documentService->processDocument($document);
     }
 }

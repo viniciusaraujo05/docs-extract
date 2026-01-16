@@ -34,10 +34,30 @@ class DocumentObserver
             && $document->extracted_data !== null 
             && $document->getOriginal('extracted_data') === null;
 
-        // Dispatch webhook event only if relevant fields changed
-        if ($document->wasChanged(['status', 'extracted_data'])) {
-            // If this is the first completion, dispatch 'document.created' instead of 'document.updated'
-            $eventType = $isFirstCompletion ? 'document.created' : 'document.updated';
+        // Don't dispatch webhook for intermediate 'processing' status
+        // Only dispatch for meaningful state changes (created/completed/failed)
+        $shouldDispatchWebhook = false;
+        
+        if ($isFirstCompletion) {
+            // First completion - dispatch 'document.created'
+            $shouldDispatchWebhook = true;
+            $eventType = 'document.created';
+        } elseif ($document->wasChanged('status')) {
+            $newStatus = $document->status;
+            $oldStatus = $document->getOriginal('status');
+            
+            // Only dispatch webhook for final states (completed/failed), not intermediate (processing)
+            if (in_array($newStatus, ['completed', 'failed'])) {
+                $shouldDispatchWebhook = true;
+                $eventType = 'document.updated';
+            }
+        } elseif ($document->wasChanged('extracted_data') && !$isFirstCompletion) {
+            // Data was updated (not first time) - dispatch update
+            $shouldDispatchWebhook = true;
+            $eventType = 'document.updated';
+        }
+        
+        if ($shouldDispatchWebhook) {
             \App\Events\DocumentLifecycle::dispatch($document, $eventType, $document->status);
         }
 

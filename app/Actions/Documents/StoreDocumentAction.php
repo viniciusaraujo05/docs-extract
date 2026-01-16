@@ -40,6 +40,7 @@ final readonly class StoreDocumentAction
         ?array $schema,
         ?array $extractedData,
         bool $forceOverwrite = false,
+        bool $dispatchJob = true,
     ): Document {
         // Verifica se já existe documento com mesmo nome
         $originalFilename = $file->getClientOriginalName();
@@ -82,7 +83,7 @@ final readonly class StoreDocumentAction
         ]);
 
         // Dispatch job de processamento se necessário
-        if ($extractedData === null) {
+        if ($extractedData === null && $dispatchJob) {
             ProcessDocumentJob::dispatch($document);
         }
 
