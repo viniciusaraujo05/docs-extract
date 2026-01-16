@@ -7,12 +7,9 @@ namespace App\Listeners;
 use App\Events\DocumentLifecycle;
 use App\Jobs\SendWebhookJob;
 use App\Models\WebhookEndpoint;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
 
-class TriggerDocumentWebhooks implements ShouldQueue
+class TriggerDocumentWebhooks
 {
-    use InteractsWithQueue;
 
     public function handle(DocumentLifecycle $event): void
     {

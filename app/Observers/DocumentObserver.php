@@ -12,14 +12,15 @@ class DocumentObserver
      */
     public function created(Document $document): void
     {
-        // Dispatch webhook event
-        \App\Events\DocumentLifecycle::dispatch($document, 'document.created', $document->status);
-
         // Only increment document count if document has extracted_data (was saved)
         // Don't count documents that are just uploaded but not saved yet
         if ($document->extracted_data !== null) {
             $usage = PlanUsage::getOrCreateForUser($document->user);
             $usage->incrementUsage('documents');
+            
+            // Dispatch webhook event only when document is created with extracted_data
+            // (e.g., when uploaded with pre-extracted data)
+            \App\Events\DocumentLifecycle::dispatch($document, 'document.created', $document->status);
         }
     }
 
@@ -28,13 +29,20 @@ class DocumentObserver
      */
     public function updated(Document $document): void
     {
+        // Check if this is the first time extracted_data is being added (document completion)
+        $isFirstCompletion = $document->wasChanged('extracted_data') 
+            && $document->extracted_data !== null 
+            && $document->getOriginal('extracted_data') === null;
+
         // Dispatch webhook event only if relevant fields changed
         if ($document->wasChanged(['status', 'extracted_data'])) {
-            \App\Events\DocumentLifecycle::dispatch($document, 'document.updated', $document->status);
+            // If this is the first completion, dispatch 'document.created' instead of 'document.updated'
+            $eventType = $isFirstCompletion ? 'document.created' : 'document.updated';
+            \App\Events\DocumentLifecycle::dispatch($document, $eventType, $document->status);
         }
 
         // If document was just saved (extracted_data was added), count it
-        if ($document->wasChanged('extracted_data') && $document->extracted_data !== null) {
+        if ($isFirstCompletion) {
             $usage = PlanUsage::getOrCreateForUser($document->user);
             $usage->incrementUsage('documents');
         }
