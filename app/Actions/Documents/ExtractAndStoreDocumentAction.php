@@ -76,7 +76,7 @@ final readonly class ExtractAndStoreDocumentAction
             type: 'predefined',
             documentTypeId: $documentTypeId,
             newTypeName: null,
-            schema: $documentType->schema ?? ['fields' => []],
+            schema: ['fields' => $documentType->fields ?? []],
             extractedData: null,
             forceOverwrite: $forceOverwrite,
         );
