@@ -7,7 +7,6 @@ namespace App\Actions\Documents;
 use App\Models\User;
 use App\Services\Extraction\ExtractionStrategyFactory;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -53,21 +52,12 @@ final readonly class ExtractFromUploadedFileAction
             $tempDocument->schema_used = ['fields' => $fields];
             $tempDocument->storage_disk = 'local'; // Temp files always on local disk
 
-            Log::info('ExtractFromUploadedFileAction: Starting extraction', [
-                'mime_type' => $tempDocument->mime_type,
-                'file_size' => $tempDocument->file_size,
-            ]);
-
             // Get strategy and extract
             $strategy = $this->strategyFactory->getStrategy($tempDocument);
             $result = $strategy->extract($tempDocument, ['fields' => $fields]);
 
             // Clean up temp file (always on local disk)
             Storage::disk('local')->delete($filePath);
-
-            Log::info('ExtractFromUploadedFileAction: Extraction completed', [
-                'has_data' => !empty($result['data']),
-            ]);
 
             if (!empty($result['data'])) {
                 return [
@@ -86,11 +76,6 @@ final readonly class ExtractFromUploadedFileAction
         } catch (\Throwable $e) {
             // Clean up temp file on error (always on local disk)
             Storage::disk('local')->delete($filePath);
-
-            Log::error('ExtractFromUploadedFileAction: Extraction failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
 
             return [
                 'success' => false,

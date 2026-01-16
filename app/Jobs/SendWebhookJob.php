@@ -48,15 +48,27 @@ class SendWebhookJob implements ShouldQueue
 
     public function handle(): void
     {
-        Log::info('Sending webhook', [
+        $startTime = now();
+        
+        Log::info('[QUEUE] Webhook job started', [
+            'timestamp' => $startTime->toIso8601String(),
             'webhook_id' => $this->webhookEndpoint->id,
             'url' => $this->webhookEndpoint->url,
             'event' => $this->event,
+            'attempt' => $this->attempts(),
+            'max_tries' => $this->tries,
         ]);
 
         try {
             $payloadJson = json_encode($this->payload);
             $signature = hash_hmac('sha256', $payloadJson, $this->webhookEndpoint->secret);
+
+            Log::info('[QUEUE] Sending HTTP request', [
+                'timestamp' => now()->toIso8601String(),
+                'webhook_id' => $this->webhookEndpoint->id,
+                'url' => $this->webhookEndpoint->url,
+                'signature' => substr($signature, 0, 16) . '...',
+            ]);
 
             $response = Http::timeout(10)
                 ->withHeaders([
@@ -67,18 +79,25 @@ class SendWebhookJob implements ShouldQueue
                 ])
                 ->post($this->webhookEndpoint->url, $this->payload);
 
+            $duration = now()->diffInMilliseconds($startTime);
+
             if ($response->failed()) {
                 $status = $response->status();
 
-                Log::warning('Webhook delivery failed', [
+                Log::warning('[QUEUE] Webhook delivery failed', [
+                    'timestamp' => now()->toIso8601String(),
                     'webhook_id' => $this->webhookEndpoint->id,
+                    'url' => $this->webhookEndpoint->url,
                     'status' => $status,
-                    'body' => $response->body(),
+                    'duration_ms' => $duration,
+                    'attempt' => $this->attempts(),
+                    'response_body' => substr($response->body(), 0, 500),
                 ]);
 
                 // For rate limit errors (429), just log and don't retry
                 if ($status === 429) {
-                    Log::warning('Webhook rate limited - skipping', [
+                    Log::warning('[QUEUE] Webhook rate limited - skipping retry', [
+                        'timestamp' => now()->toIso8601String(),
                         'webhook_id' => $this->webhookEndpoint->id,
                         'url' => $this->webhookEndpoint->url,
                     ]);
@@ -87,47 +106,86 @@ class SendWebhookJob implements ShouldQueue
 
                 // For other errors (5xx), throw to trigger retry
                 if ($status >= 500) {
+                    Log::warning('[QUEUE] Server error - will retry', [
+                        'timestamp' => now()->toIso8601String(),
+                        'webhook_id' => $this->webhookEndpoint->id,
+                        'status' => $status,
+                        'attempt' => $this->attempts(),
+                        'remaining_tries' => $this->tries - $this->attempts(),
+                    ]);
                     $response->throw();
                 }
 
                 // For client errors (4xx except 429), log but don't retry
+                Log::warning('[QUEUE] Client error - not retrying', [
+                    'timestamp' => now()->toIso8601String(),
+                    'webhook_id' => $this->webhookEndpoint->id,
+                    'status' => $status,
+                ]);
                 return;
             }
 
-            Log::info('Webhook delivered successfully', [
+            Log::info('[QUEUE] Webhook delivered successfully', [
+                'timestamp' => now()->toIso8601String(),
                 'webhook_id' => $this->webhookEndpoint->id,
+                'url' => $this->webhookEndpoint->url,
                 'status' => $response->status(),
+                'duration_ms' => $duration,
+                'attempt' => $this->attempts(),
             ]);
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            // Network errors - log and allow retry
-            Log::error('Webhook connection failed', [
+            $duration = now()->diffInMilliseconds($startTime);
+            
+            Log::error('[QUEUE] Webhook connection failed - will retry', [
+                'timestamp' => now()->toIso8601String(),
                 'webhook_id' => $this->webhookEndpoint->id,
+                'url' => $this->webhookEndpoint->url,
                 'error' => $e->getMessage(),
+                'duration_ms' => $duration,
+                'attempt' => $this->attempts(),
+                'remaining_tries' => $this->tries - $this->attempts(),
             ]);
             throw $e;
         } catch (\Illuminate\Http\Client\RequestException $e) {
-            // Request errors - check if retry-able
-            Log::error('Webhook request failed', [
+            $duration = now()->diffInMilliseconds($startTime);
+            
+            Log::error('[QUEUE] Webhook request failed', [
+                'timestamp' => now()->toIso8601String(),
                 'webhook_id' => $this->webhookEndpoint->id,
+                'url' => $this->webhookEndpoint->url,
                 'error' => $e->getMessage(),
+                'duration_ms' => $duration,
+                'attempt' => $this->attempts(),
             ]);
 
             // Only rethrow for server errors that should retry
             if ($e->response && $e->response->status() >= 500) {
+                Log::warning('[QUEUE] Server error - will retry', [
+                    'timestamp' => now()->toIso8601String(),
+                    'webhook_id' => $this->webhookEndpoint->id,
+                    'remaining_tries' => $this->tries - $this->attempts(),
+                ]);
                 throw $e;
             }
 
-            // For rate limits and client errors, just log
+            Log::warning('[QUEUE] Client error - not retrying', [
+                'timestamp' => now()->toIso8601String(),
+                'webhook_id' => $this->webhookEndpoint->id,
+            ]);
             return;
         } catch (\Exception $e) {
-            // Unexpected errors - log but don't block document save
-            Log::error('Unexpected webhook error', [
+            $duration = now()->diffInMilliseconds($startTime);
+            
+            Log::error('[QUEUE] Unexpected webhook error', [
+                'timestamp' => now()->toIso8601String(),
                 'webhook_id' => $this->webhookEndpoint->id,
+                'url' => $this->webhookEndpoint->url,
                 'error' => $e->getMessage(),
+                'duration_ms' => $duration,
+                'attempt' => $this->attempts(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            // Don't rethrow - allow document save to succeed
             return;
         }
     }

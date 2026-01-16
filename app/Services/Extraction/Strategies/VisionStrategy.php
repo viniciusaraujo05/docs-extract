@@ -67,13 +67,6 @@ final class VisionStrategy implements ExtractionStrategyInterface
         // For remote storage (R2, S3), download to temp location first
         $isRemote = !in_array($diskName, ['local', 'public']);
         
-        Log::info("VisionStrategy: File access", [
-            'disk' => $diskName,
-            'is_remote' => $isRemote,
-            'file_path' => $document->file_path,
-            'exists' => $disk->exists($document->file_path),
-        ]);
-        
         if ($isRemote) {
             $tempPath = storage_path('app/temp/' . basename($document->file_path));
             $tempDir = dirname($tempPath);
@@ -89,11 +82,6 @@ final class VisionStrategy implements ExtractionStrategyInterface
             try {
                 $content = $disk->get($document->file_path);
             } catch (\Exception $e) {
-                Log::error("Failed to download from R2", [
-                    'file_path' => $document->file_path,
-                    'error' => $e->getMessage(),
-                    'disk' => $diskName,
-                ]);
                 throw new RuntimeException("Failed to download file from remote storage: " . $e->getMessage());
             }
             
@@ -133,7 +121,7 @@ final class VisionStrategy implements ExtractionStrategyInterface
                     $pdfService->cleanup($imagePaths);
                     
                 } catch (\Exception $e) {
-                    Log::warning("PDF to Image conversion failed: " . $e->getMessage());
+                    // PDF conversion failed, return empty array
                 }
             }
         } finally {
@@ -163,7 +151,6 @@ final class VisionStrategy implements ExtractionStrategyInterface
     private function sliceImage(string $path): array
     {
         if (!extension_loaded('gd')) {
-            Log::warning("GD extension not loaded, cannot slice long image. Sending as is.");
             return [base64_encode(file_get_contents($path))];
         }
 
@@ -302,7 +289,6 @@ INSTRUCTIONS;
         }
 
         $content = $response->json('choices.0.message.content');
-        Log::info('Vision API Response: ' . $content);
         
         $data = json_decode($content, true);
 

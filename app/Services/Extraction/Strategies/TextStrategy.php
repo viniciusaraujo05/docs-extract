@@ -80,7 +80,6 @@ final class TextStrategy implements ExtractionStrategyInterface
             
             return $text;
         } catch (\Exception $e) {
-            Log::error("Text extraction failed: " . $e->getMessage());
             throw $e;
         } finally {
             // Cleanup temp file if we downloaded from remote storage
