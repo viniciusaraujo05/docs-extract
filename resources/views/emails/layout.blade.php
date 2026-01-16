@@ -5,93 +5,141 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <style>
         body {
-            background-color: #f8fafc;
-            color: #334155;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #1f2937;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', Helvetica, Arial, sans-serif;
+            line-height: 1.7;
             margin: 0;
             padding: 0;
             width: 100% !important;
         }
         .wrapper {
-            background-color: #f8fafc;
-            padding: 40px 20px;
+            padding: 50px 20px;
         }
         .content {
             background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             margin: 0 auto;
             max-width: 600px;
             overflow: hidden;
         }
         .header {
-            background-color: #ffffff;
-            padding: 40px 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 40px 35px;
             text-align: center;
+            border-bottom: 4px solid #5a67d8;
         }
-        .logo {
-            font-size: 28px;
+        .logo-container {
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .logo-img {
+            height: 50px;
+            width: auto;
+            filter: brightness(0) invert(1);
+        }
+        .logo-text {
+            font-size: 32px;
             font-weight: 800;
-            color: #0f172a;
+            color: #ffffff;
             text-decoration: none;
             letter-spacing: -0.025em;
+            display: block;
+            margin-top: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .body {
-            padding: 0 40px 40px;
+            padding: 40px 40px 40px;
         }
         h1 {
-            color: #0f172a;
-            font-size: 22px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 28px;
             font-weight: 700;
             margin-top: 0;
             margin-bottom: 24px;
             text-align: center;
+            line-height: 1.3;
         }
         p {
             font-size: 16px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            color: #374151;
         }
         .button-container {
             text-align: center;
-            margin-bottom: 32px;
+            margin: 32px 0;
         }
         .button {
-            background-color: #2563eb;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
             color: #ffffff !important;
             display: inline-block;
             font-size: 16px;
             font-weight: 600;
-            padding: 14px 32px;
+            padding: 16px 40px;
             text-decoration: none;
-            transition: background-color 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+        .button:hover {
+            box-shadow: 0 10px 15px -3px rgba(102, 126, 234, 0.4);
+            transform: translateY(-2px);
         }
         .footer {
-            padding: 20px 40px 40px;
+            background-color: #f9fafb;
+            padding: 30px 40px;
             text-align: center;
             font-size: 14px;
-            color: #64748b;
+            color: #6b7280;
+            border-top: 1px solid #e5e7eb;
+        }
+        .footer-links {
+            margin-top: 12px;
+        }
+        .footer-link {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 8px;
         }
         .subtext {
-            font-size: 12px;
-            color: #94a3b8;
+            font-size: 13px;
+            color: #9ca3af;
             margin-top: 24px;
-            border-top: 1px solid #e2e8f0;
             padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
+            line-height: 1.6;
         }
         .steps {
-            background-color: #f1f5f9;
-            border-radius: 8px;
-            padding: 24px;
-            margin-bottom: 24px;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 28px;
+            border-left: 4px solid #667eea;
         }
         .step-item {
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             font-weight: 500;
+            color: #1f2937;
+            padding-left: 8px;
         }
         .step-item:last-child {
             margin-bottom: 0;
+        }
+        .greeting {
+            font-size: 17px;
+            color: #4b5563;
+            margin-bottom: 24px;
+        }
+        .signature {
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+            color: #6b7280;
+            font-style: italic;
         }
     </style>
 </head>
@@ -99,13 +147,23 @@
     <div class="wrapper">
         <div class="content">
             <div class="header">
-                <a href="{{ config('app.url') }}" class="logo">DOCSET</a>
+                <div class="logo-container">
+                    <img src="{{ config('app.url') }}/logo.svg" alt="DOCSET Logo" class="logo-img" />
+                </div>
+                <span class="logo-text">DOCSET</span>
             </div>
             <div class="body">
                 @yield('content')
             </div>
             <div class="footer">
-                &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
+                <p>&copy; {{ date('Y') }} {{ config('app.name') }}. Todos os direitos reservados.</p>
+                <div class="footer-links">
+                    <a href="{{ config('app.url') }}/terms" class="footer-link">Termos de Uso</a>
+                    <span style="color: #d1d5db;">•</span>
+                    <a href="{{ config('app.url') }}/privacy" class="footer-link">Privacidade</a>
+                    <span style="color: #d1d5db;">•</span>
+                    <a href="mailto:suporte@docset.io" class="footer-link">Suporte</a>
+                </div>
             </div>
         </div>
     </div>
