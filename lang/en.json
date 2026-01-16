@@ -146,5 +146,7 @@
     "Field": "Field",
     "Parameter": "Parameter",
     "Responses": "Responses",
-    "Required": "Required"
+    "Required": "Required",
+    "common.close": "Close",
+    "common.reload_page": "Reload page"
 }

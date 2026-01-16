@@ -38,10 +38,12 @@ final class TextStrategy implements ExtractionStrategyInterface
 
     private function extractText(Document $document): string
     {
-        $disk = Storage::disk(config('filesystems.default'));
+        // Use document's storage_disk if set (for temp files), otherwise use default
+        $diskName = $document->storage_disk ?? config('filesystems.default');
+        $disk = Storage::disk($diskName);
         
         // For remote storage (R2, S3), download to temp location first
-        $isRemote = !in_array(config('filesystems.default'), ['local', 'public']);
+        $isRemote = !in_array($diskName, ['local', 'public']);
         
         if ($isRemote) {
             $tempPath = storage_path('app/temp/' . basename($document->file_path));

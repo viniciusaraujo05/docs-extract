@@ -59,11 +59,20 @@ final class VisionStrategy implements ExtractionStrategyInterface
      */
     private function getImagesFromDocument(Document $document): array
     {
-        $disk = Storage::disk(config('filesystems.default'));
+        // Use document's storage_disk if set (for temp files), otherwise use default
+        $diskName = $document->storage_disk ?? config('filesystems.default');
+        $disk = Storage::disk($diskName);
         $images = [];
         
         // For remote storage (R2, S3), download to temp location first
-        $isRemote = !in_array(config('filesystems.default'), ['local', 'public']);
+        $isRemote = !in_array($diskName, ['local', 'public']);
+        
+        Log::info("VisionStrategy: File access", [
+            'disk' => $diskName,
+            'is_remote' => $isRemote,
+            'file_path' => $document->file_path,
+            'exists' => $disk->exists($document->file_path),
+        ]);
         
         if ($isRemote) {
             $tempPath = storage_path('app/temp/' . basename($document->file_path));
@@ -73,9 +82,23 @@ final class VisionStrategy implements ExtractionStrategyInterface
                 mkdir($tempDir, 0755, true);
             }
             
-            $content = $disk->get($document->file_path);
+            if (!$disk->exists($document->file_path)) {
+                throw new RuntimeException("File does not exist in remote storage: {$document->file_path}");
+            }
+            
+            try {
+                $content = $disk->get($document->file_path);
+            } catch (\Exception $e) {
+                Log::error("Failed to download from R2", [
+                    'file_path' => $document->file_path,
+                    'error' => $e->getMessage(),
+                    'disk' => $diskName,
+                ]);
+                throw new RuntimeException("Failed to download file from remote storage: " . $e->getMessage());
+            }
+            
             if ($content === false || $content === null) {
-                throw new RuntimeException("Failed to download file from remote storage");
+                throw new RuntimeException("Downloaded content is empty for: {$document->file_path}");
             }
             
             $written = file_put_contents($tempPath, $content);

@@ -51,6 +51,7 @@ final readonly class ExtractFromUploadedFileAction
             $tempDocument->type = 'temp_extraction';
             $tempDocument->status = 'pending';
             $tempDocument->schema_used = ['fields' => $fields];
+            $tempDocument->storage_disk = 'local'; // Temp files always on local disk
 
             Log::info('ExtractFromUploadedFileAction: Starting extraction', [
                 'mime_type' => $tempDocument->mime_type,

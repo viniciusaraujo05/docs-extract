@@ -1,4 +1,5 @@
 import { StepUpload, StepFields, StepReview, WizardProgress } from '@/components/extraction';
+import { ErrorAlert } from '@/components/ui/ErrorAlert';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { 
@@ -542,27 +543,11 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
 
                 {/* Error Alert */}
                 {error && (
-                    <div className="mx-auto w-full max-w-2xl animate-in fade-in-50">
-                        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-left text-destructive">
-                            <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                                {error}
-                            </div>
-                            <div className="mt-3 flex gap-2">
-                                <button
-                                    onClick={() => setError('')}
-                                    className="text-xs underline hover:no-underline"
-                                >
-                                    Fechar
-                                </button>
-                                <button
-                                    onClick={() => window.location.reload()}
-                                    className="text-xs underline hover:no-underline"
-                                >
-                                    Recarregar página
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    <ErrorAlert 
+                        error={error} 
+                        onDismiss={() => setError('')}
+                        showReload={true}
+                    />
                 )}
 
                 {/* Progress Steps */}
