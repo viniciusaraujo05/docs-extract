@@ -28,9 +28,6 @@ final readonly class StoreDocumentAction
         private DocumentTypeRepository $documentTypeRepository,
     ) {}
 
-    /**
-     * Executa a ação de armazenar documento.
-     */
     public function execute(
         User $user,
         UploadedFile $file,
@@ -42,19 +39,15 @@ final readonly class StoreDocumentAction
         bool $forceOverwrite = false,
         bool $dispatchJob = true,
     ): Document {
-        // Verifica se já existe documento com mesmo nome
         $originalFilename = $file->getClientOriginalName();
         $existingDocument = $this->documentRepository->findByFilenameForUser($originalFilename, $user->id);
 
-        // Se existe e force_overwrite é true, deleta o antigo
         if ($existingDocument && $forceOverwrite) {
             $this->documentRepository->delete($existingDocument);
         }
 
-        // Upload do arquivo
         $filePath = $this->storeFile($file, $user->id);
 
-        // Cria novo tipo se necessário
         if ($type === 'new_type' && ! empty($newTypeName) && isset($schema['fields'])) {
             $newDocumentType = $this->documentTypeRepository->create([
                 'user_id' => $user->id,
@@ -65,13 +58,11 @@ final readonly class StoreDocumentAction
             $type = 'predefined';
         }
 
-        // Cria o documento
         $document = $this->documentRepository->create([
             'user_id' => $user->id,
             'organization_id' => $user->organization_id,
             'document_type_id' => $documentTypeId,
-            'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
-            'original_filename' => $file->getClientOriginalName(),
+            'name' => $originalFilename,
             'file_path' => $filePath,
             'mime_type' => $file->getMimeType(),
             'file_size' => $file->getSize(),
@@ -82,7 +73,6 @@ final readonly class StoreDocumentAction
             'processed_at' => $extractedData !== null ? now() : null,
         ]);
 
-        // Dispatch job de processamento se necessário
         if ($extractedData === null && $dispatchJob) {
             ProcessDocumentJob::dispatch($document);
         }
@@ -90,9 +80,6 @@ final readonly class StoreDocumentAction
         return $document;
     }
 
-    /**
-     * Armazena o arquivo no disco.
-     */
     private function storeFile(UploadedFile $file, int $userId): string
     {
         $filename = Str::uuid()->toString().'.'.$file->getClientOriginalExtension();

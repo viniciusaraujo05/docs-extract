@@ -24,10 +24,8 @@ final readonly class DeleteDocumentAction
      */
     public function execute(Document $document): bool
     {
-        // Remove arquivo físico
-        Storage::disk('local')->delete($document->file_path);
+        Storage::disk(config('filesystems.default'))->delete($document->file_path);
 
-        // Remove registro do banco
         return $this->documentRepository->delete($document);
     }
 }

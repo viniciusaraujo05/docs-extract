@@ -133,7 +133,7 @@ final class DocumentController extends Controller
 
         $this->authorize('view', $documentModel);
 
-        $previewUrl = Storage::disk('local')->exists($documentModel->file_path)
+        $previewUrl = Storage::disk(config('filesystems.default'))->exists($documentModel->file_path)
             ? route('documents.preview', ['locale' => app()->getLocale(), 'document' => $documentModel->id])
             : null;
 
@@ -164,7 +164,7 @@ final class DocumentController extends Controller
 
         $this->authorize('view', $documentModel);
 
-        $path = Storage::disk('local')->path($documentModel->file_path);
+        $path = Storage::disk(config('filesystems.default'))->path($documentModel->file_path);
 
         abort_unless(file_exists($path), 404, 'Ficheiro não encontrado');
 

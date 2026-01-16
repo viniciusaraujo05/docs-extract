@@ -62,7 +62,7 @@ final readonly class ExtractFromUploadedFileAction
             $result = $strategy->extract($tempDocument, ['fields' => $fields]);
 
             // Clean up temp file
-            Storage::disk('local')->delete($filePath);
+            Storage::disk(config('filesystems.default'))->delete($filePath);
 
             Log::info('ExtractFromUploadedFileAction: Extraction completed', [
                 'has_data' => !empty($result['data']),
@@ -84,7 +84,7 @@ final readonly class ExtractFromUploadedFileAction
 
         } catch (\Throwable $e) {
             // Clean up temp file on error
-            Storage::disk('local')->delete($filePath);
+            Storage::disk(config('filesystems.default'))->delete($filePath);
 
             Log::error('ExtractFromUploadedFileAction: Extraction failed', [
                 'error' => $e->getMessage(),

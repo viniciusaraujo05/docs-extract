@@ -38,7 +38,7 @@ final class TextStrategy implements ExtractionStrategyInterface
 
     private function extractText(Document $document): string
     {
-        $path = Storage::disk('local')->path($document->file_path);
+        $path = Storage::disk(config('filesystems.default'))->path($document->file_path);
 
         try {
             if (str_contains($document->mime_type, 'pdf')) {

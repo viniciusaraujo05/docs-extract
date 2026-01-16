@@ -37,11 +37,8 @@ class AppServiceProvider extends ServiceProvider
         DocumentType::observe(DocumentTypeObserver::class);
         ReportAnalysis::observe(ReportAnalysisObserver::class);
 
-        // Register events
-        \Illuminate\Support\Facades\Event::listen(
-            \App\Events\DocumentLifecycle::class,
-            \App\Listeners\TriggerDocumentWebhooks::class,
-        );
+        // Note: Event listeners are auto-discovered from app/Listeners/
+        // No need to manually register TriggerDocumentWebhooks
 
         if (! $this->app->runningInConsole()) {
             $translationCache->warm(config('app.available_locales', ['pt', 'en']));

@@ -59,7 +59,7 @@ final class VisionStrategy implements ExtractionStrategyInterface
      */
     private function getImagesFromDocument(Document $document): array
     {
-        $path = Storage::disk('local')->path($document->file_path);
+        $path = Storage::disk(config('filesystems.default'))->path($document->file_path);
         $images = [];
         
         Log::info("VisionStrategy: Processing document", [
@@ -81,7 +81,7 @@ final class VisionStrategy implements ExtractionStrategyInterface
         } elseif ($document->mime_type === 'application/pdf') {
             try {
                 // Use centralized PDF to Image service
-                $fullPath = Storage::disk('local')->path($document->file_path);
+                $fullPath = Storage::disk(config('filesystems.default'))->path($document->file_path);
                 
                 /** @var \App\Services\PdfToImageService $pdfService */
                 $pdfService = app(\App\Services\PdfToImageService::class);

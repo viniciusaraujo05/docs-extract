@@ -113,7 +113,7 @@ final class DocumentService
 
     public function delete(Document $document): bool
     {
-        Storage::disk('local')->delete($document->file_path);
+        Storage::disk(config('filesystems.default'))->delete($document->file_path);
 
         return $this->documentRepository->delete($document);
     }
