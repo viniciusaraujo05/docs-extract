@@ -52,6 +52,7 @@ interface Plan {
   color: string;
   recommended: boolean;
   stripe_price_id?: string;
+  currency?: string;
 }
 
 interface Usage {
@@ -78,13 +79,21 @@ interface Invoice {
 export default function BillingIndex() {
   const { t, i18n } = useTranslation();
   const page = usePage<SharedData>();
+  const props = page.props as unknown as SharedData & { locale: string };
+  const serverLocale = props.locale;
   const { auth } = page.props;
-  const [locale, setLocale] = useState('pt');
+  const [locale, setLocale] = useState(serverLocale || 'pt');
 
   useEffect(() => {
-    const savedLocale = localStorage.getItem('selected-locale') || 'pt';
-    setLocale(savedLocale);
-  }, []);
+    if (serverLocale) {
+      setLocale(serverLocale);
+      i18n.changeLanguage(serverLocale);
+    } else {
+      const savedLocale = localStorage.getItem('selected-locale') || 'pt';
+      setLocale(savedLocale);
+      i18n.changeLanguage(savedLocale);
+    }
+  }, [serverLocale, i18n]);
 
   const BREADCRUMBS: BreadcrumbItem[] = [
     { title: t('Dashboard'), href: `/${locale}/dashboard` },
@@ -108,6 +117,7 @@ export default function BillingIndex() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [plans, setPlans] = useState<Plan[]>([]); // Store raw plans
   const [availablePlans, setAvailablePlans] = useState<Plan[]>([]);
   const [error, setError] = useState<string | null>(null);
   
@@ -175,8 +185,7 @@ export default function BillingIndex() {
           });
 
           if (usageData.period?.end) {
-            const endDate = new Date(usageData.period.end);
-            setNextBillingDate(endDate.toLocaleDateString());
+            setNextBillingDate(usageData.period.end); // Assuming ISO string now
           }
 
           setCurrentPlan(usageData.plan?.name?.toLowerCase() || 'free');
@@ -194,7 +203,8 @@ export default function BillingIndex() {
       if (plansResponse.status === 'fulfilled' && plansResponse.value.ok) {
         const plansData = await plansResponse.value.json();
         const plansArray = Object.values(plansData) as Plan[];
-        setAvailablePlans(plansArray.filter((p: Plan) => p.name && p.name.toLowerCase() !== (currentPlan || '').toLowerCase()));
+        setPlans(plansArray);
+        // The filtering happens in the useEffect now
       }
 
       // Process invoice data
@@ -234,6 +244,33 @@ export default function BillingIndex() {
       setLoading(false);
     }
   };
+
+  // Filter plans whenever currentPlan or plans list changes
+  useEffect(() => {
+    if (plans.length > 0) {
+      setAvailablePlans(plans.filter((p: Plan) => p.name && p.name.toLowerCase() !== (currentPlan || '').toLowerCase()));
+    }
+  }, [currentPlan, plans]);
+
+  const formatPrice = (amount: string | number | null | undefined, currency: string = 'EUR') => {
+    if (amount === null || amount === undefined) return 'N/A';
+    
+    // Ensure we have a number
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+    
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(numAmount);
+  };
+
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return null;
+    return new Date(dateString).toLocaleDateString(locale, { dateStyle: 'long' });
+  };
+
 
   const handleUpgrade = (priceId: string) => {
     if (!priceId) {
@@ -360,11 +397,11 @@ export default function BillingIndex() {
                   {getStatusBadge()}
                 </CardTitle>
                 <CardDescription>
-                  {t('billing.current_plan_description', 'You are currently on the')} {planData?.name || t('billing.free_plan', 'FREE')} {t('billing.current_plan', 'plan')} ({planData?.price || '€0'}
+                  {t('billing.current_plan_description', 'You are currently on the')} {planData?.name || t('billing.free_plan', 'FREE')} {t('billing.current_plan', 'plan')} ({formatPrice(planData?.price, planData?.currency)}
                   {planData?.interval ? `/${planData.interval}` : ''})
-                  {nextBillingDate && (
+                  {nextBillingDate && currentPlan !== 'free' && (
                     <span className="ml-2">
-                      • {t('billing.next_billing', 'Next billing date')}: {nextBillingDate}
+                      • {t('billing.next_billing', 'Next billing date')}: {formatDate(nextBillingDate)}
                     </span>
                   )}
                 </CardDescription>
@@ -498,15 +535,12 @@ export default function BillingIndex() {
                 <div>
                   <p className="text-2xl font-bold">
                     {upcomingInvoice?.amount != null ? 
-                      new Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: upcomingInvoice?.currency || 'USD',
-                      }).format((upcomingInvoice?.amount || 0) / 100) :
+                      formatPrice(upcomingInvoice.amount / 100, upcomingInvoice.currency) :
                       'N/A'
                     }
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {t('billing.due_on', 'Due on')} {upcomingInvoice?.date || 'N/A'}
+                    {t('billing.due_on', 'Due on')} {formatDate(upcomingInvoice?.date) || 'N/A'}
                   </p>
                 </div>
                 <Button variant="outline" size="sm">
@@ -536,15 +570,12 @@ export default function BillingIndex() {
                     <div>
                       <p className="font-medium">
                         {invoice.amount != null ?
-                          new Intl.NumberFormat('en-US', {
-                            style: 'currency',
-                            currency: invoice.currency,
-                          }).format(invoice.amount / 100) :
+                          formatPrice(invoice.amount / 100, invoice.currency) :
                           'N/A'
                         }
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {invoice.date}
+                        {formatDate(invoice.date)}
                       </p>
                     </div>
                     <Button
@@ -639,7 +670,7 @@ export default function BillingIndex() {
                   <CardTitle className="text-green-700 dark:text-green-400">{planData.name}</CardTitle>
                   <CardDescription>{translateFeature(planData.tagline)}</CardDescription>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold text-green-700 dark:text-green-400">{planData.price}</span>
+                    <span className="text-3xl font-bold text-green-700 dark:text-green-400">{formatPrice(planData.price, planData.currency)}</span>
                     {planData.interval && (
                       <span className="text-muted-foreground">{translateFeature('/' + planData.interval)}</span>
                     )}
@@ -678,7 +709,7 @@ export default function BillingIndex() {
                   <CardTitle>{plan.name}</CardTitle>
                   <CardDescription>{translateFeature(plan.tagline)}</CardDescription>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold">{plan.price}</span>
+                    <span className="text-3xl font-bold">{formatPrice(plan.price, plan.currency)}</span>
                     {plan.interval && (
                       <span className="text-muted-foreground">{translateFeature('/' + plan.interval)}</span>
                     )}

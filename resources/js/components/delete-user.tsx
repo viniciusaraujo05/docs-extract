@@ -12,12 +12,16 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Form } from '@inertiajs/react';
+import { Form, usePage } from '@inertiajs/react';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SharedData } from '@/types';
 
 export default function DeleteUser() {
     const { t } = useTranslation();
+    const page = usePage<SharedData>();
+    const props = page.props as unknown as SharedData & { locale: string };
+    const { locale } = props;
     const passwordInput = useRef<HTMLInputElement>(null);
 
     return (
@@ -53,7 +57,7 @@ export default function DeleteUser() {
 
                         <Form
                             method="delete"
-                            action="/settings/profile"
+                            action={`/${locale}/settings/profile`}
                             options={{
                                 preserveScroll: true,
                             }}

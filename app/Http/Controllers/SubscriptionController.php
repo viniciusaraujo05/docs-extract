@@ -16,13 +16,6 @@ class SubscriptionController extends Controller
         private SubscriptionService $subscriptionService
     ) {}
 
-    public function index(Request $request): Response
-    {
-        $data = $this->subscriptionService->getUserSubscriptionData($request->user());
-
-        return Inertia::render('Subscription/Index', $data);
-    }
-
     public function showCheckout(Request $request): Response
     {
         $priceId = $request->input('price_id');

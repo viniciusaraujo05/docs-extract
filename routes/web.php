@@ -112,7 +112,6 @@ Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 
 
     // Settings Routes
     Route::get('settings/billing', [PlanController::class, 'billing'])->name('settings.billing');
-    Route::get('subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
 });
 
 // Auth routes with locale (must be BEFORE authenticated routes to avoid conflicts)
@@ -192,7 +191,6 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
 
     // Subscription routes (authenticated)
     Route::middleware(['auth'])->prefix('subscription')->name('subscription.')->group(function () {
-        Route::get('/', [SubscriptionController::class, 'index'])->name('index');
         Route::get('checkout', [SubscriptionController::class, 'showCheckout'])->name('checkout');
         Route::post('checkout', [SubscriptionController::class, 'checkout'])->name('checkout.process');
         Route::get('success', [SubscriptionController::class, 'success'])->name('success');

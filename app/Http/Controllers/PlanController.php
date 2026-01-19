@@ -72,7 +72,7 @@ class PlanController extends Controller
             'subscription' => $subscription,
             'usage' => $usageData['usage'],
             'usage_percentages' => $usageData['usage_percentages'],
-            'next_billing_date' => $subscription?->ends_at?->format('F j, Y'),
+            'next_billing_date' => $subscription?->ends_at?->format('Y-m-d'),
             'is_trial' => $subscription?->onTrial(),
             'is_past_due' => $subscription?->pastDue(),
             'is_canceled' => $subscription?->canceled(),
@@ -100,12 +100,17 @@ class PlanController extends Controller
 
         try {
             $invoice = $user->upcomingInvoice();
+            
+            if (! $invoice) {
+                return response()->json(null);
+            }
+
             $amount = $invoice->total();
 
             return response()->json([
                 'amount' => is_numeric($amount) ? (int) $amount : 0,
                 'currency' => strtoupper($invoice->currency),
-                'date' => $invoice->date()->format('F j, Y'),
+                'date' => $invoice->date()->format('Y-m-d'),
                 'items' => collect($invoice->invoiceItems())->map(function ($item) {
                     return [
                         'description' => $item->description,
@@ -132,7 +137,7 @@ class PlanController extends Controller
                 'id' => $invoice->id,
                 'amount' => is_numeric($amount) ? (int) $amount : 0,
                 'currency' => strtoupper($invoice->currency),
-                'date' => $invoice->date()->format('F j, Y'),
+                'date' => $invoice->date()->format('Y-m-d'),
                 'status' => $invoice->status,
                 'url' => $invoice->hosted_invoice_url,
             ];

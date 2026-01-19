@@ -25,7 +25,6 @@ export default defineConfig({
             generate: true,
             php: 'php -d variables_order=EGPCS',
             config: {
-                // Força uso de file cache para evitar dependência de Redis
                 cache_driver: 'file',
             },
         }),

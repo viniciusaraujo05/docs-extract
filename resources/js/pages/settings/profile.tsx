@@ -25,8 +25,10 @@ export default function Profile({
 }) {
     const { t } = useTranslation();
     const page = usePage<SharedData>();
+    const props = page.props as unknown as SharedData & { locale: string };
+    const serverLocale = props.locale;
     const { auth } = page.props;
-    const [locale, setLocale] = useState('pt');
+    const [locale, setLocale] = useState(serverLocale || 'pt');
 
     useEffect(() => {
         const savedLocale = localStorage.getItem('selected-locale') || 'pt';
@@ -51,7 +53,7 @@ export default function Profile({
 
                     <Form
                         method="post"
-                        action="/settings/profile"
+                        action={`/${serverLocale || locale}/settings/profile`}
                         options={{
                             preserveScroll: true,
                         }}

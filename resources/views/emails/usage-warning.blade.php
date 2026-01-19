@@ -6,6 +6,6 @@
 <p>{{ __('emails.usage_warning.current_usage', ['used' => $used, 'total' => $total]) }}</p>
 
 <div class="button-container">
-    <a href="{{ config('app.url') . '/dashboard' }}" class="button">{{ __('emails.usage_warning.button') }}</a>
+    <a href="{{ config('app.url') . '/' . $locale . '/dashboard' }}" class="button">{{ __('emails.usage_warning.button') }}</a>
 </div>
 @endsection

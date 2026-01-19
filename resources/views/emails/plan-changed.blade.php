@@ -6,6 +6,6 @@
 <p>{{ __('emails.plan_changed.effective_date') }}</p>
 
 <div class="button-container">
-    <a href="{{ config('app.url') . '/settings/billing' }}" class="button">{{ __('emails.plan_changed.button') }}</a>
+    <a href="{{ config('app.url') . '/' . $locale . '/settings/billing' }}" class="button">{{ __('emails.plan_changed.button') }}</a>
 </div>
 @endsection

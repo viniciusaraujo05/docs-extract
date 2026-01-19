@@ -51,8 +51,15 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        if ($user->subscribed('default') && $user->subscription('default')->active()) {
+            return redirect()->back()->withErrors(['password' => 'You must cancel your active subscription plan before deleting your account.']);
+        }
+
         Auth::logout();
 
+        // Cleanup user data
+        $user->documents()->delete();
+        \App\Models\ApiClient::where('user_id', $user->id)->delete();
         $user->delete();
 
         $request->session()->invalidate();

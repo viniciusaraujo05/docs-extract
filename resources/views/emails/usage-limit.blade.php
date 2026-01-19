@@ -6,6 +6,6 @@
 <p>{{ __('emails.usage_limit.upgrade_cta') }}</p>
 
 <div class="button-container">
-    <a href="{{ config('app.url') . '/settings/billing' }}" class="button">{{ __('emails.usage_limit.button') }}</a>
+    <a href="{{ config('app.url') . '/' . $locale . '/settings/billing' }}" class="button">{{ __('emails.usage_limit.button') }}</a>
 </div>
 @endsection
