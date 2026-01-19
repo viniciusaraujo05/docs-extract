@@ -1,0 +1,13 @@
+{
+    "component": "welcome",
+    "props": {
+        "auth": { "user": null },
+        "canRegister": true,
+        "locale": "en",
+        "name": "Docset",
+        "appUrl": "https://docset.app",
+        "initialPage": { "props": { "locale": "en" } }
+    },
+    "url": "/en",
+    "version": "123"
+}

@@ -63,7 +63,7 @@ import { toast } from "sonner";
 
 export default function Welcome() {
   const { t, i18n } = useTranslation();
-  const { props } = usePage<{ auth?: { user?: any }; canRegister: boolean; locale: string }>();
+  const { props } = usePage<{ auth?: { user?: any }; canRegister: boolean; locale: string; plans: any[] }>();
   const isAuthenticated = !!props.auth?.user;
     const [locale, setLocale] = useState<'pt' | 'en'>(() => {
     if (typeof window !== 'undefined') {
@@ -185,7 +185,7 @@ export default function Welcome() {
       <ProductFlow locale={fullLocale} />
       <Features locale={fullLocale} />
       <CodeExample locale={fullLocale} onOpenDemo={() => setShowDemo(true)} />
-      <Pricing locale={fullLocale} isAuthenticated={isAuthenticated} localeShort={locale} />
+      <Pricing locale={fullLocale} isAuthenticated={isAuthenticated} localeShort={locale} plans={props.plans} />
       <FinalCTA locale={fullLocale} />
       <Footer locale={locale} />
       {showDemo && (
@@ -255,7 +255,7 @@ function Header({
   return (
     <>
       <motion.header
-        initial={{ y: -100, opacity: 0 }}
+        initial={{ y: 0, opacity: 1 }}
         animate={{ y: 0, opacity: 1 }}
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${
           scrolled ? "bg-black/80 backdrop-blur-xl border-b border-white/10" : "bg-transparent"
@@ -357,7 +357,7 @@ function Header({
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, x: "100%" }}
+            initial={{ opacity: 1, x: "100%" }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
@@ -510,7 +510,7 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="flex flex-col items-center text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
@@ -521,7 +521,7 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
           </motion.div>
 
           <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white via-white/90 to-white/70 max-w-4xl"
@@ -533,7 +533,7 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-lg md:text-xl text-zinc-400 leading-relaxed mb-10 max-w-2xl mx-auto"
@@ -542,7 +542,7 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto"
@@ -582,7 +582,7 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
 
         <motion.div
           style={{ rotateX, scale, perspective: 1000 }}
-          initial={{ opacity: 0, y: 100, rotateX: 20 }}
+          initial={{ opacity: 1, y: 100, rotateX: 20 }}
           animate={{ opacity: 1, y: 0, rotateX: 20 }}
           transition={{ duration: 1, delay: 0.4, type: "spring", bounce: 0.2 }}
           className="mt-20 relative perspective-1000 mx-auto max-w-5xl"
@@ -623,7 +623,7 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
                     {step === 0 && (
                         <motion.div 
                             key="step-upload"
-                            initial={{ opacity: 0 }}
+                            initial={{ opacity: 1 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             className="flex flex-col items-center justify-center w-full h-full relative"
@@ -715,7 +715,7 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
                              
                              {/* Highlighted Fields appearing after scan */}
                              <motion.div 
-                                initial={{ opacity: 0 }}
+                                initial={{ opacity: 1 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.5 }}
                                 className="absolute top-[20%] left-6 right-6 h-8 border-2 border-green-500/50 bg-green-500/10 rounded flex items-center justify-center"
@@ -724,7 +724,7 @@ function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }
                              </motion.div>
 
                              <motion.div 
-                                initial={{ opacity: 0 }}
+                                initial={{ opacity: 1 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 1 }}
                                 className="absolute bottom-20 right-6 w-24 h-8 border-2 border-green-500/50 bg-green-500/10 rounded flex items-center justify-center"
@@ -856,7 +856,12 @@ function TrustSignals() {
   return (
     <section className="py-10 border-y border-white/5 bg-black/50 backdrop-blur-sm relative z-20">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+        <motion.div
+           initial={{ opacity: 0, y: 0 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true }}
+           className="flex flex-col md:flex-row items-center justify-between gap-8 ssr-fade-in"
+        >
             <div className="flex flex-wrap justify-center gap-4 md:gap-8">
                {trust.badges && Array.isArray(trust.badges) ? (
                  trust.badges.map((badge: any, i: number) => {
@@ -896,7 +901,7 @@ function TrustSignals() {
                     <span className="font-bold flex items-center gap-2" title="XML"><FileCode className="w-4 h-4" /> XML</span>
                 </div>
             </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -926,7 +931,7 @@ function UseCases() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: i * 0.1 }}
-                            className="bg-zinc-900/50 border border-white/10 p-6 rounded-2xl hover:bg-white/5 transition duration-300 group hover:border-blue-500/30 flex flex-col"
+                            className="bg-zinc-900/50 border border-white/10 p-6 rounded-2xl hover:bg-white/5 transition duration-300 group hover:border-blue-500/30 flex flex-col ssr-fade-in"
                         >
                             <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition-colors">
                                 <Icon className="w-6 h-6 text-blue-400" />
@@ -1002,7 +1007,7 @@ function ProductFlow({ locale }: { locale: string }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="relative"
+              className="relative ssr-fade-in"
             >
               <div className="bg-gradient-to-b from-white/5 to-transparent border border-white/10 rounded-2xl p-8 hover:border-blue-500/50 transition-all duration-300">
                 <div className="text-5xl font-bold text-white/10 mb-4">{item.step}</div>
@@ -1062,7 +1067,7 @@ function Features({ locale }: { locale: string }) {
               viewport={{ once: true }}
               transition={{ delay: i * 0.05 }}
               whileHover={{ y: -5 }}
-              className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 transition-colors hover:bg-white/10 hover:shadow-2xl hover:shadow-blue-500/10 ${feature.className}`}
+              className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 transition-colors hover:bg-white/10 hover:shadow-2xl hover:shadow-blue-500/10 ${feature.className} ssr-fade-in`}
             >
               <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px] group-hover:bg-blue-500/20 transition-all duration-500" />
               
@@ -1206,57 +1211,19 @@ interface Plan {
   price_id: string | null;
 }
 
-function Pricing({ locale, isAuthenticated, localeShort }: { locale: string; isAuthenticated: boolean; localeShort: string }) {
+
+function Pricing({ locale, isAuthenticated, localeShort, plans }: { locale: string; isAuthenticated: boolean; localeShort: string; plans: any[] }) {
   const { t } = useTranslation();
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  // Use server-provided plans directly
+  const plansData = plans || [];
 
-  useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        const response = await fetch(`/api/plans?locale=${localeShort}`, {
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-        const data = await response.json();
-        
-        // The API returns an object keyed by plan ID ('free': {...}, 'starter': {...})
-        // We convert it to an array for rendering
-        const plansArray = Object.values(data) as Plan[];
-        setPlans(plansArray);
-      } catch (error) {
-        console.error('Error fetching plans:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPlans();
-  }, [localeShort]);
-
-  const handlePlanClick = (plan: Plan) => {
-    if (isAuthenticated) {
-        if (plan.price_id) {
-            router.visit(`/subscription/checkout?price_id=${plan.price_id}`);
-        } else {
-            router.visit('/dashboard');
-        }
-    } else {
-        router.visit(`/${locale}/register?plan=${plan.id}&price_id=${plan.price_id || ''}`);
-    }
-  };
-
-  const getCtaText = (plan: Plan) => {
+  const getCtaText = (plan: any) => {
+      // Logic from old component
       if (plan.price === null || plan.id === 'business' || plan.id === 'enterprise') return 'Contact Sales';
-      if (parseFloat(plan.price?.replace(/[^0-9.]/g, '') || '0') === 0) return 'Start free';
-      return 'Start trial';
+      if (parseFloat(String(plan.price).replace(/[^0-9.]/g, '') || '0') === 0) return t('Start free');
+      return t('Get Started'); // Or 'Start trial' if that was the old text
   };
-
-  // Translation helpers for static strings
-  const titleText = t('landing.pricing.title');
-  const subtitleText = t('landing.pricing.subtitle');
-  const disclaimerText = t('landing.pricing.disclaimer');
 
   return (
     <section className="py-24 bg-zinc-950 relative overflow-hidden" id="pricing">
@@ -1265,32 +1232,35 @@ function Pricing({ locale, isAuthenticated, localeShort }: { locale: string; isA
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            initial={{ opacity: 0, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-3xl md:text-4xl font-bold text-white mb-6"
+            className="text-3xl md:text-4xl font-bold text-white mb-6 ssr-fade-in"
           >
-            {titleText}
+            {t('landing.pricing.title')}
           </motion.h2>
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 0 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-lg text-zinc-400"
+            className="text-lg text-zinc-400 ssr-fade-in"
           >
-            {subtitleText}
+            {t('landing.pricing.subtitle')}
           </motion.p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-          {loading ? (
+          {plansData.length === 0 ? (
+             // Fallback skeleton if no plans - though SSR should provide them
              Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="bg-white/5 h-[500px] rounded-2xl animate-pulse" />
              ))
           ) : (
-            plans.map((plan, index) => (
+            plansData.map((plan, index) => {
+              const recommended = plan.recommended || plan.is_popular;
+              return (
               <motion.div
                 key={plan.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -1298,27 +1268,29 @@ function Pricing({ locale, isAuthenticated, localeShort }: { locale: string; isA
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
                 className={`relative p-8 rounded-2xl border ${
-                  plan.recommended
+                  recommended
                     ? 'bg-blue-600/10 border-blue-500/50 shadow-lg shadow-blue-500/10' 
                     : 'bg-white/5 border-white/10 hover:border-white/20'
-                } backdrop-blur-sm transition-all duration-300 group hover:-translate-y-1 flex flex-col`}
+                } backdrop-blur-sm transition-all duration-300 group hover:-translate-y-1 flex flex-col ssr-fade-in`}
               >
                 <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-white mb-2">{plan.display_name}</h3>
+                  <h3 className="text-lg font-semibold text-white mb-2">{plan.display_name || plan.name}</h3>
                   <p className="text-zinc-400 text-sm h-10">{plan.tagline || plan.description}</p>
                 </div>
 
                 <div className="mb-8">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold text-white">{plan.price || 'Custom'}</span>
-                    {plan.price && plan.interval && (
-                        <span className="text-zinc-500">/{plan.interval === 'year' ? 'yr' : 'mo'}</span>
+                    <span className="text-4xl font-bold text-white">
+                        {plan.price === null ? 'Custom' : (plan.price === 0 ? 'Free' : new Intl.NumberFormat(locale, { style: 'currency', currency: plan.currency }).format(plan.price))}
+                    </span>
+                    {plan.price !== null && plan.interval && (
+                        <span className="text-zinc-500">/{t(plan.interval)}</span>
                     )}
                   </div>
                 </div>
 
                 <div className="space-y-4 mb-8 flex-1">
-                  {plan.features && plan.features.map((feature, i) => (
+                  {plan.features && plan.features.map((feature: string, i: number) => (
                     <div key={i} className="flex items-start gap-3 text-sm text-zinc-300">
                       <Check className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                       <span>{feature}</span>
@@ -1328,26 +1300,24 @@ function Pricing({ locale, isAuthenticated, localeShort }: { locale: string; isA
 
                 <Button 
                   className={`w-full ${
-                    plan.recommended
+                    recommended
                       ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25' 
                       : 'bg-white text-zinc-900 hover:bg-zinc-100'
                   }`}
-                  onClick={() => handlePlanClick(plan)}
+                  onClick={() => router.visit(isAuthenticated ? `/${localeShort}/settings/billing` : `/${localeShort}/register`)}
                 >
                   {getCtaText(plan)}
                 </Button>
               </motion.div>
-            ))
+            )})
           )}
         </div>
         
-        {!loading && (
-            <div className="mt-12 text-center">
-                <p className="text-zinc-500 text-sm">
-                    {disclaimerText}
-                </p>
-            </div>
-        )}
+        <div className="mt-12 text-center">
+            <p className="text-zinc-500 text-sm">
+                {t('landing.pricing.disclaimer')}
+            </p>
+        </div>
       </div>
     </section>
   );
@@ -1375,7 +1345,7 @@ function FinalCTA({ locale }: { locale: string }) {
 
       <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 1, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
@@ -1589,7 +1559,7 @@ function DemoModal({
               </p>
               {file && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 1, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                 >
                   <Badge className="mt-6 bg-blue-500/20 text-blue-300 border-blue-500/30 px-4 py-2 text-sm">
@@ -1600,7 +1570,7 @@ function DemoModal({
               )}
               {error && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 1, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg"
                 >
@@ -1631,7 +1601,7 @@ function DemoModal({
         ) : (
           <div className="space-y-6">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 1, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-xl p-6"
             >
@@ -1646,7 +1616,7 @@ function DemoModal({
                 {Object.entries(result).map(([key, value]) => (
                   <motion.div
                     key={key}
-                    initial={{ opacity: 0, x: -10 }}
+                    initial={{ opacity: 1, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     className="flex justify-between items-center p-4 bg-white/5 rounded-lg border border-white/10"
                   >

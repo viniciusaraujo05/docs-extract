@@ -31,84 +31,86 @@ class SeoHelper
 
     public static function generateStructuredData(string $locale = 'en'): string
     {
-        $siteUrl = config('app.url', 'https://docset.com');
-        $localeCode = $locale === 'pt' ? 'pt-BR' : ($locale === 'pt-PT' ? 'pt-PT' : 'en');
-        $content = self::getContent($localeCode);
+        return \Illuminate\Support\Facades\Cache::remember("seo_structured_data_{$locale}", now()->addDay(), function () use ($locale) {
+            $siteUrl = config('app.url', 'https://docset.com');
+            $localeCode = $locale === 'pt' ? 'pt-BR' : ($locale === 'pt-PT' ? 'pt-PT' : 'en');
+            $content = self::getContent($localeCode);
 
-        $data = [
-            '@context' => 'https://schema.org',
-            '@graph' => [
-                [
-                    '@type' => 'WebSite',
-                    '@id' => $siteUrl . '/#website',
-                    'url' => $siteUrl,
-                    'name' => 'DOCSET',
-                    'description' => $content['description'],
-                    'inLanguage' => $localeCode,
-                    'potentialAction' => [
-                        '@type' => 'SearchAction',
-                        'target' => [
-                            '@type' => 'EntryPoint',
-                            'urlTemplate' => $siteUrl . '/search?q={search_term_string}',
-                        ],
-                        'query-input' => 'required name=search_term_string',
-                    ],
-                ],
-                [
-                    '@type' => 'Organization',
-                    '@id' => $siteUrl . '/#organization',
-                    'name' => 'DOCSET',
-                    'url' => $siteUrl,
-                    'logo' => [
-                        '@type' => 'ImageObject',
-                        'url' => $siteUrl . '/docset.png',
-                        'width' => 512,
-                        'height' => 512,
-                    ],
-                    'sameAs' => [],
-                ],
-                [
-                    '@type' => 'WebPage',
-                    '@id' => $siteUrl . '/#webpage',
-                    'url' => $siteUrl,
-                    'name' => $content['title'],
-                    'description' => $content['description'],
-                    'inLanguage' => $localeCode,
-                    'isPartOf' => [
+            $data = [
+                '@context' => 'https://schema.org',
+                '@graph' => [
+                    [
+                        '@type' => 'WebSite',
                         '@id' => $siteUrl . '/#website',
+                        'url' => $siteUrl,
+                        'name' => 'DOCSET',
+                        'description' => $content['description'],
+                        'inLanguage' => $localeCode,
+                        'potentialAction' => [
+                            '@type' => 'SearchAction',
+                            'target' => [
+                                '@type' => 'EntryPoint',
+                                'urlTemplate' => $siteUrl . '/search?q={search_term_string}',
+                            ],
+                            'query-input' => 'required name=search_term_string',
+                        ],
                     ],
-                    'about' => [
+                    [
+                        '@type' => 'Organization',
                         '@id' => $siteUrl . '/#organization',
+                        'name' => 'DOCSET',
+                        'url' => $siteUrl,
+                        'logo' => [
+                            '@type' => 'ImageObject',
+                            'url' => $siteUrl . '/docset.png',
+                            'width' => 512,
+                            'height' => 512,
+                        ],
+                        'sameAs' => [],
+                    ],
+                    [
+                        '@type' => 'WebPage',
+                        '@id' => $siteUrl . '/#webpage',
+                        'url' => $siteUrl,
+                        'name' => $content['title'],
+                        'description' => $content['description'],
+                        'inLanguage' => $localeCode,
+                        'isPartOf' => [
+                            '@id' => $siteUrl . '/#website',
+                        ],
+                        'about' => [
+                            '@id' => $siteUrl . '/#organization',
+                        ],
+                    ],
+                    [
+                        '@type' => 'SoftwareApplication',
+                        'name' => 'DOCSET',
+                        'applicationCategory' => 'BusinessApplication',
+                        'operatingSystem' => 'Web',
+                        'offers' => [
+                            '@type' => 'Offer',
+                            'price' => '0',
+                            'priceCurrency' => 'USD',
+                            'description' => 'Free plan available',
+                        ],
+                        'description' => $content['description'],
+                        'featureList' => [
+                            'PDF data extraction',
+                            'Image OCR',
+                            'Custom field definition',
+                            'Manual review interface',
+                            'REST API',
+                            'JSON export',
+                            'CSV export',
+                            'Webhook support',
+                        ],
+                        'screenshot' => $siteUrl . '/docset.png',
                     ],
                 ],
-                [
-                    '@type' => 'SoftwareApplication',
-                    'name' => 'DOCSET',
-                    'applicationCategory' => 'BusinessApplication',
-                    'operatingSystem' => 'Web',
-                    'offers' => [
-                        '@type' => 'Offer',
-                        'price' => '0',
-                        'priceCurrency' => 'USD',
-                        'description' => 'Free plan available',
-                    ],
-                    'description' => $content['description'],
-                    'featureList' => [
-                        'PDF data extraction',
-                        'Image OCR',
-                        'Custom field definition',
-                        'Manual review interface',
-                        'REST API',
-                        'JSON export',
-                        'CSV export',
-                        'Webhook support',
-                    ],
-                    'screenshot' => $siteUrl . '/docset.png',
-                ],
-            ],
-        ];
+            ];
 
-        return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        });
     }
 
     public static function getAlternateLocales(string $currentLocale): array

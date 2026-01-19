@@ -17,9 +17,14 @@ use Laravel\Fortify\Features;
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::get('/', function () {
+    $planService = app(\App\Services\StripePlanService::class);
+    // Get plans as array list (not object/associative array) to avoid .map() errors on frontend
+    $plans = array_values($planService->getAllPlans('en'));
+
     return Inertia::render('welcome', [
         'canRegister' => Features::enabled(Features::registration()),
         'locale' => 'en',
+        'plans' => $plans,
         'auth' => [
             'user' => \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::user() : null,
         ],
@@ -28,9 +33,14 @@ Route::get('/', function () {
 
 // Landing page with locale
 Route::get('/{locale}', function ($locale) {
+    $planService = app(\App\Services\StripePlanService::class);
+    // Get plans as array list (not object/associative array) to avoid .map() errors on frontend
+    $plans = array_values($planService->getAllPlans($locale === 'pt' ? 'pt-BR' : $locale));
+
     return Inertia::render('welcome', [
         'canRegister' => Features::enabled(Features::registration()),
         'locale' => $locale,
+        'plans' => $plans,
         'auth' => [
             'user' => \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::user() : null,
         ],

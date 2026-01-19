@@ -27,7 +27,8 @@ class PlanController extends Controller
         $locale = $this->normalizeLocale($request->input('locale', 'en'));
 
         // Get plans from Stripe with real-time pricing
-        $plans = $this->stripePlanService->getAllPlans($locale);
+        // Return as array list
+        $plans = array_values($this->stripePlanService->getAllPlans($locale));
 
         return response()->json($plans);
     }

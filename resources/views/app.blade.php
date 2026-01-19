@@ -83,6 +83,16 @@
                 background-color: oklch(0.145 0 0);
             }
         </style>
+        
+        {{-- No-Script Fallback for animations --}}
+        <noscript>
+            <style>
+                .ssr-fade-in {
+                    opacity: 1 !important;
+                    transform: none !important;
+                }
+            </style>
+        </noscript>
 
         <title inertia>{{ $seoTitle }}</title>
 
@@ -113,7 +123,7 @@
         </script>
         <script type="text/javascript" charset="UTF-8" src="//cdn.cookie-script.com/s/515ed2cba50c7a9fc9f575d03a7aa1df.js"></script>
         @viteReactRefresh
-        @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
+        @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
         @inertiaHead
     </head>
     <body class="font-sans antialiased">

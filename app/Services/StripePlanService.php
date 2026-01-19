@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class StripePlanService
 {
@@ -11,6 +12,13 @@ class StripePlanService
      */
     public function getAllPlans(string $locale = 'en'): array
     {
+        $cacheKey = "stripe_plans_{$locale}";
+
+        // Try to get from cache first
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+
         try {
             // Get prices from Stripe API directly
             $stripeProductService = app(\App\Services\StripeProductService::class);
@@ -40,7 +48,7 @@ class StripePlanService
                     'name' => $config['name'],
                     'display_name' => $displayName,
                     'description' => $tagline,
-                    'price' => $price ? $this->formatPrice($price['unit_amount'], $price['currency']) : null,
+                    'price' => $price ? ($price['unit_amount'] / 100) : null,
                     'price_id' => $price ? $price['id'] : null,
                     'stripe_price_id' => $price ? $price['id'] : null,
                     'stripe_product_id' => $stripeProductId,
@@ -52,15 +60,19 @@ class StripePlanService
                     'limits' => $config['limits'],
                     'color' => $config['color'] ?? 'gray',
                     'recommended' => $config['recommended'] ?? false,
+                    'is_popular' => $config['recommended'] ?? false,
                     'tagline' => $tagline,
                 ];
             }
 
+            // Only cache if successful
+            Cache::put($cacheKey, $plans, now()->addDay());
+
             return $plans;
         } catch (\Exception $e) {
-            \Log::error('Error fetching plans from Stripe: '.$e->getMessage());
+            Log::error('Error fetching plans from Stripe: '.$e->getMessage());
 
-            // Return config plans as fallback
+            // Return config plans as fallback WITHOUT caching the error state
             return $this->getConfigPlans($locale);
         }
     }

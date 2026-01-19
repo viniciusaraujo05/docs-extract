@@ -23,8 +23,11 @@ const detectPortugueseVariant = (): 'pt-PT' | 'pt-BR' => {
     return 'pt-PT';
 };
 
+if (typeof window !== 'undefined') {
+    i18n.use(LanguageDetector);
+}
+
 i18n
-    .use(LanguageDetector)
     .use(initReactI18next)
     .init({
         resources: {
