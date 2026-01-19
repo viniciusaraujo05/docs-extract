@@ -197,6 +197,16 @@ export default function BillingIndex() {
       if (planResponse.status === 'fulfilled') {
         const planDataResponse = await planResponse.value.json();
         setPlanData(planDataResponse.plan_data || null);
+        
+        // Use backend provided status and dates
+        if (planDataResponse.is_canceled !== undefined) {
+            setIsCanceled(planDataResponse.is_canceled);
+        }
+        
+        // Prefer the date from the subscription object (ends_at) if available
+        if (planDataResponse.next_billing_date) {
+            setNextBillingDate(planDataResponse.next_billing_date);
+        }
       }
 
       // Process available plans
@@ -248,11 +258,21 @@ export default function BillingIndex() {
   // Filter plans whenever currentPlan or plans list changes
   useEffect(() => {
     if (plans.length > 0) {
-      setAvailablePlans(plans.filter((p: Plan) => p.name && p.name.toLowerCase() !== (currentPlan || '').toLowerCase()));
+      setAvailablePlans(plans.filter((p: Plan) => {
+        const isCurrentPlan = p.name && p.name.toLowerCase() === (currentPlan || '').toLowerCase();
+        // Hide Free plan if user is on a paid plan (assuming 'free' is the identifier for the free plan)
+        const isFreePlan = p.name && p.name.toLowerCase() === 'free';
+        const userIsOnPaidPlan = currentPlan && currentPlan.toLowerCase() !== 'free';
+        
+        if (userIsOnPaidPlan && isFreePlan) return false;
+        
+        return !isCurrentPlan;
+      }));
     }
   }, [currentPlan, plans]);
 
   const formatPrice = (amount: string | number | null | undefined, currency: string = 'EUR') => {
+    // Treat 0 as valid number, only null/undefined as N/A
     if (amount === null || amount === undefined) return 'N/A';
     
     // Ensure we have a number
@@ -400,8 +420,16 @@ export default function BillingIndex() {
                   {t('billing.current_plan_description', 'You are currently on the')} {planData?.name || t('billing.free_plan', 'FREE')} {t('billing.current_plan', 'plan')} ({formatPrice(planData?.price, planData?.currency)}
                   {planData?.interval ? `/${planData.interval}` : ''})
                   {nextBillingDate && currentPlan !== 'free' && (
-                    <span className="ml-2">
-                      • {t('billing.next_billing', 'Next billing date')}: {formatDate(nextBillingDate)}
+                    <span className="ml-2 block sm:inline mt-1 sm:mt-0">
+                      {isCanceled ? (
+                         <span className="text-amber-600 dark:text-amber-400 font-medium">
+                           • {t('billing.scheduled_cancel', 'Scheduled to cancel on')}: {formatDate(nextBillingDate)}
+                         </span>
+                      ) : (
+                        <span>
+                          • {t('billing.next_billing', 'Next billing date')}: {formatDate(upcomingInvoice?.date || nextBillingDate)}
+                        </span>
+                      )}
                     </span>
                   )}
                 </CardDescription>
@@ -625,7 +653,7 @@ export default function BillingIndex() {
         </Card>
 
         {/* Cancellation Section */}
-        {currentPlan !== 'free' && (
+        {currentPlan !== 'free' && !isCanceled && (
           <Card className="border-red-200 dark:border-red-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">

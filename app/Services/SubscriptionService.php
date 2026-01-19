@@ -66,10 +66,17 @@ class SubscriptionService
         $subscription = $user->subscription('default');
 
         if (! $subscription) {
+            \Illuminate\Support\Facades\Log::warning('Subscription cancellation failed: No subscription found for user ' . $user->id);
             return false;
         }
 
-        $subscription->cancel();
+        try {
+            $subscription->cancel();
+            \Illuminate\Support\Facades\Log::info('Subscription cancelled for user ' . $user->id);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Subscription cancellation error for user ' . $user->id . ': ' . $e->getMessage());
+            throw $e;
+        }
 
         return true;
     }
