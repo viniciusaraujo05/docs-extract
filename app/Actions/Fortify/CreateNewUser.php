@@ -34,11 +34,15 @@ class CreateNewUser implements CreatesNewUsers
             'locale' => ['nullable', 'string', Rule::in($supportedLocales)],
         ])->validate();
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
             'locale' => $input['locale'] ?? config('app.locale', 'pt'),
         ]);
+
+        $user->notify(new \App\Notifications\WelcomeNotification());
+
+        return $user;
     }
 }

@@ -42,20 +42,23 @@ class CheckoutRegisterController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'price_id' => ['required', 'string'],
+            'plan_name' => ['nullable', 'string'],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'locale' => $request->route('locale', app()->getLocale()),
             // email_verified_at stays NULL - user will verify after payment
         ]);
+        
+        $user->notify(new \App\Notifications\WelcomeNotification());
 
         Log::info('User created for checkout flow', ['user_id' => $user->id]);
 
-        // NOTE: We do NOT dispatch the Registered event here to avoid
-        // triggering email verification flow. The verification email
-        // will be sent after successful Stripe payment.
+        // Dispatch Registered event to trigger email verification immediately
+        // event(new \Illuminate\Auth\Events\Registered($user));
 
         Auth::login($user);
         $request->session()->regenerate();
@@ -64,7 +67,8 @@ class CheckoutRegisterController extends Controller
         // Pass price_id so the page can initiate the correct subscription
         return redirect()->route('subscription.checkout', [
             'locale' => app()->getLocale(), 
-            'price_id' => $request->price_id
+            'price_id' => $request->price_id,
+            'plan_name' => $request->plan_name,
         ]);
     }
 }

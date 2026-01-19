@@ -22,7 +22,7 @@ import * as XLSX from 'xlsx';
 import { extractTableFields } from '@/utils/tableFieldProcessor';
 import { flattenReportData, groupFlattenedData } from '@/utils/reportDataFlattener';
 import { Badge } from '@/components/ui/badge';
-import { EmailVerificationBanner } from '@/components/email-verification-banner';
+
 import { FirstExtractionModal } from '@/components/first-extraction-modal';
 import { usePage } from '@inertiajs/react';
 
@@ -607,10 +607,6 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
             
             const chartConfigs = Object.entries(currentConfig.fieldConfig)
                 .filter(([name, config]) => config.visible && config.chartType && validTableFields.has(name));
-            
-            console.log(`[DisplayCharts] Valid table fields:`, Array.from(validTableFields));
-            console.log(`[DisplayCharts] Filtered chart configs:`, chartConfigs.map(c => c[0]));
-
             if (chartConfigs.length === 0) {
                 console.warn('[DisplayCharts] No visible chart configs match current table fields.');
                 return [];
@@ -627,9 +623,7 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                 return (agg === 'growth' ? 'sum' : agg) as 'sum' | 'avg' | 'count';
             });
 
-            console.log(`[DisplayCharts] Grouping by ${groupByField} with operations:`, operations);
             const groupedData = groupFlattenedData(flattened, groupByField, operations);
-            console.log(`[DisplayCharts] Grouped data result:`, groupedData.length > 0 ? groupedData[0] : 'Empty');
 
             return chartConfigs.map(([fieldName, config]) => {
                 const fieldDef = arrayField.items?.find(f => f.name === fieldName);
@@ -689,13 +683,7 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('Reports')} />
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
-                {/* Email Verification Banner - shown if user not verified */}
-                {auth?.user && !auth.user.email_verified_at && (
-                    <EmailVerificationBanner 
-                        email={auth.user.email} 
-                        locale={currentLocale} 
-                    />
-                )}
+
 
                 {/* First Extraction Modal - shown for new freemium users */}
                 <FirstExtractionModal locale={currentLocale} />

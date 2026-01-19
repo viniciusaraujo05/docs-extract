@@ -60,8 +60,8 @@ Route::get('/{locale}/terms', function ($locale) {
     ]);
 })->where(['locale' => 'pt|en'])->name('terms');
 
-// Pages with locale prefix (auth + verified required for dashboard access)
-Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {
+// Pages with locale prefix (auth required for dashboard access)
+Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {
 
     // Reports (was Dashboard)
     Route::get('dashboard', [ReportController::class, 'index'])->name('dashboard');
@@ -101,16 +101,37 @@ Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 
         ->name('document-types.store')
         ->middleware(['usage.limit:models']);
 
-    // API Clients Management
-    Route::get('api', [ApiClientController::class, 'index'])->name('api.index');
-    Route::post('api/clients', [ApiClientController::class, 'store'])->name('api.clients.store');
-    Route::post('api/clients/{apiClient}/regenerate', [ApiClientController::class, 'regenerate'])->name('api.clients.regenerate');
-    Route::delete('api/clients/{apiClient}', [ApiClientController::class, 'destroy'])->name('api.clients.destroy');
 
-    // Webhook Endpoints Management
-    Route::post('api/webhooks', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'store'])->name('api.webhooks.store');
-    Route::delete('api/webhooks/{webhookEndpoint}', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'destroy'])->name('api.webhooks.destroy');
-    Route::post('api/webhooks/{webhookEndpoint}/regenerate', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'regenerateSecret'])->name('api.webhooks.regenerate');
+// Settings Routes (auth only, no verified required for billing to allow subscription management)
+// But we want to warn or protect sensitive actions. The user requested to "put headers there". 
+// Actually, user said: "tira essa middlearw da rota geral, e coloca nas rotas de configuração sabe, tipo de cancelamento, delete".
+// If I put 'verified' here, they CANNOT access the page to see the banner.
+// I will keep 'auth' only here, and let the Frontend Banner stay. 
+// However, the user also said "coloca nas rotas de configuração". 
+// Let's protect specific actions or sub-routes if possible. 
+// But 'billing' is a single page controller.
+// If I block it, they can't manage subscription.
+// Wait, the user said: "deixa um aviso nesses casos que ele deve confirmar o email para segurança".
+// This implies they CAN access, but with a warning.
+// BUT they also said "tira essa middlearw da rota geral, e coloca nas rotas de configuração".
+// Maybe they meant protect the *actions*?
+// Let's look at the API routes.
+// API Clients and Webhooks DEFINITELY need verification.
+// Billing... if they pay, they should be able to see it.
+// I will protect API routes first.
+
+// API Clients Management
+    Route::middleware(['verified'])->group(function () {
+        Route::get('api', [ApiClientController::class, 'index'])->name('api.index');
+        Route::post('api/clients', [ApiClientController::class, 'store'])->name('api.clients.store');
+        Route::post('api/clients/{apiClient}/regenerate', [ApiClientController::class, 'regenerate'])->name('api.clients.regenerate');
+        Route::delete('api/clients/{apiClient}', [ApiClientController::class, 'destroy'])->name('api.clients.destroy');
+
+        // Webhook Endpoints Management
+        Route::post('api/webhooks', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'store'])->name('api.webhooks.store');
+        Route::delete('api/webhooks/{webhookEndpoint}', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'destroy'])->name('api.webhooks.destroy');
+        Route::post('api/webhooks/{webhookEndpoint}/regenerate', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'regenerateSecret'])->name('api.webhooks.regenerate');
+    });
 });
 
 // Settings Routes (auth only, no verified required for billing to allow subscription management)
@@ -185,7 +206,7 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
         ]);
     })->middleware('guest')->name('locale.register');
 
-    Route::post('register', [\Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'store'])
+    Route::post('register', [\App\Http\Controllers\Auth\CustomRegisteredUserController::class, 'store'])
         ->middleware(['guest:web', 'throttle:register'])->name('locale.register.store');
 
 
@@ -202,13 +223,18 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
 
     // Subscription routes (authenticated)
     Route::middleware(['auth'])->prefix('subscription')->name('subscription.')->group(function () {
+        // Checkout flow (no verification needed)
         Route::get('checkout', [SubscriptionController::class, 'showCheckout'])->name('checkout');
         Route::post('checkout', [SubscriptionController::class, 'checkout'])->name('checkout.process');
         Route::get('success', [SubscriptionController::class, 'success'])->name('success');
-        Route::get('cancel', [SubscriptionController::class, 'cancel'])->name('cancel');
-        Route::get('portal', [SubscriptionController::class, 'portal'])->name('portal');
-        Route::post('cancel-subscription', [SubscriptionController::class, 'cancelSubscription'])->name('cancel-subscription');
-        Route::post('resume', [SubscriptionController::class, 'resumeSubscription'])->name('resume');
+
+        // Management (requires verification)
+        Route::middleware(['verified'])->group(function () {
+            Route::get('cancel', [SubscriptionController::class, 'cancel'])->name('cancel');
+            Route::get('portal', [SubscriptionController::class, 'portal'])->name('portal');
+            Route::post('cancel-subscription', [SubscriptionController::class, 'cancelSubscription'])->name('cancel-subscription');
+            Route::post('resume', [SubscriptionController::class, 'resumeSubscription'])->name('resume');
+        });
     });
 
     // Plan API routes (protected)

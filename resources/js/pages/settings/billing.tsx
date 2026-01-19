@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { router, usePage } from "@inertiajs/react";
 import { Head } from "@inertiajs/react";
+import { EmailVerificationBanner } from "@/components/email-verification-banner";
 import { type BreadcrumbItem, type SharedData } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -399,6 +400,12 @@ export default function BillingIndex() {
       
       <SettingsLayout>
         <div className="space-y-6">
+          {page.props.auth.user && !page.props.auth.user.email_verified_at && (
+             <EmailVerificationBanner 
+                email={page.props.auth.user.email} 
+                locale={page.props.locale} 
+             />
+          )}
         {/* Header */}
         <div>
           <h3 className="text-lg font-medium">{t('billing.title', 'Billing & Subscription')}</h3>

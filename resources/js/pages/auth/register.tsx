@@ -98,6 +98,8 @@ export default function Register({ canRegister }: RegisterProps) {
                 password,
                 password_confirmation: passwordConfirmation,
                 price_id: priceId,
+                plan_name: planName,
+                locale: locale, // Pass current locale
             }, {
                 onError: (errors) => {
                     setErrors(errors);
@@ -118,6 +120,7 @@ export default function Register({ canRegister }: RegisterProps) {
                 email,
                 password,
                 password_confirmation: passwordConfirmation,
+                locale: locale, // Pass current locale
             }, {
                 onError: (errors) => {
                     setErrors(errors);

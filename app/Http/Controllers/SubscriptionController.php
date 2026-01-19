@@ -21,6 +21,20 @@ class SubscriptionController extends Controller
         $priceId = $request->input('price_id');
         $planName = $request->input('plan_name');
 
+        // If plan name is missing, try to resolve it from the price ID
+        if (! $planName && $priceId) {
+            try {
+                $prices = $this->subscriptionService->getActivePrices();
+                $price = $prices->firstWhere('id', $priceId);
+                
+                if ($price) {
+                    $planName = $price['plan_name'];
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to resolve plan name from price ID: ' . $e->getMessage());
+            }
+        }
+
         Log::info('Checkout page accessed', [
             'price_id' => $priceId,
             'plan_name' => $planName,
@@ -35,7 +49,7 @@ class SubscriptionController extends Controller
         ]);
     }
 
-    public function checkout(Request $request): RedirectResponse
+    public function checkout(Request $request)
     {
         $priceId = $request->input('price_id');
 
@@ -49,7 +63,7 @@ class SubscriptionController extends Controller
                 $priceId
             );
 
-            return redirect()->away($checkoutUrl);
+            return \Inertia\Inertia::location($checkoutUrl);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }

@@ -196,7 +196,7 @@
     "Authentication": "Authentication",
     "Request Body:": "Request Body:",
     "Refresh": "Refresh",
-    "Logout": "Logout",
+
     "Use the Documentation tab to browse endpoints by category. Each endpoint includes copy-ready cURL and response examples.": "Use the Documentation tab to browse endpoints by category. Each endpoint includes copy-ready cURL and response examples.",
     "API Client": "API Client",
     "Your credentials to access the DOCSET API": "Your credentials to access the DOCSET API",

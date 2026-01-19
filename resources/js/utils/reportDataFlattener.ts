@@ -13,7 +13,6 @@ export interface GroupedMetric extends Record<string, unknown> {
 }
 
 export function flattenReportData(data: DocumentData[], arrayField: string): FlatItem[] {
-    console.log(`[FlattenReportData] Processing field: ${arrayField} for ${data.length} documents`);
     
     if (!data || data.length === 0) {
         console.warn('[FlattenReportData] No documents provided');
@@ -36,7 +35,6 @@ export function flattenReportData(data: DocumentData[], arrayField: string): Fla
         }));
     });
 
-    console.log(`[FlattenReportData] Extracted ${flattened.length} items from field ${arrayField}. Sample:`, flattened[0]);
     return flattened;
 }
 
@@ -45,7 +43,6 @@ export function groupFlattenedData(
     groupByField: string,
     operations: ('sum' | 'avg' | 'count')[]
 ): GroupedMetric[] {
-    console.log(`[GroupFlattenedData] Grouping ${items.length} items by ${groupByField}`);
     
     if (items.length === 0) return [];
 
@@ -78,12 +75,6 @@ export function groupFlattenedData(
             }
         });
     });
-
-    // Handle averages if required (logic simplified for now, assuming sum is default)
-    // If 'avg' is requested, we would need to divide by count.
-    // For now, let's keep it simple as charts usually show sums.
-    
     const result = Object.values(groups).sort((a, b) => b.count - a.count);
-    console.log(`[GroupFlattenedData] Resulting ${result.length} groups. Sample:`, result[0]);
     return result;
 }

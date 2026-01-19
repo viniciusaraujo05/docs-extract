@@ -1281,7 +1281,7 @@ function Pricing({ locale, isAuthenticated, localeShort, plans }: { locale: stri
                 <div className="mb-8">
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-white">
-                        {plan.price === null ? 'Custom' : (plan.price === 0 ? 'Free' : new Intl.NumberFormat(locale, { style: 'currency', currency: plan.currency }).format(plan.price))}
+                          {plan.price === null ? '0.00' : (plan.price === 0 ? 'Free' : new Intl.NumberFormat(locale, { style: 'currency', currency: plan.currency }).format(plan.price))}
                     </span>
                     {plan.price !== null && plan.interval && (
                         <span className="text-zinc-500">/{t(plan.interval)}</span>

@@ -413,12 +413,6 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
             if (data.success && data.extracted_data) {
                 setExtractedData(data.extracted_data);
                 
-                // Mostra nota de conversão se houver
-                if (data.conversion_note) {
-                    // Você pode mostrar isso como um toast ou notification
-                    console.log('📌 ' + data.conversion_note);
-                }
-                
                 setStep(3);
             } else {
                 // Trata erro amigável

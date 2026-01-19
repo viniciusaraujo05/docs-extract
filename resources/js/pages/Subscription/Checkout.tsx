@@ -17,9 +17,6 @@ export default function Checkout({ priceId, planName, userName, userEmail }: Che
     const { t } = useTranslation();
     const [isProcessing, setIsProcessing] = useState(false);
     const locale = document.documentElement.lang || 'en';
-
-    console.log('Checkout props:', { priceId, planName, userName });
-
     const handleCheckout = () => {
         if (!priceId) {
             alert(t('subscription.checkout.noPriceSelected'));
