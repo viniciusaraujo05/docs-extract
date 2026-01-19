@@ -932,5 +932,20 @@
       "backToPlans": "Voltar aos Planos",
       "viewSubscription": "Ver Assinatura"
     }
-  }
+  },
+    "subscription": {
+        "success": {
+            "title": "Pagamento Concluído",
+            "heading": "Pagamento Concluído!",
+            "message": "Obrigado por assinar. Sua conta foi atualizada instantaneamente para o plano premium.",
+            "instant": "Acesso Imediato",
+            "secure": "Seguro",
+            "premium": "Premium",
+            "button": {
+                "billing": "Ver Assinatura",
+                "dashboard": "Ir para o Painel"
+            },
+            "redirect": "Redirecionando automaticamente em {{seconds}}s..."
+        }
+    }
 }

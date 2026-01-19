@@ -1298,5 +1298,20 @@
             "subscribe_to": "Subscribe to",
             "recommended": "Recommended"
         }
+    },
+    "subscription": {
+        "success": {
+            "title": "Payment Successful",
+            "heading": "Payment Successful!",
+            "message": "Thank you for subscribing. Your account has been instantly upgraded to the premium plan.",
+            "instant": "Instant Access",
+            "secure": "Secure",
+            "premium": "Premium",
+            "button": {
+                "billing": "View Subscription",
+                "dashboard": "Go to Dashboard"
+            },
+            "redirect": "Redirecting automatically in {{seconds}}s..."
+        }
     }
 }

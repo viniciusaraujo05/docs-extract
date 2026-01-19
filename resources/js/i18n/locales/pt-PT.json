@@ -1133,5 +1133,20 @@
         "submit_button": "Recuperar senha"
       }
     }
-  }
+  },
+    "subscription": {
+        "success": {
+            "title": "Pagamento Concluído",
+            "heading": "Pagamento Concluído!",
+            "message": "Obrigado por subscrever. A sua conta foi atualizada instantaneamente para o plano premium.",
+            "instant": "Acesso Imediato",
+            "secure": "Seguro",
+            "premium": "Premium",
+            "button": {
+                "billing": "Ver Subscrição",
+                "dashboard": "Ir para o Painel"
+            },
+            "redirect": "A redirecionar automaticamente em {{seconds}}s..."
+        }
+    }
 }
