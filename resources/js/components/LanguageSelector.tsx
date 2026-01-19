@@ -16,13 +16,19 @@ import { setPortugueseVariant } from '@/i18n/config';
 export function LanguageSelector() {
     const { i18n, t } = useTranslation();
     const [currentLocale, setCurrentLocale] = useState(() => {
-        const saved = localStorage.getItem('selected-locale');
-        return saved || i18n.language || 'pt';
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('selected-locale');
+            return saved || i18n.language || 'pt';
+        }
+        return i18n.language || 'pt';
     });
     
     const [ptVariant, setPtVariant] = useState<'pt-PT' | 'pt-BR'>(() => {
-        const saved = localStorage.getItem('pt-variant') as 'pt-PT' | 'pt-BR' | null;
-        return saved || 'pt-PT';
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('pt-variant') as 'pt-PT' | 'pt-BR' | null;
+            return saved || 'pt-PT';
+        }
+        return 'pt-PT';
     });
 
     useEffect(() => {

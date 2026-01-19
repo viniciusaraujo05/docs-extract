@@ -65,7 +65,7 @@ export default function Welcome() {
   const { t, i18n } = useTranslation();
   const { props } = usePage<{ auth?: { user?: any }; canRegister: boolean; locale: string }>();
   const isAuthenticated = !!props.auth?.user;
-  const [locale, setLocale] = useState<'pt' | 'en'>(() => {
+    const [locale, setLocale] = useState<'pt' | 'en'>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('selected-locale') as 'pt' | 'en' | null;
       if (saved) return saved;

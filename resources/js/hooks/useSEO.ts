@@ -95,6 +95,7 @@ export function useSEO() {
 export function usePageViewTracking() {
   useEffect(() => {
     const handlePageView = () => {
+      if (typeof window === 'undefined') return;
       const url = window.location.pathname + window.location.search;
       
       // Track with Google Analytics
