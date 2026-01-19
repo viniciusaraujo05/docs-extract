@@ -8,6 +8,14 @@
     "Logout": "Logout",
     "Login": "Login",
     "Register": "Register",
+    "auth": {
+        "verify_email": {
+            "title": "Verify Your Email",
+            "description": "Thanks for signing up! Before getting started, please verify your email address by clicking on the link we just emailed to you.",
+            "link_sent": "A new verification link has been sent to the email address you provided during registration."
+        }
+    },
+    "Click here to resend verification email.": "Resend Verification Email",
     "Email": "Email",
     "Password": "Password",
     "Remember me": "Remember me",
@@ -1300,6 +1308,24 @@
         }
     },
     "subscription": {
+        "checkout": {
+            "title": "Complete Subscription",
+            "back": "Back",
+            "description": "You are about to subscribe to our premium plan.",
+            "selectedPlan": "Selected Plan",
+            "whatHappensNext": "What happens next?",
+            "step1": "You will be redirected to Stripe for secure payment.",
+            "step2": "Enter your payment details (credit card, etc).",
+            "step3": "After payment, you will be redirected back here.",
+            "step4": "Your subscription will be active immediately.",
+            "securePayment": "Secure Payment",
+            "securePaymentDesc": "All payments are processed securely by Stripe. We do not store your card details.",
+            "proceedToPayment": "Proceed to Payment",
+            "processing": "Processing...",
+            "cancelAnytime": "You can cancel anytime from your settings.",
+            "noPriceSelected": "No price selected.",
+            "questions": "Questions? Contact our support."
+        },
         "success": {
             "title": "Payment Successful",
             "heading": "Payment Successful!",
@@ -1313,5 +1339,27 @@
             },
             "redirect": "Redirecting automatically in {{seconds}}s..."
         }
+    },
+    "onboarding": {
+        "checkout_register_title": "Complete Your Purchase",
+        "checkout_register_subtitle": "Create your account and subscribe to {plan}",
+        "selected_plan": "Selected Plan",
+        "checkout_benefits_title": "Start extracting data today",
+        "benefit_ai_extraction": "AI-powered extraction",
+        "benefit_secure": "Bank-level security",
+        "benefit_instant_access": "Instant access after payment",
+        "continue_to_checkout": "Continue to Checkout",
+        "email_verify_banner": "Please verify your email to secure your account.",
+        "resend_verification": "Resend verification email",
+        "first_extraction": {
+            "title": "Welcome! Start Your First Extraction",
+            "description": "Upload a document and let AI extract the data automatically.",
+            "step1": "Upload a PDF or image",
+            "step2": "Define extraction fields",
+            "step3": "AI extracts data automatically",
+            "cta": "Extract First Document",
+            "later": "Maybe Later"
+        },
+        "subscription_active": "Subscription Active! Welcome to {plan}."
     }
 }

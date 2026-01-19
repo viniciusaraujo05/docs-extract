@@ -22,6 +22,9 @@ import * as XLSX from 'xlsx';
 import { extractTableFields } from '@/utils/tableFieldProcessor';
 import { flattenReportData, groupFlattenedData } from '@/utils/reportDataFlattener';
 import { Badge } from '@/components/ui/badge';
+import { EmailVerificationBanner } from '@/components/email-verification-banner';
+import { FirstExtractionModal } from '@/components/first-extraction-modal';
+import { usePage } from '@inertiajs/react';
 
 interface SchemaField {
     name: string;
@@ -144,6 +147,8 @@ interface ReportConfig {
 
 export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
     const { t } = useTranslation();
+    const { auth, locale: pageLocale } = usePage<{ auth: { user: { email: string; email_verified_at: string | null } | null }; locale?: string }>().props;
+    const currentLocale = pageLocale || 'en';
     
     // Check for pending subscription from registration
     useEffect(() => {
@@ -684,7 +689,19 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('Reports')} />
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
+                {/* Email Verification Banner - shown if user not verified */}
+                {auth?.user && !auth.user.email_verified_at && (
+                    <EmailVerificationBanner 
+                        email={auth.user.email} 
+                        locale={currentLocale} 
+                    />
+                )}
+
+                {/* First Extraction Modal - shown for new freemium users */}
+                <FirstExtractionModal locale={currentLocale} />
+
                 {/* Header */}
+
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold">{t('Reports')}</h1>

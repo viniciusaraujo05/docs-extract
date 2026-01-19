@@ -39,6 +39,10 @@ export default function Register({ canRegister }: RegisterProps) {
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<any>({});
     const [passwordStrength, setPasswordStrength] = useState(0);
+    
+    // Checkout flow states
+    const [priceId, setPriceId] = useState<string | null>(null);
+    const [planName, setPlanName] = useState<string | null>(null);
 
     useEffect(() => {
         if (props.auth?.user) {
@@ -62,18 +66,21 @@ export default function Register({ canRegister }: RegisterProps) {
         setPasswordStrength(strength);
     }, [password]);
 
-    // Save plan intent if present
+    // Capture plan parameters if present (for paid plan checkout flow)
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
             const plan = params.get('plan');
-            const priceId = params.get('price_id');
-            const planName = params.get('plan_name') || plan;
+            const urlPriceId = params.get('price_id') || plan; // plan param can also be price_id
+            const urlPlanName = params.get('plan_name') || '';
             
-            if (plan) {
+            if (urlPriceId && urlPriceId.startsWith('price_')) {
+                setPriceId(urlPriceId);
+                setPlanName(urlPlanName);
+            } else if (plan) {
+                // Legacy: save to localStorage for dashboard pickup
                 localStorage.setItem('pending_plan', plan);
-                if (priceId) localStorage.setItem('pending_price_id', priceId);
-                if (planName) localStorage.setItem('pending_plan_name', planName);
+                if (urlPlanName) localStorage.setItem('pending_plan_name', urlPlanName);
             }
         }
     }, []);
@@ -83,24 +90,48 @@ export default function Register({ canRegister }: RegisterProps) {
         setProcessing(true);
         setErrors({});
 
-        router.post(`/${locale}/register`, {
-            name,
-            email,
-            password,
-            password_confirmation: passwordConfirmation,
-        }, {
-            onError: (errors) => {
-                setErrors(errors);
-                toast.error('Please check the form for errors');
-                setProcessing(false);
-            },
-            onSuccess: () => {
-                toast.success(t('Account created successfully!'));
-            },
-            onFinish: () => {
-                setProcessing(false);
-            },
-        });
+        // If priceId is set, use checkout flow (direct to Stripe)
+        if (priceId) {
+            router.post(`/${locale}/register-checkout`, {
+                name,
+                email,
+                password,
+                password_confirmation: passwordConfirmation,
+                price_id: priceId,
+            }, {
+                onError: (errors) => {
+                    setErrors(errors);
+                    toast.error(t('Please check the form for errors'));
+                    setProcessing(false);
+                },
+                onSuccess: () => {
+                    toast.success(t('Redirecting to checkout...'));
+                },
+                onFinish: () => {
+                    setProcessing(false);
+                },
+            });
+        } else {
+            // Standard registration (free plan)
+            router.post(`/${locale}/register`, {
+                name,
+                email,
+                password,
+                password_confirmation: passwordConfirmation,
+            }, {
+                onError: (errors) => {
+                    setErrors(errors);
+                    toast.error('Please check the form for errors');
+                    setProcessing(false);
+                },
+                onSuccess: () => {
+                    toast.success(t('Account created successfully!'));
+                },
+                onFinish: () => {
+                    setProcessing(false);
+                },
+            });
+        }
     };
 
     const getPasswordStrengthColor = () => {

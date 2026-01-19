@@ -407,6 +407,22 @@ export default function BillingIndex() {
           </p>
         </div>
 
+        {/* Flash Messages */}
+        {page.props.flash?.success && (
+          <Alert className="border-green-500 bg-green-50 dark:bg-green-900/10 text-green-800 dark:text-green-300">
+            <CheckCircle className="h-4 w-4" />
+            <AlertTitle>Success</AlertTitle>
+            <AlertDescription>{page.props.flash.success}</AlertDescription>
+          </Alert>
+        )}
+        {page.props.flash?.error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{page.props.flash.error}</AlertDescription>
+          </Alert>
+        )}
+
         {/* Current Plan Overview */}
         <Card>
           <CardHeader>

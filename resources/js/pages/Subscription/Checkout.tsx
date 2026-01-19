@@ -9,14 +9,16 @@ import { useTranslation } from 'react-i18next';
 interface CheckoutProps {
     priceId?: string;
     planName?: string;
+    userName?: string;
+    userEmail?: string;
 }
 
-export default function Checkout({ priceId, planName }: CheckoutProps) {
+export default function Checkout({ priceId, planName, userName, userEmail }: CheckoutProps) {
     const { t } = useTranslation();
     const [isProcessing, setIsProcessing] = useState(false);
     const locale = document.documentElement.lang || 'en';
 
-    console.log('Checkout props:', { priceId, planName });
+    console.log('Checkout props:', { priceId, planName, userName });
 
     const handleCheckout = () => {
         if (!priceId) {
@@ -26,28 +28,16 @@ export default function Checkout({ priceId, planName }: CheckoutProps) {
 
         setIsProcessing(true);
 
-        // Create a form and submit it to avoid CORS issues with Stripe redirect
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/${locale}/subscription/checkout`;
-        
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-        if (csrfToken) {
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = '_token';
-            csrfInput.value = csrfToken;
-            form.appendChild(csrfInput);
-        }
-        
-        const priceInput = document.createElement('input');
-        priceInput.type = 'hidden';
-        priceInput.name = 'price_id';
-        priceInput.value = priceId;
-        form.appendChild(priceInput);
-        
-        document.body.appendChild(form);
-        form.submit();
+        // Use Inertia router to handle CSRF token automatically
+        router.post(`/${locale}/subscription/checkout`, {
+            price_id: priceId
+        }, {
+            onFinish: () => setIsProcessing(false),
+            onError: (errors) => {
+                console.error('Checkout error:', errors);
+                setIsProcessing(false);
+            }
+        });
     };
 
     const handleBack = () => {
@@ -77,7 +67,15 @@ export default function Checkout({ priceId, planName }: CheckoutProps) {
                             <CardTitle className="text-3xl">
                                 {t('subscription.checkout.title')}
                             </CardTitle>
-                            <CardDescription className="text-lg">
+                            
+                            {/* Personalization */}
+                            {userName && (
+                                <div className="mt-2 text-primary font-medium">
+                                    {t('subscription.checkout.welcome', 'Hello, {{name}}!', { name: userName })}
+                                </div>
+                            )}
+
+                            <CardDescription className="text-lg mt-2">
                                 {planName ? (
                                     <>
                                         {t('subscription.checkout.selectedPlan')}: <span className="font-semibold text-foreground">{planName}</span>

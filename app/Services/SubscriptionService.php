@@ -46,6 +46,9 @@ class SubscriptionService
 
     public function createCheckoutSession(User $user, string $priceId): string
     {
+        // Ensure user has a Stripe ID so Cashier passes 'customer' param
+        $user->createOrGetStripeCustomer();
+
         return $user->newSubscription('default', $priceId)
             ->checkout([
                 'success_url' => route('subscription.success', ['locale' => app()->getLocale()]),
@@ -54,10 +57,30 @@ class SubscriptionService
             ->url;
     }
 
+    /**
+     * Create a checkout session for a newly registered user.
+     * Pre-fills customer_email so user doesn't need to type it again in Stripe.
+     */
+    public function createCheckoutSessionForNewUser(User $user, string $priceId): string
+    {
+        // Ensure user has a Stripe ID so Cashier passes 'customer' param
+        $user->createOrGetStripeCustomer();
+
+        return $user->newSubscription('default', $priceId)
+            ->checkout([
+                // 'customer_email' => $user->email, // REMOVED: Conflicts with 'customer' param added by Cashier
+                'success_url' => route('subscription.success', ['locale' => app()->getLocale()])
+                    . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('subscription.cancel', ['locale' => app()->getLocale()]),
+            ])
+            ->url;
+    }
+
+
     public function getBillingPortalUrl(User $user): string
     {
         return $user->billingPortalUrl(
-            route('subscription.index', ['locale' => app()->getLocale()])
+            route('settings.billing', ['locale' => app()->getLocale()])
         );
     }
 

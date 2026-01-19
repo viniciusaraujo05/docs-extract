@@ -30,6 +30,8 @@ class SubscriptionController extends Controller
         return Inertia::render('Subscription/Checkout', [
             'priceId' => $priceId,
             'planName' => $planName,
+            'userName' => $request->user()->name,
+            'userEmail' => $request->user()->email,
         ]);
     }
 

@@ -60,10 +60,12 @@ Route::get('/{locale}/terms', function ($locale) {
     ]);
 })->where(['locale' => 'pt|en'])->name('terms');
 
-// Pages with locale prefix
+// Pages with locale prefix (auth + verified required for dashboard access)
 Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {
+
     // Reports (was Dashboard)
     Route::get('dashboard', [ReportController::class, 'index'])->name('dashboard');
+
 
     // Documents
     Route::resource('documents', DocumentController::class)->except(['edit'])->names([
@@ -109,8 +111,10 @@ Route::middleware(['auth', 'verified'])->prefix('{locale}')->where(['locale' => 
     Route::post('api/webhooks', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'store'])->name('api.webhooks.store');
     Route::delete('api/webhooks/{webhookEndpoint}', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'destroy'])->name('api.webhooks.destroy');
     Route::post('api/webhooks/{webhookEndpoint}/regenerate', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'regenerateSecret'])->name('api.webhooks.regenerate');
+});
 
-    // Settings Routes
+// Settings Routes (auth only, no verified required for billing to allow subscription management)
+Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {
     Route::get('settings/billing', [PlanController::class, 'billing'])->name('settings.billing');
 });
 
@@ -183,6 +187,13 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
 
     Route::post('register', [\Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'store'])
         ->middleware(['guest:web', 'throttle:register'])->name('locale.register.store');
+
+
+    // Checkout Registration (Flow B - Direct Purchase, POST only)
+    Route::post('register-checkout', [\App\Http\Controllers\Auth\CheckoutRegisterController::class, 'store'])
+        ->middleware(['guest:web', 'throttle:register'])
+        ->name('locale.register-checkout.store');
+
 
     // Logout
     Route::post('logout', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])

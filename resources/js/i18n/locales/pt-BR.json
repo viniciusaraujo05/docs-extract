@@ -14,6 +14,14 @@
   "Logout": "Sair",
   "Login": "Entrar",
   "Register": "Registrar",
+  "auth": {
+    "verify_email": {
+      "title": "Verifique seu E-mail",
+      "description": "Obrigado por se cadastrar! Antes de começar, verifique seu endereço de e-mail clicando no link que acabamos de enviar.",
+      "link_sent": "Um novo link de verificação foi enviado para o endereço de e-mail fornecido durante o cadastro."
+    }
+  },
+  "Click here to resend verification email.": "Reenviar E-mail de Verificação",
   "Email": "E-mail",
   "Remember me": "Lembrar-me",
   "Forgot your password?": "Esqueceu sua senha?",
@@ -934,6 +942,24 @@
     }
   },
     "subscription": {
+        "checkout": {
+            "title": "Completar Assinatura",
+            "back": "Voltar",
+            "description": "Você está prestes a assinar nosso plano premium.",
+            "selectedPlan": "Plano Selecionado",
+            "whatHappensNext": "O que acontece agora?",
+            "step1": "Você será redirecionado para o Stripe para pagamento seguro.",
+            "step2": "Insira seus dados de pagamento (cartão de crédito, etc).",
+            "step3": "Após o pagamento, você retornará para cá.",
+            "step4": "Sua assinatura será ativada imediatamente.",
+            "securePayment": "Pagamento Seguro",
+            "securePaymentDesc": "Todos os pagamentos são processados com segurança pelo Stripe. Não armazenamos seus dados.",
+            "proceedToPayment": "Ir para Pagamento",
+            "processing": "Processando...",
+            "cancelAnytime": "Você pode cancelar a qualquer momento nas configurações.",
+            "noPriceSelected": "Nenhum preço selecionado.",
+            "questions": "Dúvidas? Contate nosso suporte."
+        },
         "success": {
             "title": "Pagamento Concluído",
             "heading": "Pagamento Concluído!",
@@ -947,5 +973,27 @@
             },
             "redirect": "Redirecionando automaticamente em {{seconds}}s..."
         }
+    },
+    "onboarding": {
+        "checkout_register_title": "Complete sua Compra",
+        "checkout_register_subtitle": "Crie sua conta e assine o plano {plan}",
+        "selected_plan": "Plano Selecionado",
+        "checkout_benefits_title": "Comece a extrair dados hoje",
+        "benefit_ai_extraction": "Extração com IA",
+        "benefit_secure": "Segurança em nível bancário",
+        "benefit_instant_access": "Acesso imediato após pagamento",
+        "continue_to_checkout": "Continuar para Pagamento",
+        "email_verify_banner": "Por favor, confirme seu e-mail para proteger sua conta.",
+        "resend_verification": "Reenviar e-mail de verificação",
+        "first_extraction": {
+            "title": "Bem-vindo! Comece sua Primeira Extração",
+            "description": "Envie um documento e deixe a IA extrair os dados automaticamente.",
+            "step1": "Envie um PDF ou imagem",
+            "step2": "Defina os campos de extração",
+            "step3": "A IA extrai os dados automaticamente",
+            "cta": "Extrair Primeiro Documento",
+            "later": "Talvez Depois"
+        },
+        "subscription_active": "Assinatura Ativa! Bem-vindo ao {plan}."
     }
 }

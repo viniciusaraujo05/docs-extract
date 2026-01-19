@@ -1304,10 +1304,27 @@ function Pricing({ locale, isAuthenticated, localeShort, plans }: { locale: stri
                       ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25' 
                       : 'bg-white text-zinc-900 hover:bg-zinc-100'
                   }`}
-                  onClick={() => router.visit(isAuthenticated ? `/${localeShort}/settings/billing` : `/${localeShort}/register`)}
+                  onClick={() => {
+                    if (isAuthenticated) {
+                      router.visit(`/${localeShort}/settings/billing`);
+                    } else if (plan.price === null || plan.id === 'business' || plan.id === 'enterprise') {
+                      // Contact sales / custom plans - go to contact
+                      router.visit(`/${localeShort}/register`);
+                    } else if (plan.price === 0 || parseFloat(String(plan.price).replace(/[^0-9.]/g, '') || '0') === 0) {
+                      // Free plan - standard registration
+                      router.visit(`/${localeShort}/register`);
+                    } else if (plan.price_id) {
+                      // Paid plan with price_id - go to register with plan param
+                      router.visit(`/${localeShort}/register?plan=${plan.price_id}&plan_name=${encodeURIComponent(plan.display_name || plan.name)}`);
+                    } else {
+                      // Fallback to regular register
+                      router.visit(`/${localeShort}/register`);
+                    }
+                  }}
                 >
                   {getCtaText(plan)}
                 </Button>
+
               </motion.div>
             )})
           )}
