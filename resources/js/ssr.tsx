@@ -2,6 +2,8 @@ import { createInertiaApp } from '@inertiajs/react';
 import createServer from '@inertiajs/react/server';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import ReactDOMServer from 'react-dom/server';
+import { ThemeProvider } from './components/theme-provider';
+import i18n from './i18n/config';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -16,7 +18,14 @@ createServer((page) =>
                 import.meta.glob('./pages/**/*.tsx'),
             ),
         setup: ({ App, props }) => {
-            return <App {...props} />;
+            const locale = (props.initialPage.props.locale as string) || 'en';
+            i18n.changeLanguage(locale);
+
+            return (
+                <ThemeProvider defaultTheme="dark" storageKey="docset-theme">
+                    <App {...props} />
+                </ThemeProvider>
+            );
         },
     }),
 );
