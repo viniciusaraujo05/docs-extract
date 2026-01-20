@@ -29,8 +29,7 @@ final class ExtractionController extends Controller
         private readonly FieldDetectorService $fieldDetector,
         private readonly AnalyzeDocument $analyzeAction,
         private readonly ExtractFromUploadedFileAction $extractAction,
-    ) {
-    }
+    ) {}
 
     /**
      * Analisa um documento e detecta campos extraíveis.
@@ -94,6 +93,11 @@ final class ExtractionController extends Controller
 
             return response()->json($result, 200);
 
+        } catch (\App\Exceptions\ExtractionException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getTranslatedMessage(),
+            ], 422);
         } catch (\JsonException $e) {
             return response()->json([
                 'success' => false,
@@ -102,7 +106,8 @@ final class ExtractionController extends Controller
         } catch (Throwable $e) {
             return response()->json([
                 'success' => false,
-                'error' => 'Erro ao processar documento. Tente novamente.',
+                'error' => __('extraction.failed'), // Generic translated error
+                'debug' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
@@ -145,7 +150,7 @@ final class ExtractionController extends Controller
             'fields' => 'required|array',
             'fields.*.name' => 'required|string',
             'fields.*.label' => 'required|string',
-            'fields.*.type' => 'required|string|in:string,number,date,email,phone,currency,array',
+            'fields.*.type' => 'required|string|in:string,number,date,email,phone,currency,array,boolean',
             'fields.*.items' => 'array|nullable',  // For array fields
             'fields.*.items.*.name' => 'required_with:fields.*.items|string',
             'fields.*.items.*.label' => 'required_with:fields.*.items|string',

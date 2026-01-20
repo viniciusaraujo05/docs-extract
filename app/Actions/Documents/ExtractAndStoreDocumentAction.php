@@ -38,7 +38,7 @@ final readonly class ExtractAndStoreDocumentAction
         if (! $documentType || $documentType->user_id !== $user->id) {
             throw new \InvalidArgumentException('Invalid document type or you do not have permission to use it.');
         }
-        
+
         $document = $this->storeDocumentAction->execute(
             user: $user,
             file: $file,
@@ -50,7 +50,7 @@ final readonly class ExtractAndStoreDocumentAction
             forceOverwrite: $forceOverwrite,
             dispatchJob: false,
         );
-        
+
         return $this->documentService->processDocument($document);
     }
 }

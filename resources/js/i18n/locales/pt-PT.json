@@ -1106,7 +1106,7 @@
     "Invalid file type": "Tipo de ficheiro inválido. Tipos aceitos: {{types}}",
     "Invalid PDF file": "Ficheiro PDF inválido: {{fileName}}. O ficheiro parece estar corrompido ou não é um PDF válido.",
     "Error reading file": "Erro ao ler ficheiro: {{fileName}}. Tente novamente.",
-    "Document limit reached": "Atingiu o limite de documentos ({{used}}/{{limit}}). Faça upgrade do seu plano para enviar mais documentos.",
+    "Document limit reached": "Atingiu o limite de páginas ({{used}}/{{limit}}). Faça upgrade do seu plano para processar mais páginas.",
     "Model limit reached": "Limite de modelos atingido",
     "You have reached the limit of models in your plan. You can still use existing models or upgrade to create more.": "Atingiu o limite de modelos do seu plano. Ainda pode usar modelos existentes ou fazer upgrade para criar mais.",
     "document_processing_error": "❌ Não foi possível processar este documento\n\nIsto pode acontecer quando:\n• O PDF está protegido por palavra-passe\n• O ficheiro está corrompido\n• O formato não é suportado\n\nSugestões:\n• Tente converter o PDF para imagem (JPG/PNG)\n• Verifique se o ficheiro não está protegido\n• Use outro PDF se disponível",

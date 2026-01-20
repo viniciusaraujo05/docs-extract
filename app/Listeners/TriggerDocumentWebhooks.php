@@ -31,6 +31,7 @@ class TriggerDocumentWebhooks
                 'timestamp' => now()->toIso8601String(),
                 'document_id' => $document->id,
             ]);
+
             return;
         }
 
@@ -46,11 +47,11 @@ class TriggerDocumentWebhooks
 
         foreach ($webhooks as $webhook) {
             $events = $webhook->events;
-            
+
             if (! empty($events)) {
                 $hasMatch = in_array($eventType, $events);
-                
-                if (!$hasMatch && in_array('document.completed', $events)) {
+
+                if (! $hasMatch && in_array('document.completed', $events)) {
                     if ($eventType === 'document.updated' && $status === 'completed') {
                         $hasMatch = true;
                     } elseif ($eventType === 'document.created') {
@@ -66,6 +67,7 @@ class TriggerDocumentWebhooks
                         'event_type' => $eventType,
                         'subscribed_events' => $events,
                     ]);
+
                     continue;
                 }
             }

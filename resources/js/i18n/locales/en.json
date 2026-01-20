@@ -1226,7 +1226,7 @@
         "Invalid file type": "Invalid file type. Accepted types: {{types}}",
         "Invalid PDF file": "Invalid PDF file: {{fileName}}. The file appears to be corrupted or is not a valid PDF.",
         "Error reading file": "Error reading file: {{fileName}}. Please try again.",
-        "Document limit reached": "You've reached your document limit ({{used}}/{{limit}}). Upgrade your plan to upload more documents.",
+        "Document limit reached": "You've reached your page limit ({{used}}/{{limit}}). Upgrade your plan to process more pages.",
         "Model limit reached": "Model limit reached",
         "You have reached the limit of models in your plan. You can still use existing models or upgrade to create more.": "You have reached the limit of models in your plan. You can still use existing models or upgrade to create more.",
         "document_processing_error": "❌ Could not process this document\n\nThis may happen when:\n• The PDF is password protected\n• The file is corrupted\n• The format is not supported\n\nSuggestions:\n• Try converting the PDF to image (JPG/PNG)\n• Check if the file is not protected\n• Use another PDF if available",

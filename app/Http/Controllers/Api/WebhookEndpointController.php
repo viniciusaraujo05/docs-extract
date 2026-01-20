@@ -6,9 +6,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\WebhookEndpoint;
-use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class WebhookEndpointController extends Controller
@@ -30,7 +30,7 @@ class WebhookEndpointController extends Controller
             'description' => 'nullable|string|max:255',
         ]);
 
-        $webhook = new WebhookEndpoint();
+        $webhook = new WebhookEndpoint;
         $webhook->user_id = $request->user()->id;
         $webhook->url = $validated['url'];
         $webhook->events = $validated['events'] ?? ['document.created', 'document.updated', 'document.deleted'];

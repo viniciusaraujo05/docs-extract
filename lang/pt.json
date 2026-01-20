@@ -148,13 +148,13 @@
     "emails.plan_changed.button": "Ver Detalhes do Plano",
     "emails.usage_limit.subject": "🎯 Você atingiu o limite do seu plano - DOCSET",
     "emails.usage_limit.title": "📊 Você está usando muito o DOCSET!",
-    "emails.usage_limit.content": "Isso é ótimo! Você atingiu o limite mensal de documentos do plano :plan. Significa que você está tirando o máximo proveito da ferramenta!",
+    "emails.usage_limit.content": "Isso é ótimo! Você atingiu o limite mensal de páginas do plano :plan. Significa que você está tirando o máximo proveito da ferramenta!",
     "emails.usage_limit.upgrade_cta": "💡 Que tal fazer um upgrade? Assim você pode continuar processando documentos sem pausas e com recursos ainda mais poderosos.",
     "emails.usage_limit.button": "Ver Planos Disponíveis",
     "emails.usage_warning.subject": "⚡ Você está arrasando! (80% da cota usada) - DOCSET",
     "emails.usage_warning.title": "📈 Você está indo muito bem!",
     "emails.usage_warning.content": "Só um heads up amigável: você já utilizou 80% da sua cota mensal de documentos. Está mandando bem!",
-    "emails.usage_warning.current_usage": "📊 Uso atual: :used de :total documentos.",
+    "emails.usage_warning.current_usage": "📊 Uso atual: :used de :total páginas.",
     "emails.usage_warning.button": "Ver Meu Uso",
     "emails.security_change.subject": "🔒 Confirmação de Alteração - DOCSET",
     "emails.security_change.title": "✅ Alteração de segurança confirmada",
@@ -186,5 +186,13 @@
     "Fill out the form below and we will get back to you as soon as possible.": "Preencha o formulário abaixo e retornaremos o mais breve possível.",
     "Attachments": "Anexos",
     "Images (max 5MB)": "Imagens (máx 5MB)",
-    "Or email us directly at": "Ou envie um email diretamente para"
+
+    "Or email us directly at": "Ou envie um email diretamente para",
+    "extraction.failed": "Falha ao extrair dados do documento.",
+    "extraction.secured_pdf": "O PDF está protegido por senha ou criptografia.",
+    "extraction.empty_text": "O documento parece vazio ou ilegível (scanned).",
+    "extraction.vision_failed": "Falha na análise visual (IA) do documento.",
+    "extraction.file_too_large": "O arquivo é muito grande para ser processado.",
+    "extraction.openai_error": "Erro ao comunicar com o serviço de IA.",
+    "extraction.fallback_failed": "Tentamos texto e visão, mas não foi possível extrair dados."
 }

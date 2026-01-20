@@ -21,7 +21,6 @@ class CustomRegisteredUserController extends Controller
     /**
      * Create a new controller instance.
      *
-     * @param  \Illuminate\Contracts\Auth\StatefulGuard  $guard
      * @return void
      */
     public function __construct(StatefulGuard $guard)
@@ -31,16 +30,12 @@ class CustomRegisteredUserController extends Controller
 
     /**
      * Create a new registered user.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Laravel\Fortify\Contracts\CreatesNewUsers  $creator
-     * @return \Laravel\Fortify\Contracts\RegisterResponse
      */
     public function store(Request $request, CreatesNewUsers $creator): RegisterResponse
     {
         // We do NOT dispatch the Registered event here to prevent automatic email verification
         // event(new Registered($user = $creator->create($request->all())));
-        
+
         $user = $creator->create($request->all());
 
         $this->guard->login($user);

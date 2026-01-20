@@ -15,7 +15,7 @@ interface ExtractionStrategyInterface
 
     /**
      * Extract data from the document.
-     * 
+     *
      * @return array{data: array<string, mixed>, confidence: int|null, raw_text?: string}
      */
     public function extract(Document $document, array $schema): array;

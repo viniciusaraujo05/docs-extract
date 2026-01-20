@@ -17,6 +17,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Alert,
   AlertDescription,
   AlertTitle,
@@ -40,6 +46,8 @@ import {
   ArrowRight,
   Zap,
   Shield,
+  BarChart3,
+  MousePointerClick,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -57,15 +65,26 @@ interface Plan {
 }
 
 interface Usage {
+  pages: number;
   documents: number;
   models: number;
   api_requests: number;
+  reports: number;
 }
 
 interface UsagePercentages {
+  pages: number;
   documents: number;
   models: number;
   api_requests: number;
+  reports: number;
+}
+
+interface PageUsageDocument {
+  id: number;
+  name: string;
+  pages: number;
+  created_at: string;
 }
 
 interface Invoice {
@@ -105,11 +124,13 @@ export default function BillingIndex() {
   const [loading, setLoading] = useState(true);
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [planData, setPlanData] = useState<Plan | null>(null);
-  const [usage, setUsage] = useState<Usage>({ documents: 0, models: 0, api_requests: 0 });
+  const [usage, setUsage] = useState<Usage>({ pages: 0, documents: 0, models: 0, api_requests: 0, reports: 0 });
   const [usagePercentages, setUsagePercentages] = useState<UsagePercentages>({
+    pages: 0,
     documents: 0,
     models: 0,
     api_requests: 0,
+    reports: 0,
   });
   const [nextBillingDate, setNextBillingDate] = useState<string | null>(null);
   const [isTrial, setIsTrial] = useState(false);
@@ -118,6 +139,8 @@ export default function BillingIndex() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [showPagesModal, setShowPagesModal] = useState(false);
+  const [pagesDetail, setPagesDetail] = useState<PageUsageDocument[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]); // Store raw plans
   const [availablePlans, setAvailablePlans] = useState<Plan[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -174,15 +197,19 @@ export default function BillingIndex() {
         const usageData = await usageResponse.value.json();
         if (usageData.success) {
           setUsage({
+            pages: usageData.usage.documents?.used || 0, // Use documents data for pages display
             documents: usageData.usage.documents?.used || 0,
             models: usageData.usage.models?.used || 0,
             api_requests: usageData.usage.api_requests?.used || 0,
+            reports: usageData.usage.reports?.used || 0,
           });
           
           setUsagePercentages({
+            pages: usageData.usage.documents?.percentage || 0, // Use documents percentage for pages
             documents: usageData.usage.documents?.percentage || 0,
             models: usageData.usage.models?.percentage || 0,
             api_requests: usageData.usage.api_requests?.percentage || 0,
+            reports: usageData.usage.reports?.percentage || 0,
           });
 
           if (usageData.period?.end) {
@@ -320,6 +347,28 @@ export default function BillingIndex() {
       }
     } catch (error) {
       setError('Failed to cancel subscription');
+    }
+  };
+
+  const handleShowPagesDetail = async () => {
+    try {
+      const response = await fetch(`/api/usage/pages-detail`, {
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]')?.getAttribute('content') || '',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setPagesDetail(data.documents || []);
+          setShowPagesModal(true);
+        }
+      }
+    } catch (error) {
+      toast.error('Failed to load page details');
     }
   };
 
@@ -471,105 +520,166 @@ export default function BillingIndex() {
         </Card>
 
         {/* Usage Overview */}
-        <div className="grid gap-6 md:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                {t('billing.documents', 'Documents')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span>{usage?.documents || 0} of {planData?.limits?.documents === -1 ? '∞' : (planData?.limits?.documents || defaultLimits.documents)}</span>
-                  <span className={getUsageColor(usagePercentages?.documents || 0)}>
-                    {(usagePercentages?.documents || 0).toFixed(0)}%
-                  </span>
-                </div>
-                <Progress
-                  value={usagePercentages?.documents || 0}
-                  className="h-2"
-                />
-                {usagePercentages?.documents >= 80 && (
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      {usagePercentages?.documents >= 95
-                        ? "You've reached your document limit. Upgrade to continue uploading."
-                        : "You're approaching your document limit. Consider upgrading soon."}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
+          {/* Pages Card - Clickable */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Card 
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={handleShowPagesDetail}
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Pages
+                      <MousePointerClick className="h-3 w-3 ml-auto text-muted-foreground" />
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span>{usage?.pages || 0} of {planData?.limits?.documents === -1 ? '∞' : (planData?.limits?.documents || 100)}</span>
+                        <span className={getUsageColor(usagePercentages?.pages || 0)}>
+                          {(usagePercentages?.pages || 0).toFixed(0)}%
+                        </span>
+                      </div>
+                      <Progress
+                        value={usagePercentages?.pages || 0}
+                        className="h-2"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </TooltipTrigger>
+              {usagePercentages?.pages >= 80 && (
+                <TooltipContent>
+                  <p className="text-sm">
+                    {usagePercentages?.pages >= 95
+                      ? "You've reached your page limit. Upgrade to continue."
+                      : "You're approaching your page limit. Consider upgrading soon."}
+                  </p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5" />
-                {t('billing.models', 'Models')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span>{usage?.models || 0} of {planData?.limits?.models === -1 ? '∞' : (planData?.limits?.models || defaultLimits.models)}</span>
-                  <span className={getUsageColor(usagePercentages?.models || 0)}>
-                    {(usagePercentages?.models || 0).toFixed(0)}%
-                  </span>
-                </div>
-                <Progress
-                  value={usagePercentages?.models || 0}
-                  className="h-2"
-                />
-                {usagePercentages?.models >= 80 && (
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      {usagePercentages?.models >= 95
-                        ? "You've reached your models limit. Upgrade to continue creating new models."
-                        : "You're approaching your models limit. Consider upgrading soon."}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Models Card */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Database className="h-5 w-5" />
+                      {t('billing.models', 'Models')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span>{usage?.models || 0} of {planData?.limits?.models === -1 ? '∞' : (planData?.limits?.models || 5)}</span>
+                        <span className={getUsageColor(usagePercentages?.models || 0)}>
+                          {(usagePercentages?.models || 0).toFixed(0)}%
+                        </span>
+                      </div>
+                      <Progress
+                        value={usagePercentages?.models || 0}
+                        className="h-2"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </TooltipTrigger>
+              {usagePercentages?.models >= 80 && (
+                <TooltipContent>
+                  <p className="text-sm">
+                    {usagePercentages?.models >= 95
+                      ? "You've reached your models limit. Upgrade to continue creating new models."
+                      : "You're approaching your models limit. Consider upgrading soon."}
+                  </p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
-                {t('billing.api_requests', 'API Requests')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span>{usage?.api_requests || 0} of {planData?.limits?.api_requests === -1 ? '∞' : (planData?.limits?.api_requests || defaultLimits.api_requests)}</span>
-                  <span className={getUsageColor(usagePercentages?.api_requests || 0)}>
-                    {(usagePercentages?.api_requests || 0).toFixed(0)}%
-                  </span>
-                </div>
-                <Progress
-                  value={usagePercentages?.api_requests || 0}
-                  className="h-2"
-                />
-                {usagePercentages?.api_requests >= 80 && (
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      {usagePercentages?.api_requests >= 95
-                        ? "You've reached your API requests limit. Upgrade to continue using the API."
-                        : "You're approaching your API requests limit. Consider upgrading soon."}
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Reports Card */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5" />
+                      Reports
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span>{usage?.reports || 0} of {planData?.limits?.reports === -1 ? '∞' : (planData?.limits?.reports || 1)}</span>
+                        <span className={getUsageColor(usagePercentages?.reports || 0)}>
+                          {(usagePercentages?.reports || 0).toFixed(0)}%
+                        </span>
+                      </div>
+                      <Progress
+                        value={usagePercentages?.reports || 0}
+                        className="h-2"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </TooltipTrigger>
+              {usagePercentages?.reports >= 80 && (
+                <TooltipContent>
+                  <p className="text-sm">
+                    {usagePercentages?.reports >= 95
+                      ? "You've reached your reports limit. Upgrade to create more reports."
+                      : "You're approaching your reports limit. Consider upgrading soon."}
+                  </p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+
+          {/* API Requests Card */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Globe className="h-5 w-5" />
+                      {t('billing.api_requests', 'API Requests')}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span>{usage?.api_requests || 0} of {planData?.limits?.api_requests === -1 ? '∞' : (planData?.limits?.api_requests || 100)}</span>
+                        <span className={getUsageColor(usagePercentages?.api_requests || 0)}>
+                          {(usagePercentages?.api_requests || 0).toFixed(0)}%
+                        </span>
+                      </div>
+                      <Progress
+                        value={usagePercentages?.api_requests || 0}
+                        className="h-2"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </TooltipTrigger>
+              {usagePercentages?.api_requests >= 80 && (
+                <TooltipContent>
+                  <p className="text-sm">
+                    {usagePercentages?.api_requests >= 95
+                      ? "You've reached your API requests limit. Upgrade to continue using the API."
+                      : "You're approaching your API requests limit. Consider upgrading soon."}
+                  </p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Upcoming Invoice */}
@@ -700,6 +810,62 @@ export default function BillingIndex() {
           </Card>
         )}
         </div>
+
+      {/* Page Usage Details Modal */}
+      <Dialog open={showPagesModal} onOpenChange={setShowPagesModal}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle>Page Usage Details</DialogTitle>
+            <DialogDescription>
+              Detailed breakdown of pages used this billing period
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            {pagesDetail.length > 0 ? (
+              <>
+                <div className="rounded-md border">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b bg-muted/50">
+                        <th className="p-3 text-left font-medium">Document</th>
+                        <th className="p-3 text-right font-medium">Pages</th>
+                        <th className="p-3 text-right font-medium">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pagesDetail.map((doc, index) => (
+                        <tr key={doc.id} className={index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}>
+                          <td className="p-3 text-sm">{doc.name}</td>
+                          <td className="p-3 text-right text-sm font-medium">{doc.pages}</td>
+                          <td className="p-3 text-right text-sm text-muted-foreground">
+                            {new Date(doc.created_at).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t bg-muted/50 font-semibold">
+                        <td className="p-3">Total</td>
+                        <td className="p-3 text-right">{pagesDetail.reduce((sum, doc) => sum + doc.pages, 0)}</td>
+                        <td className="p-3"></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+                <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+                  <span>{pagesDetail.length} documents this period</span>
+                  <span>Limit: {planData?.limits?.documents || 100} pages/month</span>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No documents found in this billing period</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Upgrade Dialog */}
       <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>

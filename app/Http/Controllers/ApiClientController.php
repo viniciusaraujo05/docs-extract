@@ -53,7 +53,7 @@ class ApiClientController extends Controller
     public function store(StoreApiClientRequest $request, string $locale): RedirectResponse
     {
         $user = $request->user();
-        
+
         $result = $this->createApiClientAction->execute(
             user: $user,
             name: $request->validated('name'),

@@ -15,7 +15,7 @@ use RuntimeException;
  * Utiliza a OpenAI para analisar o texto de um documento
  * e identificar campos que podem ser extraídos.
  */
-final class FieldDetectorService
+class FieldDetectorService
 {
     private const TIMEOUT = 60;
 
@@ -51,11 +51,42 @@ final class FieldDetectorService
 
     /**
      * Detecta campos extraíveis a partir de uma imagem.
-     * 
-     * @param string $base64Image Imagem em Base64
+     *
+     * @param  string  $base64Image  Imagem em Base64
      */
-    public function detectFromImage(string $base64Image): array
+    /**
+     * Detecta campos extraíveis a partir de uma ou mais imagens.
+     *
+     * @param  string|array<string|array{data: string, mime: string}>  $images  Imagem em Base64 ou array de imagens
+     */
+    public function detectFromImage(string|array $images): array
     {
+        $content = [
+            [
+                'type' => 'text',
+                'text' => 'Analise estas imagens de documento e identifique todos os campos de dados que podem ser extraídos. Se houver múltiplas páginas, combine as informações.',
+            ],
+        ];
+
+        $imgs = is_array($images) ? $images : [$images];
+
+        foreach ($imgs as $img) {
+            if (is_array($img) && isset($img['data'], $img['mime'])) {
+                $url = "data:{$img['mime']};base64,{$img['data']}";
+            } else {
+                // Backward compatibility or simple string
+                $b64 = is_array($img) ? ($img['data'] ?? '') : $img;
+                $url = "data:image/jpeg;base64,{$b64}";
+            }
+
+            $content[] = [
+                'type' => 'image_url',
+                'image_url' => [
+                    'url' => $url,
+                ],
+            ];
+        }
+
         return $this->callOpenAi([
             [
                 'role' => 'system',
@@ -63,18 +94,7 @@ final class FieldDetectorService
             ],
             [
                 'role' => 'user',
-                'content' => [
-                    [
-                        'type' => 'text',
-                        'text' => 'Analise esta imagem de documento e identifique todos os campos de dados que podem ser extraídos.',
-                    ],
-                    [
-                        'type' => 'image_url',
-                        'image_url' => [
-                            'url' => "data:image/jpeg;base64,{$base64Image}",
-                        ],
-                    ],
-                ],
+                'content' => $content,
             ],
         ]);
     }
@@ -82,7 +102,6 @@ final class FieldDetectorService
     private function callOpenAi(array $messages): array
     {
         $apiKey = $this->getApiKey();
-
 
         /** @var Response $response */
         $response = Http::withToken($apiKey)
@@ -95,9 +114,9 @@ final class FieldDetectorService
                 'response_format' => ['type' => 'json_object'],
             ]);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             throw new RuntimeException(
-                'OpenAI API error: ' . $response->status() . ' ' . $response->body()
+                'OpenAI API error: '.$response->status().' '.$response->body()
             );
         }
 
@@ -192,7 +211,7 @@ PROMPT;
             $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
             $fields = $data['fields'] ?? $data;
 
-            if (!is_array($fields) || count($fields) === 0) {
+            if (! is_array($fields) || count($fields) === 0) {
                 return $this->getDefaultFields();
             }
 
@@ -205,7 +224,7 @@ PROMPT;
 
                 // If type is array, include items structure
                 if ($field['type'] === 'array' && isset($f['items']) && is_array($f['items'])) {
-                    $field['items'] = array_map(fn($item) => [
+                    $field['items'] = array_map(fn ($item) => [
                         'name' => $item['name'] ?? 'field',
                         'label' => $item['label'] ?? $item['name'] ?? 'Field',
                         'type' => $item['type'] ?? 'string',
@@ -219,6 +238,7 @@ PROMPT;
                 'error' => $e->getMessage(),
                 'content_preview' => mb_substr($content, 0, 200),
             ]);
+
             return $this->getDefaultFields();
         }
     }

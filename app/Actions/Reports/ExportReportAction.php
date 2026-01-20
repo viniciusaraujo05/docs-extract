@@ -31,7 +31,7 @@ final readonly class ExportReportAction
     /**
      * Escreve os dados CSV num resource handle (para streaming).
      *
-     * @param resource $handle
+     * @param  resource  $handle
      */
     public function writeToHandle($handle, Collection $documents, array $fields): void
     {
@@ -53,11 +53,11 @@ final readonly class ExportReportAction
             $extractedData = $doc->extracted_data ?? [];
             foreach ($fields as $field) {
                 $value = $extractedData[$field['name']] ?? '';
-                
+
                 if (is_array($value) || is_object($value)) {
                     $value = json_encode($value, JSON_UNESCAPED_UNICODE);
                 }
-                
+
                 $row[] = $value;
             }
 

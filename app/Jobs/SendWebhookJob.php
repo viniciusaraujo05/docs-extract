@@ -43,13 +43,12 @@ class SendWebhookJob implements ShouldQueue
         public WebhookEndpoint $webhookEndpoint,
         public string $event,
         public array $payload
-    ) {
-    }
+    ) {}
 
     public function handle(): void
     {
         $startTime = now();
-        
+
         Log::info('[QUEUE] Webhook job started', [
             'timestamp' => $startTime->toIso8601String(),
             'webhook_id' => $this->webhookEndpoint->id,
@@ -67,7 +66,7 @@ class SendWebhookJob implements ShouldQueue
                 'timestamp' => now()->toIso8601String(),
                 'webhook_id' => $this->webhookEndpoint->id,
                 'url' => $this->webhookEndpoint->url,
-                'signature' => substr($signature, 0, 16) . '...',
+                'signature' => substr($signature, 0, 16).'...',
             ]);
 
             $response = Http::timeout(10)
@@ -101,6 +100,7 @@ class SendWebhookJob implements ShouldQueue
                         'webhook_id' => $this->webhookEndpoint->id,
                         'url' => $this->webhookEndpoint->url,
                     ]);
+
                     return;
                 }
 
@@ -122,6 +122,7 @@ class SendWebhookJob implements ShouldQueue
                     'webhook_id' => $this->webhookEndpoint->id,
                     'status' => $status,
                 ]);
+
                 return;
             }
 
@@ -135,7 +136,7 @@ class SendWebhookJob implements ShouldQueue
             ]);
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
             $duration = now()->diffInMilliseconds($startTime);
-            
+
             Log::error('[QUEUE] Webhook connection failed - will retry', [
                 'timestamp' => now()->toIso8601String(),
                 'webhook_id' => $this->webhookEndpoint->id,
@@ -148,7 +149,7 @@ class SendWebhookJob implements ShouldQueue
             throw $e;
         } catch (\Illuminate\Http\Client\RequestException $e) {
             $duration = now()->diffInMilliseconds($startTime);
-            
+
             Log::error('[QUEUE] Webhook request failed', [
                 'timestamp' => now()->toIso8601String(),
                 'webhook_id' => $this->webhookEndpoint->id,
@@ -172,10 +173,11 @@ class SendWebhookJob implements ShouldQueue
                 'timestamp' => now()->toIso8601String(),
                 'webhook_id' => $this->webhookEndpoint->id,
             ]);
+
             return;
         } catch (\Exception $e) {
             $duration = now()->diffInMilliseconds($startTime);
-            
+
             Log::error('[QUEUE] Unexpected webhook error', [
                 'timestamp' => now()->toIso8601String(),
                 'webhook_id' => $this->webhookEndpoint->id,

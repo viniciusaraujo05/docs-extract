@@ -13,21 +13,21 @@ class PromptFactory
 
     public function createExtractionPrompt(string $context, array $schema): string
     {
-        $fields = collect($schema['fields'] ?? [])->map(function($f) {
+        $fields = collect($schema['fields'] ?? [])->map(function ($f) {
             if (is_string($f)) {
                 return "- {$f} (string)";
             }
-            
+
             // For array fields, include sub-item structure
-            if ($f['type'] === 'array' && !empty($f['items'])) {
-                $subFields = collect($f['items'])->map(function($item) {
+            if ($f['type'] === 'array' && ! empty($f['items'])) {
+                $subFields = collect($f['items'])->map(function ($item) {
                     return "    * {$item['name']} ({$item['type']}): {$item['label']}";
                 })->implode("\n");
-                
+
                 return "- {$f['name']} (array of objects): {$f['label']}\n{$subFields}";
             }
-            
-            return "- {$f['name']} ({$f['type']}): " . ($f['label'] ?? $f['name']);
+
+            return "- {$f['name']} ({$f['type']}): ".($f['label'] ?? $f['name']);
         })->implode("\n");
 
         return <<<PROMPT

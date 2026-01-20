@@ -6,13 +6,10 @@ namespace App\Services;
 
 use App\Models\Document;
 use App\Models\ExtractionSchema;
-use App\Models\User;
 use App\Repositories\DocumentRepository;
 use App\Services\Extraction\ExtractionStrategyFactory;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Service for document processing.
@@ -41,34 +38,34 @@ final class DocumentService
         Log::info('DocumentService::processDocument START', [
             'document_id' => $document->id,
             'mime_type' => $document->mime_type,
-            'status' => $document->status
+            'status' => $document->status,
         ]);
-        
+
         $document->markAsProcessing();
 
         try {
             // Get appropriate strategy
             $strategy = $this->extractionStrategyFactory->getStrategy($document);
-            
-            Log::info("Processing document {$document->id} using " . get_class($strategy), [
+
+            Log::info("Processing document {$document->id} using ".get_class($strategy), [
                 'strategy' => get_class($strategy),
-                'schema_fields_count' => count($document->schema_used['fields'] ?? [])
+                'schema_fields_count' => count($document->schema_used['fields'] ?? []),
             ]);
 
             $result = $strategy->extract(
-                $document, 
+                $document,
                 $document->schema_used ?? $this->getDefaultSchema($document->type)
             );
 
             Log::info('DocumentService: Extraction result received', [
                 'document_id' => $document->id,
-                'has_data' => !empty($result['data']),
-                'has_raw_text' => !empty($result['raw_text']),
-                'data_keys' => array_keys($result['data'] ?? [])
+                'has_data' => ! empty($result['data']),
+                'has_raw_text' => ! empty($result['raw_text']),
+                'data_keys' => array_keys($result['data'] ?? []),
             ]);
 
             // Save raw text if available
-            if (!empty($result['raw_text'])) {
+            if (! empty($result['raw_text'])) {
                 $this->documentRepository->update($document, ['raw_text' => $result['raw_text']]);
             }
 
@@ -77,15 +74,15 @@ final class DocumentService
             );
 
             $document->increment('credits_used');
-            
+
             Log::info('DocumentService::processDocument COMPLETED', [
                 'document_id' => $document->id,
-                'final_status' => $document->fresh()->status
+                'final_status' => $document->fresh()->status,
             ]);
         } catch (\Exception $e) {
-            Log::error("Document processing failed: " . $e->getMessage(), [
+            Log::error('Document processing failed: '.$e->getMessage(), [
                 'document_id' => $document->id,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             $document->markAsFailed($e->getMessage());
         }

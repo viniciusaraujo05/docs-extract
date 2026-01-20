@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Events\DocumentCompleted;
 use App\Jobs\SendWebhookJob;
 use App\Models\Document;
 use App\Models\User;
@@ -53,7 +52,7 @@ class WebhookFeatureTest extends TestCase
         Event::fake([\App\Events\DocumentLifecycle::class]);
 
         $document = Document::factory()->create(['status' => 'processing']);
-        
+
         $document->update(['status' => 'completed', 'extracted_data' => ['foo' => 'bar']]);
 
         Event::assertDispatched(\App\Events\DocumentLifecycle::class, function ($event) use ($document) {
@@ -80,7 +79,7 @@ class WebhookFeatureTest extends TestCase
         ]);
 
         $event = new \App\Events\DocumentLifecycle($document, 'document.created');
-        $listener = new \App\Listeners\TriggerDocumentWebhooks();
+        $listener = new \App\Listeners\TriggerDocumentWebhooks;
         $listener->handle($event);
 
         Queue::assertPushed(SendWebhookJob::class, function ($job) use ($webhook) {
@@ -106,7 +105,7 @@ class WebhookFeatureTest extends TestCase
 
         \Illuminate\Support\Facades\Http::assertSent(function ($request) use ($payload) {
             $expectedSignature = hash_hmac('sha256', json_encode($payload), 'my-secret');
-            
+
             return $request->url() === 'https://example.com/cb' &&
                    $request->hasHeader('X-Webhook-Signature', $expectedSignature) &&
                    $request->hasHeader('X-Webhook-Event', 'document.created');

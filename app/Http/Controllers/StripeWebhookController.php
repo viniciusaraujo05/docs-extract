@@ -43,7 +43,7 @@ class StripeWebhookController extends CashierController
             if ($oldPriceId) {
                 $locale = $user->locale ?? 'en';
                 $planService = app(\App\Services\StripePlanService::class);
-                
+
                 // Resolve New Plan Name
                 // Cashier has already updated the local DB, so subscription('default')->type gives the NEW plan key (e.g. 'professional')
                 $newPlanKey = $user->subscription('default')->type ?? 'default';
@@ -59,7 +59,7 @@ class StripeWebhookController extends CashierController
                 // Note: StripePlanService maps config keys to names. We need to map Price ID -> Plan Key -> Name.
                 $allPlans = $planService->getAllPlans($locale);
                 $oldPlanName = 'Previous Plan'; // Fallback
-                
+
                 foreach ($allPlans as $plan) {
                     // Check if this plan's price ID matches the old price ID
                     // Note: StripePlanService might return 'price_id' or 'stripe_price_id' depending on implementation details
@@ -68,11 +68,11 @@ class StripeWebhookController extends CashierController
                         break;
                     }
                 }
-                
+
                 // If we couldn't find it by price ID (maybe it was a legacy price not in current config), try to infer it?
                 // For now, if we found a change but can't name the old one, we still send the email but with fallback.
-                
-                 Mail::to($user->email)->send(new PlanChangedMail($oldPlanName, $newPlanName, $locale));
+
+                Mail::to($user->email)->send(new PlanChangedMail($oldPlanName, $newPlanName, $locale));
             }
         }
 
@@ -102,11 +102,11 @@ class StripeWebhookController extends CashierController
         if ($user) {
             $locale = $user->locale ?? 'en';
             $planService = app(\App\Services\StripePlanService::class);
-            
+
             $planKey = $user->subscription('default')->type ?? 'default';
             $planName = $planKey;
             $planData = $planService->getPlan($planKey, $locale);
-            
+
             if ($planData) {
                 $planName = $planData['display_name'];
             }

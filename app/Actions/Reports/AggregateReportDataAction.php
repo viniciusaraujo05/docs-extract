@@ -33,7 +33,7 @@ final readonly class AggregateReportDataAction
             $values = $documents
                 ->pluck('extracted_data')
                 ->map(fn ($data) => $data[$fieldName] ?? null)
-                ->filter(fn ($v) => $v !== null && $v !== '' && !is_array($v)); // Filter out arrays
+                ->filter(fn ($v) => $v !== null && $v !== '' && ! is_array($v)); // Filter out arrays
 
             if ($values->isEmpty()) {
                 continue;

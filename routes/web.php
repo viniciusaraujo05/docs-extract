@@ -66,7 +66,6 @@ Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->g
     // Reports (was Dashboard)
     Route::get('dashboard', [ReportController::class, 'index'])->name('dashboard');
 
-
     // Documents
     Route::resource('documents', DocumentController::class)->except(['edit'])->names([
         'index' => 'documents.index',
@@ -95,32 +94,13 @@ Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->g
         'update' => 'document-types.update',
         'destroy' => 'document-types.destroy',
     ])->parameters(['document-types' => 'documentType']);
-    
+
     // Apply usage limit only to store route
     Route::post('document-types', [DocumentTypeController::class, 'store'])
         ->name('document-types.store')
         ->middleware(['usage.limit:models']);
 
-
-// Settings Routes (auth only, no verified required for billing to allow subscription management)
-// But we want to warn or protect sensitive actions. The user requested to "put headers there". 
-// Actually, user said: "tira essa middlearw da rota geral, e coloca nas rotas de configuração sabe, tipo de cancelamento, delete".
-// If I put 'verified' here, they CANNOT access the page to see the banner.
-// I will keep 'auth' only here, and let the Frontend Banner stay. 
-// However, the user also said "coloca nas rotas de configuração". 
-// Let's protect specific actions or sub-routes if possible. 
-// But 'billing' is a single page controller.
-// If I block it, they can't manage subscription.
-// Wait, the user said: "deixa um aviso nesses casos que ele deve confirmar o email para segurança".
-// This implies they CAN access, but with a warning.
-// BUT they also said "tira essa middlearw da rota geral, e coloca nas rotas de configuração".
-// Maybe they meant protect the *actions*?
-// Let's look at the API routes.
-// API Clients and Webhooks DEFINITELY need verification.
-// Billing... if they pay, they should be able to see it.
-// I will protect API routes first.
-
-// API Clients Management
+    // API Clients Management
     Route::middleware(['verified'])->group(function () {
         Route::get('api', [ApiClientController::class, 'index'])->name('api.index');
         Route::post('api/clients', [ApiClientController::class, 'store'])->name('api.clients.store');
@@ -209,12 +189,10 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
     Route::post('register', [\App\Http\Controllers\Auth\CustomRegisteredUserController::class, 'store'])
         ->middleware(['guest:web', 'throttle:register'])->name('locale.register.store');
 
-
     // Checkout Registration (Flow B - Direct Purchase, POST only)
     Route::post('register-checkout', [\App\Http\Controllers\Auth\CheckoutRegisterController::class, 'store'])
         ->middleware(['guest:web', 'throttle:register'])
         ->name('locale.register-checkout.store');
-
 
     // Logout
     Route::post('logout', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])

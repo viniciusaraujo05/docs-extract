@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ApiClient;
-use App\Models\PlanUsage;
 use App\Models\User;
 use App\Services\StripePlanService;
 use App\Services\SubscriptionService;
@@ -100,7 +98,7 @@ class PlanController extends Controller
 
         try {
             $invoice = $user->upcomingInvoice();
-            
+
             if (! $invoice) {
                 return response()->json(null);
             }

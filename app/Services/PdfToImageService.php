@@ -3,14 +3,13 @@
 namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
+use Imagick;
 use RuntimeException;
 
 class PdfToImageService
 {
     /**
-     * Converte PDF para imagens JPG
-     * 
-     * @param UploadedFile|string $file
+     * Converte PDF para imagens PNG (High Quality para OCR)
      */
     public function convertPdf(UploadedFile|string $file): array
     {
@@ -19,55 +18,57 @@ class PdfToImageService
         }
 
         $path = $file instanceof UploadedFile ? $file->getRealPath() : $file;
-        
-        if ($path === false || !file_exists($path)) {
+
+        if ($path === false || ! file_exists($path)) {
             throw new RuntimeException('Não foi possível acessar o arquivo');
         }
 
         try {
-            $imagick = new \Imagick;
+            // 1. Contador Leve (Ping)
+            $counter = new Imagick;
+            $counter->pingImage($path);
+            $pageCount = $counter->getNumberImages();
+            $counter->clear();
+            $counter->destroy();
 
-            // Configurações de alta qualidade
-            $imagick->setResolution(200, 200); // 200 DPI para bom equilíbrio
-            $imagick->setColorspace(\Imagick::COLORSPACE_RGB);
-            $imagick->setCompressionQuality(90);
-
-            // Lê o PDF
-            $imagick->readImage($path);
-
-            // Converte cada página para imagem
             $images = [];
-            $pageCount = $imagick->getNumberImages();
 
-            foreach ($imagick as $index => $page) {
-                $page->setImageFormat('jpg');
-                $page->setImageBackgroundColor('white');
-                $page->mergeImageLayers(\Imagick::LAYERMETHOD_FLATTEN);
-                $page->setCompressionQuality(90);
+            for ($i = 0; $i < $pageCount; $i++) {
+                try {
+                    $imagick = new Imagick;
 
-                // Salva em arquivo temporário
-                $tempPath = tempnam(sys_get_temp_dir(), 'pdf_img_').'.jpg';
-                $page->writeImage($tempPath);
+                    $imagick->setResolution(300, 300);
+                    $imagick->setColorspace(Imagick::COLORSPACE_SRGB);
+                    $imagick->readImage($path.'['.$i.']');
+                    $imagick->setImageBackgroundColor('white');
+                    $imagick->setImageAlphaChannel(Imagick::ALPHACHANNEL_REMOVE);
+                    $imagick->mergeImageLayers(Imagick::LAYERMETHOD_FLATTEN);
 
-                $images[] = $tempPath;
+                    $imagick->setImageFormat('png');
+                    $imagick->setImageCompressionQuality(90);
 
-                // Limita a 5 páginas para não sobrecarregar
-                if ($index >= 4) {
-                    break;
+                    $tempPath = tempnam(sys_get_temp_dir(), 'pdf_img_').'.png';
+                    $imagick->writeImage($tempPath);
+
+                    $images[] = $tempPath;
+
+                    $imagick->clear();
+                    $imagick->destroy();
+
+                } catch (\Exception $e) {
+                    throw new RuntimeException("Erro ao processar página {$i}: ".$e->getMessage());
                 }
             }
 
-            $imagick->clear();
-            $imagick->destroy();
-
             return $images;
+
         } catch (\Exception $e) {
-            throw new RuntimeException('Falha ao converter PDF para imagens: '.$e->getMessage());
+            throw new RuntimeException('Error converting PDF to images: '.$e->getMessage());
         }
     }
 
     /**
-     * Cria UploadedFiles a partir dos caminhos das imagens
+     * Cria UploadedFiles para PNG
      */
     public function createImageFiles(array $imagePaths): array
     {
@@ -78,13 +79,12 @@ class PdfToImageService
                 continue;
             }
 
-            $fileInfo = pathinfo($path);
-            $originalName = 'converted_page_'.($index + 1).'.jpg';
+            $originalName = 'page_'.($index + 1).'.png';
 
             $file = new UploadedFile(
                 $path,
                 $originalName,
-                'image/jpeg',
+                'image/png',
                 null,
                 true
             );
@@ -95,14 +95,11 @@ class PdfToImageService
         return $files;
     }
 
-    /**
-     * Limpa arquivos temporários
-     */
     public function cleanup(array $paths): void
     {
         foreach ($paths as $path) {
             if (file_exists($path)) {
-                unlink($path);
+                @unlink($path);
             }
         }
     }

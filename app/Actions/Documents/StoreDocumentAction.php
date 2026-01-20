@@ -26,6 +26,7 @@ final readonly class StoreDocumentAction
     public function __construct(
         private DocumentRepository $documentRepository,
         private DocumentTypeRepository $documentTypeRepository,
+        private \App\Services\DocumentPageCounter $pageCounter,
     ) {}
 
     public function execute(
@@ -46,6 +47,7 @@ final readonly class StoreDocumentAction
             $this->documentRepository->delete($existingDocument);
         }
 
+        $pageCount = $this->pageCounter->count($file);
         $filePath = $this->storeFile($file, $user->id);
 
         if ($type === 'new_type' && ! empty($newTypeName) && isset($schema['fields'])) {
@@ -67,6 +69,7 @@ final readonly class StoreDocumentAction
             'file_path' => $filePath,
             'mime_type' => $file->getMimeType(),
             'file_size' => $file->getSize(),
+            'page_count' => $pageCount,
             'type' => $type,
             'status' => $extractedData !== null ? 'completed' : 'pending',
             'schema_used' => $schema,

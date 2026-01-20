@@ -70,12 +70,11 @@ class SubscriptionService
             ->checkout([
                 // 'customer_email' => $user->email, // REMOVED: Conflicts with 'customer' param added by Cashier
                 'success_url' => route('subscription.success', ['locale' => app()->getLocale()])
-                    . '?session_id={CHECKOUT_SESSION_ID}',
+                    .'?session_id={CHECKOUT_SESSION_ID}',
                 'cancel_url' => route('subscription.cancel', ['locale' => app()->getLocale()]),
             ])
             ->url;
     }
-
 
     public function getBillingPortalUrl(User $user): string
     {
@@ -89,15 +88,16 @@ class SubscriptionService
         $subscription = $user->subscription('default');
 
         if (! $subscription) {
-            \Illuminate\Support\Facades\Log::warning('Subscription cancellation failed: No subscription found for user ' . $user->id);
+            \Illuminate\Support\Facades\Log::warning('Subscription cancellation failed: No subscription found for user '.$user->id);
+
             return false;
         }
 
         try {
             $subscription->cancel();
-            \Illuminate\Support\Facades\Log::info('Subscription cancelled for user ' . $user->id);
+            \Illuminate\Support\Facades\Log::info('Subscription cancelled for user '.$user->id);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Subscription cancellation error for user ' . $user->id . ': ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Subscription cancellation error for user '.$user->id.': '.$e->getMessage());
             throw $e;
         }
 
@@ -230,12 +230,12 @@ class SubscriptionService
     public function getUsageData(User $user, ?array $planData = null): array
     {
         $planUsage = PlanUsage::getOrCreateForUser($user);
-        
         $usage = [
             'documents' => $planUsage->documents_count,
             'models' => $planUsage->models_count,
             'api_requests' => $planUsage->api_requests_count,
             'api_keys' => \App\Models\ApiClient::where('user_id', $user->id)->count(),
+            'reports' => $planUsage->reports_count,
         ];
 
         // If plan data not provided, fetch it
@@ -246,7 +246,7 @@ class SubscriptionService
         }
 
         $usagePercentages = [];
-        
+
         foreach ($limits as $limit => $value) {
             // Skip non-numeric limits (like exports array, webhooks boolean)
             if (is_array($value) || is_bool($value)) {

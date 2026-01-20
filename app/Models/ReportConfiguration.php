@@ -66,7 +66,7 @@ final class ReportConfiguration extends Model
 
     /**
      * Get documents based on selection mode.
-     * 
+     *
      * SECURITY: Filters by user_id to prevent cross-user data access
      */
     public function getDocumentsQuery(): Builder

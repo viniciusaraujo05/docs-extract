@@ -49,7 +49,7 @@ final readonly class DocumentRepository
 
     /**
      * Busca documentos completos por tipo de documento.
-     * 
+     *
      * SECURITY: Filters by user_id to prevent cross-user data access
      */
     public function getCompletedByDocumentType(int $documentTypeId, int $userId): Collection
@@ -65,7 +65,7 @@ final readonly class DocumentRepository
 
     /**
      * Busca documentos completos por tipo para seleção manual.
-     * 
+     *
      * SECURITY: Filters by user_id to prevent cross-user data access
      */
     public function getForManualSelection(int $documentTypeId, int $userId): Collection

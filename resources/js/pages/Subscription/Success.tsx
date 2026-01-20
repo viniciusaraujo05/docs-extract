@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
-export default function SubscriptionSuccess({ session_id }: { session_id?: string }) {
+export default function SubscriptionSuccess({ session_id, user_name, plan_name }: { session_id?: string; user_name: string; plan_name: string }) {
     const locale = document.documentElement.lang || 'en';
     const { t } = useTranslation();
     const [countdown, setCountdown] = useState(5);
@@ -63,10 +63,10 @@ export default function SubscriptionSuccess({ session_id }: { session_id?: strin
                                 transition={{ delay: 0.3 }}
                             >
                                 <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70 mb-3">
-                                    {t('subscription.success.heading', 'Payment Successful!')}
+                                    {t('subscription.success.heading', 'Welcome, {{name}}!', { name: user_name })}
                                 </h1>
                                 <p className="text-muted-foreground mb-8 text-lg">
-                                    {t('subscription.success.message', 'Thank you for subscribing. Your account has been instantly upgraded to the premium plan.')}
+                                    {t('subscription.success.message', 'Congratulations! Your account has been upgraded to the {{plan}} plan.', { plan: plan_name })}
                                 </p>
                             </motion.div>
                             

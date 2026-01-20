@@ -61,6 +61,7 @@ Route::prefix('v1')->name('api.v1.')->middleware([\App\Http\Middleware\ApiV1Json
 Route::middleware(['auth'])->group(function () {
     // Usage API
     Route::get('usage', [UsageController::class, 'index']);
+    Route::get('usage/pages-detail', [UsageController::class, 'pagesDetail']);
 
     // Reports API
     Route::get('reports/{documentType}/data', [ReportController::class, 'getData']);

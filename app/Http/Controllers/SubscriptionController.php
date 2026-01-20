@@ -26,12 +26,12 @@ class SubscriptionController extends Controller
             try {
                 $prices = $this->subscriptionService->getActivePrices();
                 $price = $prices->firstWhere('id', $priceId);
-                
+
                 if ($price) {
                     $planName = $price['plan_name'];
                 }
             } catch (\Exception $e) {
-                Log::error('Failed to resolve plan name from price ID: ' . $e->getMessage());
+                Log::error('Failed to resolve plan name from price ID: '.$e->getMessage());
             }
         }
 
@@ -71,8 +71,13 @@ class SubscriptionController extends Controller
 
     public function success(Request $request): Response
     {
+        $user = auth()->user();
+        $planName = $this->subscriptionService->getUserPlanName($user);
+        
         return Inertia::render('Subscription/Success', [
             'session_id' => $request->query('session_id'),
+            'user_name' => $user->name,
+            'plan_name' => $planName,
         ]);
     }
 

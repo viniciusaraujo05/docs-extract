@@ -34,7 +34,7 @@ class AnalyzeDocument
             if (str_starts_with($mime, 'image/')) {
                 $base64 = base64_encode(file_get_contents($file->getRealPath()));
                 $fields = $this->fieldDetector->detectFromImage($base64);
-                
+
                 return [
                     'fields' => $fields,
                     'text' => '', // No text extracted for images in analysis phase
@@ -88,36 +88,41 @@ class AnalyzeDocument
         try {
             /** @var \App\Services\PdfToImageService $pdfService */
             $pdfService = app(\App\Services\PdfToImageService::class);
-            
-            // Convert first page only for analysis
+
+            // Convert ALL pages for analysis (PdfToImageService now handles this efficiently)
             $imagePaths = $pdfService->convertPdf($file);
-            
+
             if (empty($imagePaths)) {
-                throw new \RuntimeException('Failed to convert PDF to image');
+                throw new \RuntimeException('Failed to convert PDF to images');
             }
-            
-            // Use first page for detection
-            $firstPage = $imagePaths[0];
-            $base64 = base64_encode(file_get_contents($firstPage));
-            
+
+            // Prepare all images for detection
+            $imagesPayload = [];
+            foreach ($imagePaths as $path) {
+                $imagesPayload[] = [
+                    'data' => base64_encode(file_get_contents($path)),
+                    'mime' => 'image/png', // PdfToImageService produces PNGs now
+                ];
+            }
+
             // Clean up
             $pdfService->cleanup($imagePaths);
-            
-            // Detect from image
-            $fields = $this->fieldDetector->detectFromImage($base64);
+
+            // Detect from ALL images
+            $fields = $this->fieldDetector->detectFromImage($imagesPayload);
 
             return [
                 'fields' => $fields,
                 'text' => '', // No text text for image analysis
                 'message' => 'PDF analyzed using AI Vision (converted to image)',
             ];
-            
+
         } catch (\Throwable $e) {
             // Fallback
-             return [
+            return [
                 'fields' => $this->fieldDetector->getDefaultFields(),
                 'text' => '',
-                'message' => 'Could not analyze PDF: ' . $e->getMessage(),
+                'message' => 'Could not analyze PDF: '.$e->getMessage(),
             ];
         }
     }

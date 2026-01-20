@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace App\Services\Extraction\Strategies;
 
 use App\Models\Document;
-use App\Services\Extraction\Contracts\ExtractionStrategyInterface;
 use App\Services\AI\PromptFactory;
+use App\Services\Extraction\Contracts\ExtractionStrategyInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use Smalot\PdfParser\Parser;
 use RuntimeException;
-use Illuminate\Support\Facades\Log;
+use Smalot\PdfParser\Parser;
 
-final class TextStrategy implements ExtractionStrategyInterface
+class TextStrategy implements ExtractionStrategyInterface
 {
     public function __construct(
         private readonly PromptFactory $promptFactory
@@ -28,9 +27,9 @@ final class TextStrategy implements ExtractionStrategyInterface
     public function extract(Document $document, array $schema): array
     {
         $text = $this->extractText($document);
-        
+
         if (trim($text) === '') {
-            throw new RuntimeException('No text could be extracted from the document.');
+            throw new \App\Exceptions\ExtractionException('extraction.empty_text');
         }
 
         return $this->processWithLLM($text, $schema);
@@ -41,28 +40,28 @@ final class TextStrategy implements ExtractionStrategyInterface
         // Use document's storage_disk if set (for temp files), otherwise use default
         $diskName = $document->storage_disk ?? config('filesystems.default');
         $disk = Storage::disk($diskName);
-        
+
         // For remote storage (R2, S3), download to temp location first
-        $isRemote = !in_array($diskName, ['local', 'public']);
-        
+        $isRemote = ! in_array($diskName, ['local', 'public']);
+
         if ($isRemote) {
-            $tempPath = storage_path('app/temp/' . basename($document->file_path));
+            $tempPath = storage_path('app/temp/'.basename($document->file_path));
             $tempDir = dirname($tempPath);
-            
-            if (!is_dir($tempDir)) {
+
+            if (! is_dir($tempDir)) {
                 mkdir($tempDir, 0755, true);
             }
-            
+
             $content = $disk->get($document->file_path);
             if ($content === false || $content === null) {
-                throw new RuntimeException("Failed to download file from remote storage");
+                throw new RuntimeException('Failed to download file from remote storage');
             }
-            
+
             $written = file_put_contents($tempPath, $content);
             if ($written === false) {
                 throw new RuntimeException("Failed to write temp file: {$tempPath}");
             }
-            
+
             chmod($tempPath, 0644);
             $path = $tempPath;
         } else {
@@ -71,13 +70,13 @@ final class TextStrategy implements ExtractionStrategyInterface
 
         try {
             if (str_contains($document->mime_type, 'pdf')) {
-                $parser = new Parser();
+                $parser = new Parser;
                 $pdf = $parser->parseFile($path);
                 $text = $pdf->getText();
             } else {
                 $text = file_get_contents($path);
             }
-            
+
             return $text;
         } catch (\Exception $e) {
             throw $e;
@@ -91,13 +90,13 @@ final class TextStrategy implements ExtractionStrategyInterface
 
     private function processWithLLM(string $text, array $schema): array
     {
-         $apiKey = config('services.openai.api_key');
-         $model = config('services.openai.model', 'gpt-4o-mini');
-         
-         $prompt = $this->promptFactory->createExtractionPrompt($text, $schema);
+        $apiKey = config('services.openai.api_key');
+        $model = config('services.openai.model', 'gpt-4o-mini');
 
-         /** @var \Illuminate\Http\Client\Response $response */
-         $response = Http::withToken($apiKey)
+        $prompt = $this->promptFactory->createExtractionPrompt($text, $schema);
+
+        /** @var \Illuminate\Http\Client\Response $response */
+        $response = Http::withToken($apiKey)
             ->timeout(120)
             ->withoutVerifying()
             ->post('https://api.openai.com/v1/chat/completions', [
@@ -110,13 +109,13 @@ final class TextStrategy implements ExtractionStrategyInterface
                 'response_format' => ['type' => 'json_object'],
             ]);
 
-        if (!$response->successful()) {
-            throw new RuntimeException('OpenAI API error: ' . $response->body());
+        if (! $response->successful()) {
+            throw new RuntimeException('OpenAI API error: '.$response->body());
         }
 
         $content = $response->json('choices.0.message.content');
         $data = json_decode($content, true);
-        
+
         return [
             'data' => $data['extracted_data'] ?? $data,
             'confidence' => $data['confidence'] ?? null,

@@ -42,7 +42,7 @@ class SupportController extends Controller
         $data = collect($validated)->except(['attachments'])->toArray();
 
         Mail::to('help@docset.app')->send(new SupportRequestMail($request->user(), $data, $attachmentPaths));
-        
+
         return back()->with('success', __('Your message has been sent successfully. We will contact you shortly.'));
     }
 }

@@ -103,4 +103,38 @@ class UsageController extends Controller
 
         return $used >= $limit;
     }
+
+    /**
+     * Get detailed page usage breakdown by document.
+     */
+    public function pagesDetail(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $limits = $this->subscriptionService->getUserPlanLimits($user);
+
+        // Get all documents from current billing period
+        $usage = $this->usageTrackingService->getCurrentUsage($user);
+        $periodStart = $usage['period_start'] ?? now()->startOfMonth();
+        $periodEnd = $usage['period_end'] ?? now()->endOfMonth();
+
+        $documents = $user->documents()
+            ->whereBetween('created_at', [$periodStart, $periodEnd])
+            ->orderBy('created_at', 'desc')
+            ->get(['id', 'name', 'page_count', 'created_at'])
+            ->map(fn($doc) => [
+                'id' => $doc->id,
+                'name' => $doc->name,
+                'pages' => $doc->page_count ?? 1,
+                'created_at' => $doc->created_at->toDateString(),
+            ]);
+
+        $totalPages = $documents->sum('pages');
+
+        return response()->json([
+            'success' => true,
+            'documents' => $documents,
+            'total_pages' => $totalPages,
+            'limit' => $limits['pages'] ?? 100,
+        ]);
+    }
 }

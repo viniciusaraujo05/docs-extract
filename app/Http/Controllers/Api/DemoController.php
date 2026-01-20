@@ -8,7 +8,6 @@ use App\Services\Demo\DemoRateLimiter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 
 class DemoController extends Controller
 {
@@ -39,12 +38,12 @@ class DemoController extends Controller
             // 1. Analyze document to get fields (Schema Inference)
             $analysis = $this->analyzeDocumentAction->execute($file);
             $detectedFields = $analysis['fields'];
-            
+
             // 2. Extract data using the inferred fields
             // Pass null for user as this is a public demo
             $result = $this->extractAction->execute(null, $file, $detectedFields);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 throw new \Exception($result['error'] ?? 'Extraction failed');
             }
 
@@ -71,7 +70,7 @@ class DemoController extends Controller
 
             return response()->json([
                 'error' => 'Extraction failed',
-                'message' => 'An error occurred while processing your document. Please try again. ' . $e->getMessage(),
+                'message' => 'An error occurred while processing your document. Please try again. '.$e->getMessage(),
             ], 500);
         }
     }

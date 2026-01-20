@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 
 /**
  * Extract data from uploaded file without persisting to database.
- * 
+ *
  * Used for quick extractions in the frontend "Extract Data" flow.
  */
 final readonly class ExtractFromUploadedFileAction
@@ -24,22 +24,25 @@ final readonly class ExtractFromUploadedFileAction
     /**
      * Execute extraction from uploaded file.
      *
-     * @param ?User $user Current user (nullable for demo)
-     * @param UploadedFile $file Uploaded document file
-     * @param array $fields Schema fields to extract
+     * @param  ?User  $user  Current user (nullable for demo)
+     * @param  UploadedFile  $file  Uploaded document file
+     * @param  array  $fields  Schema fields to extract
      * @return array{success: bool, extracted_data?: array, confidence?: int, raw_text_preview?: string, error?: string}
      */
     public function execute(?User $user, UploadedFile $file, array $fields): array
     {
         $userId = $user ? $user->id : 'guest';
         $orgId = $user ? $user->organization_id : null;
-        
-        $filename = Str::uuid()->toString() . '.' . $file->getClientOriginalExtension();
+
+        // Increase time limit for this request as PDF conversion/OCR can be slow
+        set_time_limit(180);
+
+        $filename = Str::uuid()->toString().'.'.$file->getClientOriginalExtension();
         $filePath = $file->storeAs("temp_extractions/{$userId}", $filename, 'local');
 
         try {
             // Create temporary document model (not saved to DB)
-            $tempDocument = new \App\Models\Document();
+            $tempDocument = new \App\Models\Document;
             $tempDocument->user_id = $userId === 'guest' ? 0 : $userId;
             $tempDocument->organization_id = $orgId;
             $tempDocument->name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
@@ -53,13 +56,14 @@ final readonly class ExtractFromUploadedFileAction
             $tempDocument->storage_disk = 'local'; // Temp files always on local disk
 
             // Get strategy and extract
+            // Get strategy and extract
             $strategy = $this->strategyFactory->getStrategy($tempDocument);
             $result = $strategy->extract($tempDocument, ['fields' => $fields]);
 
             // Clean up temp file (always on local disk)
             Storage::disk('local')->delete($filePath);
 
-            if (!empty($result['data'])) {
+            if (! empty($result['data'])) {
                 return [
                     'success' => true,
                     'extracted_data' => $result['data'],
@@ -79,7 +83,7 @@ final readonly class ExtractFromUploadedFileAction
 
             return [
                 'success' => false,
-                'error' => 'Failed to extract data: ' . $e->getMessage(),
+                'error' => 'Failed to extract data: '.$e->getMessage(),
             ];
         }
     }

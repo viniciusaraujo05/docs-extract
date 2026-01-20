@@ -22,7 +22,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Controller para gestão de documentos.
@@ -93,13 +92,13 @@ final class DocumentController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        // Check document limit before storing
+        // Check page limit before storing
         $subscriptionService = app(\App\Services\SubscriptionService::class);
-        if ($subscriptionService->hasReachedLimit($user, 'documents')) {
+        if ($subscriptionService->hasReachedLimit($user, 'pages')) {
             $planName = $subscriptionService->getUserPlanName($user);
 
             return redirect()->back()
-                ->with('error', "You've reached the document limit for your {$planName} plan. Upgrade to continue uploading documents.");
+                ->with('error', "You've reached the page limit for your {$planName} plan. Upgrade to continue uploading documents.");
         }
 
         $file = $request->file('file');
@@ -167,14 +166,14 @@ final class DocumentController extends Controller
         $diskName = $documentModel->storage_disk ?? config('filesystems.default');
         $disk = Storage::disk($diskName);
 
-        if (!$disk->exists($documentModel->file_path)) {
+        if (! $disk->exists($documentModel->file_path)) {
             abort(404, 'File not found');
         }
 
         // For remote storage (R2, S3), stream the file
-        if (!in_array($diskName, ['local', 'public'])) {
+        if (! in_array($diskName, ['local', 'public'])) {
             $stream = $disk->readStream($documentModel->file_path);
-            
+
             if ($stream === false) {
                 abort(500, 'Failed to read file from storage');
             }
@@ -186,14 +185,14 @@ final class DocumentController extends Controller
                 }
             }, 200, [
                 'Content-Type' => $documentModel->mime_type,
-                'Content-Disposition' => 'inline; filename="' . $documentModel->original_filename . '"',
+                'Content-Disposition' => 'inline; filename="'.$documentModel->original_filename.'"',
             ]);
         }
 
         // For local storage, use file response
         $path = $disk->path($documentModel->file_path);
-        
-        if (!file_exists($path)) {
+
+        if (! file_exists($path)) {
             abort(404, 'File not found');
         }
 

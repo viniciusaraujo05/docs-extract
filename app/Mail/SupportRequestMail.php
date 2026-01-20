@@ -2,22 +2,23 @@
 
 namespace App\Mail;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\User;
-
-use Illuminate\Mail\Mailables\Attachment;
 
 class SupportRequestMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     public $user;
+
     public $data;
+
     public $attachmentPaths;
 
     /**
@@ -36,7 +37,7 @@ class SupportRequestMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '[Support Request] ' . ($this->data['subject'] ?? 'New Message'),
+            subject: '[Support Request] '.($this->data['subject'] ?? 'New Message'),
             replyTo: [$this->user->email],
         );
     }

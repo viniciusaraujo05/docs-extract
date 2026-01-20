@@ -27,6 +27,7 @@ class Document extends Model
         'file_path',
         'mime_type',
         'file_size',
+        'page_count',
         'type',
         'status',
         'raw_text',

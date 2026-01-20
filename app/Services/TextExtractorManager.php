@@ -14,7 +14,7 @@ use RuntimeException;
  * Gerencia múltiplos extractors e seleciona o apropriado
  * baseado no tipo de ficheiro (Strategy Pattern).
  */
-final class TextExtractorManager
+class TextExtractorManager
 {
     /**
      * @var array<TextExtractorInterface>

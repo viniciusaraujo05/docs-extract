@@ -17,6 +17,8 @@ class ProcessDocumentJob implements ShouldQueue
 
     public int $tries = 3;
 
+    public int $timeout = 300;
+
     public int $backoff = 60;
 
     public function __construct(
@@ -34,6 +36,13 @@ class ProcessDocumentJob implements ShouldQueue
                 'document_id' => $this->document->id,
                 'status' => $this->document->fresh()->status,
             ]);
+        } catch (\App\Exceptions\ExtractionException $e) {
+            Log::error('Extraction Logic Failed', [
+                'document_id' => $this->document->id,
+                'key' => $e->getTranslationKey(),
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Document processing failed', [
                 'document_id' => $this->document->id,
@@ -51,6 +60,10 @@ class ProcessDocumentJob implements ShouldQueue
             'error' => $exception->getMessage(),
         ]);
 
-        $this->document->markAsFailed('Processamento falhou após múltiplas tentativas: '.$exception->getMessage());
+        $message = $exception instanceof \App\Exceptions\ExtractionException
+            ? $exception->getTranslatedMessage()
+            : 'Processamento falhou após múltiplas tentativas: '.$exception->getMessage();
+
+        $this->document->markAsFailed($message);
     }
 }

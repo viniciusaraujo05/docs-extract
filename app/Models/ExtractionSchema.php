@@ -91,7 +91,7 @@ class ExtractionSchema extends Model
                         ['name' => 'title', 'type' => 'string'],
                         ['name' => 'sales', 'type' => 'number'],
                         ['name' => 'visits', 'type' => 'number'],
-                    ]
+                    ],
                 ],
             ],
         ];

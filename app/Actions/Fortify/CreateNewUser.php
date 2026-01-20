@@ -41,7 +41,7 @@ class CreateNewUser implements CreatesNewUsers
             'locale' => $input['locale'] ?? config('app.locale', 'pt'),
         ]);
 
-        $user->notify(new \App\Notifications\WelcomeNotification());
+        $user->notify(new \App\Notifications\WelcomeNotification);
 
         return $user;
     }

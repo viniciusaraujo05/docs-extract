@@ -27,7 +27,7 @@ return [
             ],
             'features' => [
                 'en' => [
-                    '100 documents per month',
+                    '100 pages per month',
                     '5 models',
                     '1 report',
                     'API access',
@@ -35,7 +35,7 @@ return [
                     'Full UI',
                 ],
                 'pt-BR' => [
-                    '100 documentos por mês',
+                    '100 páginas por mês',
                     '5 modelos',
                     '1 relatório',
                     'Acesso à API',
@@ -43,7 +43,7 @@ return [
                     'Interface completa',
                 ],
                 'pt-PT' => [
-                    '100 documentos por mês',
+                    '100 páginas por mês',
                     '5 modelos',
                     '1 relatório',
                     'Acesso à API',
@@ -76,7 +76,7 @@ return [
             ],
             'features' => [
                 'en' => [
-                    '500 documents per month',
+                    '500 pages per month',
                     '10 models',
                     '5 reports',
                     'API access',
@@ -85,7 +85,7 @@ return [
                     'Full UI',
                 ],
                 'pt-BR' => [
-                    '500 documentos por mês',
+                    '500 páginas por mês',
                     '10 modelos',
                     '5 relatórios',
                     'Acesso à API',
@@ -93,7 +93,7 @@ return [
                     'Interface completa',
                 ],
                 'pt-PT' => [
-                    '500 documentos por mês',
+                    '500 páginas por mês',
                     '10 modelos',
                     '5 relatórios',
                     'Acesso à API',
@@ -126,7 +126,7 @@ return [
             ],
             'features' => [
                 'en' => [
-                    '1,500 documents per month',
+                    '1,500 pages per month',
                     '20 models',
                     'Unlimited reports',
                     'API access',
@@ -135,7 +135,7 @@ return [
                     'Full UI',
                 ],
                 'pt-BR' => [
-                    '1.500 documentos por mês',
+                    '1.500 páginas por mês',
                     '20 modelos',
                     'Relatórios ilimitados',
                     'Acesso à API',
@@ -145,7 +145,7 @@ return [
                     'Interface completa',
                 ],
                 'pt-PT' => [
-                    '1.500 documentos por mês',
+                    '1.500 páginas por mês',
                     '20 modelos',
                     'Relatórios ilimitados',
                     'Acesso à API',
@@ -180,7 +180,7 @@ return [
             ],
             'features' => [
                 'en' => [
-                    '5,000+ documents per month',
+                    '5,000+ pages per month',
                     'Unlimited models',
                     'Unlimited reports',
                     'API access',
@@ -190,7 +190,7 @@ return [
                     'Full UI',
                 ],
                 'pt-BR' => [
-                    '5.000+ documentos por mês',
+                    '5.000+ páginas por mês',
                     'Modelos ilimitados',
                     'Relatórios ilimitados',
                     'Acesso à API',
@@ -201,7 +201,7 @@ return [
                     'Interface completa',
                 ],
                 'pt-PT' => [
-                    '5.000+ documentos por mês',
+                    '5.000+ páginas por mês',
                     'Modelos ilimitados',
                     'Relatórios ilimitados',
                     'Acesso à API',

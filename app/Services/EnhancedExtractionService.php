@@ -42,8 +42,7 @@ final class EnhancedExtractionService
     public function __construct(
         private readonly ExtractionLoggerInterface $logger,
         private readonly FieldValidatorInterface $validator
-    ) {
-    }
+    ) {}
 
     /**
      * Extract structured data from document text.
@@ -158,7 +157,7 @@ final class EnhancedExtractionService
                 'response_format' => ['type' => 'json_object'],
             ]);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             $errorBody = $response->json() ?? [];
             $errorMessage = $errorBody['error']['message'] ?? $response->body();
 
@@ -180,9 +179,9 @@ final class EnhancedExtractionService
      */
     private function getSystemPrompt(): string
     {
-        return 'You are a specialized assistant for extracting structured data from documents. ' .
-            'Always respond with valid JSON, without markdown or additional text. ' .
-            'Extract exact values from the document. ' .
+        return 'You are a specialized assistant for extracting structured data from documents. '.
+            'Always respond with valid JSON, without markdown or additional text. '.
+            'Extract exact values from the document. '.
             'For each field, provide a confidence score (0-100) indicating how certain you are about the extracted value.';
     }
 
@@ -214,7 +213,7 @@ final class EnhancedExtractionService
         $maxTextLength = 8000;
         if (mb_strlen($text) > $maxTextLength) {
             $halfLength = (int) ($maxTextLength / 2);
-            $text = mb_substr($text, 0, $halfLength) . "\n\n[... middle section truncated ...]\n\n" . mb_substr($text, -$halfLength);
+            $text = mb_substr($text, 0, $halfLength)."\n\n[... middle section truncated ...]\n\n".mb_substr($text, -$halfLength);
         }
 
         return <<<PROMPT
@@ -312,11 +311,11 @@ PROMPT;
         $itemsSchema = $field['items'] ?? [];
 
         if (empty($itemsSchema)) {
-            return "- {$field['name']} (array): " . ($field['label'] ?? 'List of items');
+            return "- {$field['name']} (array): ".($field['label'] ?? 'List of items');
         }
 
         $itemFields = collect($itemsSchema)
-            ->map(fn($item) => "{$item['name']} ({$item['type']})")
+            ->map(fn ($item) => "{$item['name']} ({$item['type']})")
             ->implode(', ');
 
         $description = "- {$field['name']} (array of objects): [{$itemFields}]";
@@ -363,7 +362,7 @@ PROMPT;
                 'error' => $e->getMessage(),
             ]);
 
-            throw new RuntimeException('Invalid JSON response from OpenAI: ' . $e->getMessage());
+            throw new RuntimeException('Invalid JSON response from OpenAI: '.$e->getMessage());
         }
     }
 
@@ -383,7 +382,7 @@ PROMPT;
                 if (array_keys($value) === range(0, count($value) - 1)) {
                     // It's an indexed array (list of items), normalize each item
                     $normalized[$lowercaseKey] = array_map(
-                        fn($item) => is_array($item) ? $this->normalizeFieldNames($item) : $item,
+                        fn ($item) => is_array($item) ? $this->normalizeFieldNames($item) : $item,
                         $value
                     );
                 } else {
@@ -422,7 +421,7 @@ PROMPT;
                 $validationResult = $this->validator->validate($value, $fieldSchema);
             }
 
-            if (!$validationResult['valid']) {
+            if (! $validationResult['valid']) {
                 $validationErrors[$fieldName] = $validationResult['errors'];
                 Log::warning('Field validation failed', [
                     'field' => $fieldName,

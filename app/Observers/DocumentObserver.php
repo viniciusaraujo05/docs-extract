@@ -19,23 +19,23 @@ class DocumentObserver
 
         if ($document->extracted_data !== null) {
             $usage = PlanUsage::getOrCreateForUser($document->user);
-            $usage->incrementUsage('documents');
-            
+            $usage->incrementUsage('documents', $document->page_count ?? 1);
+
             Log::info('[OBSERVER] Dispatching document.created event', [
                 'timestamp' => now()->toIso8601String(),
                 'document_id' => $document->id,
                 'event_type' => 'document.created',
                 'status' => $document->status,
             ]);
-            
+
             \App\Events\DocumentLifecycle::dispatch($document, 'document.created', $document->status);
         }
     }
 
     public function updated(Document $document): void
     {
-        $isFirstCompletion = $document->wasChanged('extracted_data') 
-            && $document->extracted_data !== null 
+        $isFirstCompletion = $document->wasChanged('extracted_data')
+            && $document->extracted_data !== null
             && $document->getOriginal('extracted_data') === null;
 
         Log::info('[OBSERVER] Document updated', [
@@ -48,13 +48,13 @@ class DocumentObserver
 
         $shouldDispatchWebhook = false;
         $eventType = null;
-        
+
         if ($isFirstCompletion) {
             $shouldDispatchWebhook = true;
             $eventType = 'document.created';
-            
+
             $usage = PlanUsage::getOrCreateForUser($document->user);
-            $usage->incrementUsage('documents');
+            $usage->incrementUsage('documents', $document->page_count ?? 1);
         } elseif ($document->wasChanged('status')) {
             if (in_array($document->status, ['completed', 'failed'])) {
                 $shouldDispatchWebhook = true;
@@ -64,7 +64,7 @@ class DocumentObserver
             $shouldDispatchWebhook = true;
             $eventType = 'document.updated';
         }
-        
+
         if ($shouldDispatchWebhook) {
             Log::info('[OBSERVER] Dispatching lifecycle event', [
                 'timestamp' => now()->toIso8601String(),
@@ -72,7 +72,7 @@ class DocumentObserver
                 'event_type' => $eventType,
                 'status' => $document->status,
             ]);
-            
+
             \App\Events\DocumentLifecycle::dispatch($document, $eventType, $document->status);
         } else {
             Log::debug('[OBSERVER] No webhook dispatch needed', [
@@ -90,13 +90,13 @@ class DocumentObserver
             'document_id' => $document->id,
             'status' => $document->status,
         ]);
-        
+
         Log::info('[OBSERVER] Dispatching document.deleted event', [
             'timestamp' => now()->toIso8601String(),
             'document_id' => $document->id,
             'event_type' => 'document.deleted',
         ]);
-        
+
         \App\Events\DocumentLifecycle::dispatch($document, 'document.deleted', $document->status);
     }
 }

@@ -55,7 +55,7 @@ final class ReportController extends Controller
 
         /** @var User $user */
         $user = $request->user();
-        
+
         $documents = $this->documentRepository->getCompletedByDocumentType(
             $documentType->id,
             $user->id
@@ -86,7 +86,7 @@ final class ReportController extends Controller
 
         /** @var User $user */
         $user = $request->user();
-        
+
         $documents = $this->documentRepository->getCompletedByDocumentType(
             $documentType->id,
             $user->id
