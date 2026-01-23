@@ -34,6 +34,8 @@ function getFilePreviewUrl(file: File | null): string | null {
 
 interface Props {
     documentTypes?: DocumentType[];
+    limitReached?: boolean;
+    planName?: string;
 }
 
 /**
@@ -42,7 +44,7 @@ interface Props {
  * Step 2: Definição de campos a extrair
  * Step 3: Revisão e salvamento dos dados
  */
-export default function DocumentsCreate({ documentTypes = [] }: Props) {
+export default function DocumentsCreate({ documentTypes = [], limitReached = false, planName = 'Free' }: Props) {
     const { t } = useTranslation();
     const [locale, setLocale] = useState('pt');
 
@@ -50,6 +52,13 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
         const savedLocale = localStorage.getItem('selected-locale') || 'pt';
         setLocale(savedLocale);
     }, []);
+
+    // Effect to show limit error on mount if reached
+    useEffect(() => {
+        if (limitReached) {
+            setError(t('Document limit reached', { plan: planName }));
+        }
+    }, [limitReached, planName, t]);
     
     const BREADCRUMBS: BreadcrumbItem[] = [
         { title: t('Dashboard'), href: `/${locale}/dashboard` },
@@ -158,6 +167,11 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
      * IMPORTANTE: Limpa todos os dados anteriores para evitar mistura de dados
      */
     const handleFileSelect = useCallback(async (selectedFile: File | null) => {
+        if (limitReached) {
+             toast.error(t('Document limit reached', { plan: planName }));
+             return;
+        }
+
         // Limpa preview anterior
         if (filePreview) {
             URL.revokeObjectURL(filePreview);
@@ -258,7 +272,7 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
                 setCheckingDuplicate(false);
             }
         }
-    }, [filePreview, selectedTypeId]);
+    }, [filePreview, selectedTypeId, limitReached, planName, t]);
 
     /**
      * Handler para seleção de tipo de documento
@@ -364,28 +378,12 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
     const handleExtract = useCallback(async () => {
         if (!file || fields.length === 0) return;
         
-        // Check document limit before extracting
-        try {
-            const usageResponse = await fetch(`/${locale}/api/usage`, {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': getCsrfToken(),
-                },
-            });
-            const usageData = await usageResponse.json();
-            
-            if (usageData.success && usageData.usage.documents.is_reached) {
-                setError(t('Document limit reached', {
-                    used: usageData.usage.documents.used,
-                    limit: usageData.usage.documents.limit
-                }));
-                return;
-            }
-        } catch (err) {
-            console.error('Error checking usage:', err);
+        // Final backend check before costly AI op
+        if (limitReached) {
+             setError(t('Document limit reached', { plan: planName }));
+             return;
         }
-        
+
         setProcessing(true);
         setError(null);
         
@@ -448,7 +446,7 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
         } finally {
             setProcessing(false);
         }
-    }, [file, fields]);
+    }, [file, fields, limitReached, planName, t]);
 
     /**
      * Atualiza um campo editado
@@ -535,8 +533,31 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
                     </p>
                 </div>
 
+                {/* Limit Reach Alert with CTA */}
+                {limitReached && (
+                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-lg flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                             <div className="p-2 bg-red-100 dark:bg-red-800 rounded-full text-red-600 dark:text-red-200">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                             </div>
+                             <div>
+                                 <h4 className="font-semibold text-red-900 dark:text-red-300">{t('Plan Limit Reached')}</h4>
+                                 <p className="text-sm text-red-700 dark:text-red-400">
+                                     {t('You have reached the page limit for your plan', { plan: planName })}
+                                 </p>
+                             </div>
+                        </div>
+                        <button 
+                            onClick={handleUpgradePlan}
+                            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm"
+                        >
+                            {t('Upgrade Plan')}
+                        </button>
+                    </div>
+                )}
+
                 {/* Error Alert */}
-                {error && (
+                {error && !limitReached && (
                     <ErrorAlert 
                         error={error} 
                         onDismiss={() => setError('')}
@@ -549,26 +570,28 @@ export default function DocumentsCreate({ documentTypes = [] }: Props) {
 
                 {/* Step Content */}
                 {step === 1 && (
-                    <StepUpload
-                        file={file}
-                        documentTypes={documentTypes}
-                        selectedTypeId={selectedTypeId}
-                        newTypeName={newTypeName}
-                        analyzing={analyzing}
-                        analysisCompleted={analysisCompleted}
-                        suggestedFieldsCount={suggestedFields.length}
-                        error={error}
-                        locale={locale}
-                        checkingDuplicate={checkingDuplicate}
-                        duplicateExists={duplicateExists}
-                        modelLimitReached={modelLimitReached}
-                        onFileSelect={handleFileSelect}
-                        onTypeSelect={handleTypeSelect}
-                        onNewTypeNameChange={handleNewTypeNameChange}
-                        onAnalyzeDocument={() => file && analyzeDocument(file)}
-                        onNext={() => setStep(2)}
-                        onUpgradePlan={handleUpgradePlan}
-                    />
+                    <div className={limitReached ? 'opacity-50 pointer-events-none grayscale' : ''}>
+                        <StepUpload
+                            file={file}
+                            documentTypes={documentTypes}
+                            selectedTypeId={selectedTypeId}
+                            newTypeName={newTypeName}
+                            analyzing={analyzing}
+                            analysisCompleted={analysisCompleted}
+                            suggestedFieldsCount={suggestedFields.length}
+                            error={error}
+                            locale={locale}
+                            checkingDuplicate={checkingDuplicate}
+                            duplicateExists={duplicateExists}
+                            modelLimitReached={modelLimitReached}
+                            onFileSelect={handleFileSelect}
+                            onTypeSelect={handleTypeSelect}
+                            onNewTypeNameChange={handleNewTypeNameChange}
+                            onAnalyzeDocument={() => file && analyzeDocument(file)}
+                            onNext={() => setStep(2)}
+                            onUpgradePlan={handleUpgradePlan}
+                        />
+                    </div>
                 )}
 
                 {step === 2 && (

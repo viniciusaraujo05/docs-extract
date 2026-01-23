@@ -124,38 +124,6 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
         });
     };
 
-    const handleReprocess = () => {
-        toast((toastId) => (
-            <div className="flex flex-col gap-2">
-                <p>{t('Reprocessing the document will consume 1 credit. Continue?')}</p>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => {
-                            toast.dismiss(toastId);
-                            router.post(`/${locale}/documents/${document.id}/reprocess`, {}, {
-                                onSuccess: () => {
-                                    toast.success(t('Document sent for reprocessing!'));
-                                },
-                                onError: () => {
-                                    toast.error(t('Error reprocessing document'));
-                                },
-                            });
-                        }}
-                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    >
-                        {t('Continue')}
-                    </button>
-                    <button
-                        onClick={() => toast.dismiss(toastId)}
-                        className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-                    >
-                        {t('Cancel')}
-                    </button>
-                </div>
-            </div>
-        ));
-    };
-
     useEffect(() => {
         if (!isPolling) return;
 
@@ -313,15 +281,7 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                                             size="sm"
                                             disabled={isSaving}
                                         />
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={handleReprocess}
-                                            disabled={isSaving}
-                                        >
-                                            <RefreshCw className="mr-2 h-4 w-4" />
-                                            {t('Reprocess')}
-                                        </Button>
+            
                                     </div>
                                 )}
                             </div>
@@ -428,10 +388,6 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                             <div>
                                 <p className="font-medium text-muted-foreground">{t('Processed at')}</p>
                                 <p>{formatDate(document.processed_at)}</p>
-                            </div>
-                            <div>
-                                <p className="font-medium text-muted-foreground">{t('Credits used')}</p>
-                                <p>{document.credits_used}</p>
                             </div>
                             <div>
                                 <p className="font-medium text-muted-foreground">{t('MIME type')}</p>

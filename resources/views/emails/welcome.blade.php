@@ -2,7 +2,7 @@
 
 @section('content')
 <h1>{{ __('emails.welcome.title') }}</h1>
-<p>{{ __('emails.welcome.content') }}</p>
+<div class="greeting">{{ __('emails.welcome.content') }}</div>
 
 <div class="steps">
     <div class="step-item">{{ __('emails.welcome.step_1') }}</div>
@@ -13,7 +13,7 @@
     <a href="{{ config('app.url') . '/' . $locale . '/dashboard' }}" class="button">{{ __('emails.welcome.button') }}</a>
 </div>
 
-<p>
+<div class="signature">
     {{ __('emails.welcome.signature') }}
-</p>
+</div>
 @endsection

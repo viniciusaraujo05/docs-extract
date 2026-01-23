@@ -81,9 +81,14 @@ final class DocumentController extends Controller
         $user = $request->user();
 
         $documentTypes = $this->documentTypeRepository->getActiveForCreation($user->id);
+        $subscriptionService = app(\App\Services\SubscriptionService::class);
+        $limitReached = $subscriptionService->hasReachedLimit($user, 'documents');
+        $planName = $subscriptionService->getUserPlanName($user);
 
         return Inertia::render('documents/create', [
             'documentTypes' => $documentTypes,
+            'limitReached' => $limitReached,
+            'planName' => $planName,
         ]);
     }
 
@@ -94,11 +99,11 @@ final class DocumentController extends Controller
 
         // Check page limit before storing
         $subscriptionService = app(\App\Services\SubscriptionService::class);
-        if ($subscriptionService->hasReachedLimit($user, 'pages')) {
+        if ($subscriptionService->hasReachedLimit($user, 'documents')) {
             $planName = $subscriptionService->getUserPlanName($user);
 
             return redirect()->back()
-                ->with('error', "You've reached the page limit for your {$planName} plan. Upgrade to continue uploading documents.");
+                ->with('error', "You've reached the document limit for your {$planName} plan. Upgrade to continue uploading documents.");
         }
 
         $file = $request->file('file');

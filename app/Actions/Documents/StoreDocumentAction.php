@@ -89,6 +89,12 @@ final readonly class StoreDocumentAction
     {
         $filename = Str::uuid()->toString().'.'.$file->getClientOriginalExtension();
 
-        return $file->storeAs("documents/{$userId}", $filename, config('filesystems.default')) ?: '';
+        $path = $file->storeAs("documents/{$userId}", $filename, config('filesystems.default'));
+
+        if (! $path) {
+            throw new \RuntimeException('Failed to store document file. Please check storage configuration.');
+        }
+
+        return $path;
     }
 }

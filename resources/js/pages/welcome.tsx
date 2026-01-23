@@ -1218,13 +1218,6 @@ function Pricing({ locale, isAuthenticated, localeShort, plans }: { locale: stri
   // Use server-provided plans directly
   const plansData = plans || [];
 
-  const getCtaText = (plan: any) => {
-      // Logic from old component
-      if (plan.price === null || plan.id === 'business' || plan.id === 'enterprise') return 'Contact Sales';
-      if (parseFloat(String(plan.price).replace(/[^0-9.]/g, '') || '0') === 0) return t('Start free');
-      return t('Get Started'); // Or 'Start trial' if that was the old text
-  };
-
   return (
     <section className="py-24 bg-zinc-950 relative overflow-hidden" id="pricing">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05),transparent_70%)]" />
@@ -1422,15 +1415,6 @@ function Footer({ locale }: { locale: string }) {
           </div>
           
           <div>
-            <h3 className="font-semibold mb-4">Resources</h3>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-white transition">Documentation</a></li>
-              <li><a href="#" className="hover:text-white transition">Blog</a></li>
-              <li><a href="#" className="hover:text-white transition">Support</a></li>
-            </ul>
-          </div>
-          
-          <div>
             <h3 className="font-semibold mb-4">Legal</h3>
             <ul className="space-y-2 text-sm text-gray-400">
               <li><a href={`/${locale}/privacy`} className="hover:text-white transition">{t('Privacy Policy')}</a></li>
@@ -1440,7 +1424,6 @@ function Footer({ locale }: { locale: string }) {
                   onClick={handleOpenCookieSettings} 
                   className="hover:text-white transition text-left"
                 >
-                  {locale === 'pt' ? 'Gerir Cookies' : 'Manage Cookies'}
                 </button>
               </li>
             </ul>

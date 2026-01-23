@@ -182,7 +182,7 @@ export default function Privacy() {
                                         <li>Withdraw consent at any time</li>
                                     </ul>
                                     <p className="text-gray-300 leading-relaxed mt-4">
-                                        To exercise these rights, please contact us at privacy@docset.app
+                                        To exercise these rights, please contact us at help@docset.app
                                     </p>
                                 </Section>
 
@@ -217,8 +217,8 @@ export default function Privacy() {
                                         If you have any questions about this Privacy Policy, please contact us at:
                                     </p>
                                     <p className="text-blue-400 mt-2">
-                                        <a href="mailto:privacy@docset.app" className="hover:text-blue-300">
-                                            privacy@docset.app
+                                        <a href="mailto:help@docset.app" className="hover:text-blue-300">
+                                            help@docset.app
                                         </a>
                                     </p>
                                 </div>

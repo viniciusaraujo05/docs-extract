@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Head, router, usePage } from '@inertiajs/react';
@@ -43,6 +44,18 @@ export default function Register({ canRegister }: RegisterProps) {
     // Checkout flow states
     const [priceId, setPriceId] = useState<string | null>(null);
     const [planName, setPlanName] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Ensure fresh CSRF token on mount to prevent 419 errors
+        const refreshCsrf = async () => {
+            try {
+                await axios.get('/sanctum/csrf-cookie');
+            } catch (error) {
+                console.error('Failed to refresh CSRF token', error);
+            }
+        };
+        refreshCsrf();
+    }, []);
 
     useEffect(() => {
         if (props.auth?.user) {
