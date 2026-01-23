@@ -1281,10 +1281,12 @@ function Pricing({ locale, isAuthenticated, localeShort, plans }: { locale: stri
                 <div className="mb-8">
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-white">
-                          {plan.price === null ? '0.00' : (plan.price === 0 ? 'Free' : new Intl.NumberFormat(locale, { style: 'currency', currency: plan.currency }).format(plan.price))}
+                          {plan.price === null || plan.price === 0 || parseFloat(String(plan.price)) === 0 
+                            ? new Intl.NumberFormat(locale, { style: 'currency', currency: plan.currency || 'EUR' }).format(0) 
+                            : new Intl.NumberFormat(locale, { style: 'currency', currency: plan.currency }).format(plan.price)}
                     </span>
-                    {plan.price !== null && plan.interval && (
-                        <span className="text-zinc-500">/{t(plan.interval)}</span>
+                    {(plan.price !== null || plan.interval) && (
+                        <span className="text-zinc-500">/{t(plan.interval || 'month')}</span>
                     )}
                   </div>
                 </div>
@@ -1307,22 +1309,19 @@ function Pricing({ locale, isAuthenticated, localeShort, plans }: { locale: stri
                   onClick={() => {
                     if (isAuthenticated) {
                       router.visit(`/${localeShort}/settings/billing`);
-                    } else if (plan.price === null || plan.id === 'business' || plan.id === 'enterprise') {
-                      // Contact sales / custom plans - go to contact
-                      router.visit(`/${localeShort}/register`);
-                    } else if (plan.price === 0 || parseFloat(String(plan.price).replace(/[^0-9.]/g, '') || '0') === 0) {
-                      // Free plan - standard registration
-                      router.visit(`/${localeShort}/register`);
                     } else if (plan.price_id) {
                       // Paid plan with price_id - go to register with plan param
                       router.visit(`/${localeShort}/register?plan=${plan.price_id}&plan_name=${encodeURIComponent(plan.display_name || plan.name)}`);
                     } else {
-                      // Fallback to regular register
+                      // Free plan or fallback - standard registration
                       router.visit(`/${localeShort}/register`);
                     }
                   }}
                 >
-                  {getCtaText(plan)}
+                  {(() => {
+                      if (parseFloat(String(plan.price).replace(/[^0-9.]/g, '') || '0') === 0) return t('Start free');
+                      return t('Get Started');
+                  })()}
                 </Button>
 
               </motion.div>

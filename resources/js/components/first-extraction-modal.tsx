@@ -48,43 +48,42 @@ export function FirstExtractionModal({ locale = 'en', isOpen: controlledOpen, on
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
             <DialogContent className="sm:max-w-md border-0 p-0 overflow-hidden bg-white dark:bg-zinc-950 shadow-2xl">
-                {/* Gradient Header */}
-                <div className="relative h-32 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center overflow-hidden">
-                    <div className="absolute inset-0 bg-[url('/img/grid.svg')] opacity-20"></div>
-                    <div className="relative bg-white/10 backdrop-blur-md p-4 rounded-full border border-white/20 shadow-lg animate-in zoom-in duration-500">
-                        <FileUp className="h-8 w-8 text-white drop-shadow-md" />
+                <div className="relative h-32 bg-zinc-950 flex items-center justify-center overflow-hidden border-b border-white/5">
+                    <div className="absolute inset-0 bg-blue-500/10 radial-gradient-center"></div>
+                    <div className="relative bg-white/5 backdrop-blur-md p-4 rounded-full border border-white/10 shadow-lg animate-in zoom-in duration-500">
+                        <FileUp className="h-8 w-8 text-blue-400 drop-shadow-md" />
                     </div>
                 </div>
 
-                <div className="px-6 py-6 space-y-4">
+                <div className="px-6 py-6 space-y-4 bg-zinc-950">
                     <DialogHeader>
-                        <DialogTitle className="text-center text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400">
+                        <DialogTitle className="text-center text-2xl font-bold text-white">
                             {t('onboarding.first_extraction.title')}
                         </DialogTitle>
-                        <DialogDescription className="text-center text-base text-muted-foreground pt-2">
+                        <DialogDescription className="text-center text-base text-zinc-400 pt-2">
                              {t('onboarding.first_extraction.description')}
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="grid grid-cols-2 gap-4 py-2">
-                        <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                             <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400">
+                        <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-zinc-900 border border-white/10">
+                             <div className="p-2 rounded-full bg-blue-500/10 text-blue-400">
                                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
                              </div>
-                             <span className="text-xs font-medium text-center">{t('Upload PDF/Image')}</span>
+                             <span className="text-xs font-medium text-center text-zinc-300">{t('Upload PDF/Image')}</span>
                         </div>
-                        <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                             <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400">
+                        <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-zinc-900 border border-white/10">
+                             <div className="p-2 rounded-full bg-emerald-500/10 text-emerald-400">
                                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                              </div>
-                             <span className="text-xs font-medium text-center">{t('Extract Data')}</span>
+                             <span className="text-xs font-medium text-center text-zinc-300">{t('Extract Data')}</span>
                         </div>
                     </div>
 
-                    <DialogFooter className="flex-col !space-x-0 gap-3 pt-2">
+                    <div className="flex flex-col gap-3 pt-2">
                         <Button
                             onClick={handleStartExtraction}
-                            className="w-full bg-gradient-to-r from-indigo-600 to-pink-600 hover:from-indigo-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 h-11 text-base group"
+                            className="w-full bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20 h-11 text-base group border-0"
                         >
                             {t('onboarding.first_extraction.cta')}
                             <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -92,11 +91,11 @@ export function FirstExtractionModal({ locale = 'en', isOpen: controlledOpen, on
                         <Button
                             variant="ghost"
                             onClick={handleClose}
-                            className="w-full text-muted-foreground hover:text-foreground"
+                            className="w-full text-zinc-500 hover:text-white hover:bg-white/5"
                         >
                             {t('onboarding.first_extraction.later')}
                         </Button>
-                    </DialogFooter>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog>

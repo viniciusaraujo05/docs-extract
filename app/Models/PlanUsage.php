@@ -55,17 +55,27 @@ class PlanUsage extends Model
         $currentPeriodEnd = $currentPeriodStart->copy()->addMonth()->subSecond();
         $billingPeriod = $currentPeriodStart->format('Y-m');
 
-        return self::firstOrCreate(
-            [
-                'user_id' => $user->id,
-                'billing_period' => $billingPeriod,
-            ],
-            [
-                'subscription_id' => $subscription?->stripe_id,
-                'period_start' => $currentPeriodStart,
-                'period_end' => $currentPeriodEnd,
-            ]
-        );
+        try {
+            return self::firstOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'billing_period' => $billingPeriod,
+                ],
+                [
+                    'subscription_id' => $subscription?->stripe_id,
+                    'period_start' => $currentPeriodStart,
+                    'period_end' => $currentPeriodEnd,
+                ]
+            );
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Handle race condition: if another request created it just now
+            if ($e->getCode() === '23000') {
+                return self::where('user_id', $user->id)
+                    ->where('billing_period', $billingPeriod)
+                    ->firstOrFail();
+            }
+            throw $e;
+        }
     }
 
     /**
