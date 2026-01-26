@@ -98,7 +98,7 @@ final readonly class StoreBatchDocumentsAction
     private function storeTemporarily(UploadedFile $file, int $userId, int $batchId, int $index): string
     {
         $filename = "batch_{$batchId}_{$index}_" . $file->getClientOriginalName();
-        $path = $file->storeAs("temp/batches/{$userId}", $filename, 'local');
+        $path = $file->storeAs("temp/batches/{$userId}", $filename, config('filesystems.default'));
 
         if (!$path) {
             throw new \RuntimeException('Failed to store temporary file. Please check storage configuration.');

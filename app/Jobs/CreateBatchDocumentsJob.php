@@ -82,22 +82,25 @@ class CreateBatchDocumentsJob implements ShouldQueue
      */
     private function createDocument(string $tempPath, string $originalFilenameFromAction, int $index): void
     {
-        // Get file info from LOCAL disk
+        // Get file info from DEFAULT disk
         $originalFilename = $originalFilenameFromAction; // Use the passed original name
-        $mimeType = Storage::disk('local')->mimeType($tempPath);
-        $fileSize = Storage::disk('local')->size($tempPath);
+        $disk = config('filesystems.default');
+        
+        $mimeType = Storage::disk($disk)->mimeType($tempPath);
+        $fileSize = Storage::disk($disk)->size($tempPath);
 
         // Generate unique filename
         $filename = $this->user->id . '_' . time() . '_' . $index . '_' . $originalFilename;
         $finalPath = 'documents/' . $filename;
 
-        // Move file to final location (Cross-disk transfer: Local -> R2/Cloud)
-        $stream = Storage::disk('local')->readStream($tempPath);
-        Storage::writeStream($finalPath, $stream);
-        if (is_resource($stream)) {
-            fclose($stream);
+        // Move file to final location on the SAME disk
+        // Since we are using the default disk for both temp and final, we can just move it.
+        if (Storage::disk($disk)->exists($finalPath)) {
+            // Edge case: collision? Should be rare with timestamp and user ID.
+            throw new \RuntimeException("File already exists at destination: {$finalPath}");
         }
-        Storage::disk('local')->delete($tempPath);
+        
+        Storage::disk($disk)->move($tempPath, $finalPath);
 
         // Determine document type (must match enum: invoice, receipt, custom)
         // We load the relationship to ensure we can access the type name
@@ -150,10 +153,11 @@ class CreateBatchDocumentsJob implements ShouldQueue
 
         // Clean up temporary files
         // Clean up temporary files
+        // Clean up temporary files
         foreach ($this->filesPaths as $fileInfo) {
             $filePath = is_array($fileInfo) ? $fileInfo['path'] : $fileInfo;
-            if (Storage::disk('local')->exists($filePath)) {
-                Storage::disk('local')->delete($filePath);
+            if (Storage::disk(config('filesystems.default'))->exists($filePath)) {
+                Storage::disk(config('filesystems.default'))->delete($filePath);
             }
         }
     }
