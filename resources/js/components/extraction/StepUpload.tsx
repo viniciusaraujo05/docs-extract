@@ -42,6 +42,7 @@ interface StepUploadProps {
     locale: string;
     checkingDuplicate?: boolean;
     duplicateExists?: boolean;
+    duplicateFiles?: string[]; // NEW: List of duplicate filenames
     modelLimitReached?: boolean;
     isFirstDocument?: boolean;
     onFileSelect: (file: File | null) => void;
@@ -74,6 +75,7 @@ export function StepUpload({
     locale,
     checkingDuplicate = false,
     duplicateExists = false,
+    duplicateFiles = [],
     modelLimitReached = false,
     isFirstDocument = false,
     onFileSelect,
@@ -498,37 +500,53 @@ export function StepUpload({
                                 </Button>
                             </div>
                             <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg border p-3">
-                                {files.map((f, index) => (
-                                    <div
-                                        key={index}
-                                        className="flex items-center justify-between rounded-md border bg-card p-3 transition-colors hover:bg-muted/50"
-                                    >
-                                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                                            <div className="flex-shrink-0">
-                                                {f.type.includes('pdf') ? (
-                                                    <FileText className="h-5 w-5 text-red-500" />
-                                                ) : (
-                                                    <ImageIcon className="h-5 w-5 text-blue-500" />
-                                                )}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium truncate">{f.name}</p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {formatFileSize(f.size)}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => handleRemoveFile(index)}
-                                            className="flex-shrink-0"
+                                {files.map((f, index) => {
+                                    const isDuplicate = duplicateFiles.some(d => d.toLowerCase() === f.name.toLowerCase());
+                                    return (
+                                        <div
+                                            key={index}
+                                            className={cn(
+                                                "flex items-center justify-between rounded-md border p-3 transition-colors",
+                                                isDuplicate 
+                                                    ? "bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800" 
+                                                    : "bg-card hover:bg-muted/50"
+                                            )}
                                         >
-                                            <X className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                ))}
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <div className="flex-shrink-0">
+                                                    {f.type.includes('pdf') ? (
+                                                        <FileText className="h-5 w-5 text-red-500" />
+                                                    ) : (
+                                                        <ImageIcon className="h-5 w-5 text-blue-500" />
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-sm font-medium truncate">{f.name}</p>
+                                                        {isDuplicate && (
+                                                            <Badge variant="outline" className="h-5 gap-1 border-amber-500 text-amber-600 dark:text-amber-400 bg-transparent text-[10px] px-1.5">
+                                                                <Info className="h-3 w-3" />
+                                                                {t('Duplicate')}
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {formatFileSize(f.size)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleRemoveFile(index)}
+                                                className="flex-shrink-0"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
@@ -618,7 +636,9 @@ export function StepUpload({
                             (batchMode && files.length === 0) || 
                             analyzing || 
                             checkingDuplicate || 
-                            duplicateExists || 
+                            duplicateExists ||
+                            (batchMode && duplicateFiles.length > 0) || 
+                            !hasTypeSelected || 
                             !hasTypeSelected || 
                             (isNewType && !analysisCompleted)
                         }

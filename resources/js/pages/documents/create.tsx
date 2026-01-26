@@ -101,6 +101,7 @@ export default function DocumentsCreate({
     const [analysisCompleted, setAnalysisCompleted] = useState(false);
     const [modelLimitReached, setModelLimitReached] = useState(initialModelLimitReached);
     const [duplicateExists, setDuplicateExists] = useState(false);
+    const [duplicateFiles, setDuplicateFiles] = useState<string[]>([]);
 
     /**
      * Check model limit
@@ -587,9 +588,44 @@ export default function DocumentsCreate({
     /**
      * Handle multiple files selection
      */
-    const handleFilesSelect = useCallback((selectedFiles: File[]) => {
+    /**
+     * Handle multiple files selection with duplicate checking
+     */
+    const handleFilesSelect = useCallback(async (selectedFiles: File[]) => {
         setFiles(selectedFiles);
-    }, []);
+        setDuplicateFiles([]);
+        setError(null);
+        
+        if (selectedFiles.length === 0) return;
+
+        setCheckingDuplicate(true);
+        try {
+            const params = new URLSearchParams();
+            selectedFiles.forEach(f => params.append('names[]', f.name));
+            
+            const response = await fetch(`/api/documents/check-name?${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                },
+            });
+            
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const data = await response.json();
+            if (data.duplicates && Array.isArray(data.duplicates)) {
+                setDuplicateFiles(data.duplicates);
+                if (data.duplicates.length > 0) {
+                     setError(t('Some files already exist. Please remove them to continue.'));
+                }
+            }
+        } catch (error) {
+            console.error('Error checking duplicates:', error);
+        } finally {
+            setCheckingDuplicate(false);
+        }
+    }, [t]);
 
     return (
         <AppLayout breadcrumbs={BREADCRUMBS}>
@@ -671,6 +707,7 @@ export default function DocumentsCreate({
                             isFirstDocument={isFirstDocument}
                             onFileSelect={handleFileSelect}
                             onFilesSelect={handleFilesSelect}
+                            duplicateFiles={duplicateFiles}
                             onBatchModeToggle={handleBatchModeToggle}
                             onTypeSelect={handleTypeSelect}
                             onNewTypeNameChange={handleNewTypeNameChange}

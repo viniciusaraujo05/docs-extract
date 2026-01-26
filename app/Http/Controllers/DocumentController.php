@@ -425,18 +425,39 @@ final class DocumentController extends Controller
     /**
      * Verifica se já existe documento com o nome fornecido.
      */
+    /**
+     * Verifica se já existe documento com o nome fornecido.
+     * Suporta verificação em lote via parametro 'names[]'.
+     */
     public function checkName(Request $request): JsonResponse
     {
+        /** @var User $user */
+        $user = $request->user();
+
+        // Batch check
+        if ($request->has('names')) {
+            $names = $request->query('names');
+            if (!is_array($names)) {
+                $names = [$names];
+            }
+            
+            $duplicates = $this->documentRepository->findExistingNames($names, $user->id);
+            
+            return response()->json([
+                'structure' => 'batch',
+                'duplicates' => $duplicates,
+            ]);
+        }
+
+        // Single check (Legacy/Standard)
         $filename = (string) $request->query('name', '');
         $displayName = $request->query('display_name');
         $displayName ??= $filename !== '' ? pathinfo($filename, PATHINFO_FILENAME) : '';
 
-        /** @var User $user */
-        $user = $request->user();
-
         $exists = $this->documentRepository->existsByNameForUser($filename, $user->id, $displayName);
 
         return response()->json([
+            'structure' => 'single',
             'exists' => $exists,
             'name' => $filename,
             'display_name_checked' => $displayName,

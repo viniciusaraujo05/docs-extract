@@ -190,4 +190,61 @@ final readonly class DocumentRepository
             'paginator' => $paginator,
         ];
     }
+    /**
+     * Verifica quais nomes de uma lista já existem para o usuário.
+     * Retorna array com os nomes que já existem (conflitam).
+     *
+     * @param string[] $filenames Nomes originais dos arquivos
+     * @return string[] Nomes da lista de entrada que possuem duplicatas
+     */
+    public function findExistingNames(array $filenames, int $userId): array
+    {
+        if (empty($filenames)) {
+            return [];
+        }
+
+        // Normaliza entradas para comparação
+        $normalizedMap = []; // 'normalized_name' => 'original_input_name'
+        $normalizedBaseMap = []; // 'normalized_base_name' => 'original_input_name'
+        
+        foreach ($filenames as $name) {
+            $lower = mb_strtolower($name);
+            $normalizedMap[$lower] = $name;
+            
+            $base = mb_strtolower(pathinfo($name, PATHINFO_FILENAME));
+            $normalizedBaseMap[$base] = $name;
+        }
+        
+        $searchNames = array_keys($normalizedMap);
+        $searchBaseNames = array_keys($normalizedBaseMap);
+
+        $query = Document::query()
+            ->select(['original_filename', 'name'])
+            ->where('user_id', $userId)
+            ->where(function ($q) use ($searchNames, $searchBaseNames) {
+                 $q->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(original_filename)'), $searchNames)
+                   ->orWhereIn(\Illuminate\Support\Facades\DB::raw('LOWER(name)'), $searchBaseNames);
+            });
+            
+        $existing = $query->get();
+        
+        $duplicates = [];
+        
+        foreach ($existing as $doc) {
+            // Verifica match com original_filename
+            $docOriginalLower = mb_strtolower($doc->original_filename ?? '');
+            if (isset($normalizedMap[$docOriginalLower])) {
+                $duplicates[] = $normalizedMap[$docOriginalLower];
+                continue; // Encontrou match para este input, vai para próximo doc
+            }
+            
+            // Verifica match com name
+            $docNameLower = mb_strtolower($doc->name);
+            if (isset($normalizedBaseMap[$docNameLower])) {
+                $duplicates[] = $normalizedBaseMap[$docNameLower];
+            }
+        }
+        
+        return array_values(array_unique($duplicates));
+    }
 }

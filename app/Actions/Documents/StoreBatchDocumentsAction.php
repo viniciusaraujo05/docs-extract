@@ -60,14 +60,10 @@ final readonly class StoreBatchDocumentsAction
         $documentRepository = app(\App\Repositories\DocumentRepository::class);
 
         foreach ($files as $index => $file) {
-             // Check if document already exists
+            // Check if document already exists
             if ($documentRepository->existsByNameForUser($file->getClientOriginalName(), $user->id)) {
-                // User requested error feedback similar to single upload.
-                // Single upload usually prompts for overwrite or fails.
-                // In batch, we will fail the request so the user knows which file is duplicated.
-                throw \Illuminate\Validation\ValidationException::withMessages([
-                    'files' => ["O arquivo '{$file->getClientOriginalName()}' já existe."],
-                ]);
+                // Skip duplicate file but continue with others
+                continue;
             }
 
             $tempPath = $this->storeTemporarily($file, $user->id, $batch->id, $index);
