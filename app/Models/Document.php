@@ -22,6 +22,7 @@ class Document extends Model
         'user_id',
         'organization_id',
         'document_type_id',
+        'batch_id',
         'name',
         'original_filename',
         'file_path',
@@ -54,6 +55,14 @@ class Document extends Model
     public function documentType(): BelongsTo
     {
         return $this->belongsTo(DocumentType::class);
+    }
+
+    /**
+     * Get the batch this document belongs to.
+     */
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(DocumentBatch::class);
     }
 
     public function isPending(): bool

@@ -10,6 +10,9 @@ import { DocumentPreview } from './DocumentPreview';
 import { ArrayFieldEditor } from './ArrayFieldEditor';
 import { 
     ArrowLeft, 
+    ArrowRight, // NEW
+    ChevronLeft, // NEW
+    ChevronRight, // NEW
     Loader2, 
     Plus, 
     Sparkles, 
@@ -21,11 +24,13 @@ import {
     Pencil,
     Check
 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface StepFieldsProps {
     file: File | null;
+    files?: File[]; // NEW
+    batchMode?: boolean; // NEW
     filePreview: string | null;
     fields: SchemaField[];
     suggestedFields: SchemaField[];
@@ -34,6 +39,7 @@ interface StepFieldsProps {
     newTypeName: string;
     analyzing: boolean;
     processing: boolean;
+    isFirstDocument?: boolean;
     onAddField: (field: SchemaField) => void;
     onUpdateField: (field: SchemaField) => void;
     onRemoveField: (name: string) => void;
@@ -44,6 +50,8 @@ interface StepFieldsProps {
 
 export function StepFields({
     file,
+    files = [], // NEW
+    batchMode = false, // NEW
     filePreview,
     fields,
     suggestedFields,
@@ -52,6 +60,7 @@ export function StepFields({
     newTypeName,
     analyzing,
     processing,
+    isFirstDocument = false,
     onAddField,
     onUpdateField,
     onRemoveField,
@@ -66,6 +75,38 @@ export function StepFields({
     const [editingArrayField, setEditingArrayField] = useState<SchemaField | null>(null);
     const [editingLabel, setEditingLabel] = useState<string | null>(null);
     const [tempLabel, setTempLabel] = useState('');
+    
+    // Batch Mode Navigation State
+    const [currentFileIndex, setCurrentFileIndex] = useState(0);
+
+    // Determines current file to show
+    const currentFile = batchMode && files.length > 0 ? files[currentFileIndex] : file;
+    // We need to generate a preview URL for the current batch file if in batch mode
+    // Note: In a real app we should manage these URLs carefully to revoke them
+    const [batchPreviewUrl, setBatchPreviewUrl] = useState<string | null>(null);
+
+    // Update preview when index changes in batch mode
+    useEffect(() => {
+        if (batchMode && files.length > 0) {
+            const url = URL.createObjectURL(files[currentFileIndex]);
+            setBatchPreviewUrl(url);
+            return () => URL.revokeObjectURL(url);
+        }
+    }, [batchMode, files, currentFileIndex]);
+
+    const activePreview = batchMode ? batchPreviewUrl : filePreview;
+
+    const handleNextFile = () => {
+        if (currentFileIndex < files.length - 1) {
+            setCurrentFileIndex(prev => prev + 1);
+        }
+    };
+
+    const handlePrevFile = () => {
+        if (currentFileIndex > 0) {
+            setCurrentFileIndex(prev => prev - 1);
+        }
+    };
 
     const availableSuggested = suggestedFields.filter(
         preset => !fields.some(f => f.name === preset.name)
@@ -169,6 +210,17 @@ export function StepFields({
                                             </Badge>
                                         </Button>
                                     ))}
+                                </div>
+                            )}
+                            {/* Tutorial hint for AI suggestions */}
+                            {isFirstDocument && availableSuggested.length > 0 && (
+                                <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm dark:border-blue-800 dark:bg-blue-950/30 animate-in fade-in slide-in-from-top-1 duration-500">
+                                    <div className="flex items-start gap-2">
+                                        <Sparkles className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                                        <span className="text-blue-700 dark:text-blue-300">
+                                            {t('step_fields_ai_hint')}
+                                        </span>
+                                    </div>
                                 </div>
                             )}
                             <Separator />
@@ -287,6 +339,12 @@ export function StepFields({
                     {/* Add Custom Field */}
                     <div className="space-y-2">
                         <Label className="text-sm">{t('Add Custom Field')}</Label>
+                        {/* Tutorial hint for custom fields */}
+                        {isFirstDocument && (
+                            <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-top-1 duration-500">
+                                💡 {t('step_fields_custom_hint')}
+                            </p>
+                        )}
                         <div className="space-y-2">
                             <div className="grid grid-cols-2 gap-2">
                                 <Input
@@ -344,15 +402,52 @@ export function StepFields({
                 </CardContent>
             </Card>
 
-            {/* Preview */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('Document Preview')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <DocumentPreview file={file} filePreview={filePreview} />
-                </CardContent>
-            </Card>
+            {/* Left Column - Preview */}
+            <div className="flex flex-col gap-4 lg:col-span-1">
+                {/* Batch Mode Navigation Header */}
+                {batchMode && files.length > 0 && (
+                    <div className="flex items-center justify-between rounded-lg border bg-muted/30 p-2">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handlePrevFile}
+                            disabled={currentFileIndex === 0}
+                            className="h-8 w-8"
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <div className="flex flex-col items-center">
+                            <span className="text-sm font-medium">
+                                {t('Document')} {currentFileIndex + 1} {t('of')} {files.length}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground truncate max-w-[200px]">
+                                {files[currentFileIndex]?.name}
+                            </span>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleNextFile}
+                            disabled={currentFileIndex === files.length - 1}
+                            className="h-8 w-8"
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
+
+                <Card className="flex-1 min-h-[500px] flex flex-col">
+                    <CardHeader className="py-3">
+                        <CardTitle className="text-sm font-medium">{t('Document Preview')}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 p-0 overflow-hidden">
+                        <DocumentPreview 
+                            file={currentFile} 
+                            filePreview={activePreview}
+                        />
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* Actions - Full Width */}
             <div className="lg:col-span-2 flex justify-between">

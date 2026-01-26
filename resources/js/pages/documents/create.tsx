@@ -34,8 +34,11 @@ function getFilePreviewUrl(file: File | null): string | null {
 
 interface Props {
     documentTypes?: DocumentType[];
+    hasTemplates?: boolean;  // NEW
     limitReached?: boolean;
     planName?: string;
+    isFirstDocument?: boolean;
+    modelLimitReached?: boolean;  // NEW
 }
 
 /**
@@ -44,7 +47,14 @@ interface Props {
  * Step 2: Definição de campos a extrair
  * Step 3: Revisão e salvamento dos dados
  */
-export default function DocumentsCreate({ documentTypes = [], limitReached = false, planName = 'Free' }: Props) {
+export default function DocumentsCreate({ 
+    documentTypes = [], 
+    hasTemplates = false,
+    limitReached = false, 
+    planName = 'Free', 
+    isFirstDocument = false,
+    modelLimitReached: initialModelLimitReached = false 
+}: Props) {
     const { t } = useTranslation();
     const [locale, setLocale] = useState('pt');
 
@@ -71,6 +81,8 @@ export default function DocumentsCreate({ documentTypes = [], limitReached = fal
     // Estado do wizard
     const [step, setStep] = useState(1);
     const [file, setFile] = useState<File | null>(null);
+    const [files, setFiles] = useState<File[]>([]);  // NEW: for batch mode
+    const [batchMode, setBatchMode] = useState(false);  // NEW: toggle mode
     const [filePreview, setFilePreview] = useState<string | null>(null);
     const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null);
     
@@ -87,7 +99,7 @@ export default function DocumentsCreate({ documentTypes = [], limitReached = fal
     const [checkingDuplicate, setCheckingDuplicate] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [analysisCompleted, setAnalysisCompleted] = useState(false);
-    const [modelLimitReached, setModelLimitReached] = useState(false);
+    const [modelLimitReached, setModelLimitReached] = useState(initialModelLimitReached);
     const [duplicateExists, setDuplicateExists] = useState(false);
 
     /**
@@ -376,6 +388,25 @@ export default function DocumentsCreate({ documentTypes = [], limitReached = fal
      * Extrai dados do documento usando IA
      */
     const handleExtract = useCallback(async () => {
+        // In batch mode, skip sample extraction and go directly to processing
+        if (batchMode) {
+            if (files.length === 0) return;
+            
+            // Validate basic requirements before sending
+            if (!selectedTypeId && !newTypeName) {
+                setError(t('Please select or create a document template'));
+                return;
+            }
+            if (fields.length === 0) {
+                setError(t('Please define at least one field'));
+                return;
+            }
+
+            // Immediately start batch processing
+            await checkAndSave();
+            return;
+        }
+
         if (!file || fields.length === 0) return;
         
         // Final backend check before costly AI op
@@ -446,7 +477,7 @@ export default function DocumentsCreate({ documentTypes = [], limitReached = fal
         } finally {
             setProcessing(false);
         }
-    }, [file, fields, limitReached, planName, t]);
+    }, [file, files, batchMode, fields, limitReached, planName, t]);
 
     /**
      * Atualiza um campo editado
@@ -459,53 +490,72 @@ export default function DocumentsCreate({ documentTypes = [], limitReached = fal
      * Salva o documento
      */
     const checkAndSave = useCallback(async (forceOverwrite = false) => {
-        if (!file) return;
+        if ((!batchMode && !file) || (batchMode && files.length === 0)) return;
+        
         if (!selectedTypeId && !newTypeName) {
-            toast.error('Selecione ou crie um modelo de documento');
+            toast.error(t(batchMode ? 'Batch Template Requirement' : 'Please select or create a document template'));
             return;
         }
 
         setSaving(true);
         
         const formData = new FormData();
-        formData.append('file', file);
+        
+        if (batchMode) {
+            files.forEach(f => formData.append('files[]', f));
+            // Batch request expects 'fields' directly, not inside schema object
+            formData.append('fields', JSON.stringify(fields));
+        } else {
+            if (file) formData.append('file', file);
+            // Single request expects 'schema' with fields inside
+            formData.append('schema', JSON.stringify({ fields }));
+            formData.append('extracted_data', JSON.stringify(extractedData));
+        }
+        
+        if (selectedTypeId) {
+            formData.append('document_type_id', selectedTypeId.toString());
+        }
+        
+        if (newTypeName) {
+            formData.append('new_type_name', newTypeName);
+        }
+
         formData.append('type', selectedTypeId ? 'predefined' : 'new_type');
-        formData.append('document_type_id', selectedTypeId?.toString() ?? '');
-        formData.append('new_type_name', newTypeName);
-        formData.append('schema', JSON.stringify({ fields }));
-        formData.append('extracted_data', JSON.stringify(extractedData));
         formData.append('force_overwrite', forceOverwrite ? '1' : '0');
         
         const locale = localStorage.getItem('selected-locale') || 'pt';
-        router.post(`/${locale}/documents`, formData, { 
+        const endpoint = batchMode ? `/${locale}/documents/batch` : `/${locale}/documents`;
+        
+        router.post(endpoint, formData, { 
             forceFormData: true,
             onSuccess: (page) => {
-                toast.success('Documento salvo com sucesso!');
+                const message = batchMode 
+                    ? t('Documents uploaded for processing!') 
+                    : t('Document saved successfully!');
+                toast.success(message);
                 setSaving(false);
-                // Extrai o ID do documento da resposta
-                const documentId = (page.props as any).document?.id;
-                if (documentId) {
-                    // Redireciona para a página do documento criado
-                    router.visit(`/${locale}/documents/${documentId}`);
+                
+                if (batchMode) {
+                    // Backend redirects to batch progress page automatically
                 } else {
-                    // Fallback para lista se não conseguir obter o ID
-                    router.visit(`/${locale}/documents`);
+                    // Extrai o ID do documento da resposta
+                    const documentId = (page.props as any).document?.id;
+                    if (documentId) {
+                        // Redireciona para a página do documento criado
+                        router.visit(`/${locale}/documents/${documentId}`);
+                    } else {
+                        // Fallback para lista se não conseguir obter o ID
+                        router.visit(`/${locale}/documents`);
+                    }
                 }
             },
             onError: (errors) => {
-                console.error('Save errors:', errors);
-                // Check if it's a limit error
-                if (errors.error && errors.error.includes('limit reached')) {
-                    toast.error(errors.error);
-                } else if (errors.file) {
-                    toast.error(errors.file);
-                } else {
-                    toast.error('Erro ao salvar documento. Tente novamente.');
-                }
                 setSaving(false);
-            },
+                console.error('Save error:', errors);
+                toast.error(t('Error saving document'));
+            }
         });
-    }, [file, selectedTypeId, newTypeName, fields, extractedData, locale]);
+    }, [file, files, batchMode, selectedTypeId, newTypeName, fields, extractedData, t]);
 
     /**
      * Descarta e volta à lista
@@ -521,16 +571,47 @@ export default function DocumentsCreate({ documentTypes = [], limitReached = fal
         router.visit(`/${locale}/settings/billing`);
     }, [locale]);
 
+    /**
+     * Toggle batch mode
+     */
+    const handleBatchModeToggle = useCallback(() => {
+        setBatchMode(prev => !prev);
+        // Clear files when switching modes
+        if (batchMode) {
+            setFiles([]);
+        } else {
+            setFile(null);
+        }
+    }, [batchMode]);
+
+    /**
+     * Handle multiple files selection
+     */
+    const handleFilesSelect = useCallback((selectedFiles: File[]) => {
+        setFiles(selectedFiles);
+    }, []);
+
     return (
         <AppLayout breadcrumbs={BREADCRUMBS}>
             <Head title={t('New Document')} />
             <div className="flex h-full flex-1 flex-col gap-6 p-4">
                 {/* Header */}
-                <div className="text-center">
+                <div className="text-center space-y-2">
                     <h1 className="text-2xl font-bold">{t('Extract Document Data')}</h1>
                     <p className="text-muted-foreground">
                         {t('Upload, define fields and let AI extract the data')}
                     </p>
+                    
+                    {/* Batch Volume Indicator */}
+                    {batchMode && files.length > 0 && (
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium animate-in fade-in-50 zoom-in-95 duration-300">
+                            <span className="relative flex h-2 w-2">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                            </span>
+                            {files.length} {files.length === 1 ? t('Document') : t('Documents')} {t('to analyze')}
+                        </div>
+                    )}
                 </div>
 
                 {/* Limit Reach Alert with CTA */}
@@ -573,6 +654,9 @@ export default function DocumentsCreate({ documentTypes = [], limitReached = fal
                     <div className={limitReached ? 'opacity-50 pointer-events-none grayscale' : ''}>
                         <StepUpload
                             file={file}
+                            files={files}
+                            batchMode={batchMode}
+                            hasTemplates={hasTemplates}
                             documentTypes={documentTypes}
                             selectedTypeId={selectedTypeId}
                             newTypeName={newTypeName}
@@ -584,7 +668,10 @@ export default function DocumentsCreate({ documentTypes = [], limitReached = fal
                             checkingDuplicate={checkingDuplicate}
                             duplicateExists={duplicateExists}
                             modelLimitReached={modelLimitReached}
+                            isFirstDocument={isFirstDocument}
                             onFileSelect={handleFileSelect}
+                            onFilesSelect={handleFilesSelect}
+                            onBatchModeToggle={handleBatchModeToggle}
                             onTypeSelect={handleTypeSelect}
                             onNewTypeNameChange={handleNewTypeNameChange}
                             onAnalyzeDocument={() => file && analyzeDocument(file)}
@@ -597,6 +684,8 @@ export default function DocumentsCreate({ documentTypes = [], limitReached = fal
                 {step === 2 && (
                     <StepFields
                         file={file}
+                        files={files}
+                        batchMode={batchMode}
                         filePreview={filePreview}
                         fields={fields}
                         suggestedFields={suggestedFields}
@@ -605,6 +694,7 @@ export default function DocumentsCreate({ documentTypes = [], limitReached = fal
                         newTypeName={newTypeName}
                         analyzing={analyzing}
                         processing={processing}
+                        isFirstDocument={isFirstDocument}
                         onAddField={handleAddField}
                         onUpdateField={handleUpdateFieldStructure}
                         onRemoveField={handleRemoveField}
@@ -617,6 +707,8 @@ export default function DocumentsCreate({ documentTypes = [], limitReached = fal
                 {step === 3 && (
                     <StepReview
                         file={file}
+                        files={files}
+                        batchMode={batchMode}
                         filePreview={filePreview}
                         fields={fields}
                         extractedData={extractedData}
@@ -624,6 +716,7 @@ export default function DocumentsCreate({ documentTypes = [], limitReached = fal
                         selectedTypeId={selectedTypeId}
                         newTypeName={newTypeName}
                         isSaving={saving}
+                        isFirstDocument={isFirstDocument}
                         onUpdateField={handleUpdateField}
                         onRemoveField={handleRemoveField}
                         onRenameField={handleRenameField}

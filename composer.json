@@ -17,12 +17,14 @@
         "laravel/fortify": "^1.30",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
+        "laravel/socialite": "^5.24",
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.9",
         "league/flysystem-aws-s3-v3": "^3.0",
         "php-open-source-saver/jwt-auth": "^2.8",
         "predis/predis": "^3.3",
         "resend/resend-laravel": "^1.1",
+        "sentry/sentry-laravel": "^4.20",
         "smalot/pdfparser": "^2.12"
     },
     "require-dev": {

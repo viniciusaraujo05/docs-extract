@@ -20,6 +20,8 @@ import { useTranslation } from 'react-i18next';
 
 interface StepReviewProps {
     file: File | null;
+    files?: File[]; // NEW
+    batchMode?: boolean; // NEW
     filePreview: string | null;
     fields: SchemaField[];
     extractedData: Record<string, unknown>;
@@ -27,6 +29,7 @@ interface StepReviewProps {
     selectedTypeId: number | null;
     newTypeName: string;
     isSaving?: boolean;
+    isFirstDocument?: boolean;
     onUpdateField: (fieldName: string, value: unknown) => void;
     onRemoveField: (fieldName: string) => void;
     onRenameField: (oldName: string, newLabel: string) => void;
@@ -48,6 +51,7 @@ export function StepReview({
     selectedTypeId,
     newTypeName,
     isSaving = false,
+    isFirstDocument = false,
     onUpdateField,
     onRemoveField,
     onRenameField,
@@ -90,6 +94,17 @@ export function StepReview({
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                    {/* Tutorial hint for review */}
+                    {isFirstDocument && (
+                        <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm dark:border-blue-800 dark:bg-blue-950/30 animate-in fade-in slide-in-from-top-1 duration-500">
+                            <div className="flex items-start gap-2">
+                                <Check className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                                <span className="text-blue-700 dark:text-blue-300">
+                                    {t('step_review_hint')}
+                                </span>
+                            </div>
+                        </div>
+                    )}
                     {fields.map((field) => (
                         <div key={field.name} className="space-y-1.5 animate-in fade-in-50 group">
                             <div className="flex items-center justify-between">

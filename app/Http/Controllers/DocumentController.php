@@ -39,6 +39,8 @@ final class DocumentController extends Controller
         private readonly StoreDocumentAction $storeDocumentAction,
         private readonly DeleteDocumentAction $deleteDocumentAction,
         private readonly ReprocessDocumentAction $reprocessDocumentAction,
+        private readonly \App\Repositories\DocumentBatchRepository $batchRepository,
+        private readonly \App\Actions\Documents\StoreBatchDocumentsAction $storeBatchDocumentsAction,
     ) {}
 
     public function index(Request $request): Response
@@ -49,6 +51,8 @@ final class DocumentController extends Controller
         $result = $this->documentRepository->getPaginatedForUser($user, self::ITEMS_PER_PAGE);
         $paginator = $result['paginator'];
         $documentTypes = $this->documentTypeRepository->getAllForUser($user->id);
+
+        $recentBatches = $this->batchRepository->getRecentBatches($user, 3);
 
         return Inertia::render('documents/index', [
             'documents' => [
@@ -72,6 +76,13 @@ final class DocumentController extends Controller
                 'total' => $paginator->total(),
             ],
             'documentTypes' => $documentTypes,
+            'recentBatches' => $recentBatches->map(fn($b) => [
+                'id' => $b->id,
+                'status' => $b->status,
+                'template_name' => $b->template_name,
+                'progress' => $b->getProgress(),
+                'created_at' => $b->created_at->toISOString(),
+            ])->toArray(),
         ]);
     }
 
@@ -81,14 +92,26 @@ final class DocumentController extends Controller
         $user = $request->user();
 
         $documentTypes = $this->documentTypeRepository->getActiveForCreation($user->id);
+        $hasTemplates = count($documentTypes) > 0;
+
+        // Check usage limits
         $subscriptionService = app(\App\Services\SubscriptionService::class);
         $limitReached = $subscriptionService->hasReachedLimit($user, 'documents');
         $planName = $subscriptionService->getUserPlanName($user);
 
+        // Check model limit  
+        $modelLimitReached = $subscriptionService->hasReachedLimit($user, 'models');
+
+        // Check if this is the first document
+        $isFirstDocument = $user->documents()->doesntExist();
+
         return Inertia::render('documents/create', [
             'documentTypes' => $documentTypes,
+            'hasTemplates' => $hasTemplates,
             'limitReached' => $limitReached,
             'planName' => $planName,
+            'modelLimitReached' => $modelLimitReached,
+            'isFirstDocument' => $isFirstDocument,
         ]);
     }
 
@@ -131,15 +154,32 @@ final class DocumentController extends Controller
             ->with('success', $message);
     }
 
-    public function show(string $locale, string $document): Response
+    public function show(Request $request, string $locale, string $document)
     {
         $documentModel = $this->documentRepository->findById($document);
 
         $this->authorize('view', $documentModel);
 
-        $previewUrl = Storage::disk(config('filesystems.default'))->exists($documentModel->file_path)
+        $diskName = $documentModel->storage_disk ?? config('filesystems.default');
+        
+        \Illuminate\Support\Facades\Log::info('Checking Preview', [
+            'doc_id' => $documentModel->id,
+            'path' => $documentModel->file_path,
+            'disk_db' => $documentModel->storage_disk,
+            'disk_used' => $diskName,
+            'exists' => Storage::disk($diskName)->exists($documentModel->file_path),
+        ]);
+
+        $previewUrl = Storage::disk($diskName)->exists($documentModel->file_path)
             ? route('documents.preview', ['locale' => app()->getLocale(), 'document' => $documentModel->id])
             : null;
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'document' => $documentModel->load('user'),
+                'previewUrl' => $previewUrl,
+            ]);
+        }
 
         return Inertia::render('documents/show', [
             'document' => $documentModel->load('user'),
@@ -254,6 +294,132 @@ final class DocumentController extends Controller
         return redirect()
             ->route('documents.index', ['locale' => app()->getLocale()])
             ->with('success', 'Documento eliminado com sucesso.');
+    }
+
+    /**
+     * Store batch documents.
+     */
+    public function batchStore(\App\Http\Requests\StoreBatchDocumentRequest $request): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        // Check if user has reached document limit
+        $subscriptionService = app(\App\Services\SubscriptionService::class);
+        if ($subscriptionService->hasReachedLimit($user, 'documents')) {
+            $planName = $subscriptionService->getUserPlanName($user);
+            return redirect()->back()
+                ->with('error', "You've reached the document limit for your {$planName} plan. Upgrade to continue uploading documents.");
+        }
+
+        $files = $request->file('files');
+        $documentTypeId = $request->input('document_type_id');
+        $documentTypeId = $documentTypeId ? (int) $documentTypeId : null;
+        $newTypeName = $request->input('new_type_name');
+        $fields = $request->input('fields');
+
+        $schema = ['fields' => $fields];
+
+        $batch = $this->storeBatchDocumentsAction->execute(
+            user: $user,
+            files: $files,
+            documentTypeId: $documentTypeId,
+            newTypeName: $newTypeName,
+            schema: $schema,
+        );
+
+        return redirect()
+            ->route('documents.batch.show', ['locale' => app()->getLocale(), 'batch' => $batch->id])
+            ->with('success', count($files) . ' documents queued for processing.');
+    }
+
+    /**
+     * Show batch progress/results.
+     */
+    public function batchShow(Request $request, string $locale, string $batch): Response
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $batchModel = $this->batchRepository->findForUser((int)$batch, $user);
+
+        if (!$batchModel) {
+            abort(404, 'Batch not found');
+        }
+
+        return Inertia::render('documents/batch-progress', [
+            'batch' => [
+                'id' => $batchModel->id,
+                'status' => $batchModel->status,
+                'template_name' => $batchModel->template_name,
+                'progress' => $batchModel->getProgress(),
+                'created_at' => $batchModel->created_at->toISOString(),
+                'started_at' => $batchModel->started_at?->toISOString(),
+                'completed_at' => $batchModel->completed_at?->toISOString(),
+            ],
+            'documents' => $batchModel->documents->map(fn($doc) => [
+                'id' => $doc->id,
+                'name' => $doc->name,
+                'status' => $doc->status,
+                'error_message' => $doc->error_message,
+                'created_at' => $doc->created_at->toISOString(),
+            ])->toArray(),
+        ]);
+    }
+
+    /**
+     * Get batch progress (API endpoint for polling).
+     */
+    public function batchProgress(Request $request, string $locale, string $batch)
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $batchModel = $this->batchRepository->findForUser((int)$batch, $user);
+
+        if (!$batchModel) {
+            if ($request->wantsJson() || $request->query('json') === 'true') {
+                return response()->json(['error' => 'Batch not found'], 404);
+            }
+            abort(404, 'Batch not found');
+        }
+
+        // Return JSON if requested (for polling)
+        if ($request->wantsJson() || $request->query('json') === 'true') {
+            return response()->json([
+                'batch' => [
+                    'id' => $batchModel->id,
+                    'status' => $batchModel->status,
+                    'progress' => $batchModel->getProgress(),
+                ],
+                'documents' => $batchModel->documents->map(fn($doc) => [
+                    'id' => $doc->id,
+                    'name' => $doc->name,
+                    'status' => $doc->status,
+                    'error_message' => $doc->error_message,
+                ])->toArray(),
+            ]);
+        }
+
+        // Return Inertia view by default
+        return Inertia::render('documents/batch-progress', [
+            'batch' => [
+                'id' => $batchModel->id,
+                'status' => $batchModel->status,
+                'template_name' => $batchModel->template_name,
+                'progress' => $batchModel->getProgress(),
+                'created_at' => $batchModel->created_at->toISOString(),
+                'started_at' => $batchModel->started_at?->toISOString(),
+                'completed_at' => $batchModel->completed_at?->toISOString(),
+            ],
+            'documents' => $batchModel->documents->map(fn($doc) => [
+                'id' => $doc->id,
+                'name' => $doc->name,
+                'status' => $doc->status,
+                'error_message' => $doc->error_message,
+                'created_at' => $doc->created_at->toISOString(),
+            ])->toArray(),
+        ]);
     }
 
     /**

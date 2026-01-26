@@ -85,6 +85,13 @@ Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->g
     Route::put('documents/{document}/data', [DocumentController::class, 'updateData'])->name('documents.updateData');
     Route::post('documents/{document}/reprocess', [DocumentController::class, 'reprocess'])->name('documents.reprocess');
 
+    // Batch document routes (API only - UI integrated in create page)
+    Route::post('documents/batch', [DocumentController::class, 'batchStore'])
+        ->name('documents.batch.store')
+        ->middleware(['usage.limit:documents']);
+    Route::get('documents/batch/{batch}', [DocumentController::class, 'batchShow'])->name('documents.batch.show');
+    Route::get('documents/batch/{batch}/progress', [DocumentController::class, 'batchProgress'])->name('documents.batch.progress');
+
     Route::resource('document-types', DocumentTypeController::class)->names([
         'index' => 'document-types.index',
         'create' => 'document-types.create',

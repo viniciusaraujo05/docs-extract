@@ -19,7 +19,9 @@ import {
     FolderPlus,
     CheckCircle2,
     Sparkles,
-    Info
+    Info,
+    Image as ImageIcon,
+    Copy,
 } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -27,6 +29,9 @@ import { useTranslation } from 'react-i18next';
 
 interface StepUploadProps {
     file: File | null;
+    files?: File[];  // NEW: for batch mode
+    batchMode?: boolean;  // NEW: toggle between single/multiple
+    hasTemplates?: boolean;  // NEW: to show batch option
     documentTypes: DocumentType[];
     selectedTypeId: number | null;
     newTypeName: string;
@@ -38,7 +43,10 @@ interface StepUploadProps {
     checkingDuplicate?: boolean;
     duplicateExists?: boolean;
     modelLimitReached?: boolean;
+    isFirstDocument?: boolean;
     onFileSelect: (file: File | null) => void;
+    onFilesSelect?: (files: File[]) => void;  // NEW: for batch
+    onBatchModeToggle?: () => void;  // NEW: toggle mode
     onTypeSelect: (typeId: number | null) => void;
     onNewTypeNameChange: (name: string) => void;
     onAnalyzeDocument: () => void;
@@ -53,6 +61,9 @@ interface StepUploadProps {
  */
 export function StepUpload({
     file,
+    files = [],
+    batchMode = false,
+    hasTemplates = false,
     documentTypes,
     selectedTypeId,
     newTypeName,
@@ -64,7 +75,10 @@ export function StepUpload({
     checkingDuplicate = false,
     duplicateExists = false,
     modelLimitReached = false,
+    isFirstDocument = false,
     onFileSelect,
+    onFilesSelect,
+    onBatchModeToggle,
     onTypeSelect,
     onNewTypeNameChange,
     onAnalyzeDocument,
@@ -93,22 +107,39 @@ export function StepUpload({
     }, [onFileSelect]);
 
     const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = e.target.files?.[0] ?? null;
-        if (selectedFile) {
-            onFileSelect(selectedFile);
+        const selectedFiles = e.target.files;
+        if (!selectedFiles || selectedFiles.length === 0) return;
+
+        if (batchMode) {
+            // Multiple files mode
+            const filesArray = Array.from(selectedFiles);
+            onFilesSelect?.(filesArray);
+        } else {
+            // Single file mode
+            const selectedFile = selectedFiles[0] ?? null;
+            if (selectedFile) {
+                onFileSelect(selectedFile);
+            }
         }
-    }, [onFileSelect]);
+    }, [batchMode, onFileSelect, onFilesSelect]);
 
     const handleClick = useCallback(() => {
         inputRef.current?.click();
     }, []);
 
-    const handleRemoveFile = useCallback(() => {
-        onFileSelect(null);
-        if (inputRef.current) {
-            inputRef.current.value = '';
+    const handleRemoveFile = useCallback((index?: number) => {
+        if (batchMode && typeof index === 'number' && onFilesSelect) {
+            // Remove specific file from batch
+            const newFiles = files.filter((_, i) => i !== index);
+            onFilesSelect(newFiles);
+        } else {
+            // Remove single file
+            onFileSelect(null);
+            if (inputRef.current) {
+                inputRef.current.value = '';
+            }
         }
-    }, [onFileSelect]);
+    }, [batchMode, files, onFileSelect, onFilesSelect]);
 
     const getFileIcon = useCallback(() => {
         if (!file) return <Upload className="h-12 w-12 text-primary" />;
@@ -130,14 +161,62 @@ export function StepUpload({
 
     return (
         <Card className="mx-auto w-full max-w-2xl animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
-            <CardHeader className="text-center">
-                <CardTitle className="flex items-center justify-center gap-2 text-xl">
-                    <Upload className="h-5 w-5" />
-                    {t('New Document')}
-                </CardTitle>
-                <CardDescription>
-                    {t('First select the template, then upload the document')}
-                </CardDescription>
+            <CardHeader>
+                <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                        <CardTitle className="flex items-center gap-2 text-xl">
+                            <Upload className="h-5 w-5" />
+                            {t('New Document')}{batchMode && 's'}
+                        </CardTitle>
+                        <CardDescription>
+                            {batchMode 
+                                ? t('Upload multiple files using the same template')
+                                : t('First select the template, then upload the document')}
+                        </CardDescription>
+                    </div>
+                    {hasTemplates && onBatchModeToggle && (
+                        <div className="flex bg-muted rounded-lg p-1 gap-1">
+                            <Button
+                                type="button"
+                                variant={!batchMode ? "secondary" : "ghost"}
+                                size="sm"
+                                onClick={batchMode ? onBatchModeToggle : undefined}
+                                className={cn(
+                                    "flex-1 gap-2 text-xs",
+                                    !batchMode && "bg-background shadow-sm hover:bg-background"
+                                )}
+                            >
+                                <File className="h-3.5 w-3.5" />
+                                {t('Single')}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant={batchMode ? "secondary" : "ghost"}
+                                size="sm"
+                                onClick={!batchMode ? onBatchModeToggle : undefined}
+                                className={cn(
+                                    "flex-1 gap-2 text-xs",
+                                    batchMode && "bg-background shadow-sm hover:bg-background"
+                                )}
+                            >
+                                <Copy className="h-3.5 w-3.5" />
+                                {t('Multiple')}
+                            </Button>
+                        </div>
+                    )}
+                </div>
+                
+                {/* Info message for first-time users */}
+                {!hasTemplates && isFirstDocument && (
+                    <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950/30">
+                        <div className="flex items-start gap-2">
+                            <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                            <p className="text-sm text-blue-700 dark:text-blue-300">
+                                {t('Your first upload will create a template')}
+                            </p>
+                        </div>
+                    </div>
+                )}
             </CardHeader>
             <CardContent className="space-y-6">
                 {/* PASSO 1: Modelo de Documento - PRIMEIRO! */}
@@ -224,19 +303,31 @@ export function StepUpload({
                                     </div>
                                 </>
                             ) : null}
-                            <Button
-                                type="button"
-                                variant={documentTypes.length === 0 ? 'default' : 'outline'}
-                                onClick={() => {
-                                    setShowNewType(true);
-                                    onTypeSelect(null);
-                                }}
-                                className="w-full"
-                                disabled={modelLimitReached && documentTypes.length > 0}
-                            >
-                                <FolderPlus className="mr-2 h-4 w-4" />
-                                {documentTypes.length === 0 ? t('Create First Template') : t('Create New Template')}
-                            </Button>
+                            <div className="space-y-2">
+                                <Button
+                                    type="button"
+                                    variant={documentTypes.length === 0 ? 'default' : 'outline'}
+                                    onClick={() => {
+                                        setShowNewType(true);
+                                        onTypeSelect(null);
+                                    }}
+                                    className="w-full"
+                                    disabled={(modelLimitReached && documentTypes.length > 0) || batchMode}
+                                >
+                                    <FolderPlus className="mr-2 h-4 w-4" />
+                                    {documentTypes.length === 0 ? t('Create First Template') : t('Create New Template')}
+                                </Button>
+                                {batchMode && (
+                                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950/30">
+                                        <div className="flex items-start gap-2">
+                                            <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                                            <p className="text-xs text-blue-700 dark:text-blue-300">
+                                                {t('In multiple mode, you must select an existing template. All files will use the same template for consistency.')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     ) : (
                         <div className="space-y-3">
@@ -250,12 +341,29 @@ export function StepUpload({
                                 )}
                                 autoFocus
                             />
+                            {/* Tutorial Helper Text for Template Name */}
+                            {isFirstDocument && (
+                                <p className="text-sm text-muted-foreground animate-in fade-in slide-in-from-top-1 duration-500">
+                                    💡 {t('first_document_template_hint')}
+                                </p>
+                            )}
                             {newTypeName && (
                                 <div className="flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 p-3 text-sm">
                                     <Sparkles className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
                                     <span className="text-amber-700 dark:text-amber-300">
                                         {t('AI will analyze the document and detect fields automatically.')}
                                     </span>
+                                </div>
+                            )}
+                            {/* Tutorial Helper Text for AI Analysis */}
+                            {isFirstDocument && newTypeName && (
+                                <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm dark:border-blue-800 dark:bg-blue-950/30 animate-in fade-in slide-in-from-top-1 duration-500">
+                                    <div className="flex items-start gap-2">
+                                        <Info className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                                        <span className="text-blue-700 dark:text-blue-300">
+                                            {t('first_document_ai_hint')}
+                                        </span>
+                                    </div>
                                 </div>
                             )}
                             {documentTypes.length > 0 && (
@@ -320,6 +428,7 @@ export function StepUpload({
                             onChange={handleFileChange}
                             className="hidden"
                             disabled={!hasTypeSelected}
+                            multiple={batchMode}
                         />
 
                         {!file ? (
@@ -369,6 +478,69 @@ export function StepUpload({
                             </div>
                         )}
                     </div>
+
+                    {/* Batch Mode: File List */}
+                    {batchMode && files.length > 0 && (
+                        <div className="mt-4 space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label className="text-sm font-medium">
+                                    {t('Selected files')} ({files.length})
+                                </Label>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleClick}
+                                    disabled={!hasTypeSelected}
+                                >
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    {t('Add more files')}
+                                </Button>
+                            </div>
+                            <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg border p-3">
+                                {files.map((f, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center justify-between rounded-md border bg-card p-3 transition-colors hover:bg-muted/50"
+                                    >
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <div className="flex-shrink-0">
+                                                {f.type.includes('pdf') ? (
+                                                    <FileText className="h-5 w-5 text-red-500" />
+                                                ) : (
+                                                    <ImageIcon className="h-5 w-5 text-blue-500" />
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium truncate">{f.name}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {formatFileSize(f.size)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleRemoveFile(index)}
+                                            className="flex-shrink-0"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Empty state for batch mode */}
+                    {batchMode && files.length === 0 && hasTypeSelected && (
+                        <div className="mt-4 rounded-lg border border-dashed border-muted-foreground/25 p-4 text-center">
+                            <p className="text-sm text-muted-foreground">
+                                {t('No files selected')}. {t('Click or drag the document')}.
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Análise obrigatória para novo modelo */}
@@ -441,7 +613,15 @@ export function StepUpload({
                     </Button>
                     <Button
                         onClick={onNext}
-                        disabled={!file || analyzing || checkingDuplicate || duplicateExists || !hasTypeSelected || (isNewType && !analysisCompleted)}
+                        disabled={
+                            (!batchMode && !file) || 
+                            (batchMode && files.length === 0) || 
+                            analyzing || 
+                            checkingDuplicate || 
+                            duplicateExists || 
+                            !hasTypeSelected || 
+                            (isNewType && !analysisCompleted)
+                        }
                     >
                         {analyzing ? (
                             <>

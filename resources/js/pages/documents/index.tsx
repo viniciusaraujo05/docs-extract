@@ -8,11 +8,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
-import { type Document, type DocumentsIndexProps } from '@/types/document';
+import { type Document, type DocumentsIndexProps as BaseDocsProps } from '@/types/document';
 import { Head, Link, router } from '@inertiajs/react';
 import { 
     FileText, 
     Plus, 
+    Layers,
     Eye, 
     Trash2, 
     Clock, 
@@ -31,15 +32,38 @@ import {
     ArrowUpDown,
     X,
     CheckSquare,
-    Square
+    Square,
+    History
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
-// Breadcrumbs will be translated in the component
+interface Batch {
+    id: number;
+    status: string;
+    template_name: string;
+    progress: {
+        percentage: number;
+        total: number;
+        processed: number;
+        successful: number;
+        failed: number;
+    };
+    created_at: string;
+}
 
-// Status config will use translations
+interface DocumentsIndexProps extends BaseDocsProps {
+    recentBatches?: Batch[];
+}
 
 function formatFileSize(bytes: number): string {
     if (bytes < 1024) return bytes + ' B';
@@ -240,8 +264,9 @@ function DocumentCard({ document, isSelected, onSelect, onDelete, index, locale 
     );
 }
 
-export default function DocumentsIndex({ documents, documentTypes = [] }: DocumentsIndexProps) {
+export default function DocumentsIndex({ documents, documentTypes = [], recentBatches = [] }: DocumentsIndexProps) {
     const { t } = useTranslation();
+    // Force re-render
     const [locale, setLocale] = useState(() => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('selected-locale') || 'pt';
@@ -353,7 +378,7 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
     }, [filteredDocuments, selectedIds.size]);
 
     const handleDelete = useCallback((id: number) => {
-        toast((toastId) => (
+        toast(((toastId: string | number) => (
             <div className="flex flex-col gap-2">
                 <p>{t('Are you sure you want to delete this document?')}</p>
                 <div className="flex gap-2">
@@ -386,13 +411,13 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                     </button>
                 </div>
             </div>
-        ));
+        )) as any);
     }, [locale, t]);
 
     const handleDeleteSelected = useCallback(() => {
         if (selectedIds.size === 0) return;
         
-        toast((toastId) => (
+        toast(((toastId: string | number) => (
             <div className="flex flex-col gap-2">
                 <p>{t('Are you sure you want to delete {{count}} document(s)?', { count: selectedIds.size })}</p>
                 <div className="flex gap-2">
@@ -435,7 +460,7 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                     </button>
                 </div>
             </div>
-        ));
+        )) as any);
     }, [selectedIds, locale, t]);
 
     const clearFilters = useCallback(() => {
@@ -459,6 +484,72 @@ export default function DocumentsIndex({ documents, documentTypes = [] }: Docume
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
+                        {/* History Dialog */}
+                        {recentBatches && recentBatches.length > 0 && (
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                                        <History className="h-5 w-5" />
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                                    <DialogHeader>
+                                        <DialogTitle>{t('Upload History')}</DialogTitle>
+                                        <DialogDescription>{t('Recent batch processing tasks')}</DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-2 py-4">
+                                        {recentBatches.map(batch => (
+                                            <div 
+                                                key={batch.id} 
+                                                className="flex items-center justify-between p-3 rounded-lg border border-transparent hover:bg-muted/50 hover:border-border cursor-pointer transition-all group" 
+                                                onClick={() => router.visit(`/${locale}/documents/batch/${batch.id}/progress`)}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={cn(
+                                                        "flex h-9 w-9 items-center justify-center rounded-full bg-muted/50 border",
+                                                        batch.status === 'completed' && "bg-green-100/50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400",
+                                                        batch.status === 'processing' && "bg-blue-100/50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400",
+                                                        batch.status === 'failed' && "bg-red-100/50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400"
+                                                    )}>
+                                                       {batch.status === 'completed' ? <CheckCircle className="h-4 w-4" /> : 
+                                                        batch.status === 'processing' ? <Loader2 className="h-4 w-4 animate-spin" /> :
+                                                        batch.status === 'failed' ? <XCircle className="h-4 w-4" /> :
+                                                        <Clock className="h-4 w-4" />}
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">{batch.template_name}</span>
+                                                        <span className="text-xs text-muted-foreground">{getRelativeTime(batch.created_at, t)}</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="flex items-center gap-4">
+                                                    <div className="hidden sm:flex flex-col items-end gap-1 min-w-[5rem]">
+                                                        <div className="flex items-center justify-between w-full text-xs">
+                                                           <span className="text-muted-foreground">{batch.progress.processed}/{batch.progress.total}</span>
+                                                           <span className="font-medium">{batch.progress.percentage}%</span>
+                                                        </div>
+                                                        <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
+                                                            <div 
+                                                                className={cn(
+                                                                    "h-full transition-all duration-500",
+                                                                    batch.status === 'failed' ? "bg-destructive" :
+                                                                    batch.status === 'completed' ? "bg-green-500" : "bg-primary"
+                                                                )}
+                                                                style={{ width: `${batch.progress.percentage}%` }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <Badge variant={batch.status === 'completed' ? 'default' : 'secondary'} className="capitalize">
+                                                        {batch.status}
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        )}
+
                         <Button variant="outline" size="sm" asChild className="hidden sm:flex">
                             <Link href={`/${locale}/document-types`}>
                                 <Settings2 className="mr-2 h-4 w-4" />
