@@ -64,11 +64,13 @@ class SocialLoginController extends Controller
             $user = User::create([
                 'name' => $socialUser->getName() ?? $socialUser->getNickname(),
                 'email' => $socialUser->getEmail(),
-                'password' => bcrypt(Str::random(16)), // Dummy password
+                'password' => bcrypt(Str::random(16)),
                 $provider . '_id' => $socialUser->getId(),
                 'avatar' => $socialUser->getAvatar(),
                 'email_verified_at' => now(),
             ]);
+
+            $user->notify(new \App\Notifications\WelcomeNotification());
         }
 
         Auth::login($user);
