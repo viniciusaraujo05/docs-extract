@@ -164,21 +164,25 @@ final class DocumentTypeControllerApi extends Controller
                 'fields.*.required' => ['nullable', 'boolean'],
             ]);
 
-            $updatedType = $this->updateDocumentTypeAction->execute(
+            $success = $this->updateDocumentTypeAction->execute(
                 documentType: $documentType,
-                name: $validated['name'] ?? null,
-                description: $validated['description'] ?? null,
-                fields: $validated['fields'] ?? null,
+                name: $validated['name'] ?? $documentType->name,
+                description: array_key_exists('description', $validated) ? $validated['description'] : $documentType->description,
+                fields: $validated['fields'] ?? $documentType->fields,
             );
+
+            if (!$success) {
+                throw new \Exception('Failed to update document type in repository.');
+            }
 
             return response()->json(
                 HttpResponse::OK->json(
                     data: [
-                        'id' => $updatedType->id,
-                        'name' => $updatedType->name,
-                        'description' => $updatedType->description,
-                        'fields' => $updatedType->fields,
-                        'updated_at' => $updatedType->updated_at?->toISOString(),
+                        'id' => $documentType->id,
+                        'name' => $documentType->name,
+                        'description' => $documentType->description,
+                        'fields' => $documentType->fields,
+                        'updated_at' => $documentType->updated_at?->toISOString(),
                     ],
                     message: 'Document type updated successfully.'
                 ),

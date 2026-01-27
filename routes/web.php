@@ -170,6 +170,10 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
     // Email Verification routes
     if (Features::enabled(Features::emailVerification())) {
         Route::get('email/verify', function ($locale) {
+            if (auth()->user()->hasVerifiedEmail()) {
+                return redirect()->route('dashboard');
+            }
+            
             return Inertia::render('auth/verify-email', [
                 'status' => session('status'),
                 'locale' => $locale,

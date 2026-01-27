@@ -40,7 +40,10 @@ class WebhookFeatureTest extends TestCase
     {
         Event::fake([\App\Events\DocumentLifecycle::class]);
 
-        $document = Document::factory()->create(['status' => 'processing']);
+        $document = Document::factory()->create([
+            'status' => 'completed',
+            'extracted_data' => ['foo' => 'bar'],
+        ]);
 
         Event::assertDispatched(\App\Events\DocumentLifecycle::class, function ($event) use ($document) {
             return $event->document->id === $document->id && $event->eventType === 'document.created';
@@ -51,7 +54,10 @@ class WebhookFeatureTest extends TestCase
     {
         Event::fake([\App\Events\DocumentLifecycle::class]);
 
-        $document = Document::factory()->create(['status' => 'processing']);
+        $document = Document::factory()->create([
+            'status' => 'processing',
+            'extracted_data' => ['initial' => 'data'],
+        ]);
 
         $document->update(['status' => 'completed', 'extracted_data' => ['foo' => 'bar']]);
 
