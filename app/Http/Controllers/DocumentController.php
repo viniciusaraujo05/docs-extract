@@ -423,6 +423,25 @@ final class DocumentController extends Controller
     }
 
     /**
+     * Cancel a batch.
+     */
+    public function batchCancel(Request $request, string $locale, string $batch): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        $batchModel = $this->batchRepository->findForUser((int)$batch, $user);
+
+        if (!$batchModel) {
+            abort(404, 'Batch not found');
+        }
+
+        $this->batchRepository->cancel($batchModel);
+
+        return redirect()->back()->with('success', 'Batch processing cancelled.');
+    }
+
+    /**
      * Verifica se já existe documento com o nome fornecido.
      */
     /**
@@ -436,7 +455,7 @@ final class DocumentController extends Controller
 
         // Batch check
         if ($request->has('names')) {
-            $names = $request->query('names');
+            $names = $request->input('names');
             if (!is_array($names)) {
                 $names = [$names];
             }
@@ -450,8 +469,8 @@ final class DocumentController extends Controller
         }
 
         // Single check (Legacy/Standard)
-        $filename = (string) $request->query('name', '');
-        $displayName = $request->query('display_name');
+        $filename = (string) $request->input('name', '');
+        $displayName = $request->input('display_name');
         $displayName ??= $filename !== '' ? pathinfo($filename, PATHINFO_FILENAME) : '';
 
         $exists = $this->documentRepository->existsByNameForUser($filename, $user->id, $displayName);

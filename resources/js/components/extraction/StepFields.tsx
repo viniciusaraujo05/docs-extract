@@ -462,12 +462,12 @@ export function StepFields({
                     {processing ? (
                         <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            {t('Extracting...')}
+                            {batchMode ? t('Starting Batch...') : t('Extracting...')}
                         </>
                     ) : (
                         <>
                             <Sparkles className="mr-2 h-4 w-4" />
-                            {t('Extract Data')}
+                            {batchMode ? t('Start Batch Processing') : t('Extract Data')}
                         </>
                     )}
                 </Button>

@@ -600,15 +600,16 @@ export default function DocumentsCreate({
 
         setCheckingDuplicate(true);
         try {
-            const params = new URLSearchParams();
-            selectedFiles.forEach(f => params.append('names[]', f.name));
-            
-            const response = await fetch(`/api/documents/check-name?${params.toString()}`, {
-                method: 'GET',
+            const response = await fetch('/api/documents/check-name', {
+                method: 'POST',
                 headers: {
+                    'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': getCsrfToken(),
                 },
+                body: JSON.stringify({
+                    names: selectedFiles.map(f => f.name)
+                })
             });
             
             if (!response.ok) throw new Error('Network response was not ok');
@@ -730,7 +731,7 @@ export default function DocumentsCreate({
                         selectedTypeId={selectedTypeId}
                         newTypeName={newTypeName}
                         analyzing={analyzing}
-                        processing={processing}
+                        processing={processing || saving}
                         isFirstDocument={isFirstDocument}
                         onAddField={handleAddField}
                         onUpdateField={handleUpdateFieldStructure}

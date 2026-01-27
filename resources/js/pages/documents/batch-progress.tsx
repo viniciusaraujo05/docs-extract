@@ -165,10 +165,7 @@ export default function BatchProgress({ batch: initialBatch, documents: initialD
              });
              
              if(response.ok) {
-                 const data = await response.json();
-                 console.log('Quick View Data:', data); // DEBUG
-                 
-                 // backend returns { document: {...}, previewUrl: '...' }
+                 const data = await response.json();                 
                  const { document: fullDoc, previewUrl } = data;
                  
                  setDocuments(prev => prev.map(d => d.id === docId ? { ...d, ...fullDoc, previewUrl } : d));
@@ -214,6 +211,29 @@ export default function BatchProgress({ batch: initialBatch, documents: initialD
         { title: t('Batch Processing'), href: '#' },
     ];
 
+    const handleCancel = async () => {
+        if (!confirm(t('Are you sure you want to cancel the batch processing? Pending documents will be skipped.'))) {
+            return;
+        }
+
+        try {
+            await router.post(`/${locale}/api/documents/batch/${batch.id}/cancel`, {}, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success(t('Batch processing cancelled'));
+                    setIsPolling(false);
+                    // Update local state immediately to reflect change
+                    setBatch(prev => ({ ...prev, status: 'cancelled' }));
+                },
+                onError: () => {
+                    toast.error(t('Failed to cancel batch'));
+                }
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`${t('Batch Processing')} - ${batch.template_name}`} />
@@ -233,11 +253,21 @@ export default function BatchProgress({ batch: initialBatch, documents: initialD
                                 </Badge>
                             </h1>
                             <p className="text-muted-foreground text-sm">
-                                {t('Started at')}: {new Date(batch.created_at).toLocaleString()}
+                                {t('Started at')}: {new Date(batch.created_at).toLocaleString(locale)}
                             </p>
                         </div>
                     </div>
                                     <div className="flex items-center gap-2">
+                         {(batch.status === 'processing' || batch.status === 'pending') && (
+                             <Button 
+                                variant="destructive" 
+                                size="sm" 
+                                onClick={handleCancel}
+                                disabled={isRefreshing}
+                             >
+                                {t('Cancel Processing')}
+                            </Button>
+                         )}
                          <Button 
                             variant="outline" 
                             size="sm" 
@@ -245,7 +275,7 @@ export default function BatchProgress({ batch: initialBatch, documents: initialD
                             disabled={isRefreshing || isPolling}
                          >
                             <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing || isPolling ? 'animate-spin' : ''}`} />
-                            {isPolling ? t('Polling...') : t('Refresh')}
+                            {isPolling ? t('Syncing...') : t('Refresh')}
                         </Button>
                     </div>
                 </div>
@@ -388,7 +418,7 @@ export default function BatchProgress({ batch: initialBatch, documents: initialD
                                 selectedDocument.status === 'processing' || selectedDocument.status === 'pending' ? (
                                     <div className="flex flex-col items-center justify-center h-full gap-4">
                                         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                                        <p className="text-muted-foreground text-lg">{t('Document is strictly processing...')}</p>
+                                        <p className="text-muted-foreground text-lg">{t('Document is currently processing...')}</p>
                                     </div>
                                 ) : (
                                      <div className="flex flex-col items-center justify-center h-full gap-4">

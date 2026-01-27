@@ -82,4 +82,5 @@ Route::middleware(['auth'])->group(function () {
     Route::post('documents/analyze', [ExtractionController::class, 'analyze']);
     Route::post('documents/extract', [ExtractionController::class, 'extract']);
     Route::get('documents/check-name', [DocumentController::class, 'checkName']);
+    Route::post('documents/batch/{batch}/cancel', [DocumentController::class, 'batchCancel']);
 });

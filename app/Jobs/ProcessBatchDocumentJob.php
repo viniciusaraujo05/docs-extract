@@ -36,6 +36,18 @@ class ProcessBatchDocumentJob implements ShouldQueue
      */
     public function handle(DocumentService $documentService): void
     {
+        // Check if batch was cancelled
+        if ($this->batch->fresh()->status === 'cancelled') {
+            Log::info('Batch document processing skipped (cancelled)', [
+                'document_id' => $this->document->id,
+                'batch_id' => $this->batch->id,
+            ]);
+            
+            // Mark document as cancelled if needed, or just leave as pending/cancelled
+            $this->document->update(['status' => 'cancelled']);
+            return;
+        }
+
         Log::info('Processing batch document', [
             'document_id' => $this->document->id,
             'batch_id' => $this->batch->id,

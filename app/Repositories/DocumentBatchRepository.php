@@ -61,6 +61,19 @@ final class DocumentBatchRepository
     }
 
     /**
+     * Cancel a batch.
+     */
+    public function cancel(DocumentBatch $batch): DocumentBatch
+    {
+        $batch->update([
+            'status' => 'cancelled',
+            'completed_at' => now(),
+        ]);
+        
+        return $batch->fresh();
+    }
+
+    /**
      * Delete a batch.
      */
     public function delete(DocumentBatch $batch): bool

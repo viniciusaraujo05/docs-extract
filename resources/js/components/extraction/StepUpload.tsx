@@ -114,8 +114,15 @@ export function StepUpload({
 
         if (batchMode) {
             // Multiple files mode
-            const filesArray = Array.from(selectedFiles);
-            onFilesSelect?.(filesArray);
+            const newFiles = Array.from(selectedFiles);
+            
+            // Merge with existing files, avoiding duplicates by name
+            const existingNames = new Set(files.map(f => f.name));
+            const uniqueNewFiles = newFiles.filter(f => !existingNames.has(f.name));
+            
+            if (uniqueNewFiles.length > 0) {
+                onFilesSelect?.([...files, ...uniqueNewFiles]);
+            }
         } else {
             // Single file mode
             const selectedFile = selectedFiles[0] ?? null;
@@ -123,7 +130,7 @@ export function StepUpload({
                 onFileSelect(selectedFile);
             }
         }
-    }, [batchMode, onFileSelect, onFilesSelect]);
+    }, [batchMode, files, onFileSelect, onFilesSelect]);
 
     const handleClick = useCallback(() => {
         inputRef.current?.click();
