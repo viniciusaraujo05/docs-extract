@@ -4,8 +4,9 @@ import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { type BreadcrumbItem } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import { useRef } from 'react';
+import { type SharedData } from '@/types';
 
 import HeadingSmall from '@/components/heading-small';
 import { Button } from '@/components/ui/button';
@@ -16,16 +17,18 @@ import { useTranslation } from 'react-i18next';
 
 export default function Password() {
     const { t } = useTranslation();
-    const [locale, setLocale] = useState('pt');
+    const page = usePage<SharedData>();
+    const props = page.props as unknown as SharedData & { locale: string };
+    const { locale, auth } = props;
+
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
-        const savedLocale = localStorage.getItem('selected-locale') || 'pt';
-        setLocale(savedLocale);
-    }, []);
-
     const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: t('Dashboard'),
+            href: `/${locale}/dashboard`
+        },
         {
             title: t('Password settings'),
             href: `/${locale}/settings/password`,
@@ -45,7 +48,7 @@ export default function Password() {
 
                     <Form
                         method="put"
-                        action="/settings/password"
+                        action={`/${locale}/settings/password`}
                         options={{
                             preserveScroll: true,
                         }}
@@ -68,25 +71,27 @@ export default function Password() {
                     >
                         {({ errors, processing, recentlySuccessful }) => (
                             <>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="current_password">
-                                        Current password
-                                    </Label>
+                                {(!auth.user.google_id && !auth.user.github_id) && (
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="current_password">
+                                            Current password
+                                        </Label>
 
-                                    <Input
-                                        id="current_password"
-                                        ref={currentPasswordInput}
-                                        name="current_password"
-                                        type="password"
-                                        className="mt-1 block w-full"
-                                        autoComplete="current-password"
-                                        placeholder="Current password"
-                                    />
+                                        <Input
+                                            id="current_password"
+                                            ref={currentPasswordInput}
+                                            name="current_password"
+                                            type="password"
+                                            className="mt-1 block w-full"
+                                            autoComplete="current-password"
+                                            placeholder="Current password"
+                                        />
 
-                                    <InputError
-                                        message={errors.current_password}
-                                    />
-                                </div>
+                                        <InputError
+                                            message={errors.current_password}
+                                        />
+                                    </div>
+                                )}
 
                                 <div className="grid gap-2">
                                     <Label htmlFor="password">

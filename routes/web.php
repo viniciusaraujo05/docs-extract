@@ -219,6 +219,11 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
         ->where(['provider' => 'google|github'])
         ->name('social.redirect');
 
+    Route::get('auth/{provider}/callback', [\App\Http\Controllers\Auth\SocialLoginController::class, 'handleLocalizedProviderCallback'])
+        ->middleware('guest')
+        ->where(['provider' => 'google|github'])
+        ->name('social.callback.locale');
+
     // Logout
     Route::post('logout', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])
         ->middleware(['auth:web'])

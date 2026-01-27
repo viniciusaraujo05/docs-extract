@@ -21,7 +21,7 @@ export default function DeleteUser() {
     const { t } = useTranslation();
     const page = usePage<SharedData>();
     const props = page.props as unknown as SharedData & { locale: string };
-    const { locale } = props;
+    const { locale, auth } = props;
     const passwordInput = useRef<HTMLInputElement>(null);
 
     return (
@@ -67,25 +67,27 @@ export default function DeleteUser() {
                         >
                             {({ resetAndClearErrors, processing, errors }) => (
                                 <>
-                                    <div className="grid gap-2">
-                                        <Label
-                                            htmlFor="password"
-                                            className="sr-only"
-                                        >
-                                            {t('Password')}
-                                        </Label>
+                                    {(!auth.user.google_id && !auth.user.github_id) && (
+                                        <div className="grid gap-2">
+                                            <Label
+                                                htmlFor="password"
+                                                className="sr-only"
+                                            >
+                                                {t('Password')}
+                                            </Label>
 
-                                        <Input
-                                            id="password"
-                                            type="password"
-                                            name="password"
-                                            ref={passwordInput}
-                                            placeholder={t('Password')}
-                                            autoComplete="current-password"
-                                        />
+                                            <Input
+                                                id="password"
+                                                type="password"
+                                                name="password"
+                                                ref={passwordInput}
+                                                placeholder={t('Password')}
+                                                autoComplete="current-password"
+                                            />
 
-                                        <InputError message={errors.password} />
-                                    </div>
+                                            <InputError message={errors.password} />
+                                        </div>
+                                    )}
 
                                     <DialogFooter className="gap-2">
                                         <DialogClose asChild>

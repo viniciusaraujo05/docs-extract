@@ -52,7 +52,7 @@ export default function Profile({
                     />
 
                     <Form
-                        method="post"
+                        method="patch"
                         action={`/${serverLocale || locale}/settings/profile`}
                         options={{
                             preserveScroll: true,

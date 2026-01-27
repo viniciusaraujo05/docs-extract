@@ -33,6 +33,11 @@ class SetLocale
             return $next($request);
         }
 
+        // Allow Social Auth Callback (Global) without locale redirect to preserve query params
+        if ($request->is('auth/*/callback')) {
+            return $next($request);
+        }
+
         // If URL doesn't have locale and it's not an API route, redirect to localized URL
         if (! $request->route('locale') && ! $request->is('api/*') && ! $request->is('/')) {
             $path = $request->path();

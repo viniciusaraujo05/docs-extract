@@ -20,14 +20,29 @@ class SocialLoginController extends Controller
     }
 
     /**
+     * Obtain the user information from the provider (Localized version).
+     * Route parameters: {locale}, {provider}
+     */
+    public function handleLocalizedProviderCallback(string $locale, string $provider)
+    {
+        return $this->handleProviderCallback($provider, $locale);
+    }
+
+    /**
      * Obtain the user information from the provider.
      */
-    public function handleProviderCallback(string $provider)
+    public function handleProviderCallback(string $provider, ?string $locale = null)
     {
+        if ($locale) {
+            app()->setLocale($locale);
+        } else {
+            $locale = session()->pull('social_login_locale', app()->getLocale());
+        }
+
         try {
-            $socialUser = Socialite::driver($provider)->user();
+            // stateless() is used to avoid InvalidStateException on some configurations
+            $socialUser = Socialite::driver($provider)->stateless()->user();
         } catch (\Exception $e) {
-            $locale = session('social_login_locale', app()->getLocale());
             return redirect()->route('locale.login', ['locale' => $locale])
                 ->with('status', 'Authentication failed. Please try again.');
         }
@@ -58,7 +73,6 @@ class SocialLoginController extends Controller
 
         Auth::login($user);
 
-        $locale = session()->pull('social_login_locale', 'en'); // Default to 'en' or app default
         return redirect()->route('dashboard', ['locale' => $locale]);
     }
 }

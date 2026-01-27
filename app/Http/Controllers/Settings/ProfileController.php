@@ -37,7 +37,7 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return to_route('profile.edit');
+        return to_route('profile.edit', ['locale' => $request->route('locale') ?? app()->getLocale()]);
     }
 
     /**
@@ -45,11 +45,14 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request)
     {
-        $request->validate([
-            'password' => ['required', 'current_password'],
-        ]);
-
         $user = $request->user();
+
+        // Only require password if user doesn't have social login linked
+        if (! $user->google_id && ! $user->github_id) {
+            $request->validate([
+                'password' => ['required', 'current_password'],
+            ]);
+        }
 
         if ($user->subscribed('default') && $user->subscription('default')->active()) {
             return redirect()->back()->withErrors(['password' => 'You must cancel your active subscription plan before deleting your account.']);
