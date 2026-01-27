@@ -16,6 +16,12 @@ use Laravel\Fortify\Features;
 // SEO Routes
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
+// Social Login Callback (Global/Non-localized to match OAuth App settings)
+Route::get('auth/{provider}/callback', [\App\Http\Controllers\Auth\SocialLoginController::class, 'handleProviderCallback'])
+    ->middleware(['web', 'guest'])
+    ->where(['provider' => 'google|github'])
+    ->name('social.callback');
+
 Route::get('/', function () {
     $planService = app(\App\Services\StripePlanService::class);
     // Get plans as array list (not object/associative array) to avoid .map() errors on frontend
@@ -204,6 +210,14 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
     Route::post('register-checkout', [\App\Http\Controllers\Auth\CheckoutRegisterController::class, 'store'])
         ->middleware(['guest:web', 'throttle:register'])
         ->name('locale.register-checkout.store');
+
+
+
+    // Social Login Redirect (Localized to preserve language)
+    Route::get('auth/{provider}', [\App\Http\Controllers\Auth\SocialLoginController::class, 'redirectToProvider'])
+        ->middleware('guest')
+        ->where(['provider' => 'google|github'])
+        ->name('social.redirect');
 
     // Logout
     Route::post('logout', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])
