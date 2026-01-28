@@ -25,8 +25,9 @@ class ExportToGoogleSheetsJob implements ShouldQueue
     {
         $account = $this->user->connectedAccounts()->where('provider', 'google')->first();
 
-        if (!$account) {
+        if (! $account) {
             Log::error("Export failed: No Google account connected for user {$this->user->id}");
+
             return;
         }
 
@@ -39,7 +40,7 @@ class ExportToGoogleSheetsJob implements ShouldQueue
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $account->refresh_token,
             ]);
-    
+
             if ($response->successful()) {
                 $data = $response->json();
                 $account->update([
@@ -48,6 +49,7 @@ class ExportToGoogleSheetsJob implements ShouldQueue
                 ]);
             } else {
                 Log::error("Export failed: Could not refresh token for user {$this->user->id}");
+
                 return;
             }
         }
@@ -58,12 +60,13 @@ class ExportToGoogleSheetsJob implements ShouldQueue
         $response = Http::withToken($token)
             ->post('https://sheets.googleapis.com/v4/spreadsheets', [
                 'properties' => [
-                    'title' => "Export - {$this->batch->name} - " . now()->format('Y-m-d H:i')
-                ]
+                    'title' => "Export - {$this->batch->name} - ".now()->format('Y-m-d H:i'),
+                ],
             ]);
 
         if ($response->failed()) {
             Log::error('Export failed: Could not create spreadsheet', ['response' => $response->body()]);
+
             return;
         }
 
@@ -72,7 +75,9 @@ class ExportToGoogleSheetsJob implements ShouldQueue
 
         // 2. Prepare Data
         $documents = $this->batch->documents()->where('status', 'completed')->get();
-        if ($documents->isEmpty()) return;
+        if ($documents->isEmpty()) {
+            return;
+        }
 
         // Collect all possible headers from all documents to ensure consistency
         // (Some docs might have extra fields or missing ones)
@@ -83,8 +88,8 @@ class ExportToGoogleSheetsJob implements ShouldQueue
             }
         }
         $headers = array_unique($allHeaders);
-        sort($headers); 
-        
+        sort($headers);
+
         // Add standard columns
         array_unshift($headers, 'Document Name', 'Created At');
 
@@ -112,16 +117,16 @@ class ExportToGoogleSheetsJob implements ShouldQueue
             ->post("https://sheets.googleapis.com/v4/spreadsheets/{$spreadsheetId}/values/A1:append", [
                 'range' => 'A1',
                 'valueInputOption' => 'USER_ENTERED',
-                'values' => $rows
+                'values' => $rows,
             ]);
 
         if ($response->failed()) {
             Log::error('Export failed: Could not append data', ['response' => $response->body()]);
             // Retry logic could go here
         }
-        
+
         // Optional: Notify user (e.g. database notification)
-        // For now, we assume the user can check Drive. 
+        // For now, we assume the user can check Drive.
         // Ideally we'd send an email or in-app notification with $spreadsheetUrl
     }
 }

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 class GoogleDriveService
 {
     private const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3/files';
+
     private const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
     public function __construct() {}
@@ -32,7 +33,7 @@ class GoogleDriveService
     {
         $account = $this->getAccount($user);
 
-        if (!$account) {
+        if (! $account) {
             throw new \Exception('Google account not connected');
         }
 
@@ -55,13 +56,13 @@ class GoogleDriveService
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
-            
-             // Handle 401 Unauthorized specifically to hint at re-auth
+
+            // Handle 401 Unauthorized specifically to hint at re-auth
             if ($response->status() === 401) {
-                 throw new \Exception('Unauthorized: Please reconnect your Google account.');
+                throw new \Exception('Unauthorized: Please reconnect your Google account.');
             }
 
-            throw new \Exception('Failed to fetch files from Google Drive: ' . $response->body());
+            throw new \Exception('Failed to fetch files from Google Drive: '.$response->body());
         }
 
         return $response->json();
@@ -74,7 +75,7 @@ class GoogleDriveService
     {
         $account = $this->getAccount($user);
 
-        if (!$account) {
+        if (! $account) {
             throw new \Exception('Google account not connected');
         }
 
@@ -83,18 +84,18 @@ class GoogleDriveService
         // Get file metadata
         /** @var \Illuminate\Http\Client\Response $metaResponse */
         $metaResponse = Http::withToken($account->token)
-            ->get(self::DRIVE_API_URL . "/{$fileId}", [
+            ->get(self::DRIVE_API_URL."/{$fileId}", [
                 'fields' => 'name,mimeType',
             ]);
 
         if ($metaResponse->failed()) {
-             throw new \Exception('Failed to fetch file metadata');
+            throw new \Exception('Failed to fetch file metadata');
         }
 
         $meta = $metaResponse->json();
         $filename = $meta['name'];
         $mimeType = $meta['mimeType'];
-        $url = "";
+        $url = '';
         $params = [];
 
         // Handle Export logic
@@ -105,14 +106,18 @@ class GoogleDriveService
                 'application/vnd.google-apps.presentation' => 'application/pdf',
                 default => 'application/pdf',
             };
-            
-            $url = self::DRIVE_API_URL . "/{$fileId}/export";
+
+            $url = self::DRIVE_API_URL."/{$fileId}/export";
             $params = ['mimeType' => $exportMimeType];
-            
-            if ($exportMimeType === 'application/pdf') $filename .= '.pdf';
-            if ($exportMimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') $filename .= '.xlsx';
+
+            if ($exportMimeType === 'application/pdf') {
+                $filename .= '.pdf';
+            }
+            if ($exportMimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+                $filename .= '.xlsx';
+            }
         } else {
-            $url = self::DRIVE_API_URL . "/{$fileId}";
+            $url = self::DRIVE_API_URL."/{$fileId}";
             $params = ['alt' => 'media'];
         }
 
@@ -120,7 +125,7 @@ class GoogleDriveService
         $response = Http::withToken($account->token)->get($url, $params);
 
         if ($response->failed()) {
-             Log::error('Google Drive Download Failed', [
+            Log::error('Google Drive Download Failed', [
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
@@ -141,10 +146,10 @@ class GoogleDriveService
     {
         // Add a buffer time (e.g., 60 seconds) to avoid edge cases
         if ($account->expires_at && $account->expires_at->subSeconds(60)->isPast()) {
-            if (!$account->refresh_token) {
-                 // If we don't have a refresh token, we can't refresh. 
-                 // The user must re-connect.
-                 throw new \Exception('Session expired. Please reconnect your Google Account.');
+            if (! $account->refresh_token) {
+                // If we don't have a refresh token, we can't refresh.
+                // The user must re-connect.
+                throw new \Exception('Session expired. Please reconnect your Google Account.');
             }
 
             /** @var \Illuminate\Http\Client\Response $response */

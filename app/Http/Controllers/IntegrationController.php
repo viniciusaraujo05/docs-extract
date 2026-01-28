@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Batch;
 use App\Models\ConnectedAccount;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
-use App\Models\Batch;
+use Illuminate\Support\Facades\Log;
+use Laravel\Socialite\Facades\Socialite;
 
 class IntegrationController extends Controller
 {
@@ -18,13 +18,13 @@ class IntegrationController extends Controller
         $user = $request->user();
 
         return \Inertia\Inertia::render('settings/integrations', [
-            'integrations' => $user->connectedAccounts()->get()->map(fn($account) => [
+            'integrations' => $user->connectedAccounts()->get()->map(fn ($account) => [
                 'provider' => $account->provider,
                 'name' => $account->name,
                 'email' => $account->email,
                 'avatar' => $account->avatar,
                 'created_at' => $account->created_at,
-            ])
+            ]),
         ]);
     }
 
@@ -38,7 +38,7 @@ class IntegrationController extends Controller
         if ($request->has('return_to')) {
             session(['oauth_return_to' => $request->input('return_to')]);
         }
-        
+
         // Store locale for callback redirect
         session(['integration_locale' => $locale]);
 
@@ -47,7 +47,7 @@ class IntegrationController extends Controller
         return Socialite::driver('google')
             ->scopes([
                 'https://www.googleapis.com/auth/drive.readonly',
-                'https://www.googleapis.com/auth/spreadsheets'
+                'https://www.googleapis.com/auth/spreadsheets',
             ])
             ->with(['access_type' => 'offline', 'prompt' => 'consent select_account'])
             ->redirectUrl(route('integrations.callback', ['provider' => $provider]))
@@ -73,8 +73,8 @@ class IntegrationController extends Controller
             Log::info('Google OAuth Callback', [
                 'user_id' => $user->id,
                 'google_id' => $socialUser->getId(),
-                'has_token' => !empty($socialUser->token),
-                'has_refresh_token' => !empty($socialUser->refreshToken),
+                'has_token' => ! empty($socialUser->token),
+                'has_refresh_token' => ! empty($socialUser->refreshToken),
                 'expires_in' => $socialUser->expiresIn,
             ]);
 
@@ -98,22 +98,24 @@ class IntegrationController extends Controller
                 ],
                 $data
             );
-            
+
             Log::info('Connected Account Saved', ['account_id' => $account->id]);
 
             $returnTo = session('oauth_return_to');
             if ($returnTo) {
                 session()->forget('oauth_return_to');
+
                 return redirect($returnTo)->with('success', 'Google account connected successfully.');
             }
-            
+
             return redirect()->route('settings.integrations', ['locale' => $locale])
                 ->with('success', 'Google account connected successfully.');
 
         } catch (\Exception $e) {
             Log::error('Google OAuth Error', ['message' => $e->getMessage()]);
+
             return redirect()->route('settings.integrations', ['locale' => $locale])
-                ->with('error', 'Failed to connect Google account: ' . $e->getMessage());
+                ->with('error', 'Failed to connect Google account: '.$e->getMessage());
         }
     }
 
@@ -142,6 +144,7 @@ class IntegrationController extends Controller
             if ($e->getMessage() === 'Google account not connected') {
                 return response()->json(['error' => $e->getMessage()], 400);
             }
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -153,7 +156,7 @@ class IntegrationController extends Controller
 
         try {
             $file = $driveService->downloadFile($user, $fileId);
-            
+
             return response($file['content'])
                 ->header('Content-Type', $file['mime_type'])
                 ->header('Content-Disposition', "attachment; filename=\"{$file['filename']}\"");
@@ -162,6 +165,7 @@ class IntegrationController extends Controller
             if ($e->getMessage() === 'Google account not connected') {
                 return response()->json(['error' => $e->getMessage()], 403);
             }
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -178,7 +182,7 @@ class IntegrationController extends Controller
 
         $account = $user->connectedAccounts()->where('provider', 'google')->first();
 
-        if (!$account) {
+        if (! $account) {
             return response()->json(['error' => 'Google account not connected'], 400);
         }
 
@@ -198,7 +202,7 @@ class IntegrationController extends Controller
         $user = $request->user();
         $account = $user->connectedAccounts()->where('provider', 'google')->first();
 
-        if (!$account) {
+        if (! $account) {
             return response()->json(['error' => 'Google account not connected'], 400);
         }
 
@@ -210,7 +214,7 @@ class IntegrationController extends Controller
                 'grant_type' => 'refresh_token',
                 'refresh_token' => $account->refresh_token,
             ]);
-    
+
             if ($response->successful()) {
                 $data = $response->json();
                 $account->update([
@@ -223,18 +227,19 @@ class IntegrationController extends Controller
         }
 
         $token = $account->token;
-        $title = $request->input('filename', 'Export') . ' - ' . now()->format('Y-m-d H:i');
+        $title = $request->input('filename', 'Export').' - '.now()->format('Y-m-d H:i');
 
         // 1. Create Spreadsheet
         $response = Http::withToken($token)
             ->post('https://sheets.googleapis.com/v4/spreadsheets', [
                 'properties' => [
-                    'title' => $title
-                ]
+                    'title' => $title,
+                ],
             ]);
 
         if ($response->failed()) {
             Log::error('Export failed: Could not create spreadsheet', ['response' => $response->body()]);
+
             return response()->json(['error' => 'Failed to create spreadsheet'], 500);
         }
 
@@ -249,32 +254,32 @@ class IntegrationController extends Controller
 
         // Normalize data to array of arrays
         $rows = [];
-        
+
         // Ensure data is a list of objects
-        if (!array_is_list($data)) {
+        if (! array_is_list($data)) {
             $data = [$data];
         }
 
         // Headers from first item
         $headers = array_keys($data[0]);
         $rows[] = $headers;
-        
+
         foreach ($data as $item) {
-             $row = [];
-             foreach ($headers as $header) {
-                 $val = $item[$header] ?? '';
-                 if (is_array($val) || is_object($val)) {
-                     $val = json_encode($val, JSON_UNESCAPED_UNICODE);
-                 }
-                 $row[] = $val;
-             }
-             $rows[] = $row;
+            $row = [];
+            foreach ($headers as $header) {
+                $val = $item[$header] ?? '';
+                if (is_array($val) || is_object($val)) {
+                    $val = json_encode($val, JSON_UNESCAPED_UNICODE);
+                }
+                $row[] = $val;
+            }
+            $rows[] = $row;
         }
 
         // 3. Write Data
         $response = Http::withToken($token)
             ->post("https://sheets.googleapis.com/v4/spreadsheets/{$spreadsheetId}/values/A1:append?valueInputOption=USER_ENTERED", [
-                'values' => $rows
+                'values' => $rows,
             ]);
 
         if ($response->failed()) {

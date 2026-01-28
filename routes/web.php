@@ -93,7 +93,6 @@ Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->g
 
     // Google Integration
 
-        
     // Batch document routes (API only - UI integrated in create page)
     Route::post('documents/batch', [DocumentController::class, 'batchStore'])
         ->name('documents.batch.store')
@@ -133,7 +132,7 @@ Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->g
 // Settings Routes (auth only, no verified required for billing to allow subscription management)
 Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {
     Route::get('settings/billing', [PlanController::class, 'billing'])->name('settings.billing');
-    
+
     // Integrations
     Route::get('settings/integrations', [App\Http\Controllers\IntegrationController::class, 'index'])->name('settings.integrations');
     Route::get('integrations/{provider}/connect', [App\Http\Controllers\IntegrationController::class, 'connect'])->name('integrations.connect');
@@ -147,7 +146,7 @@ Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->g
 // Non-localized authenticated routes
 Route::middleware(['auth'])->group(function () {
     Route::get('integrations/{provider}/callback', [App\Http\Controllers\IntegrationController::class, 'callback'])->name('integrations.callback');
-    
+
     // Google Integration Export (AJAX)
     Route::post('integrations/google/export', [App\Http\Controllers\IntegrationController::class, 'exportRawData'])
         ->name('integrations.google.export');
