@@ -76,7 +76,7 @@ final class DocumentController extends Controller
                 'total' => $paginator->total(),
             ],
             'documentTypes' => $documentTypes,
-            'recentBatches' => $recentBatches->map(fn($b) => [
+            'recentBatches' => $recentBatches->map(fn ($b) => [
                 'id' => $b->id,
                 'status' => $b->status,
                 'template_name' => $b->template_name,
@@ -99,7 +99,7 @@ final class DocumentController extends Controller
         $limitReached = $subscriptionService->hasReachedLimit($user, 'documents');
         $planName = $subscriptionService->getUserPlanName($user);
 
-        // Check model limit  
+        // Check model limit
         $modelLimitReached = $subscriptionService->hasReachedLimit($user, 'models');
 
         // Check if this is the first document
@@ -161,7 +161,7 @@ final class DocumentController extends Controller
         $this->authorize('view', $documentModel);
 
         $diskName = $documentModel->storage_disk ?? config('filesystems.default');
-        
+
         \Illuminate\Support\Facades\Log::info('Checking Preview', [
             'doc_id' => $documentModel->id,
             'path' => $documentModel->file_path,
@@ -308,6 +308,7 @@ final class DocumentController extends Controller
         $subscriptionService = app(\App\Services\SubscriptionService::class);
         if ($subscriptionService->hasReachedLimit($user, 'documents')) {
             $planName = $subscriptionService->getUserPlanName($user);
+
             return redirect()->back()
                 ->with('error', "You've reached the document limit for your {$planName} plan. Upgrade to continue uploading documents.");
         }
@@ -330,7 +331,7 @@ final class DocumentController extends Controller
 
         return redirect()
             ->route('documents.batch.show', ['locale' => app()->getLocale(), 'batch' => $batch->id])
-            ->with('success', count($files) . ' documents queued for processing.');
+            ->with('success', count($files).' documents queued for processing.');
     }
 
     /**
@@ -341,9 +342,9 @@ final class DocumentController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $batchModel = $this->batchRepository->findForUser((int)$batch, $user);
+        $batchModel = $this->batchRepository->findForUser((int) $batch, $user);
 
-        if (!$batchModel) {
+        if (! $batchModel) {
             abort(404, 'Batch not found');
         }
 
@@ -357,7 +358,7 @@ final class DocumentController extends Controller
                 'started_at' => $batchModel->started_at?->toISOString(),
                 'completed_at' => $batchModel->completed_at?->toISOString(),
             ],
-            'documents' => $batchModel->documents->map(fn($doc) => [
+            'documents' => $batchModel->documents->map(fn ($doc) => [
                 'id' => $doc->id,
                 'name' => $doc->name,
                 'status' => $doc->status,
@@ -375,9 +376,9 @@ final class DocumentController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $batchModel = $this->batchRepository->findForUser((int)$batch, $user);
+        $batchModel = $this->batchRepository->findForUser((int) $batch, $user);
 
-        if (!$batchModel) {
+        if (! $batchModel) {
             if ($request->wantsJson() || $request->query('json') === 'true') {
                 return response()->json(['error' => 'Batch not found'], 404);
             }
@@ -390,13 +391,18 @@ final class DocumentController extends Controller
                 'batch' => [
                     'id' => $batchModel->id,
                     'status' => $batchModel->status,
+                    'template_name' => $batchModel->template_name,
                     'progress' => $batchModel->getProgress(),
+                    'created_at' => $batchModel->created_at->toISOString(),
+                    'started_at' => $batchModel->started_at?->toISOString(),
+                    'completed_at' => $batchModel->completed_at?->toISOString(),
                 ],
-                'documents' => $batchModel->documents->map(fn($doc) => [
+                'documents' => $batchModel->documents->map(fn ($doc) => [
                     'id' => $doc->id,
                     'name' => $doc->name,
                     'status' => $doc->status,
                     'error_message' => $doc->error_message,
+                    'created_at' => $doc->created_at->toISOString(),
                 ])->toArray(),
             ]);
         }
@@ -412,7 +418,7 @@ final class DocumentController extends Controller
                 'started_at' => $batchModel->started_at?->toISOString(),
                 'completed_at' => $batchModel->completed_at?->toISOString(),
             ],
-            'documents' => $batchModel->documents->map(fn($doc) => [
+            'documents' => $batchModel->documents->map(fn ($doc) => [
                 'id' => $doc->id,
                 'name' => $doc->name,
                 'status' => $doc->status,
@@ -430,9 +436,9 @@ final class DocumentController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $batchModel = $this->batchRepository->findForUser((int)$batch, $user);
+        $batchModel = $this->batchRepository->findForUser((int) $batch, $user);
 
-        if (!$batchModel) {
+        if (! $batchModel) {
             abort(404, 'Batch not found');
         }
 
@@ -456,12 +462,12 @@ final class DocumentController extends Controller
         // Batch check
         if ($request->has('names')) {
             $names = $request->input('names');
-            if (!is_array($names)) {
+            if (! is_array($names)) {
                 $names = [$names];
             }
-            
+
             $duplicates = $this->documentRepository->findExistingNames($names, $user->id);
-            
+
             return response()->json([
                 'structure' => 'batch',
                 'duplicates' => $duplicates,

@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -300,8 +299,8 @@ export default function BillingIndex() {
   }, [currentPlan, plans]);
 
   const formatPrice = (amount: string | number | null | undefined, currency: string = 'EUR') => {
-    // Treat 0 as valid number, only null/undefined as N/A
-    if (amount === null || amount === undefined) return 'N/A';
+    // Treat null/undefined as 0
+    if (amount === null || amount === undefined || amount === 'N/A') amount = 0;
     
     // Ensure we have a number
     const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;

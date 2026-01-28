@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\User;
 use App\Mail\PasswordResetMail;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
@@ -75,7 +75,7 @@ class PasswordResetTest extends TestCase
         $response
             ->assertSessionHasNoErrors()
             ->assertSessionHasNoErrors();
-            
+
         $this->assertStringContainsString('/login', $response->headers->get('Location'));
     }
 

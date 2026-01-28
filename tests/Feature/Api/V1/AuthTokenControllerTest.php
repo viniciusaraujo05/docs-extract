@@ -2,10 +2,8 @@
 
 namespace Tests\Feature\Api\V1;
 
-use App\Enums\HttpResponse;
 use App\Models\ApiClient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class AuthTokenControllerTest extends TestCase
@@ -57,7 +55,7 @@ class AuthTokenControllerTest extends TestCase
         $client = ApiClient::factory()->create();
         $token = auth('api')->login($client);
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson(route('api.v1.auth.refresh'));
 
         $response->assertStatus(200)
@@ -66,8 +64,8 @@ class AuthTokenControllerTest extends TestCase
                 'access_token',
                 'expires_in',
             ]);
-            
-        // Ensure new token is different? strict JWT refresh might return same if within grace period, 
+
+        // Ensure new token is different? strict JWT refresh might return same if within grace period,
         // but typically it rotates. Let's just assert structure.
     }
 
@@ -76,7 +74,7 @@ class AuthTokenControllerTest extends TestCase
         $client = ApiClient::factory()->create();
         $token = auth('api')->login($client);
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$token)
             ->postJson(route('api.v1.auth.logout'));
 
         $response->assertStatus(200)

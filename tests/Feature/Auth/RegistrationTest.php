@@ -27,7 +27,7 @@ class RegistrationTest extends TestCase
 
         $response->assertSessionHasNoErrors();
         $this->assertAuthenticated();
-        
+
         $response->assertStatus(302);
         // Using manual check for locale-agnostic redirect
         $this->assertStringContainsString('/dashboard', $response->headers->get('Location'));

@@ -17,6 +17,7 @@ class CreateBatchDocumentsJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 1;
+
     public int $timeout = 120;
 
     /**
@@ -44,16 +45,16 @@ class CreateBatchDocumentsJob implements ShouldQueue
             foreach ($this->filesPaths as $index => $fileInfo) {
                 // Support both new array format and legacy string format (for backward compatibility if queues are running)
                 if (is_string($fileInfo)) {
-                     $filePath = $fileInfo;
-                     // Try to recover original name from temp filename if possible, otherwise use basename
-                     // Temp format: batch_{batchId}_{index}_{originalName}
-                     $basename = basename($filePath);
-                     // Try to strip prefix
-                     if (preg_match('/^batch_\d+_\d+_(.+)$/', $basename, $matches)) {
-                         $originalName = $matches[1];
-                     } else {
-                         $originalName = $basename;
-                     }
+                    $filePath = $fileInfo;
+                    // Try to recover original name from temp filename if possible, otherwise use basename
+                    // Temp format: batch_{batchId}_{index}_{originalName}
+                    $basename = basename($filePath);
+                    // Try to strip prefix
+                    if (preg_match('/^batch_\d+_\d+_(.+)$/', $basename, $matches)) {
+                        $originalName = $matches[1];
+                    } else {
+                        $originalName = $basename;
+                    }
                 } else {
                     $filePath = $fileInfo['path'];
                     $originalName = $fileInfo['original_name'];
@@ -85,13 +86,13 @@ class CreateBatchDocumentsJob implements ShouldQueue
         // Get file info from DEFAULT disk
         $originalFilename = $originalFilenameFromAction; // Use the passed original name
         $disk = config('filesystems.default');
-        
+
         $mimeType = Storage::disk($disk)->mimeType($tempPath);
         $fileSize = Storage::disk($disk)->size($tempPath);
 
         // Generate unique filename
-        $filename = $this->user->id . '_' . time() . '_' . $index . '_' . $originalFilename;
-        $finalPath = 'documents/' . $filename;
+        $filename = time().'_'.$index.'_'.$originalFilename;
+        $finalPath = "documents/{$this->user->id}/{$filename}";
 
         // Move file to final location on the SAME disk
         // Since we are using the default disk for both temp and final, we can just move it.
@@ -99,15 +100,15 @@ class CreateBatchDocumentsJob implements ShouldQueue
             // Edge case: collision? Should be rare with timestamp and user ID.
             throw new \RuntimeException("File already exists at destination: {$finalPath}");
         }
-        
+
         Storage::disk($disk)->move($tempPath, $finalPath);
 
         // Determine document type (must match enum: invoice, receipt, custom)
         // We load the relationship to ensure we can access the type name
         $this->batch->loadMissing('documentType');
-        
+
         $rawType = $this->batch->new_type_name ?? $this->batch->documentType?->name ?? 'custom';
-        
+
         // Map user-defined type names to database constraints
         $type = match (strtolower($rawType)) {
             'invoice', 'fatura' => 'invoice',

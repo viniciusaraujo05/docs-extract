@@ -16,6 +16,7 @@ class SocialLoginController extends Controller
     public function redirectToProvider(string $locale, string $provider)
     {
         session(['social_login_locale' => $locale]);
+
         return Socialite::driver($provider)->redirect();
     }
 
@@ -47,14 +48,14 @@ class SocialLoginController extends Controller
                 ->with('status', 'Authentication failed. Please try again.');
         }
 
-        $user = User::where($provider . '_id', $socialUser->getId())
+        $user = User::where($provider.'_id', $socialUser->getId())
             ->orWhere('email', $socialUser->getEmail())
             ->first();
 
         if ($user) {
             // Update provider ID and avatar if missing or changed
             $user->update([
-                $provider . '_id' => $socialUser->getId(),
+                $provider.'_id' => $socialUser->getId(),
                 'avatar' => $socialUser->getAvatar(),
                 // If user was created via email, mark verified if social provider verified it
                 'email_verified_at' => $user->email_verified_at ?? now(),
@@ -65,12 +66,12 @@ class SocialLoginController extends Controller
                 'name' => $socialUser->getName() ?? $socialUser->getNickname(),
                 'email' => $socialUser->getEmail(),
                 'password' => bcrypt(Str::random(16)),
-                $provider . '_id' => $socialUser->getId(),
+                $provider.'_id' => $socialUser->getId(),
                 'avatar' => $socialUser->getAvatar(),
                 'email_verified_at' => now(),
             ]);
 
-            $user->notify(new \App\Notifications\WelcomeNotification());
+            $user->notify(new \App\Notifications\WelcomeNotification);
         }
 
         Auth::login($user);

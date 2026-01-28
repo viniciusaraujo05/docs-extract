@@ -10,7 +10,6 @@ use App\Models\User;
 use App\Repositories\DocumentBatchRepository;
 use App\Repositories\DocumentTypeRepository;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Action to store batch documents.
@@ -36,7 +35,7 @@ final readonly class StoreBatchDocumentsAction
         array $schema,
     ): DocumentBatch {
         // Create new document type if needed
-        if ($documentTypeId === null && !empty($newTypeName) && isset($schema['fields'])) {
+        if ($documentTypeId === null && ! empty($newTypeName) && isset($schema['fields'])) {
             $newDocumentType = $this->documentTypeRepository->create([
                 'user_id' => $user->id,
                 'name' => $newTypeName,
@@ -74,11 +73,12 @@ final readonly class StoreBatchDocumentsAction
         }
 
         if (empty($tempPaths)) {
-             // If all files were duplicates, maybe we should mark batch as 'completed' or 'failed' immediately?
-             $batch->update(['status' => 'completed', 'total_documents' => 0]);
-             return $batch;
+            // If all files were duplicates, maybe we should mark batch as 'completed' or 'failed' immediately?
+            $batch->update(['status' => 'completed', 'total_documents' => 0]);
+
+            return $batch;
         }
-        
+
         // Update total documents count in case some were skipped
         $batch->update(['total_documents' => count($tempPaths)]);
 
@@ -97,7 +97,7 @@ final readonly class StoreBatchDocumentsAction
         // We use a directory per batch to avoid collisions.
         $path = $file->storeAs("temp/batches/{$userId}/{$batchId}", $file->getClientOriginalName(), config('filesystems.default'));
 
-        if (!$path) {
+        if (! $path) {
             throw new \RuntimeException('Failed to store temporary file. Please check storage configuration.');
         }
 

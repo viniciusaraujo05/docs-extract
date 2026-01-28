@@ -56,7 +56,7 @@ final class DocumentBatchRepository
     public function update(DocumentBatch $batch, array $data): DocumentBatch
     {
         $batch->update($data);
-        
+
         return $batch->fresh();
     }
 
@@ -69,7 +69,7 @@ final class DocumentBatchRepository
             'status' => 'cancelled',
             'completed_at' => now(),
         ]);
-        
+
         return $batch->fresh();
     }
 

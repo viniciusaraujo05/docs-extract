@@ -73,7 +73,7 @@ class SubscriptionController extends Controller
     {
         $user = auth()->user();
         $planName = $this->subscriptionService->getUserPlanName($user);
-        
+
         return Inertia::render('Subscription/Success', [
             'session_id' => $request->query('session_id'),
             'user_name' => $user->name,

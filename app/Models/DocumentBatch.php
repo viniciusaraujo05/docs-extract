@@ -124,7 +124,7 @@ class DocumentBatch extends Model
     public function incrementProcessed(bool $success): void
     {
         $this->increment('processed_documents');
-        
+
         if ($success) {
             $this->increment('successful_documents');
         } else {

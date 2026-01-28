@@ -17,7 +17,9 @@ class ProcessBatchDocumentJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
+
     public int $timeout = 300;
+
     public int $backoff = 60;
 
     /**
@@ -42,9 +44,10 @@ class ProcessBatchDocumentJob implements ShouldQueue
                 'document_id' => $this->document->id,
                 'batch_id' => $this->batch->id,
             ]);
-            
+
             // Mark document as cancelled if needed, or just leave as pending/cancelled
             $this->document->update(['status' => 'cancelled']);
+
             return;
         }
 

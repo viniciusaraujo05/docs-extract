@@ -121,7 +121,7 @@ class UsageController extends Controller
             ->whereBetween('created_at', [$periodStart, $periodEnd])
             ->orderBy('created_at', 'desc')
             ->get(['id', 'name', 'page_count', 'created_at'])
-            ->map(fn($doc) => [
+            ->map(fn ($doc) => [
                 'id' => $doc->id,
                 'name' => $doc->name,
                 'pages' => $doc->page_count ?? 1,

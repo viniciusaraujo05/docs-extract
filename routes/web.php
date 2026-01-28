@@ -179,7 +179,7 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
             if (auth()->user()->hasVerifiedEmail()) {
                 return redirect()->route('dashboard');
             }
-            
+
             return Inertia::render('auth/verify-email', [
                 'status' => session('status'),
                 'locale' => $locale,
@@ -210,8 +210,6 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
     Route::post('register-checkout', [\App\Http\Controllers\Auth\CheckoutRegisterController::class, 'store'])
         ->middleware(['guest:web', 'throttle:register'])
         ->name('locale.register-checkout.store');
-
-
 
     // Social Login Redirect (Localized to preserve language)
     Route::get('auth/{provider}', [\App\Http\Controllers\Auth\SocialLoginController::class, 'redirectToProvider'])

@@ -137,6 +137,7 @@ class VisionStrategy implements ExtractionStrategyInterface
         try {
             $imagick = new \Imagick($path);
             $ratio = $imagick->getImageHeight() / $imagick->getImageWidth();
+
             return $ratio > 2.5; // Tunable threshold
         } catch (\Throwable $e) {
             return false;
@@ -151,20 +152,21 @@ class VisionStrategy implements ExtractionStrategyInterface
             $width = $imagick->getImageWidth();
             $height = $imagick->getImageHeight();
             $sliceHeight = 2000; // Target height for slices regarding context window
-            
+
             for ($y = 0; $y < $height; $y += $sliceHeight) {
                 // Clone to crop
                 $slice = clone $imagick;
                 $currentSliceHeight = min($sliceHeight, $height - $y);
                 $slice->cropImage($width, $currentSliceHeight, 0, $y);
-                $slice->setImageFormat('jpeg'); 
-                
+                $slice->setImageFormat('jpeg');
+
                 $slices[] = base64_encode($slice->getImageBlob());
             }
         } catch (\Throwable $e) {
             // Fallback: return original if slice fails
             return [base64_encode(file_get_contents($path))];
         }
+
         return $slices;
     }
 

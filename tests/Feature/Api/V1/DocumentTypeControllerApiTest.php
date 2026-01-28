@@ -13,13 +13,15 @@ class DocumentTypeControllerApiTest extends TestCase
     use RefreshDatabase;
 
     protected ApiClient $apiClient;
+
     protected User $user;
+
     protected string $token;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
         $this->apiClient = ApiClient::factory()->for($this->user)->create();
         $this->token = auth('api')->login($this->apiClient);
@@ -29,7 +31,7 @@ class DocumentTypeControllerApiTest extends TestCase
     {
         DocumentType::factory()->count(2)->for($this->user)->create();
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->getJson(route('api.v1.document-types.index'));
 
         $response->assertStatus(200)
@@ -42,7 +44,7 @@ class DocumentTypeControllerApiTest extends TestCase
                         'description',
                         'fields',
                         'created_at',
-                    ]
+                    ],
                 ],
                 'message',
             ]);
@@ -67,7 +69,7 @@ class DocumentTypeControllerApiTest extends TestCase
             ],
         ];
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->postJson(route('api.v1.document-types.store'), $payload);
 
         $response->assertStatus(201)
@@ -84,7 +86,7 @@ class DocumentTypeControllerApiTest extends TestCase
     {
         $type = DocumentType::factory()->for($this->user)->create();
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->getJson(route('api.v1.document-types.show', $type->id));
 
         $response->assertStatus(200)
@@ -97,7 +99,7 @@ class DocumentTypeControllerApiTest extends TestCase
         $otherUser = User::factory()->create();
         $type = DocumentType::factory()->for($otherUser)->create();
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->getJson(route('api.v1.document-types.show', $type->id));
 
         $response->assertStatus(404);
@@ -109,7 +111,7 @@ class DocumentTypeControllerApiTest extends TestCase
             'name' => 'Old Name',
         ]);
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->putJson(route('api.v1.document-types.update', $type->id), [
                 'name' => 'Updated Name',
                 'description' => 'Updated Description',
@@ -117,7 +119,7 @@ class DocumentTypeControllerApiTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonPath('data.name', 'Updated Name');
-            
+
         $this->assertDatabaseHas('document_types', [
             'id' => $type->id,
             'name' => 'Updated Name',
@@ -128,7 +130,7 @@ class DocumentTypeControllerApiTest extends TestCase
     {
         $type = DocumentType::factory()->for($this->user)->create();
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->deleteJson(route('api.v1.document-types.destroy', $type->id));
 
         $response->assertStatus(200)

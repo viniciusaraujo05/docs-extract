@@ -17,21 +17,21 @@ return new class extends Migration
             $table->foreignId('document_type_id')->nullable()->constrained()->onDelete('set null');
             $table->string('new_type_name')->nullable(); // For new document types
             $table->json('schema_used'); // Fields configuration
-            
+
             // Progress tracking
             $table->integer('total_documents')->default(0);
             $table->integer('processed_documents')->default(0);
             $table->integer('successful_documents')->default(0);
             $table->integer('failed_documents')->default(0);
-            
+
             // Status
             $table->enum('status', ['pending', 'processing', 'completed', 'failed'])->default('pending');
-            
+
             // Timestamps
             $table->timestamp('started_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
-            
+
             // Indexes
             $table->index(['user_id', 'status']);
             $table->index('created_at');

@@ -2,9 +2,8 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\User;
 use App\Mail\VerificationMail;
-use Illuminate\Auth\Notifications\VerifyEmail;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
@@ -30,7 +29,7 @@ class VerificationNotificationTest extends TestCase
         // Actually the controller redirects back().
         // If I don't set from(), it might redirect to root.
         // Let's just check it redirects SOMEWHERE.
-        
+
         Mail::assertSent(VerificationMail::class, function ($mail) use ($user) {
             return $mail->hasTo($user->email);
         });

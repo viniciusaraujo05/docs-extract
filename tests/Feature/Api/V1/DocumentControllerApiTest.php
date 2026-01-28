@@ -16,13 +16,15 @@ class DocumentControllerApiTest extends TestCase
     use RefreshDatabase;
 
     protected ApiClient $apiClient;
+
     protected User $user;
+
     protected string $token;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
         $this->apiClient = ApiClient::factory()->for($this->user)->create();
         $this->token = auth('api')->login($this->apiClient);
@@ -31,10 +33,10 @@ class DocumentControllerApiTest extends TestCase
     public function test_can_upload_document(): void
     {
         Storage::fake('documents');
-        
+
         $file = UploadedFile::fake()->create('invoice.pdf', 100);
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->postJson(route('api.v1.documents.store'), [
                 'file' => $file,
                 'type' => 'invoice',
@@ -55,7 +57,7 @@ class DocumentControllerApiTest extends TestCase
         $this->assertDatabaseHas('documents', [
             'user_id' => $this->user->id,
         ]);
-        
+
         $doc = Document::where('user_id', $this->user->id)->latest()->first();
         $this->assertStringContainsString('invoice', $doc->name);
     }
@@ -64,7 +66,7 @@ class DocumentControllerApiTest extends TestCase
     {
         $document = Document::factory()->for($this->user)->create();
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->getJson(route('api.v1.documents.show', $document->id));
 
         $response->assertStatus(200)
@@ -81,7 +83,7 @@ class DocumentControllerApiTest extends TestCase
         $otherUser = User::factory()->create();
         $document = Document::factory()->for($otherUser)->create();
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->getJson(route('api.v1.documents.show', $document->id));
 
         $response->assertStatus(404);
@@ -91,7 +93,7 @@ class DocumentControllerApiTest extends TestCase
     {
         Document::factory()->count(3)->for($this->user)->create();
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->getJson(route('api.v1.documents.index'));
 
         $response->assertStatus(200)
@@ -107,7 +109,7 @@ class DocumentControllerApiTest extends TestCase
         Document::factory()->for($this->user)->create(['name' => 'Specific Invoice']);
         Document::factory()->for($this->user)->create(['name' => 'Other File']);
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->getJson(route('api.v1.documents.search.name', ['name' => 'Invoice']));
 
         $response->assertStatus(200)
@@ -121,7 +123,7 @@ class DocumentControllerApiTest extends TestCase
         $doc2 = Document::factory()->for($this->user)->create(['created_at' => now()->subDays(2)]);
         Document::factory()->for($this->user)->create(['created_at' => now()->subDays(10)]); // Too old
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->postJson(route('api.v1.documents.search.date'), [
                 'start_date' => now()->subDays(6)->toDateString(),
                 'end_date' => now()->toDateString(),
@@ -137,7 +139,7 @@ class DocumentControllerApiTest extends TestCase
         Document::factory()->for($this->user)->for($type)->create(['name' => 'Lunch Receipt']);
         Document::factory()->for($this->user)->create(['name' => 'Unknown Doc']);
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $this->token)
+        $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
             ->getJson(route('api.v1.documents.filter', [
                 'document_type' => 'Receipt',
                 'name' => 'Lunch',

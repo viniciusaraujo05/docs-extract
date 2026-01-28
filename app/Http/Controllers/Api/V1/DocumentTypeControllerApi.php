@@ -171,7 +171,7 @@ final class DocumentTypeControllerApi extends Controller
                 fields: $validated['fields'] ?? $documentType->fields,
             );
 
-            if (!$success) {
+            if (! $success) {
                 throw new \Exception('Failed to update document type in repository.');
             }
 

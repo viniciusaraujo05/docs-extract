@@ -34,7 +34,7 @@ class AuthenticationTest extends TestCase
         $location = $response->headers->get('Location');
         $this->assertTrue(
             str_contains($location, '/dashboard') || str_contains($location, '/documents'),
-            'Redirected to unexpected location: ' . $location
+            'Redirected to unexpected location: '.$location
         );
     }
 
