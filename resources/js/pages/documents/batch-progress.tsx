@@ -54,9 +54,10 @@ interface BatchProgressProps {
         previewUrl?: string; // Add this
         mime_type?: string;  // Add this
     }>;
+    hasGoogleConnection: boolean;
 }
 
-export default function BatchProgress({ batch: initialBatch, documents: initialDocuments }: BatchProgressProps) {
+export default function BatchProgress({ batch: initialBatch, documents: initialDocuments, hasGoogleConnection }: BatchProgressProps) {
     const { t } = useTranslation();
     const { props } = usePage();
     const locale = (props as any).locale || 'pt';
@@ -234,6 +235,36 @@ export default function BatchProgress({ batch: initialBatch, documents: initialD
         }
     };
 
+    const handleExportToSheets = async () => {
+         try {
+             // Show loading state/toast
+             const promise = fetch(`/${locale}/integrations/batch/${batch.id}/export`, {
+                 method: 'POST',
+                 headers: {
+                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                     'Accept': 'application/json',
+                 }
+             });
+
+             toast.promise(promise, {
+                loading: t('Starting export...'),
+                success: async (response) => {
+                    const data = await response.json();
+                    if (response.ok && data.success) {
+                        return t('Export started! Check your Google Drive soon.');
+                    } else {
+                        throw new Error(data.error || 'Unknown error');
+                    }
+                },
+                error: (err) => t('Export failed: ') + (err.message || t('Unknown error')),
+             });
+
+         } catch (error) {
+             console.error(error);
+             toast.error(t('Export failed. Please try again.'));
+         }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`${t('Batch Processing')} - ${batch.template_name}`} />
@@ -257,7 +288,26 @@ export default function BatchProgress({ batch: initialBatch, documents: initialD
                             </p>
                         </div>
                     </div>
-                                    <div className="flex items-center gap-2">
+                                     <div className="flex items-center gap-2">
+                         {/* Export Button */}
+                         {hasGoogleConnection && (batch.status === 'completed' || batch.status === 'processed') && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleExportToSheets}
+                                className="text-green-600 border-green-200 hover:bg-green-50 dark:hover:bg-green-950/20"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                                    <line x1="3" y1="9" x2="21" y2="9"/>
+                                    <line x1="3" y1="15" x2="21" y2="15"/>
+                                    <line x1="9" y1="9" x2="9" y2="21"/>
+                                    <line x1="15" y1="9" x2="15" y2="21"/>
+                                </svg>
+                                {t('Export to Sheets')}
+                            </Button>
+                         )}
+
                          {(batch.status === 'processing' || batch.status === 'pending') && (
                              <Button 
                                 variant="destructive" 

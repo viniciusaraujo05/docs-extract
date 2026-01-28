@@ -365,6 +365,7 @@ final class DocumentController extends Controller
                 'error_message' => $doc->error_message,
                 'created_at' => $doc->created_at->toISOString(),
             ])->toArray(),
+            'hasGoogleConnection' => $user->connectedAccounts()->where('provider', 'google')->exists(),
         ]);
     }
 

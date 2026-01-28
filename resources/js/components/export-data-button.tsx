@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -44,6 +45,32 @@ export function ExportDataButton({
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  const exportToGoogleSheets = async () => {
+    try {
+      setIsExporting(true);
+      const response = await axios.post('/integrations/google/export', {
+        data,
+        filename
+      });
+
+      if (response.data.url) {
+        window.open(response.data.url, '_blank');
+        toast.success(t('Exported to Google Sheets successfully!'));
+      } else {
+        toast.success(t('Exported to Google Sheets (Empty)'));
+      }
+    } catch (error: any) {
+      if (error.response?.status === 400 && error.response?.data?.error === 'Google account not connected') {
+         toast.error(t('Please connect your Google account in Settings > Integrations first.'));
+      } else {
+         toast.error(t('Error exporting to Google Sheets'));
+      }
+      console.error('Sheets export error:', error);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const exportToCSV = () => {
@@ -401,6 +428,12 @@ export function ExportDataButton({
   };
 
   const exportFormats = [
+    {
+       label: 'Google Sheets',
+       icon: FileSpreadsheet,
+       action: exportToGoogleSheets,
+       description: t('Export to Google Sheets'),
+    },
     {
       label: 'CSV',
       icon: FileSpreadsheet,

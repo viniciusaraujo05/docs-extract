@@ -59,6 +59,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Document::class);
     }
 
+    public function connectedAccounts(): HasMany
+    {
+        return $this->hasMany(ConnectedAccount::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *

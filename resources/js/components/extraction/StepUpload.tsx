@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { GoogleDrivePicker } from './GoogleDrivePicker';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -90,6 +91,7 @@ export function StepUpload({
     const { t } = useTranslation();
     const [dragActive, setDragActive] = useState(false);
     const [showNewType, setShowNewType] = useState(documentTypes.length === 0);
+    const [showDrivePicker, setShowDrivePicker] = useState(false); // NEW
     const inputRef = useRef<HTMLInputElement>(null);
 
     const handleDrag = useCallback((e: React.DragEvent) => {
@@ -135,6 +137,24 @@ export function StepUpload({
     const handleClick = useCallback(() => {
         inputRef.current?.click();
     }, []);
+
+    const handleDriveFileSelect = useCallback((fileOrFiles: File | File[]) => {
+        if (batchMode) {
+             const newFiles = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
+             
+             // Filter duplicates
+             const existingNames = new Set(files.map(f => f.name));
+             const uniqueNewFiles = newFiles.filter(f => !existingNames.has(f.name));
+
+             if (uniqueNewFiles.length > 0) {
+                onFilesSelect?.([...files, ...uniqueNewFiles]);
+             }
+        } else {
+            // Single mode: take first if array
+            const file = Array.isArray(fileOrFiles) ? fileOrFiles[0] : fileOrFiles;
+            onFileSelect(file);
+        }
+    }, [batchMode, files, onFilesSelect, onFileSelect]);
 
     const handleRemoveFile = useCallback((index?: number) => {
         if (batchMode && typeof index === 'number' && onFilesSelect) {
@@ -440,27 +460,104 @@ export function StepUpload({
                             multiple={batchMode}
                         />
 
-                        {!file ? (
-                            <div className="flex flex-col items-center gap-3 p-6 text-center">
-                                <div className={cn(
-                                    'rounded-full p-4 transition-transform duration-300',
-                                    hasTypeSelected ? 'bg-primary/10' : 'bg-muted',
-                                    dragActive && 'scale-110'
-                                )}>
-                                    {getFileIcon()}
+                        {/* Google Drive Import - Disabled for now to simplify verification (removing drive.readonly scope)
+                                        <div className="mt-4 flex items-center justify-center">
+                                            <div className="relative w-full text-center">
+                                                <div className="absolute inset-0 flex items-center">
+                                                    <span className="w-full border-t border-gray-300 dark:border-gray-600" />
+                                                </div>
+                                                <div className="relative flex justify-center text-xs uppercase">
+                                                    <span className="bg-white dark:bg-gray-800 px-2 text-gray-500">
+                                                        {t('Or import from')}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-4 flex justify-center">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setShowDrivePicker(true);
+                                                }}
+                                                className="w-full max-w-sm flex items-center justify-center gap-2"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" role="img">
+                                                    <path d="M23.49,12.275 C23.49,11.485 23.425,10.73 23.295,10 H12 V14.51 H18.46 C18.18,15.99 17.335,17.245 16.08,18.09 L16.08,21.09 L19.905,21.09 C22.145,19.03 23.49,15.98 23.49,12.275 Z" fill="#4285F4"/>
+                                                    <path d="M12,24 C15.24,24 17.965,22.935 19.91,21.09 L16.08,18.09 C15.005,18.815 13.62,19.25 12,19.25 C8.865,19.25 6.215,17.135 5.265,14.29 L1.3,14.29 L1.3,17.385 C3.26,21.275 7.315,24 12,24 Z" fill="#34A853"/>
+                                                    <path d="M5.265,14.29 C5.025,13.565 4.9,12.795 4.9,12 C4.9,11.205 5.025,10.435 5.265,9.71 L5.265,6.62 L1.3,6.62 C0.47,8.28 0,10.09 0,12 C0,13.91 0.47,15.72 1.3,17.385 L5.265,14.29 Z" fill="#FBBC05"/>
+                                                    <path d="M12,4.75 C13.77,4.75 15.355,5.36 16.605,6.55 L20.02,3.135 C17.96,1.215 15.235,0 12,0 C7.315,0 3.26,2.725 1.3,6.62 L5.265,9.71 C6.215,6.865 8.865,4.75 12,4.75 Z" fill="#EA4335"/>
+                                                </svg>
+                                                {t('Drive')}
+                                            </Button>
+                                        </div>
+                                        */}                {!file ? (
+                            <div className="flex flex-col items-center gap-6 p-8 text-center">
+                                <div className="space-y-2">
+                                    <h3 className="text-lg font-semibold">{t('How would you like to upload?')}</h3>
+                                    <p className="text-sm text-muted-foreground">{t('Choose the source of your document')}</p>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium">
-                                        {hasTypeSelected ? (
-                                            <span className="text-primary">{t('Click or drag the document')}</span>
-                                        ) : (
-                                            <span className="text-muted-foreground">{t('Select the template first')}</span>
+                                
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-md">
+                                    {/* Option 1: Computer */}
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleClick();
+                                        }}
+                                        disabled={!hasTypeSelected}
+                                        className={cn(
+                                            "flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200",
+                                            hasTypeSelected 
+                                                ? "border-muted hover:border-primary/50 hover:bg-muted/50 cursor-pointer" 
+                                                : "border-muted opacity-50 cursor-not-allowed"
                                         )}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        PDF, JPG, PNG, WebP (máx. {MAX_FILE_SIZE_MB}MB)
-                                    </p>
+                                    >
+                                        <div className="p-3 bg-primary/10 rounded-full">
+                                            <Upload className="h-6 w-6 text-primary" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="font-medium block">{t('From Computer')}</span>
+                                            <span className="text-xs text-muted-foreground block">{t('Click to browse')}</span>
+                                        </div>
+                                    </button>
+
+                                    {/* Option 2: Google Drive */}
+                                    <button
+                                        type="button"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setShowDrivePicker(true);
+                                        }}
+                                        disabled={!hasTypeSelected}
+                                        className={cn(
+                                            "flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200",
+                                            hasTypeSelected 
+                                                ? "border-muted hover:border-blue-500/50 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 cursor-pointer" 
+                                                : "border-muted opacity-50 cursor-not-allowed"
+                                        )}
+                                    >
+                                        <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" role="img" className="h-6 w-6">
+                                                <path d="M23.49,12.275 C23.49,11.485 23.425,10.73 23.295,10 H12 V14.51 H18.46 C18.18,15.99 17.335,17.245 16.08,18.09 L16.08,21.09 L19.905,21.09 C22.145,19.03 23.49,15.98 23.49,12.275 Z" fill="#4285F4"/>
+                                                <path d="M12,24 C15.24,24 17.965,22.935 19.91,21.09 L16.08,18.09 C15.005,18.815 13.62,19.25 12,19.25 C8.865,19.25 6.215,17.135 5.265,14.29 L1.3,14.29 L1.3,17.385 C3.26,21.275 7.315,24 12,24 Z" fill="#34A853"/>
+                                                <path d="M5.265,14.29 C5.025,13.565 4.9,12.795 4.9,12 C4.9,11.205 5.025,10.435 5.265,9.71 L5.265,6.62 L1.3,6.62 C0.47,8.28 0,10.09 0,12 C0,13.91 0.47,15.72 1.3,17.385 L5.265,14.29 Z" fill="#FBBC05"/>
+                                                <path d="M12,4.75 C13.77,4.75 15.355,5.36 16.605,6.55 L20.02,3.135 C17.96,1.215 15.235,0 12,0 C7.315,0 3.26,2.725 1.3,6.62 L5.265,9.71 C6.215,6.865 8.865,4.75 12,4.75 Z" fill="#EA4335"/>
+                                            </svg>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="font-medium block">{t('From Google Drive')}</span>
+                                            <span className="text-xs text-muted-foreground block">{t('Import from cloud')}</span>
+                                        </div>
+                                    </button>
                                 </div>
+                                
+                                {!hasTypeSelected && (
+                                     <p className="text-xs text-muted-foreground mt-2">{t('Select the template first')}</p>
+                                )}
                             </div>
                         ) : (
                             <div className="flex w-full flex-col items-center gap-3 p-6">
@@ -669,6 +766,14 @@ export function StepUpload({
                     </Button>
                 </div>
             </CardContent>
+            
+            <GoogleDrivePicker 
+                open={showDrivePicker} 
+                onOpenChange={setShowDrivePicker}
+                onFileSelect={handleDriveFileSelect}
+                locale={locale}
+                multiple={batchMode}
+            />
         </Card>
     );
 }

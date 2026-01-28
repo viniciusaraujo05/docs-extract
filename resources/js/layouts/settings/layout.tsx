@@ -38,6 +38,11 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
             icon: null,
         },
         {
+            title: t('Integrations'),
+            href: `/${locale}/settings/integrations`,
+            icon: null,
+        },
+        {
             title: t('Language'),
             href: `/${locale}/settings/language`,
             icon: null,
