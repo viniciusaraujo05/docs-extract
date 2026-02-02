@@ -47,7 +47,7 @@ final class ReportController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             \Illuminate\Support\Facades\Log::error('ReportController::index - No authenticated user');
             abort(401);
         }
@@ -56,9 +56,9 @@ final class ReportController extends Controller
             \Illuminate\Support\Facades\Log::info('ReportController::index - Fetching document types', [
                 'user_id' => $user->id,
             ]);
-            
+
             $documentTypes = $this->documentTypeRepository->getActiveWithDocumentCount($user->id);
-            
+
             \Illuminate\Support\Facades\Log::info('ReportController::index - Document types fetched', [
                 'count' => $documentTypes->count(),
             ]);
@@ -77,7 +77,7 @@ final class ReportController extends Controller
 
         try {
             \Illuminate\Support\Facades\Log::info('ReportController::index - Rendering view');
-            
+
             return Inertia::render('reports/index', [
                 'documentTypes' => $documentTypes,
             ]);
@@ -87,7 +87,7 @@ final class ReportController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             throw $e;
         }
     }

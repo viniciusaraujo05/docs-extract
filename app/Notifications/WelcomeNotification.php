@@ -34,7 +34,7 @@ class WelcomeNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $locale = $notifiable->locale ?? app()->getLocale() ?? 'en';
-        
+
         return (new MailMessage)
             ->subject(__('emails.welcome.subject'))
             ->view('emails.welcome', [
