@@ -68,6 +68,12 @@ class HandleInertiaRequests extends Middleware
             $alternateLocales = [];
         }
 
+        // Check if user has any documents (for first extraction modal)
+        $hasDocuments = false;
+        if ($user = $request->user()) {
+            $hasDocuments = \App\Models\Document::where('user_id', $user->id)->exists();
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -75,6 +81,7 @@ class HandleInertiaRequests extends Middleware
             'quote' => ['message' => $message, 'author' => $author],
             'auth' => [
                 'user' => $request->user(),
+                'hasDocuments' => $hasDocuments,
             ],
             'locale' => $locale,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',

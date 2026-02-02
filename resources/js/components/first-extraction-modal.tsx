@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { FileUp, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,30 +18,33 @@ interface FirstExtractionModalProps {
     onClose?: () => void;
 }
 
-const STORAGE_KEY = 'docset_onboarding_modal_v1';
+const STORAGE_KEY = 'docset_onboarding_modal_dismissed';
 
 export function FirstExtractionModal({ locale = 'en', isOpen: controlledOpen, onClose }: FirstExtractionModalProps) {
     const { t } = useTranslation();
+    const { auth } = usePage<{ auth: { hasDocuments: boolean } }>().props;
     const [open, setOpen] = useState(false);
 
     useEffect(() => {
-        // Check if modal was already shown
-        const wasShown = localStorage.getItem(STORAGE_KEY);
-        if (!wasShown && controlledOpen !== false) {
+        // Only show if user has no documents AND hasn't dismissed it in this session
+        const wasDismissed = sessionStorage.getItem(STORAGE_KEY);
+        
+        if (!auth.hasDocuments && !wasDismissed && controlledOpen !== false) {
             // Small delay for smoother entrance after page load
             const timer = setTimeout(() => setOpen(true), 500);
             return () => clearTimeout(timer);
         }
-    }, [controlledOpen]);
+    }, [auth.hasDocuments, controlledOpen]);
 
     const handleClose = () => {
         setOpen(false);
-        localStorage.setItem(STORAGE_KEY, 'true');
+        // Use sessionStorage instead of localStorage - only dismiss for this session
+        sessionStorage.setItem(STORAGE_KEY, 'true');
         onClose?.();
     };
 
     const handleStartExtraction = () => {
-        localStorage.setItem(STORAGE_KEY, 'true');
+        sessionStorage.setItem(STORAGE_KEY, 'true');
         router.visit(`/${locale}/documents/create`);
     };
 
