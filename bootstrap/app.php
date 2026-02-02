@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\CheckUsageLimit;
+use App\Http\Middleware\RestrictApiDomain;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RedirectIfAuthenticated;
@@ -29,7 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
             // Public API v1 (JWT-based)
             if ($apiDomain) {
-                Route::middleware('api')
+                Route::middleware(['api', RestrictApiDomain::class])
                     ->domain($apiDomain)
                     ->group(base_path('routes/api_v1.php'));
             } else {
