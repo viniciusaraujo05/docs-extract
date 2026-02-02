@@ -25,31 +25,32 @@ class GoogleDriveService
 
     /**
      * REMOVED: listFiles() method.
-     * 
+     *
      * With drive.file scope, we cannot list arbitrary files from user's Drive.
      * Files must be explicitly selected by the user via Google Picker API.
-     * 
+     *
      * To implement file selection:
      * 1. Use Google Picker API on frontend with the same OAuth token
      * 2. User explicitly selects files through Google's UI
      * 3. Picker returns fileId which can then be used with downloadFile()
-     * 
+     *
      * This ensures compliance with Google's least privilege policy.
      */
 
     /**
      * Download a file from Google Drive.
-     * 
+     *
      * IMPORTANT: With drive.file scope, this only works for:
      * - Files created by this application
      * - Files explicitly selected by user via Google Picker API
-     * 
+     *
      * The fileId must come from user interaction (Google Picker), not from
      * programmatic listing or search operations.
-     * 
-     * @param User $user The authenticated user
-     * @param string $fileId The Google Drive file ID (from Picker or app-created file)
+     *
+     * @param  User  $user  The authenticated user
+     * @param  string  $fileId  The Google Drive file ID (from Picker or app-created file)
      * @return array ['content' => string, 'filename' => string, 'mime_type' => string]
+     *
      * @throws \Exception
      */
     public function downloadFile(User $user, string $fileId)
@@ -64,7 +65,7 @@ class GoogleDriveService
 
         // Get file metadata
         $metadataUrl = self::DRIVE_API_URL."/{$fileId}";
-        
+
         /** @var \Illuminate\Http\Client\Response $metaResponse */
         $metaResponse = Http::withToken($account->token)
             ->get($metadataUrl, [

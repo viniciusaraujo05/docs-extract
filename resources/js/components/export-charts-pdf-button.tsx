@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Download, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { domToBlob } from 'modern-screenshot';
 
 interface ExportChartsPDFButtonProps {
   disabled?: boolean;
@@ -55,71 +55,34 @@ export function ExportChartsPDFButton({
           pdf.addPage();
         }
 
-        // Store reference to original element for onclone callback
         const originalChart = chart as HTMLElement;
 
-        // Capture chart as image with onclone callback to fix oklch colors
-        const canvas = await html2canvas(originalChart, {
+        // Use modern-screenshot library which handles oklch colors properly
+        const blob = await domToBlob(originalChart, {
           scale: 2,
-          logging: false,
-          useCORS: true,
           backgroundColor: '#ffffff',
-          onclone: (clonedDoc, clonedElement) => {
-            // Apply computed styles to all elements in the clone
-            const applyComputedStyles = (original: Element, cloned: Element) => {
-              const computedStyle = window.getComputedStyle(original);
-              const clonedEl = cloned as HTMLElement;
-              
-              // Apply all color-related properties (browser converts oklch to rgb)
-              if (computedStyle.backgroundColor) {
-                clonedEl.style.backgroundColor = computedStyle.backgroundColor;
-              }
-              if (computedStyle.color) {
-                clonedEl.style.color = computedStyle.color;
-              }
-              if (computedStyle.borderColor) {
-                clonedEl.style.borderColor = computedStyle.borderColor;
-              }
-              if (computedStyle.borderTopColor) {
-                clonedEl.style.borderTopColor = computedStyle.borderTopColor;
-              }
-              if (computedStyle.borderRightColor) {
-                clonedEl.style.borderRightColor = computedStyle.borderRightColor;
-              }
-              if (computedStyle.borderBottomColor) {
-                clonedEl.style.borderBottomColor = computedStyle.borderBottomColor;
-              }
-              if (computedStyle.borderLeftColor) {
-                clonedEl.style.borderLeftColor = computedStyle.borderLeftColor;
-              }
-              if (computedStyle.outlineColor) {
-                clonedEl.style.outlineColor = computedStyle.outlineColor;
-              }
-              
-              // Recursively apply to children
-              const originalChildren = original.children;
-              const clonedChildren = cloned.children;
-              
-              for (let i = 0; i < originalChildren.length; i++) {
-                if (originalChildren[i] && clonedChildren[i]) {
-                  applyComputedStyles(originalChildren[i], clonedChildren[i]);
-                }
-              }
-            };
-            
-            // Apply to the cloned element and all its children
-            applyComputedStyles(originalChart, clonedElement);
-          },
         });
-
-        const imgData = canvas.toDataURL('image/png');
+        
+        // Convert blob to data URL
+        const imgData = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+        
+        // Create image to get dimensions
+        const img = new Image();
+        await new Promise((resolve) => {
+          img.onload = resolve;
+          img.src = imgData;
+        });
         
         // Calculate dimensions to fit landscape A4
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         
         const imgWidth = pdfWidth - 20; // 10mm margin on each side
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const imgHeight = (img.height * imgWidth) / img.width;
         
         // Center vertically if image is smaller than page
         const yPosition = imgHeight < pdfHeight - 20 

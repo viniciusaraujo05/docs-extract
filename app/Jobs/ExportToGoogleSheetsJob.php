@@ -14,12 +14,12 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Export batch data to Google Sheets.
- * 
+ *
  * COMPLIANCE NOTE: This job is fully compatible with drive.file scope because:
  * - It creates NEW spreadsheets owned by this application
  * - It does not access or list existing user files
  * - All created files are accessible because they were created by the app
- * 
+ *
  * The Sheets API v4 endpoint automatically creates files in Google Drive
  * with proper ownership, making them accessible under drive.file scope.
  */

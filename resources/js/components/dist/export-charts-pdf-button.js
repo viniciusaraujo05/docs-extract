@@ -42,8 +42,8 @@ var button_1 = require("@/components/ui/button");
 var lucide_react_1 = require("lucide-react");
 var sonner_1 = require("sonner");
 var react_i18next_1 = require("react-i18next");
-var html2canvas_1 = require("html2canvas");
 var jspdf_1 = require("jspdf");
+var modern_screenshot_1 = require("modern-screenshot");
 function ExportChartsPDFButton(_a) {
     var _this = this;
     var _b = _a.disabled, disabled = _b === void 0 ? false : _b, _c = _a.variant, variant = _c === void 0 ? 'outline' : _c, _d = _a.size, size = _d === void 0 ? 'default' : _d, _e = _a.filename, filename = _e === void 0 ? 'charts_report' : _e;
@@ -73,7 +73,7 @@ function ExportChartsPDFButton(_a) {
                     }
                     isFirstPage = true;
                     _loop_1 = function (chart) {
-                        var originalChart, canvas, imgData, pdfWidth, pdfHeight, imgWidth, imgHeight, yPosition;
+                        var originalChart, blob, imgData, img, pdfWidth, pdfHeight, imgWidth, imgHeight, yPosition;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -81,61 +81,30 @@ function ExportChartsPDFButton(_a) {
                                         pdf.addPage();
                                     }
                                     originalChart = chart;
-                                    return [4 /*yield*/, html2canvas_1["default"](originalChart, {
+                                    return [4 /*yield*/, modern_screenshot_1.domToBlob(originalChart, {
                                             scale: 2,
-                                            logging: false,
-                                            useCORS: true,
-                                            backgroundColor: '#ffffff',
-                                            onclone: function (clonedDoc, clonedElement) {
-                                                // Apply computed styles to all elements in the clone
-                                                var applyComputedStyles = function (original, cloned) {
-                                                    var computedStyle = window.getComputedStyle(original);
-                                                    var clonedEl = cloned;
-                                                    // Apply all color-related properties (browser converts oklch to rgb)
-                                                    if (computedStyle.backgroundColor) {
-                                                        clonedEl.style.backgroundColor = computedStyle.backgroundColor;
-                                                    }
-                                                    if (computedStyle.color) {
-                                                        clonedEl.style.color = computedStyle.color;
-                                                    }
-                                                    if (computedStyle.borderColor) {
-                                                        clonedEl.style.borderColor = computedStyle.borderColor;
-                                                    }
-                                                    if (computedStyle.borderTopColor) {
-                                                        clonedEl.style.borderTopColor = computedStyle.borderTopColor;
-                                                    }
-                                                    if (computedStyle.borderRightColor) {
-                                                        clonedEl.style.borderRightColor = computedStyle.borderRightColor;
-                                                    }
-                                                    if (computedStyle.borderBottomColor) {
-                                                        clonedEl.style.borderBottomColor = computedStyle.borderBottomColor;
-                                                    }
-                                                    if (computedStyle.borderLeftColor) {
-                                                        clonedEl.style.borderLeftColor = computedStyle.borderLeftColor;
-                                                    }
-                                                    if (computedStyle.outlineColor) {
-                                                        clonedEl.style.outlineColor = computedStyle.outlineColor;
-                                                    }
-                                                    // Recursively apply to children
-                                                    var originalChildren = original.children;
-                                                    var clonedChildren = cloned.children;
-                                                    for (var i = 0; i < originalChildren.length; i++) {
-                                                        if (originalChildren[i] && clonedChildren[i]) {
-                                                            applyComputedStyles(originalChildren[i], clonedChildren[i]);
-                                                        }
-                                                    }
-                                                };
-                                                // Apply to the cloned element and all its children
-                                                applyComputedStyles(originalChart, clonedElement);
-                                            }
+                                            backgroundColor: '#ffffff'
                                         })];
                                 case 1:
-                                    canvas = _a.sent();
-                                    imgData = canvas.toDataURL('image/png');
+                                    blob = _a.sent();
+                                    return [4 /*yield*/, new Promise(function (resolve) {
+                                            var reader = new FileReader();
+                                            reader.onloadend = function () { return resolve(reader.result); };
+                                            reader.readAsDataURL(blob);
+                                        })];
+                                case 2:
+                                    imgData = _a.sent();
+                                    img = new Image();
+                                    return [4 /*yield*/, new Promise(function (resolve) {
+                                            img.onload = resolve;
+                                            img.src = imgData;
+                                        })];
+                                case 3:
+                                    _a.sent();
                                     pdfWidth = pdf.internal.pageSize.getWidth();
                                     pdfHeight = pdf.internal.pageSize.getHeight();
                                     imgWidth = pdfWidth - 20;
-                                    imgHeight = (canvas.height * imgWidth) / canvas.width;
+                                    imgHeight = (img.height * imgWidth) / img.width;
                                     yPosition = imgHeight < pdfHeight - 20
                                         ? (pdfHeight - imgHeight) / 2
                                         : 10;

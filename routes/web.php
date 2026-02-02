@@ -149,7 +149,7 @@ Route::middleware(['auth'])->group(function () {
     // Google Integration Export (AJAX)
     Route::post('integrations/google/export', [App\Http\Controllers\IntegrationController::class, 'exportRawData'])
         ->name('integrations.google.export');
-    
+
     // Google Picker API - Get OAuth Token
     Route::get('api/integrations/google/token', [App\Http\Controllers\IntegrationController::class, 'getOAuthToken'])
         ->name('integrations.google.token');

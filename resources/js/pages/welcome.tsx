@@ -55,6 +55,8 @@ import {
   IdCard,
   FileSpreadsheet,
   FileCode,
+  Cloud,
+  Link,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -183,6 +185,7 @@ export default function Welcome() {
       <TrustSignals />
       <UseCases />
       <ProductFlow locale={fullLocale} />
+      <GoogleIntegrations locale={fullLocale} />
       <Features locale={fullLocale} />
       <CodeExample locale={fullLocale} onOpenDemo={() => setShowDemo(true)} />
       <Pricing locale={fullLocale} isAuthenticated={isAuthenticated} localeShort={locale} plans={props.plans} />
@@ -895,8 +898,9 @@ function TrustSignals() {
             
             <div className="flex items-center gap-4 text-gray-500 font-mono text-sm">
                 <span className="hidden lg:block opacity-50">{(trust.exports || 'Export:').split(':')[0]}:</span>
-                <div className="flex gap-4 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
+                <div className="flex flex-wrap gap-3 md:gap-4 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
                     <span className="font-bold flex items-center gap-2" title="Excel / CSV"><FileSpreadsheet className="w-4 h-4" /> XLS/CSV</span>
+                    <span className="font-bold flex items-center gap-2" title="Google Sheets"><FileSpreadsheet className="w-4 h-4 text-emerald-400" /> Sheets</span>
                     <span className="font-bold flex items-center gap-2" title="JSON"><FileJson className="w-4 h-4" /> JSON</span>
                     <span className="font-bold flex items-center gap-2" title="XML"><FileCode className="w-4 h-4" /> XML</span>
                 </div>
@@ -1020,6 +1024,187 @@ function ProductFlow({ locale }: { locale: string }) {
             </motion.div>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+function GoogleIntegrations({ locale }: { locale: string }) {
+  const { t } = useTranslation();
+  
+  return (
+    <section className="py-20 md:py-28 relative overflow-hidden bg-gradient-to-b from-zinc-950 via-blue-950/10 to-zinc-950">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-600/10 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:32px_32px]"></div>
+      
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="text-center mb-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 backdrop-blur-sm"
+          >
+            <Cloud className="w-4 h-4 text-blue-400" />
+            <span className="text-sm font-medium text-blue-300">
+              {locale.startsWith('pt') ? 'Integrações Poderosas' : 'Powerful Integrations'}
+            </span>
+          </motion.div>
+          
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70"
+          >
+            {locale.startsWith('pt') 
+              ? 'Integração Nativa com Google' 
+              : 'Native Google Integration'}
+          </motion.h2>
+          
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-xl text-gray-400 max-w-3xl mx-auto"
+          >
+            {locale.startsWith('pt')
+              ? 'Conecte-se diretamente ao Google Drive e exporte para Google Sheets com apenas alguns cliques. Automatize seu fluxo de trabalho sem esforço.'
+              : 'Connect directly to Google Drive and export to Google Sheets with just a few clicks. Automate your workflow effortlessly.'}
+          </motion.p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {/* Google Drive Card */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] p-8 hover:border-blue-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10"
+          >
+            <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px] group-hover:bg-blue-500/20 transition-all duration-500" />
+            
+            <div className="relative z-10">
+              <div className="mb-6 inline-flex rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 p-4 text-blue-400 ring-1 ring-inset ring-blue-500/30 group-hover:scale-110 transition-transform duration-300">
+                <Cloud className="w-8 h-8" />
+              </div>
+              
+              <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-blue-100 transition-colors">
+                Google Drive
+              </h3>
+              
+              <p className="text-gray-400 leading-relaxed mb-6 group-hover:text-gray-300 transition-colors">
+                {locale.startsWith('pt')
+                  ? 'Importe documentos diretamente do seu Google Drive. Acesse e processe seus arquivos sem precisar fazer download manual.'
+                  : 'Import documents directly from your Google Drive. Access and process your files without manual downloads.'}
+              </p>
+              
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3 text-sm text-gray-300">
+                  <Check className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
+                  <span>
+                    {locale.startsWith('pt')
+                      ? 'Acesso direto aos seus arquivos'
+                      : 'Direct access to your files'}
+                  </span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-gray-300">
+                  <Check className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
+                  <span>
+                    {locale.startsWith('pt')
+                      ? 'Processamento em lote de múltiplos documentos'
+                      : 'Batch processing of multiple documents'}
+                  </span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-gray-300">
+                  <Check className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
+                  <span>
+                    {locale.startsWith('pt')
+                      ? 'Sincronização automática'
+                      : 'Automatic synchronization'}
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </motion.div>
+
+          {/* Google Sheets Card */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] p-8 hover:border-emerald-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10"
+          >
+            <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-emerald-500/10 blur-[80px] group-hover:bg-emerald-500/20 transition-all duration-500" />
+            
+            <div className="relative z-10">
+              <div className="mb-6 inline-flex rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 p-4 text-emerald-400 ring-1 ring-inset ring-emerald-500/30 group-hover:scale-110 transition-transform duration-300">
+                <FileSpreadsheet className="w-8 h-8" />
+              </div>
+              
+              <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-emerald-100 transition-colors">
+                Google Sheets
+              </h3>
+              
+              <p className="text-gray-400 leading-relaxed mb-6 group-hover:text-gray-300 transition-colors">
+                {locale.startsWith('pt')
+                  ? 'Exporte dados extraídos diretamente para Google Sheets. Organize e analise suas informações em tempo real.'
+                  : 'Export extracted data directly to Google Sheets. Organize and analyze your information in real-time.'}
+              </p>
+              
+              <ul className="space-y-3">
+                <li className="flex items-start gap-3 text-sm text-gray-300">
+                  <Check className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
+                  <span>
+                    {locale.startsWith('pt')
+                      ? 'Exportação com um clique'
+                      : 'One-click export'}
+                  </span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-gray-300">
+                  <Check className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
+                  <span>
+                    {locale.startsWith('pt')
+                      ? 'Formatação automática de dados'
+                      : 'Automatic data formatting'}
+                  </span>
+                </li>
+                <li className="flex items-start gap-3 text-sm text-gray-300">
+                  <Check className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
+                  <span>
+                    {locale.startsWith('pt')
+                      ? 'Colaboração em equipe facilitada'
+                      : 'Easy team collaboration'}
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Bottom CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5 }}
+          className="mt-16 text-center"
+        >
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
+            <Link className="w-4 h-4 text-blue-400" />
+            <span className="text-sm text-gray-300">
+              {locale.startsWith('pt')
+                ? 'Conecte sua conta Google em segundos'
+                : 'Connect your Google account in seconds'}
+            </span>
+            <Sparkles className="w-4 h-4 text-yellow-400" />
+          </div>
+        </motion.div>
       </div>
     </section>
   );

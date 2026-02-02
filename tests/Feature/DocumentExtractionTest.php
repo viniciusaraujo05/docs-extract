@@ -53,15 +53,15 @@ class DocumentExtractionTest extends TestCase
                 'files' => $files,
                 'new_type_name' => 'Invoice Batch',
                 'fields' => [['name' => 'total', 'label' => 'Total', 'type' => 'number']],
-                'locale' => 'en'
+                'locale' => 'en',
             ]);
 
         $response->assertRedirect();
-        
+
         $this->assertDatabaseHas('document_batches', [
             'user_id' => $user->id,
         ]);
-        
+
         $this->assertDatabaseCount('documents', 2);
     }
 }
