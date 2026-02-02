@@ -85,10 +85,9 @@ Route::prefix('api')->group(function () {
 Route::prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {
 
     // Auth Actions
-    Route::get('debug-test', function() { return "API.PHP IS LOADED"; });
-    
-    Route::post('login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])
-        ->middleware(['guest:web', 'throttle:login'])->name('locale.login.store');
+    Route::middleware('web')->group(function () {
+        Route::post('login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])
+            ->middleware(['guest:web', 'throttle:login'])->name('locale.login.store');
 
         if (Features::enabled(Features::resetPasswords())) {
             Route::post('forgot-password', [\Laravel\Fortify\Http\Controllers\PasswordResetLinkController::class, 'store'])
@@ -116,6 +115,8 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {
         Route::post('logout', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])
             ->middleware(['auth:web'])
             ->name('locale.logout');
+    });
+
     // Authenticated Actions
     Route::middleware(['auth'])->group(function () {
 

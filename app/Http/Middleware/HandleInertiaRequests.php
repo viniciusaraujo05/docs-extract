@@ -89,45 +89,34 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
-        try {
-            $shared = [
-                ...parent::share($request),
-                'name' => config('app.name'),
-                'appUrl' => config('app.url'),
-                'api_url' => env('API_DOMAIN') ? 'https://'.env('API_DOMAIN').'/v1' : config('app.url').'/api/v1',
-                'quote' => ['message' => $message, 'author' => $author],
-                'auth' => [
-                    'user' => $request->user(),
-                    'hasDocuments' => $hasDocuments,
-                ],
+        return [
+            ...parent::share($request),
+            'name' => config('app.name'),
+            'appUrl' => config('app.url'),
+            'api_url' => env('API_DOMAIN') ? 'https://'.env('API_DOMAIN').'/v1' : config('app.url').'/api/v1',
+            'quote' => ['message' => $message, 'author' => $author],
+            'auth' => [
+                'user' => $request->user(),
+                'hasDocuments' => $hasDocuments,
+            ],
+            'locale' => $locale,
+            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+                'newClient' => $request->session()->get('newClient'),
+            ],
+            'seo' => [
+                'title' => $seoContent['title'],
+                'description' => $seoContent['description'],
+                'keywords' => $seoContent['keywords'],
                 'locale' => $locale,
-                'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-                'flash' => [
-                    'success' => $request->session()->get('success'),
-                    'error' => $request->session()->get('error'),
-                    'newClient' => $request->session()->get('newClient'),
-                ],
-                'seo' => [
-                    'title' => $seoContent['title'],
-                    'description' => $seoContent['description'],
-                    'keywords' => $seoContent['keywords'],
-                    'locale' => $locale,
-                    'url' => $request->url(),
-                    'canonical' => $request->url(),
-                    'ogImage' => config('app.url').'/docset.png',
-                    'structuredData' => $structuredData,
-                    'alternateLocales' => $alternateLocales,
-                ],
-            ];
-            
-            \Illuminate\Support\Facades\Log::info('HandleInertiaRequests::share SUCCESS');
-            return $shared;
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('HandleInertiaRequests::share FAILED', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            throw $e;
-        }
+                'url' => $request->url(),
+                'canonical' => $request->url(),
+                'ogImage' => config('app.url').'/docset.png',
+                'structuredData' => $structuredData,
+                'alternateLocales' => $alternateLocales,
+            ],
+        ];
     }
 }

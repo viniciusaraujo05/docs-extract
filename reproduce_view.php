@@ -13,7 +13,7 @@ $kernel->bootstrap();
 try {
     echo "Rendering view...\n";
     $page = [
-        'component' => 'reports/Overview',
+        'component' => 'reports/index',
         'props' => [
             'seo' => [],
             'auth' => ['user' => null],
