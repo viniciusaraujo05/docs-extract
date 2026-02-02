@@ -10,7 +10,6 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Support\Facades\Route;
-use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -72,7 +71,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Loaded with 'web' middleware to inherit Session/CSRF protection
         Route::middleware('web')
             ->group(base_path('routes/api.php'));
-            
+
         // Public API (v1)
         if ($apiDomain) {
             Route::middleware('api')
@@ -84,10 +83,11 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->prefix('api')
                 ->group(base_path('routes/api_v1.php'));
         }
-        
+
         Route::middleware('web')
-             ->get('/up', function () {
-                 \Illuminate\Support\Facades\Event::dispatch(new \Illuminate\Foundation\Events\DiagnosingHealth);
-                 return response('OK');
-             });
+            ->get('/up', function () {
+                \Illuminate\Support\Facades\Event::dispatch(new \Illuminate\Foundation\Events\DiagnosingHealth);
+
+                return response('OK');
+            });
     })->create();

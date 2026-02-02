@@ -93,7 +93,7 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'appUrl' => config('app.url'),
-            'api_url' => env('API_DOMAIN') ? 'https://' . env('API_DOMAIN') . '/v1' : config('app.url') . '/api/v1',
+            'api_url' => env('API_DOMAIN') ? 'https://'.env('API_DOMAIN').'/v1' : config('app.url').'/api/v1',
             'quote' => ['message' => $message, 'author' => $author],
             'auth' => [
                 'user' => $request->user(),

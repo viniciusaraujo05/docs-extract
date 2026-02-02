@@ -98,7 +98,7 @@ Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->g
     Route::middleware(['verified'])->group(function () {
         Route::get('api', [ApiClientController::class, 'index'])->name('api.index');
     });
-    
+
     // Settings (Views)
     Route::get('settings/billing', [PlanController::class, 'billing'])->name('settings.billing');
     Route::get('settings/integrations', [App\Http\Controllers\IntegrationController::class, 'index'])->name('settings.integrations');
@@ -108,7 +108,7 @@ Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->g
 // Non-localized authenticated routes
 Route::middleware(['auth'])->group(function () {
     Route::get('integrations/{provider}/callback', [App\Http\Controllers\IntegrationController::class, 'callback'])->name('integrations.callback');
-    
+
     // Google Picker API
     Route::get('api/integrations/google/token', [App\Http\Controllers\IntegrationController::class, 'getOAuthToken'])
         ->name('integrations.google.token');
