@@ -114,8 +114,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('integrations.google.token');
 });
 
-// Auth routes with locale (must be BEFORE authenticated routes to avoid conflicts)
-// ONLY GET ROUTES (VIEWS) HERE. ACTIONS ARE IN API.PHP
 Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->group(function () {
     // Login routes
     Route::get('login', function ($locale) {

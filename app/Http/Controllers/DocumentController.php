@@ -450,9 +450,6 @@ final class DocumentController extends Controller
 
     /**
      * Verifica se já existe documento com o nome fornecido.
-     */
-    /**
-     * Verifica se já existe documento com o nome fornecido.
      * Suporta verificação em lote via parametro 'names[]'.
      */
     public function checkName(Request $request): JsonResponse
