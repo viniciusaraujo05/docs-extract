@@ -66,7 +66,7 @@ class AuthenticationTest extends TestCase
         $location = $response->headers->get('Location');
         $this->assertTrue(
             str_contains($location, 'two-factor-challenge'),
-            'Expected redirect to two-factor challenge, got: ' . $location
+            'Expected redirect to two-factor challenge, got: '.$location
         );
         $response->assertSessionHas('login.id', $user->id);
         $this->assertGuest();

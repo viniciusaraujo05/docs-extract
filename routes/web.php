@@ -117,6 +117,7 @@ Route::middleware(['auth'])->group(function () {
 // Two-factor authentication redirect (Fortify uses this internally)
 Route::get('two-factor-challenge', function () {
     $locale = app()->getLocale();
+
     return redirect()->route('locale.two-factor.login', ['locale' => $locale]);
 })->middleware(['guest'])->name('two-factor.login');
 

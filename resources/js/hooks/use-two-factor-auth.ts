@@ -1,4 +1,3 @@
-import { qrCode, recoveryCodes, secretKey } from '@/routes/two-factor';
 import { useCallback, useMemo, useState } from 'react';
 
 interface TwoFactorSetupData {
@@ -35,24 +34,22 @@ export const useTwoFactorAuth = () => {
         [qrCodeSvg, manualSetupKey],
     );
 
-    const fetchQrCode = useCallback(async (): Promise<void> => {
+    const fetchQrCode = useCallback(async () => {
         try {
-            const { svg } = await fetchJson<TwoFactorSetupData>(qrCode.url());
-            setQrCodeSvg(svg);
-        } catch {
-            setErrors((prev) => [...prev, 'Failed to fetch QR code']);
+            const data = await fetchJson<TwoFactorSetupData>('/user/two-factor-qr-code');
+            setQrCodeSvg(data.svg);
+        } catch (error) {
+            console.error('Failed to fetch QR code:', error);
             setQrCodeSvg(null);
         }
     }, []);
 
     const fetchSetupKey = useCallback(async (): Promise<void> => {
         try {
-            const { secretKey: key } = await fetchJson<TwoFactorSecretKey>(
-                secretKey.url(),
-            );
+            const { secretKey: key } = await fetchJson<TwoFactorSecretKey>('/user/two-factor-secret-key');
             setManualSetupKey(key);
-        } catch {
-            setErrors((prev) => [...prev, 'Failed to fetch a setup key']);
+        } catch (error) {
+            console.error('Failed to fetch a setup key:', error);
             setManualSetupKey(null);
         }
     }, []);
@@ -67,13 +64,13 @@ export const useTwoFactorAuth = () => {
         clearErrors();
     }, [clearErrors]);
 
-    const fetchRecoveryCodes = useCallback(async (): Promise<void> => {
+    const fetchRecoveryCodes = useCallback(async () => {
         try {
             clearErrors();
-            const codes = await fetchJson<string[]>(recoveryCodes.url());
+            const codes = await fetchJson<string[]>('/user/two-factor-recovery-codes');
             setRecoveryCodesList(codes);
-        } catch {
-            setErrors((prev) => [...prev, 'Failed to fetch recovery codes']);
+        } catch (error) {
+            console.error('Failed to fetch recovery codes:', error);
             setRecoveryCodesList([]);
         }
     }, [clearErrors]);

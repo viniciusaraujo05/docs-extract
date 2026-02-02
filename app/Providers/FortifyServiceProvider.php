@@ -46,6 +46,7 @@ class FortifyServiceProvider extends ServiceProvider
     {
         Fortify::twoFactorChallengeView(function () {
             $locale = app()->getLocale();
+
             return redirect()->route('locale.two-factor.login', ['locale' => $locale]);
         });
     }
