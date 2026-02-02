@@ -43,6 +43,7 @@ class DemoController extends Controller
 
                 if ($pages > 2) {
                     Log::info('Demo page limit exceeded', ['ip' => $ip, 'pages' => $pages]);
+
                     return response()->json([
                         'error' => 'Page limit exceeded',
                         'message' => "Demo is limited to 2 pages maximum. We detected {$pages} pages. Please register for full access.",
