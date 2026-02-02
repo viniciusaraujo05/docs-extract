@@ -50,7 +50,7 @@ export function ExportDataButton({
   const exportToGoogleSheets = async () => {
     try {
       setIsExporting(true);
-      const response = await axios.post('/integrations/google/export', {
+      const response = await axios.post('/api/integrations/google/export', {
         data,
         filename
       });

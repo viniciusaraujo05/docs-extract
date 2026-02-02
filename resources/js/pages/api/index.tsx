@@ -148,7 +148,7 @@ export default function ApiIndex() {
 
     const handleCreateWebhook = (e: React.FormEvent) => {
         e.preventDefault();
-        createWebhookForm.post(`/${locale}/api/webhooks`, {
+        createWebhookForm.post(`/api/webhooks`, {
             onSuccess: () => {
                 toast.success(t('Webhook created successfully!'));
                 createWebhookForm.reset();
@@ -187,7 +187,7 @@ export default function ApiIndex() {
     const confirmRegenerateSecret = () => {
         if (!selectedWebhook) return;
 
-        regenerateWebhookForm.post(`/${locale}/api/webhooks/${selectedWebhook.id}/regenerate`, {
+        regenerateWebhookForm.post(`/api/webhooks/${selectedWebhook.id}/regenerate`, {
             preserveScroll: true,
             onSuccess: () => {
                 toast.success(t('Webhook secret regenerated!'));

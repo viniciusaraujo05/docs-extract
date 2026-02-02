@@ -137,7 +137,7 @@ function DocumentsCreate(_a) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, , 4]);
-                        return [4 /*yield*/, fetch("/" + locale + "/api/usage", {
+                        return [4 /*yield*/, fetch("/api/usage", {
                                 headers: {
                                     'Accept': 'application/json',
                                     'X-Requested-With': 'XMLHttpRequest',
@@ -547,7 +547,7 @@ function DocumentsCreate(_a) {
     var checkAndSave = react_2.useCallback(function (forceOverwrite) {
         if (forceOverwrite === void 0) { forceOverwrite = false; }
         return __awaiter(_this, void 0, void 0, function () {
-            var formData, locale, endpoint;
+            var formData, endpoint;
             return __generator(this, function (_a) {
                 if ((!batchMode && !file) || (batchMode && files.length === 0))
                     return [2 /*return*/];
@@ -577,8 +577,7 @@ function DocumentsCreate(_a) {
                 }
                 formData.append('type', selectedTypeId ? 'predefined' : 'new_type');
                 formData.append('force_overwrite', forceOverwrite ? '1' : '0');
-                locale = localStorage.getItem('selected-locale') || 'pt';
-                endpoint = batchMode ? "/" + locale + "/documents/batch" : "/" + locale + "/documents";
+                endpoint = batchMode ? "/api/documents/batch" : "/api/documents";
                 react_1.router.post(endpoint, formData, {
                     forceFormData: true,
                     onSuccess: function (page) {

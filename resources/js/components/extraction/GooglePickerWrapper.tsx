@@ -148,7 +148,7 @@ export function GooglePickerWrapper({
                     const fileName = doc.name;
                     const mimeType = doc.mimeType;
                     
-                    const response = await fetch(`/${locale}/integrations/google/process-file`, {
+                    const response = await fetch(`/api/integrations/google/process-file`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

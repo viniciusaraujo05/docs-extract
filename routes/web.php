@@ -115,6 +115,37 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->group(function () {
+    // Auth POST routes
+    Route::post('login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])
+        ->middleware(['guest:web', 'throttle:login'])->name('locale.login.store');
+
+    Route::post('register', [\App\Http\Controllers\Auth\CustomRegisteredUserController::class, 'store'])
+        ->middleware(['guest:web', 'throttle:register'])->name('locale.register.store');
+
+    Route::post('register-checkout', [\App\Http\Controllers\Auth\CheckoutRegisterController::class, 'store'])
+        ->middleware(['guest:web', 'throttle:register'])
+        ->name('locale.register-checkout.store');
+
+    Route::post('logout', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])
+        ->middleware(['auth:web'])
+        ->name('locale.logout');
+
+    if (\Laravel\Fortify\Features::enabled(\Laravel\Fortify\Features::resetPasswords())) {
+        Route::post('forgot-password', [\Laravel\Fortify\Http\Controllers\PasswordResetLinkController::class, 'store'])
+            ->middleware(['guest', 'throttle:6,1'])
+            ->name('locale.password.email');
+
+        Route::post('reset-password', [\Laravel\Fortify\Http\Controllers\NewPasswordController::class, 'store'])
+            ->middleware('guest')
+            ->name('locale.password.update');
+    }
+
+    if (\Laravel\Fortify\Features::enabled(\Laravel\Fortify\Features::emailVerification())) {
+        Route::post('email/verification-notification', [\Laravel\Fortify\Http\Controllers\EmailVerificationNotificationController::class, 'store'])
+            ->middleware(['auth', 'throttle:6,1'])
+            ->name('locale.verification.send');
+    }
+
     // Login routes
     Route::get('login', function ($locale) {
         return Inertia::render('auth/login', [
@@ -184,7 +215,6 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
     Route::middleware(['auth'])->prefix('subscription')->name('subscription.')->group(function () {
         // Checkout flow (no verification needed)
         Route::get('checkout', [SubscriptionController::class, 'showCheckout'])->name('checkout');
-        Route::post('checkout', [SubscriptionController::class, 'checkout'])->name('checkout.process');
         Route::get('success', [SubscriptionController::class, 'success'])->name('success');
 
         // Management (requires verification)

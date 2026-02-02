@@ -161,14 +161,14 @@ export default function BillingIndex() {
 
       // Fetch all data in parallel
       const [usageResponse, planResponse, plansResponse, invoiceResponse] = await Promise.allSettled([
-        fetch(`/${locale}/api/usage`, {
+        fetch(`/api/usage`, {
           headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
           },
         }),
-        fetch(`/${locale}/api/plans/current?locale=${locale}`, {
+        fetch(`/api/plans/current?locale=${locale}`, {
           headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
@@ -182,7 +182,7 @@ export default function BillingIndex() {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
           },
         }),
-        fetch(`/${locale}/api/plans/upcoming-invoice`, {
+        fetch(`/api/plans/upcoming-invoice`, {
           headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
@@ -255,7 +255,7 @@ export default function BillingIndex() {
 
       // Fetch invoices separately (less critical)
       try {
-        const invoicesResponse = await fetch(`/${locale}/api/plans/invoices`, {
+        const invoicesResponse = await fetch(`/api/plans/invoices`, {
           headers: {
             'Accept': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
@@ -329,7 +329,7 @@ export default function BillingIndex() {
 
   const handleCancelSubscription = async () => {
     try {
-      const response = await fetch(`/${locale}/api/plans/cancel-subscription`, {
+      const response = await fetch(`/api/plans/cancel-subscription`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

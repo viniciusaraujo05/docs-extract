@@ -31,9 +31,10 @@ class CheckoutRegisterController extends Controller
      */
     public function store(Request $request)
     {
+        // SECURITY: Do not log sensitive data like emails
         Log::info('CheckoutRegisterController::store called', [
-            'email' => $request->email,
             'price_id' => $request->price_id,
+            'has_email' => !empty($request->email),
         ]);
 
         $request->validate([
@@ -54,6 +55,7 @@ class CheckoutRegisterController extends Controller
 
         $user->notify(new \App\Notifications\WelcomeNotification);
 
+        // SECURITY: Log only non-sensitive identifiers
         Log::info('User created for checkout flow', ['user_id' => $user->id]);
 
         // Dispatch Registered event to trigger email verification immediately

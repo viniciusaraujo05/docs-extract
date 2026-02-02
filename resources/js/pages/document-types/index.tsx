@@ -36,7 +36,7 @@ export default function DocumentTypesIndex({ documentTypes }: Props) {
             action: {
                 label: t('Delete'),
                 onClick: () => {
-                    router.delete(`/${locale}/document-types/${id}`, {
+                    router.delete(`/api/document-types/${id}`, {
                         preserveScroll: true,
                         onSuccess: () => {
                             toast.success(t('Document type deleted successfully!'));

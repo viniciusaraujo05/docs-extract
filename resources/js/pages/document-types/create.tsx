@@ -55,7 +55,7 @@ export default function DocumentTypesCreate() {
 
         // Check model limit before creating
         try {
-            const usageResponse = await fetch(`/${locale}/api/usage`, {
+            const usageResponse = await fetch(`/api/usage`, {
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
@@ -76,7 +76,7 @@ export default function DocumentTypesCreate() {
         }
 
         setSaving(true);
-        router.post(`/${locale}/document-types`, {
+        router.post(`/api/document-types`, {
             name,
             description,
             fields: JSON.stringify(fields),

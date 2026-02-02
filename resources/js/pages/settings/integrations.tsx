@@ -42,7 +42,7 @@ export default function Integrations({ integrations }: IntegrationsProps) {
     const handleDisconnect = (provider: string) => {
         if (!confirm(t('Are you sure you want to disconnect this account?'))) return;
 
-        router.post(`/${locale}/integrations/${provider}/disconnect`, {}, {
+        router.post(`/api/integrations/${provider}/disconnect`, {}, {
             preserveScroll: true,
             onSuccess: () => {
                 toast.success(t('Account disconnected successfully'));

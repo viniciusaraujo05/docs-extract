@@ -26,7 +26,7 @@ export default function Checkout({ priceId, planName, userName, userEmail }: Che
         setIsProcessing(true);
 
         // Use Inertia router to handle CSRF token automatically
-        router.post(`/${locale}/subscription/checkout`, {
+        router.post(`/api/subscription/checkout`, {
             price_id: priceId
         }, {
             onFinish: () => setIsProcessing(false),

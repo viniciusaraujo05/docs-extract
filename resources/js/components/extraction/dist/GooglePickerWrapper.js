@@ -166,7 +166,7 @@ function GooglePickerWrapper(_a) {
                                     fileId = doc.id;
                                     fileName = doc.name;
                                     mimeType = doc.mimeType;
-                                    return [4 /*yield*/, fetch("/" + locale + "/integrations/google/process-file", {
+                                    return [4 /*yield*/, fetch("/api/integrations/google/process-file", {
                                             method: 'POST',
                                             headers: {
                                                 'Content-Type': 'application/json',

@@ -21,7 +21,8 @@ class IntegrationController extends Controller
             'integrations' => $user->connectedAccounts()->get()->map(fn ($account) => [
                 'provider' => $account->provider,
                 'name' => $account->name,
-                'email' => $account->email,
+                // SECURITY: Mask email to protect privacy (show only first char and domain)
+                'email' => $this->maskEmail($account->email),
                 'avatar' => $account->avatar,
                 'created_at' => $account->created_at,
             ]),
@@ -77,17 +78,18 @@ class IntegrationController extends Controller
                 'expires_in' => $socialUser->expiresIn,
             ]);
 
+            // SECURITY: Encrypt OAuth tokens before storing
             $data = [
                 'provider_id' => $socialUser->getId(),
                 'name' => $socialUser->getName(),
                 'email' => $socialUser->getEmail(),
                 'avatar' => $socialUser->getAvatar(),
-                'token' => $socialUser->token,
+                'token' => encrypt($socialUser->token),
                 'expires_at' => now()->addSeconds($socialUser->expiresIn),
             ];
 
             if ($socialUser->refreshToken) {
-                $data['refresh_token'] = $socialUser->refreshToken;
+                $data['refresh_token'] = encrypt($socialUser->refreshToken);
             }
 
             $account = ConnectedAccount::updateOrCreate(
@@ -167,7 +169,7 @@ class IntegrationController extends Controller
      * The fileId must be explicitly provided by the user through the Picker.
      * This complies with drive.file scope: only access files explicitly selected by user.
      */
-    public function processPickedFile(Request $request, string $locale, \App\Services\GoogleDriveService $driveService)
+    public function processPickedFile(Request $request, \App\Services\GoogleDriveService $driveService)
     {
         $request->validate([
             'fileId' => 'required|string',
@@ -242,11 +244,14 @@ class IntegrationController extends Controller
             }
 
             try {
+                // SECURITY: Decrypt refresh token before use
+                $decryptedRefreshToken = decrypt($account->refresh_token);
+
                 $response = Http::timeout(10)->asForm()->post('https://oauth2.googleapis.com/token', [
                     'client_id' => config('services.google.client_id'),
                     'client_secret' => config('services.google.client_secret'),
                     'grant_type' => 'refresh_token',
-                    'refresh_token' => $account->refresh_token,
+                    'refresh_token' => $decryptedRefreshToken,
                 ]);
 
                 if ($response->successful()) {
@@ -259,8 +264,9 @@ class IntegrationController extends Controller
                         return response()->json(['error' => 'Invalid token refresh response'], 500);
                     }
 
+                    // SECURITY: Encrypt new token before storing
                     $account->update([
-                        'token' => $data['access_token'],
+                        'token' => encrypt($data['access_token']),
                         'expires_at' => now()->addSeconds($data['expires_in']),
                     ]);
                 } else {
@@ -281,11 +287,12 @@ class IntegrationController extends Controller
             }
         }
 
-        $token = $account->token;
+        // SECURITY: Decrypt token before use
+        $decryptedToken = decrypt($account->token);
         $title = $request->input('filename', 'Export').' - '.now()->format('Y-m-d H:i');
 
         // 1. Create Spreadsheet
-        $response = Http::withToken($token)
+        $response = Http::withToken($decryptedToken)
             ->post('https://sheets.googleapis.com/v4/spreadsheets', [
                 'properties' => [
                     'title' => $title,
@@ -332,7 +339,7 @@ class IntegrationController extends Controller
         }
 
         // 3. Write Data
-        $response = Http::withToken($token)
+        $response = Http::withToken($decryptedToken)
             ->post("https://sheets.googleapis.com/v4/spreadsheets/{$spreadsheetId}/values/A1:append?valueInputOption=USER_ENTERED", [
                 'values' => $rows,
             ]);
@@ -343,5 +350,24 @@ class IntegrationController extends Controller
         }
 
         return response()->json(['url' => $spreadsheetUrl]);
+    }
+
+    /**
+     * Mask email address for privacy protection
+     * Example: john.doe@example.com -> j***@example.com
+     */
+    private function maskEmail(?string $email): ?string
+    {
+        if (!$email || !str_contains($email, '@')) {
+            return $email;
+        }
+
+        [$local, $domain] = explode('@', $email, 2);
+        
+        if (strlen($local) <= 1) {
+            return $email;
+        }
+
+        return substr($local, 0, 1) . '***@' . $domain;
     }
 }

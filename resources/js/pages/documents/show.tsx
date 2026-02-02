@@ -111,7 +111,7 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
 
     const handleSave = () => {
         setIsSaving(true);
-        router.put(`/${locale}/documents/${document.id}/data`, {
+        router.put(`/api/documents/${document.id}/data`, {
             extracted_data: formData,
         }, {
             onSuccess: () => {

@@ -64,6 +64,8 @@ class ApiClientController extends Controller
         $client = $result['client'];
         $plainSecret = $result['plainTextSecret'];
 
+        // SECURITY: Use one-time flash for sensitive data
+        // The secret will only be available once and then removed
         return back()->with([
             'success' => 'API Client created successfully!',
             'newClient' => [
@@ -71,11 +73,10 @@ class ApiClientController extends Controller
                 'public_id' => $client->public_id,
                 'name' => $client->name,
                 'client_id' => $client->client_id,
-                'client_secret' => $plainSecret,
                 'status' => $client->status,
                 'created_at' => $client->created_at?->toISOString(),
             ],
-        ]);
+        ])->with('client_secret_once', $plainSecret);
     }
 
     public function destroy(Request $request, string $locale, ApiClient $apiClient): RedirectResponse
@@ -93,6 +94,8 @@ class ApiClientController extends Controller
 
         $plainSecret = $this->regenerateApiClientSecretAction->execute($apiClient);
 
+        // SECURITY: Use one-time flash for sensitive data
+        // The secret will only be available once and then removed
         return back()->with([
             'success' => 'API Client secret regenerated successfully!',
             'newClient' => [
@@ -100,10 +103,9 @@ class ApiClientController extends Controller
                 'public_id' => $apiClient->public_id,
                 'name' => $apiClient->name,
                 'client_id' => $apiClient->client_id,
-                'client_secret' => $plainSecret,
                 'status' => $apiClient->status,
                 'created_at' => $apiClient->created_at?->toISOString(),
             ],
-        ]);
+        ])->with('client_secret_once', $plainSecret);
     }
 }

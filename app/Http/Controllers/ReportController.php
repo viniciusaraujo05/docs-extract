@@ -39,9 +39,9 @@ final class ReportController extends Controller
 
     public function index(Request $request): Response
     {
+        // SECURITY: Avoid logging user_id unnecessarily
         \Illuminate\Support\Facades\Log::info('ReportController::index START', [
             'url' => $request->url(),
-            'user_id' => $request->user()?->id,
         ]);
 
         /** @var User $user */

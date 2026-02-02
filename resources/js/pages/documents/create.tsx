@@ -110,7 +110,7 @@ export default function DocumentsCreate({
     useEffect(() => {
         const checkModelLimit = async () => {
             try {
-                const usageResponse = await fetch(`/${locale}/api/usage`, {
+                const usageResponse = await fetch(`/api/usage`, {
                     headers: {
                         'Accept': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
@@ -525,8 +525,7 @@ export default function DocumentsCreate({
         formData.append('type', selectedTypeId ? 'predefined' : 'new_type');
         formData.append('force_overwrite', forceOverwrite ? '1' : '0');
         
-        const locale = localStorage.getItem('selected-locale') || 'pt';
-        const endpoint = batchMode ? `/${locale}/documents/batch` : `/${locale}/documents`;
+        const endpoint = batchMode ? `/api/documents/batch` : `/api/documents`;
         
         router.post(endpoint, formData, { 
             forceFormData: true,

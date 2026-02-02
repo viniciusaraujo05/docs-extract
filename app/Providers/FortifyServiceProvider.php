@@ -21,6 +21,10 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Disable Fortify's automatic route registration
+        // Must be called in register() before Fortify's boot() runs
+        Fortify::ignoreRoutes();
+        
         $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
     }
 

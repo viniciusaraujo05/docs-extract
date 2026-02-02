@@ -23,7 +23,7 @@ export function CancelSubscriptionModal({ open, onOpenChange }: CancelSubscripti
         setIsLoading(true);
         try {
             const locale = document.documentElement.lang || 'en';
-            const response = await fetch(`/${locale}/subscription/cancel-subscription`, {
+            const response = await fetch(`/api/subscription/cancel-subscription`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

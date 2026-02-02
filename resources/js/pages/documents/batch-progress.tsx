@@ -183,7 +183,7 @@ export default function BatchProgress({ batch: initialBatch, documents: initialD
         
         try {
             await new Promise<void>((resolve, reject) => {
-                router.put(`/${locale}/documents/${selectedDocId}/data`, {
+                router.put(`/api/documents/${selectedDocId}/data`, {
                     extracted_data: data,
                 }, {
                     preserveScroll: true,
@@ -218,7 +218,7 @@ export default function BatchProgress({ batch: initialBatch, documents: initialD
         }
 
         try {
-            await router.post(`/${locale}/api/documents/batch/${batch.id}/cancel`, {}, {
+            await router.post(`/api/documents/batch/${batch.id}/cancel`, {}, {
                 preserveScroll: true,
                 onSuccess: () => {
                     toast.success(t('Batch processing cancelled'));
@@ -238,7 +238,7 @@ export default function BatchProgress({ batch: initialBatch, documents: initialD
     const handleExportToSheets = async () => {
          try {
              // Show loading state/toast
-             const promise = fetch(`/${locale}/integrations/batch/${batch.id}/export`, {
+             const promise = fetch(`/api/integrations/batch/${batch.id}/export`, {
                  method: 'POST',
                  headers: {
                      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',

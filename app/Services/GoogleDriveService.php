@@ -66,8 +66,11 @@ class GoogleDriveService
         // Get file metadata
         $metadataUrl = self::DRIVE_API_URL."/{$fileId}";
 
+        // SECURITY: Decrypt token before use
+        $decryptedToken = decrypt($account->token);
+
         /** @var \Illuminate\Http\Client\Response $metaResponse */
-        $metaResponse = Http::withToken($account->token)
+        $metaResponse = Http::withToken($decryptedToken)
             ->get($metadataUrl, [
                 'fields' => 'name,mimeType',
             ]);
@@ -110,7 +113,7 @@ class GoogleDriveService
         }
 
         /** @var \Illuminate\Http\Client\Response $response */
-        $response = Http::withToken($account->token)->get($url, $params);
+        $response = Http::withToken($decryptedToken)->get($url, $params);
 
         if ($response->failed()) {
             Log::error('Failed to download file', [
@@ -140,18 +143,22 @@ class GoogleDriveService
                 throw new \Exception('Session expired. Please reconnect your Google Account.');
             }
 
+            // SECURITY: Decrypt refresh token before use
+            $decryptedRefreshToken = decrypt($account->refresh_token);
+
             /** @var \Illuminate\Http\Client\Response $response */
             $response = Http::asForm()->post(self::TOKEN_URL, [
                 'client_id' => config('services.google.client_id'),
                 'client_secret' => config('services.google.client_secret'),
                 'grant_type' => 'refresh_token',
-                'refresh_token' => $account->refresh_token,
+                'refresh_token' => $decryptedRefreshToken,
             ]);
 
             if ($response->successful()) {
                 $data = $response->json();
+                // SECURITY: Encrypt new token before storing
                 $account->update([
-                    'token' => $data['access_token'],
+                    'token' => encrypt($data['access_token']),
                     'expires_at' => now()->addSeconds($data['expires_in']),
                 ]);
             } else {

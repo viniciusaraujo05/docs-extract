@@ -385,7 +385,7 @@ export default function DocumentsIndex({ documents, documentTypes = [], recentBa
                     <button
                         onClick={() => {
                             toast.dismiss(toastId);
-                            router.delete(`/${locale}/documents/${id}`, {
+                            router.delete(`/api/documents/${id}`, {
                                 onSuccess: () => {
                                     toast.success(t('Document deleted successfully!'));
                                     setSelectedIds(prev => {
@@ -429,7 +429,7 @@ export default function DocumentsIndex({ documents, documentTypes = [], recentBa
                             // Deleta todos os documentos em paralelo
                             const deletePromises = ids.map(id => 
                                 new Promise<void>((resolve, reject) => {
-                                    router.delete(`/${locale}/documents/${id}`, {
+                                    router.delete(`/api/documents/${id}`, {
                                         preserveScroll: true,
                                         preserveState: false,
                                         onSuccess: () => resolve(),
