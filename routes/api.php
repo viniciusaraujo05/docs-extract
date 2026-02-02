@@ -69,16 +69,17 @@ Route::prefix('api')->group(function () {
             Route::post('/cancel-subscription', [SubscriptionController::class, 'cancelSubscription'])->name('cancel-subscription');
         });
 
-        // Demo API routes (moved from web.php)
-        Route::prefix('demo')->middleware(['throttle:3,60'])->group(function () {
-            Route::post('extract', [\App\Http\Controllers\Api\DemoController::class, 'extract']);
-            Route::get('check', [\App\Http\Controllers\Api\DemoController::class, 'checkAvailability']);
-        });
-
-        // Public Plans API (moved from web.php)
-        Route::get('plans', [\App\Http\Controllers\PlanController::class, 'index'])->name('plans.index');
     });
 });
+
+// Demo API routes (Public with throttle)
+Route::prefix('demo')->middleware(['throttle:3,60'])->group(function () {
+    Route::post('extract', [\App\Http\Controllers\Api\DemoController::class, 'extract']);
+    Route::get('check', [\App\Http\Controllers\Api\DemoController::class, 'checkAvailability']);
+});
+
+// Public Plans API
+Route::get('plans', [\App\Http\Controllers\PlanController::class, 'index'])->name('plans.index');
 
 // App Actions Routes (Moved from web.php)
 // These routes handle Business Logic (POST/PUT/DELETE) but were previously mixed with views.

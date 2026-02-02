@@ -20,7 +20,7 @@ $limits = [
         'api_requests' => 25000,
     ],
     'business' => [
-        'documents' => 5000,
+        'documents' => 4000,
         'models' => -1, // unlimited
         'reports' => -1, // unlimited
         'api_requests' => 100000,
@@ -59,6 +59,7 @@ return [
                     "{$limits['free']['reports']} report",
                     'API access',
                     "{$limits['free']['api_requests']} API requests per month",
+                    'Webhooks',
                     'Full UI',
                 ],
                 'pt-BR' => [
@@ -67,6 +68,7 @@ return [
                     "{$limits['free']['reports']} relatório",
                     'Acesso à API',
                     "{$limits['free']['api_requests']} requisições de API por mês",
+                    "Webhooks",
                     'Interface completa',
                 ],
                 'pt-PT' => [
@@ -75,6 +77,7 @@ return [
                     "{$limits['free']['reports']} relatório",
                     'Acesso à API',
                     "{$limits['free']['api_requests']} requisições de API por mês",
+                    'Webhooks',
                     'Interface completa',
                 ],
             ],
@@ -103,6 +106,7 @@ return [
                     "{$limits['starter']['reports']} reports",
                     'API access',
                     number_format($limits['starter']['api_requests']).' API requests per month',
+                    'Webhooks',
                     'Standard support',
                     'Full UI',
                 ],
@@ -112,6 +116,8 @@ return [
                     "{$limits['starter']['reports']} relatórios",
                     'Acesso à API',
                     number_format($limits['starter']['api_requests'], 0, ',', '.').' requisições de API por mês',
+                    'Webhooks',
+                    'Suporte padrão',
                     'Interface completa',
                 ],
                 'pt-PT' => [
@@ -120,6 +126,8 @@ return [
                     "{$limits['starter']['reports']} relatórios",
                     'Acesso à API',
                     number_format($limits['starter']['api_requests'], 0, ',', '.').' requisições de API por mês',
+                    'Webhooks',
+                    'Suporte padrão',
                     'Interface completa',
                 ],
             ],
@@ -149,6 +157,7 @@ return [
                     'API access',
                     number_format($limits['pro']['api_requests']).' API requests per month',
                     'Priority support',
+                    'Webhooks',
                     'Full UI',
                 ],
                 'pt-BR' => [
@@ -159,6 +168,7 @@ return [
                     number_format($limits['pro']['api_requests'], 0, ',', '.').' requisições de API por mês',
                     'Processamento prioritário',
                     'Suporte prioritário',
+
                     'Interface completa',
                 ],
                 'pt-PT' => [
@@ -169,6 +179,7 @@ return [
                     number_format($limits['pro']['api_requests'], 0, ',', '.').' requisições de API por mês',
                     'Processamento prioritário',
                     'Suporte prioritário',
+                    'Webhooks',
                     'Interface completa',
                 ],
             ],
@@ -197,7 +208,7 @@ return [
                     'Unlimited reports',
                     'API access',
                     number_format($limits['business']['api_requests']).'+ API requests per month',
-                    'Webhooks (coming soon)',
+                    'Webhooks',
                     'Priority support',
                     'Full UI',
                 ],
@@ -207,8 +218,7 @@ return [
                     'Relatórios ilimitados',
                     'Acesso à API',
                     number_format($limits['business']['api_requests'], 0, ',', '.').'+ requisições de API por mês',
-                    'Webhooks (em breve)',
-                    'SLA básico',
+                    'Webhooks',
                     'Suporte prioritário',
                     'Interface completa',
                 ],
@@ -218,8 +228,7 @@ return [
                     'Relatórios ilimitados',
                     'Acesso à API',
                     number_format($limits['business']['api_requests'], 0, ',', '.').'+ requisições de API por mês',
-                    'Webhooks (brevemente)',
-                    'SLA básico',
+                    'Webhooks',
                     'Suporte prioritário',
                     'Interface completa',
                 ],

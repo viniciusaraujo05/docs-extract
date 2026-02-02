@@ -34,6 +34,25 @@ class DemoController extends Controller
 
         $file = $request->file('file');
 
+        // Check page count for PDFs
+        if ($file->getMimeType() === 'application/pdf') {
+            try {
+                $parser = new \Smalot\PdfParser\Parser();
+                $pdf = $parser->parseFile($file->getPathname());
+                $pages = count($pdf->getPages());
+
+                if ($pages > 2) {
+                    return response()->json([
+                        'error' => 'Page limit exceeded',
+                        'message' => 'Demo is limited to 2 pages maximum. Please register for full access.',
+                    ], 422);
+                }
+            } catch (\Exception $e) {
+                // Ignore parsing errors here, let the main extractor handle valid/invalid files
+                Log::warning('Demo check: Failed to count pages', ['error' => $e->getMessage()]);
+            }
+        }
+
         try {
             // 1. Analyze document to get fields (Schema Inference)
             $analysis = $this->analyzeDocumentAction->execute($file);

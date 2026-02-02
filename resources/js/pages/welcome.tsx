@@ -1663,6 +1663,16 @@ function DemoModal({
   };
 
   const handleProcess = async () => {
+    // Check if demo was already used
+    if (typeof window !== 'undefined' && localStorage.getItem('docset_demo_used') === 'true') {
+        toast.error(t('Demo already used. Please register to continue.'));
+        setTimeout(() => {
+          onClose();
+          router.visit(`/${locale}/register`);
+        }, 1500);
+        return;
+    }
+
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
@@ -1690,6 +1700,7 @@ function DemoModal({
 
       if (!response.ok) {
         if (response.status === 429) {
+          localStorage.setItem('docset_demo_used', 'true');
           toast.error(t('Demo already used. Please register to continue.'));
           setTimeout(() => {
             onClose();
@@ -1697,10 +1708,17 @@ function DemoModal({
           }, 2500);
           return;
         }
-        throw new Error(data.message || t('document_processing_error')); // Fallback or key? "Extraction failed" isn't in JSON directly but "document_processing_error" is close/better
+
+        if (response.status === 422 && data.error === 'Page limit exceeded') {
+             setError(t('Demo is limited to 2 pages. Please register for full access.'));
+             return;
+        }
+
+        throw new Error(data.message || t('document_processing_error'));
       }
 
       setResult(data.data);
+      localStorage.setItem('docset_demo_used', 'true');
       toast.success(t('Data Extracted Successfully!'));
     } catch (error: any) {
       console.error('Demo extraction error:', error);
