@@ -149,10 +149,10 @@ class IntegrationController extends Controller
             $method = $reflection->getMethod('ensureTokenIsValid');
             $method->setAccessible(true);
             $method->invoke($driveService, $account);
-            
+
             // Reload account to get updated token
             $account->refresh();
-            
+
             return response()->json([
                 'token' => $account->token,
                 'connected' => true,
