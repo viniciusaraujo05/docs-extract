@@ -1,4 +1,111 @@
 {
+    "legal": {
+        "privacy": {
+            "title": "Privacy Policy",
+            "last_updated": "Last updated",
+            "intro": "This Privacy Policy describes how we collect, use, and handle your information when you use our services.",
+            "sections": {
+                "collection": {
+                    "title": "1. Information We Collect",
+                    "content": "We collect information you explicitly provide to us:\n• Account Information: Name, email address, and account credentials.\n• Payment Data: Processed securely by our payment partners (Stripe); we do not store your credit card details.\n• User Content: Documents (PDFs, images) you upload for processing and the data extracted from them.\n• Usage Data: Information about how you interact with our services."
+                },
+                "usage": {
+                    "title": "2. How We Use Your Information",
+                    "content": "Your document data is the core of our service. We want to be crystal clear:\n• Uploaded documents are processed SOLELY for data extraction purposes.\n• We do NOT sell your data.\n• We do NOT use your documents or extracted data to train our AI models.\n• Your data is only shared with third-party processors (e.g., OCR and AI providers) strictly necessary to deliver the service."
+                },
+                "processing": {
+                    "title": "3. Where Data is Processed",
+                    "content": "To provide our services, your data may be processed on servers located outside of your country of residence. We rely on trusted third-party providers, including:\n• Cloud Infrastructure Providers (e.g., AWS, Google Cloud)\n• Payment Processors (e.g., Stripe)\n• Specialized Data Processing Services\nAll providers are vetted to ensure they meet stringent security and privacy standards."
+                },
+                "retention": {
+                    "title": "4. Data Retention and Deletion",
+                    "content": "We give you control over your data:\n• Documents are stored only as long as you keep them.\n• You can manually delete documents at any time via your dashboard.\n• If you delete your account, all your data (documents, extracted information, and account details) is permanently removed from our systems within 30 days."
+                },
+                "cookies": {
+                    "title": "5. Cookies and Tracking",
+                    "content": "We use cookies and similar technologies to improve your experience:\n• Session Cookies: To keep you logged in.\n• Analytics: To understand how our site is used (anonymized data).\nWe do not use tracking cookies for advertising purposes."
+                },
+                "rights": {
+                    "title": "6. Your Rights (GDPR & Privacy)",
+                    "content": "You have full rights over your personal data:\n• Right to Access: View the data we hold about you.\n• Right to Rectification: Correct inaccurate information.\n• Right to Erasure: Request deletion of your data.\n• Right to Portability: Export your data.\nTo exercise these rights, please contact us through our support channels."
+                },
+                "contact": {
+                    "title": "Contact Us",
+                    "text": "If you have any questions about this Privacy Policy, please contact us at:"
+                },
+                "changes": {
+                    "title": "Changes to This Policy",
+                    "content": "We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page."
+                }
+            }
+        },
+        "terms": {
+            "title": "Terms of Service",
+            "last_updated": "Last updated",
+            "sections": {
+                "acceptance": {
+                    "title": "1. Acceptance of Terms",
+                    "content": "By accessing and using DOCSET (\"the Service\"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Service, please do not use the Service."
+                },
+                "description": {
+                    "title": "2. Description of Service",
+                    "content": "DOCSET provides a document data extraction service that allows users to:\n• Upload PDF and image documents\n• Define custom extraction templates\n• Extract structured data using AI technology\n• Review and validate extracted data\n• Export data via UI or API\n• Store and manage document data"
+                },
+                "accuracy": {
+                    "title": "3. Accuracy and Validation",
+                    "content": "DOCSET uses advanced artificial intelligence to extract data, but we cannot guarantee 100% accuracy. You acknowledge and agree that:\n• You are responsible for reviewing and validating all extracted data before using it.\n• We are not responsible for any errors or omissions in the extraction process.\n• We are not liable for any decisions or actions taken based on the extracted data."
+                },
+                "accounts": {
+                    "title": "4. User Accounts",
+                    "content": "When you create an account with us, you must provide accurate, complete, and current information. Failure to do so constitutes a breach of the Terms.\nYou are responsible for safeguarding the password and for all activities that occur under your account. You agree not to disclose your password to any third party and to notify us immediately if you become aware of any breach of security or unauthorized use of your account."
+                },
+                "acceptable_use": {
+                    "title": "5. Acceptable Use",
+                    "content": "You agree not to use the Service to:\n• Upload illegal, harmful, or offensive content\n• Violated any applicable laws or regulations\n• Infringe upon intellectual property rights of others\n• Attempt to gain unauthorized access to our systems\n• Interfere with or disrupt the Service\n• Use the Service to process documents you don't have rights to\n• Resell or redistribute the Service without authorization"
+                },
+                "content": {
+                    "title": "6. Your Content",
+                    "content": "You retain all rights to the documents and data you upload to DOCSET. By uploading content, you grant us a limited license to:\n• Process your documents to provide the extraction service\n• Store your documents and extracted data\n• Display your data back to you through our interface\n\nImportant: We will never use your documents to train AI models, share them with third parties, or use them for any purpose other than providing you with our service."
+                },
+                "pricing": {
+                    "title": "7. Pricing and Payment",
+                    "content": "DOCSET offers various pricing plans, including a free tier. Paid plans are billed monthly or annually as selected by you.\n• All fees are non-refundable unless required by law\n• Prices may change with 30 days notice\n• You can cancel your subscription at any time\n• Upon cancellation, you retain access until the end of your billing period\n• Free tier limitations may apply"
+                },
+                "availability": {
+                    "title": "8. Service Availability",
+                    "content": "We strive to provide reliable service, but we do not guarantee that the Service will be uninterrupted or error-free. We reserve the right to modify, suspend, or discontinue the Service at any time with reasonable notice. We are not liable for any modifications, suspension, or discontinuation of the Service."
+                },
+                "termination": {
+                    "title": "9. Termination",
+                    "content": "We may terminate or suspend your account and access to the Service immediately, without prior notice or liability, for any reason, including:\n• Breach of these Terms\n• Non-payment of fees\n• Violation of applicable laws\n• Fraudulent or illegal activity\nUpon termination, your right to use the Service will immediately cease. You may delete your account at any time from your account settings."
+                },
+                "liability": {
+                    "title": "10. Limitation of Liability",
+                    "content": "To the maximum extent permitted by law, DOCSET shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses resulting from your use of the Service."
+                },
+                "warranties": {
+                    "title": "11. Disclaimer of Warranties",
+                    "content": "The Service is provided \"as is\" and \"as available\" without warranties of any kind, either express or implied. We do not warrant that the Service will be uninterrupted, secure, or error-free, or that the results obtained from the use of the Service will be accurate or reliable."
+                },
+                "data_protection": {
+                    "title": "12. Data Protection",
+                    "content": "We are committed to protecting your data. Please review our Privacy Policy to understand how we collect, use, and protect your information. By using the Service, you also agree to our Privacy Policy."
+                },
+                "changes": {
+                    "title": "13. Changes to Terms",
+                    "content": "We reserve the right to modify these Terms at any time. We will notify users of any material changes via email or through the Service. Your continued use of the Service after such modifications constitutes your acceptance of the updated Terms."
+                },
+                "governing": {
+                    "title": "14. Governing Law",
+                    "content": "These Terms shall be governed by and construed in accordance with the laws of Portugal, without regard to its conflict of law provisions. Any disputes arising from these Terms or your use of the Service shall be subject to the exclusive jurisdiction of the courts of Portugal."
+                },
+                "contact": {
+                    "title": "Contact Us",
+                    "text": "If you have any questions about these Terms of Service, please contact us at:"
+                }
+            }
+        }
+    },
     "first_document_template_hint": "Enter a descriptive name for your template (e.g., 'Invoice', 'Receipt', 'Contract')",
     "first_document_ai_hint": "Our AI will automatically detect fields in your document. You can also add or customize fields at any time.",
     "step_fields_ai_hint": "These fields were automatically detected by our AI. Click to add them to your template.",

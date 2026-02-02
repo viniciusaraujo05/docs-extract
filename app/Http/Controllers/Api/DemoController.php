@@ -42,9 +42,10 @@ class DemoController extends Controller
                 $pages = count($pdf->getPages());
 
                 if ($pages > 2) {
+                    Log::info('Demo page limit exceeded', ['ip' => $ip, 'pages' => $pages]);
                     return response()->json([
                         'error' => 'Page limit exceeded',
-                        'message' => 'Demo is limited to 2 pages maximum. Please register for full access.',
+                        'message' => "Demo is limited to 2 pages maximum. We detected {$pages} pages. Please register for full access.",
                     ], 422);
                 }
             } catch (\Exception $e) {

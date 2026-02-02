@@ -1820,12 +1820,49 @@ function DemoModal({
                     key={key}
                     initial={{ opacity: 1, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="flex justify-between items-center p-4 bg-white/5 rounded-lg border border-white/10"
+                    className="flex flex-col p-4 bg-white/5 rounded-lg border border-white/10"
                   >
-                    <span className="font-medium capitalize text-gray-300">
-                      {key.replace('_', ' ')}:
-                    </span>
-                    <span className="font-bold text-white">{value as string}</span>
+                    <div className="flex justify-between items-center mb-1">
+                        <span className="font-medium capitalize text-gray-300">
+                        {key.replace('_', ' ')}
+                        </span>
+                    </div>
+                    
+                    <div className="w-full">
+                        {Array.isArray(value) ? (
+                            <div className="space-y-2 mt-2">
+                                {value.map((item, idx) => (
+                                    <div key={idx} className="p-3 bg-white/5 rounded text-sm border border-white/5">
+                                        {typeof item === 'object' && item !== null ? (
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {Object.entries(item).map(([subKey, subValue]) => (
+                                                    <div key={subKey} className="flex flex-col">
+                                                        <span className="text-xs text-gray-500 uppercase">{subKey}</span>
+                                                        <span className="text-sm text-gray-200">{String(subValue)}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className="text-gray-200">{String(item)}</span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : typeof value === 'object' && value !== null ? (
+                             <div className="p-3 bg-white/5 rounded text-sm border border-white/5 mt-2">
+                                <div className="grid grid-cols-2 gap-2">
+                                    {Object.entries(value).map(([subKey, subValue]) => (
+                                        <div key={subKey} className="flex flex-col">
+                                            <span className="text-xs text-gray-500 uppercase">{subKey}</span>
+                                            <span className="text-sm text-gray-200">{String(subValue)}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                             <span className="font-bold text-white text-right block">{String(value)}</span>
+                        )}
+                    </div>
                   </motion.div>
                 ))}
               </div>

@@ -1,4 +1,111 @@
 {
+    "legal": {
+        "privacy": {
+            "title": "Política de Privacidade",
+            "last_updated": "Última atualização",
+            "intro": "Esta Política de Privacidade descreve como recolhemos, usamos e tratamos as suas informações quando utiliza os nossos serviços.",
+            "sections": {
+                "collection": {
+                    "title": "1. Dados que Recolhemos",
+                    "content": "Recolhemos informações que nos fornece explicitamente:\n• Dados da Conta: Nome, e-mail e credenciais de acesso.\n• Dados de Pagamento: Processados de forma segura pelos nossos parceiros (Stripe); não armazenamos detalhes do seu cartão de crédito.\n• Conteúdo do Utilizador: Documentos (PDFs, imagens) que envia para processamento e os dados extraídos dos mesmos.\n• Dados de Utilização: Informações sobre como interage com os nossos serviços."
+                },
+                "usage": {
+                    "title": "2. Como Usamos os Seus Documentos",
+                    "content": "Os seus dados documentais são o núcleo do nosso serviço. Queremos ser absolutamente claros:\n• Os documentos enviados são processados EXCLUSIVAMENTE para fins de extração de dados.\n• Nós NÃO vendemos os seus dados.\n• Nós NÃO usamos os seus documentos ou dados extraídos para treinar os nossos modelos de IA.\n• Os seus dados são partilhados apenas com processadores terceiros (ex: fornecedores de OCR e IA) estritamente necessários para prestar o serviço."
+                },
+                "processing": {
+                    "title": "3. Onde os Dados são Processados",
+                    "content": "Para fornecer os nossos serviços, os seus dados podem ser processados em servidores localizados fora do seu país de residência. Utilizamos fornecedores terceiros de confiança, incluindo:\n• Fornecedores de Infraestrutura na Nuvem (ex: AWS, Google Cloud)\n• Processadores de Pagamento (ex: Stripe)\n• Serviços Especializados de Processamento de Dados\nTodos os fornecedores são verificados para garantir que cumprem rigorosos padrões de segurança e privacidade."
+                },
+                "retention": {
+                    "title": "4. Retenção e Eliminação de Dados",
+                    "content": "Damos-lhe controlo sobre os seus dados:\n• Os documentos são armazenados apenas enquanto os mantiver.\n• Pode eliminar documentos manualmente a qualquer momento através do seu painel.\n• Se eliminar a sua conta, todos os seus dados (documentos, informações extraídas e detalhes da conta) serão removidos permanentemente dos nossos sistemas no prazo de 30 dias."
+                },
+                "cookies": {
+                    "title": "5. Cookies e Rastreamento",
+                    "content": "Usamos cookies e tecnologias similares para melhorar a sua experiência:\n• Cookies de Sessão: Para manter a sua sessão iniciada.\n• Analytics: Para compreender como o nosso site é utilizado (dados anonimizados).\nNão usamos cookies de rastreamento para fins publicitários."
+                },
+                "rights": {
+                    "title": "6. Os Seus Direitos (RGPD)",
+                    "content": "Respeitamos os seus direitos sobre os seus dados pessoais:\n• Direito de Acesso: Ver os dados que temos sobre si.\n• Direito de Retificação: Corrigir informações imprecisas.\n• Direito de Eliminação: Solicitar a eliminação dos seus dados.\n• Direito de Portabilidade: Exportar os seus dados.\nPara exercer estes direitos, contacte-nos através dos nossos canais de suporte."
+                },
+                "contact": {
+                    "title": "Contacte-nos",
+                    "text": "Se tiver alguma dúvida sobre esta Política de Privacidade, contacte-nos em:"
+                },
+                "changes": {
+                    "title": "Alterações a esta Política",
+                    "content": "Podemos atualizar a nossa Política de Privacidade ocasionalmente. Iremos notificá-lo de quaisquer alterações publicando a nova Política de Privacidade nesta página."
+                }
+            }
+        },
+        "terms": {
+            "title": "Termos de Serviço",
+            "last_updated": "Última atualização",
+            "sections": {
+                "acceptance": {
+                    "title": "1. Aceitação dos Termos",
+                    "content": "Ao aceder e utilizar o DOCSET (\"o Serviço\"), aceita e concorda em ficar vinculado pelos termos e disposições deste contrato. Se não concordar com estes Termos de Serviço, por favor, não utilize o Serviço."
+                },
+                "description": {
+                    "title": "2. Descrição do Serviço",
+                    "content": "O DOCSET fornece um serviço de extração de dados de documentos que permite aos utilizadores:\n• Carregar documentos PDF e de imagem\n• Definir modelos de extração personalizados\n• Extrair dados estruturados utilizando tecnologia de IA\n• Rever e validar dados extraídos\n• Exportar dados via UI ou API\n• Armazenar e gerir dados de documentos"
+                },
+                "accuracy": {
+                    "title": "3. Precisão e Validação",
+                    "content": "O DOCSET utiliza inteligência artificial avançada para extrair dados, mas não podemos garantir 100% de precisão. O utilizador reconhece e concorda que:\n• É responsável por rever e validar todos os dados extraídos antes de os utilizar.\n• Não somos responsáveis por quaisquer erros ou omissões no processo de extração.\n• Não somos responsáveis por quaisquer decisões ou ações tomadas com base nos dados extraídos."
+                },
+                "accounts": {
+                    "title": "4. Contas de Utilizador",
+                    "content": "Quando cria uma conta connosco, deve fornecer informações precisas, completas e atuais. O incumprimento constitui uma violação dos Termos.\nÉ responsável por proteger a palavra-passe e por todas as atividades que ocorrem na sua conta. Concorda em não divulgar a sua palavra-passe a terceiros e em notificar-nos imediatamente se tiver conhecimento de qualquer violação de segurança ou uso não autorizado da sua conta."
+                },
+                "acceptable_use": {
+                    "title": "5. Uso Aceitável",
+                    "content": "Concorda em não utilizar o Serviço para:\n• Carregar conteúdo ilegal, prejudicial ou ofensivo\n• Violar quaisquer leis ou regulamentos aplicáveis\n• Infringir direitos de propriedade intelectual de terceiros\n• Tentar obter acesso não autorizado aos nossos sistemas\n• Interferir ou interromper o Serviço\n• Utilizar o Serviço para processar documentos sobre os quais não tem direitos\n• Revender ou redistribuir o Serviço sem autorização"
+                },
+                "content": {
+                    "title": "6. O Seu Conteúdo",
+                    "content": "Mantém todos os direitos sobre os documentos e dados que carrega no DOCSET. Ao carregar conteúdo, concede-nos uma licença limitada para:\n• Processar os seus documentos para prestar o serviço de extração\n• Armazenar os seus documentos e dados extraídos\n• Exibir os seus dados de volta para si através da nossa interface\n\nImportante: Nunca utilizaremos os seus documentos para treinar modelos de IA, partilhá-los com terceiros ou utilizá-los para qualquer finalidade que não seja prestar-lhe o serviço."
+                },
+                "pricing": {
+                    "title": "7. Preços e Pagamento",
+                    "content": "O DOCSET oferece vários planos de preços, incluindo um nível gratuito. Os planos pagos são faturados mensalmente ou anualmente, conforme selecionado por si.\n• Todas as taxas não são reembolsáveis, a menos que exigido por lei\n• Os preços podem mudar com aviso prévio de 30 dias\n• Pode cancelar a sua subscrição a qualquer momento\n• Após o cancelamento, mantém o acesso até ao final do seu período de faturação\n• Limitações do nível gratuito podem ser aplicadas"
+                },
+                "availability": {
+                    "title": "8. Disponibilidade do Serviço",
+                    "content": "Esforçamo-nos para fornecer um serviço fiável, mas não garantimos que o Serviço será ininterrupto ou livre de erros. Reservamo-nos o direito de modificar, suspender ou descontinuar o Serviço a qualquer momento com aviso prévio razoável. Não somos responsáveis ​​por quaisquer modificações, suspensões ou descontinuação do Serviço."
+                },
+                "termination": {
+                    "title": "9. Rescisão",
+                    "content": "Podemos encerrar ou suspender a sua conta e acesso ao Serviço imediatamente, sem aviso prévio ou responsabilidade, por qualquer motivo, incluindo:\n• Violação destes Termos\n• Não pagamento de taxas\n• Violação de leis aplicáveis\n• Atividade fraudulenta ou ilegal\nApós a rescisão, o seu direito de utilizar o Serviço cessará imediatamente. Pode eliminar a sua conta a qualquer momento nas definições da sua conta."
+                },
+                "liability": {
+                    "title": "10. Limitação de Responsabilidade",
+                    "content": "Na extensão máxima permitida por lei, o DOCSET não será responsável por quaisquer danos indiretos, incidentais, especiais, consequentes ou punitivos, ou qualquer perda de lucros ou receitas, incorridos direta ou indiretamente, ou qualquer perda de dados, uso, boa vontade ou outras perdas intangíveis resultantes da utilização do Serviço."
+                },
+                "warranties": {
+                    "title": "11. Isenção de Garantias",
+                    "content": "O Serviço é fornecido \"como está\" e \"conforme disponível\" sem garantias de qualquer tipo, expressas ou implícitas. Não garantimos que o Serviço será ininterrupto, seguro ou livre de erros, ou que os resultados obtidos com a utilização do Serviço serão precisos ou fiáveis."
+                },
+                "data_protection": {
+                    "title": "12. Proteção de Dados",
+                    "content": "Estamos comprometidos em proteger os seus dados. Por favor, reveja a nossa Política de Privacidade para compreender como recolhemos, usamos e protegemos as suas informações. Ao utilizar o Serviço, também concorda com a nossa Política de Privacidade."
+                },
+                "changes": {
+                    "title": "13. Alterações aos Termos",
+                    "content": "Reservamo-nos o direito de modificar estes Termos a qualquer momento. Notificaremos os utilizadores sobre quaisquer alterações materiais via e-mail ou através do Serviço. A utilização continuada do Serviço após tais modificações constitui a sua aceitação dos Termos atualizados."
+                },
+                "governing": {
+                    "title": "14. Lei Aplicável",
+                    "content": "Estes Termos serão regidos e interpretados de acordo com as leis de Portugal, sem levar em consideração os seus conflitos de disposições legais. Quaisquer disputas decorrentes destes Termos ou da utilização do Serviço estarão sujeitas à jurisdição exclusiva dos tribunais de Portugal."
+                },
+                "contact": {
+                    "title": "Contacte-nos",
+                    "text": "Se tiver alguma dúvida sobre estes Termos de Serviço, contacte-nos em:"
+                }
+            }
+        }
+    },
     "first_document_template_hint": "Insira um nome descritivo para o modelo (ex: 'Fatura', 'Recibo', 'Contrato')",
     "first_document_ai_hint": "A nossa IA detetará automaticamente os campos do documento. Também pode adicionar ou personalizar campos a qualquer momento.",
     "step_fields_ai_hint": "Estes campos foram detetados automaticamente pela nossa IA. Clique para adicioná-los ao modelo.",
