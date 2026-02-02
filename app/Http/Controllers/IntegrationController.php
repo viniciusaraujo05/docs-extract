@@ -251,13 +251,14 @@ class IntegrationController extends Controller
 
                 if ($response->successful()) {
                     $data = $response->json();
-                    
+
                     // Validate response data
                     if (empty($data['access_token']) || empty($data['expires_in'])) {
                         Log::error('Invalid Google token refresh response', ['response' => $data]);
+
                         return response()->json(['error' => 'Invalid token refresh response'], 500);
                     }
-                    
+
                     $account->update([
                         'token' => $data['access_token'],
                         'expires_at' => now()->addSeconds($data['expires_in']),
@@ -267,6 +268,7 @@ class IntegrationController extends Controller
                         'status' => $response->status(),
                         'body' => $response->body(),
                     ]);
+
                     return response()->json(['error' => 'Could not refresh Google token. Please reconnect your account.'], 401);
                 }
             } catch (\Exception $e) {
@@ -274,6 +276,7 @@ class IntegrationController extends Controller
                     'error' => $e->getMessage(),
                     'user_id' => $user->id,
                 ]);
+
                 return response()->json(['error' => 'Failed to refresh token. Please try again.'], 500);
             }
         }

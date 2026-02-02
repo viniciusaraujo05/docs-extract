@@ -39,25 +39,57 @@ final class ReportController extends Controller
 
     public function index(Request $request): Response
     {
+        \Illuminate\Support\Facades\Log::info('ReportController::index START', [
+            'url' => $request->url(),
+            'user_id' => $request->user()?->id,
+        ]);
+
         /** @var User $user */
         $user = $request->user();
 
+        if (!$user) {
+            \Illuminate\Support\Facades\Log::error('ReportController::index - No authenticated user');
+            abort(401);
+        }
+
         try {
+            \Illuminate\Support\Facades\Log::info('ReportController::index - Fetching document types', [
+                'user_id' => $user->id,
+            ]);
+            
             $documentTypes = $this->documentTypeRepository->getActiveWithDocumentCount($user->id);
+            
+            \Illuminate\Support\Facades\Log::info('ReportController::index - Document types fetched', [
+                'count' => $documentTypes->count(),
+            ]);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Failed to load dashboard', [
                 'user_id' => $user->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
             ]);
 
             // Return empty array if query fails
             $documentTypes = collect([]);
         }
 
-        return Inertia::render('reports/index', [
-            'documentTypes' => $documentTypes,
-        ]);
+        try {
+            \Illuminate\Support\Facades\Log::info('ReportController::index - Rendering view');
+            
+            return Inertia::render('reports/index', [
+                'documentTypes' => $documentTypes,
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to render dashboard view', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            throw $e;
+        }
     }
 
     public function getData(Request $request, DocumentType $documentType): JsonResponse

@@ -33,13 +33,13 @@ class WelcomeNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $locale = $notifiable->locale ?? app()->getLocale() ?? 'en';
+        
         return (new MailMessage)
-            ->subject(__('Welcome to DocSet! 🎉'))
-            ->greeting(__('So glad to have you here! 🎉'))
-            ->line(__('We\'re super excited to be part of your journey! DOCSET will transform the way you process documents. Let\'s get started?'))
-            ->line(__('📄 Upload your first document'))
-            ->line(__('🎯 Set up your extraction model'))
-            ->action(__('Go to Dashboard'), url(route('dashboard', ['locale' => $notifiable->locale ?? 'en'] ?? 'en')));
+            ->subject(__('emails.welcome.subject'))
+            ->view('emails.welcome', [
+                'locale' => $locale,
+            ]);
     }
 
     /**

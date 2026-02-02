@@ -10,7 +10,7 @@
 </div>
 
 <div class="button-container">
-    <a href="{{ config('app.url') . '/' . $locale . '/dashboard' }}" class="button">{{ __('emails.welcome.button') }}</a>
+    <a href="{{ config('app.url') . '/' . $locale . '/documents' }}" class="button">{{ __('emails.welcome.button') }}</a>
 </div>
 
 <div class="signature">

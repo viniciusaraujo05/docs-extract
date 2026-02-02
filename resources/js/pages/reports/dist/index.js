@@ -133,6 +133,9 @@ function ReportsIndex(_a) {
     var currentLocale = pageLocale || 'en';
     // Check for pending subscription from registration
     react_2.useEffect(function () {
+        // Only run in browser (not during SSR)
+        if (typeof window === 'undefined')
+            return;
         var pendingPlan = localStorage.getItem('pending_plan');
         var pendingPriceId = localStorage.getItem('pending_price_id');
         var pendingPlanName = localStorage.getItem('pending_plan_name');
@@ -159,7 +162,9 @@ function ReportsIndex(_a) {
     var _f = react_2.useState({}), chartTypes = _f[0], setChartTypes = _f[1];
     var _g = react_2.useState({}), chartColors = _g[0], setChartColors = _g[1];
     var _h = react_2.useState(function () {
-        // Load from localStorage
+        // Load from localStorage (only in browser)
+        if (typeof window === 'undefined')
+            return 'hsl(var(--chart-1))';
         return localStorage.getItem('report-global-color') || 'hsl(var(--chart-1))';
     }), globalColor = _h[0], setGlobalColor = _h[1];
     var _j = react_2.useState(false), showConfigurator = _j[0], setShowConfigurator = _j[1];
@@ -181,16 +186,22 @@ function ReportsIndex(_a) {
     }, [reportData, selectedType]);
     // Auto-save global color to localStorage
     react_2.useEffect(function () {
+        if (typeof window === 'undefined')
+            return;
         localStorage.setItem('report-global-color', globalColor);
     }, [globalColor]);
     // Auto-save chart colors to localStorage
     react_2.useEffect(function () {
+        if (typeof window === 'undefined')
+            return;
         if (selectedTypeId && Object.keys(chartColors).length > 0) {
             localStorage.setItem("report-colors-" + selectedTypeId, JSON.stringify(chartColors));
         }
     }, [chartColors, selectedTypeId]);
     // Load chart colors from localStorage when type changes
     react_2.useEffect(function () {
+        if (typeof window === 'undefined')
+            return;
         if (selectedTypeId) {
             var saved = localStorage.getItem("report-colors-" + selectedTypeId);
             if (saved) {
@@ -241,7 +252,8 @@ function ReportsIndex(_a) {
                     _c.label = 1;
                 case 1:
                     _c.trys.push([1, 4, 5, 6]);
-                    csrfToken = (_b = (_a = document.querySelector('meta[name="csrf-token"]')) === null || _a === void 0 ? void 0 : _a.content) !== null && _b !== void 0 ? _b : '';
+                    csrfToken = typeof document !== 'undefined'
+                        ? (_b = (_a = document.querySelector('meta[name="csrf-token"]')) === null || _a === void 0 ? void 0 : _a.content) !== null && _b !== void 0 ? _b : '' : '';
                     return [4 /*yield*/, fetch("/api/reports/" + selectedTypeId + "/analyze-ai", {
                             method: 'POST',
                             headers: {
@@ -365,7 +377,9 @@ function ReportsIndex(_a) {
                             headers: {
                                 'Accept': 'application/json',
                                 'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': ((_a = document.querySelector('meta[name="csrf-token"]')) === null || _a === void 0 ? void 0 : _a.getAttribute('content')) || ''
+                                'X-CSRF-TOKEN': typeof document !== 'undefined'
+                                    ? ((_a = document.querySelector('meta[name="csrf-token"]')) === null || _a === void 0 ? void 0 : _a.getAttribute('content')) || ''
+                                    : ''
                             },
                             body: JSON.stringify({
                                 field_config: config.fieldConfig,
