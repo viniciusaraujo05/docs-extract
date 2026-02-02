@@ -76,6 +76,6 @@ class SocialLoginController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('dashboard', ['locale' => $locale]);
+        return redirect()->route('documents.index', ['locale' => $locale]);
     }
 }

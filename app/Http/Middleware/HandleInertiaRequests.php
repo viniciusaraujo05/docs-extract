@@ -48,7 +48,7 @@ class HandleInertiaRequests extends Middleware
         }
 
         $locale = $request->route('locale') ?? 'en';
-        
+
         try {
             $seoContent = SeoHelper::getContent($locale);
             $structuredData = SeoHelper::generateStructuredData($locale);
@@ -58,7 +58,7 @@ class HandleInertiaRequests extends Middleware
                 'error' => $e->getMessage(),
                 'locale' => $locale,
             ]);
-            
+
             $seoContent = [
                 'title' => config('app.name', 'DOCSET'),
                 'description' => 'Document processing platform',

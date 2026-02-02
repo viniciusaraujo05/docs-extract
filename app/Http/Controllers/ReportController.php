@@ -50,7 +50,7 @@ final class ReportController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             // Return empty array if query fails
             $documentTypes = collect([]);
         }
