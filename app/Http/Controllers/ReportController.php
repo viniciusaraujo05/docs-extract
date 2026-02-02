@@ -78,7 +78,7 @@ final class ReportController extends Controller
         try {
             \Illuminate\Support\Facades\Log::info('ReportController::index - Rendering view');
 
-            return Inertia::render('reports/index', [
+            return Inertia::render('reports/Dashboard', [
                 'documentTypes' => $documentTypes,
             ]);
         } catch (\Exception $e) {
