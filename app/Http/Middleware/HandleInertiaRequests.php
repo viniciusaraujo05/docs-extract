@@ -37,16 +37,42 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+        try {
+            $quoteString = Inspiring::quotes()->random();
+            $parts = str($quoteString)->explode('-');
+            $message = trim($parts[0] ?? 'Build something amazing');
+            $author = trim($parts[1] ?? 'Laravel');
+        } catch (\Exception $e) {
+            $message = 'Build something amazing';
+            $author = 'Laravel';
+        }
 
         $locale = $request->route('locale') ?? 'en';
-        $seoContent = SeoHelper::getContent($locale);
+        
+        try {
+            $seoContent = SeoHelper::getContent($locale);
+            $structuredData = SeoHelper::generateStructuredData($locale);
+            $alternateLocales = SeoHelper::getAlternateLocales($locale);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('SEO Helper failed in HandleInertiaRequests', [
+                'error' => $e->getMessage(),
+                'locale' => $locale,
+            ]);
+            
+            $seoContent = [
+                'title' => config('app.name', 'DOCSET'),
+                'description' => 'Document processing platform',
+                'keywords' => 'documents, AI, extraction',
+            ];
+            $structuredData = '{}';
+            $alternateLocales = [];
+        }
 
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'appUrl' => config('app.url'),
-            'quote' => ['message' => trim($message), 'author' => trim($author)],
+            'quote' => ['message' => $message, 'author' => $author],
             'auth' => [
                 'user' => $request->user(),
             ],
@@ -65,8 +91,8 @@ class HandleInertiaRequests extends Middleware
                 'url' => $request->url(),
                 'canonical' => $request->url(),
                 'ogImage' => config('app.url').'/docset.png',
-                'structuredData' => SeoHelper::generateStructuredData($locale),
-                'alternateLocales' => SeoHelper::getAlternateLocales($locale),
+                'structuredData' => $structuredData,
+                'alternateLocales' => $alternateLocales,
             ],
         ];
     }

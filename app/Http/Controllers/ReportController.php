@@ -42,7 +42,18 @@ final class ReportController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        $documentTypes = $this->documentTypeRepository->getActiveWithDocumentCount($user->id);
+        try {
+            $documentTypes = $this->documentTypeRepository->getActiveWithDocumentCount($user->id);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to load dashboard', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            // Return empty array if query fails
+            $documentTypes = collect([]);
+        }
 
         return Inertia::render('reports/index', [
             'documentTypes' => $documentTypes,
