@@ -2,25 +2,25 @@
 
 $limits = [
     'free' => [
-        'documents' => 50,
+        'documents' => 20,
         'models' => 5,
         'reports' => 1,
         'api_requests' => 150,
     ],
     'starter' => [
-        'documents' => 500,
+        'documents' => 300,
         'models' => 10,
         'reports' => 5,
         'api_requests' => 3000,
     ],
     'pro' => [
-        'documents' => 1500,
+        'documents' => 1200,
         'models' => 20,
         'reports' => -1, // unlimited
         'api_requests' => 25000,
     ],
     'business' => [
-        'documents' => 4000,
+        'documents' => 3500,
         'models' => -1, // unlimited
         'reports' => -1, // unlimited
         'api_requests' => 100000,
