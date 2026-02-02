@@ -237,21 +237,44 @@ class IntegrationController extends Controller
 
         // Refresh token if needed
         if ($account->expires_at && $account->expires_at->isPast()) {
-            $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
-                'client_id' => config('services.google.client_id'),
-                'client_secret' => config('services.google.client_secret'),
-                'grant_type' => 'refresh_token',
-                'refresh_token' => $account->refresh_token,
-            ]);
+            if (! $account->refresh_token) {
+                return response()->json(['error' => 'No refresh token available. Please reconnect your Google account.'], 401);
+            }
 
-            if ($response->successful()) {
-                $data = $response->json();
-                $account->update([
-                    'token' => $data['access_token'],
-                    'expires_at' => now()->addSeconds($data['expires_in']),
+            try {
+                $response = Http::timeout(10)->asForm()->post('https://oauth2.googleapis.com/token', [
+                    'client_id' => config('services.google.client_id'),
+                    'client_secret' => config('services.google.client_secret'),
+                    'grant_type' => 'refresh_token',
+                    'refresh_token' => $account->refresh_token,
                 ]);
-            } else {
-                return response()->json(['error' => 'Could not refresh Google token'], 401);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    
+                    // Validate response data
+                    if (empty($data['access_token']) || empty($data['expires_in'])) {
+                        Log::error('Invalid Google token refresh response', ['response' => $data]);
+                        return response()->json(['error' => 'Invalid token refresh response'], 500);
+                    }
+                    
+                    $account->update([
+                        'token' => $data['access_token'],
+                        'expires_at' => now()->addSeconds($data['expires_in']),
+                    ]);
+                } else {
+                    Log::error('Google token refresh failed', [
+                        'status' => $response->status(),
+                        'body' => $response->body(),
+                    ]);
+                    return response()->json(['error' => 'Could not refresh Google token. Please reconnect your account.'], 401);
+                }
+            } catch (\Exception $e) {
+                Log::error('Exception during Google token refresh', [
+                    'error' => $e->getMessage(),
+                    'user_id' => $user->id,
+                ]);
+                return response()->json(['error' => 'Failed to refresh token. Please try again.'], 500);
             }
         }
 

@@ -71,7 +71,15 @@ class HandleInertiaRequests extends Middleware
         // Check if user has any documents (for first extraction modal)
         $hasDocuments = false;
         if ($user = $request->user()) {
-            $hasDocuments = \App\Models\Document::where('user_id', $user->id)->exists();
+            try {
+                $hasDocuments = \App\Models\Document::where('user_id', $user->id)->exists();
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Failed to check user documents', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+                $hasDocuments = false;
+            }
         }
 
         return [
