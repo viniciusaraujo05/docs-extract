@@ -73,7 +73,7 @@ class PasswordResetTest extends TestCase
         ]);
 
         $response->assertSessionHasNoErrors();
-        
+
         // Password reset should redirect somewhere (either login or dashboard depending on config)
         $response->assertRedirect();
     }

@@ -14,7 +14,6 @@ use App\Http\Controllers\StripePriceController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
 
 // Public API routes with rate limiting
 Route::middleware(['throttle:60,1'])->group(function () {
@@ -129,7 +128,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     // Subscription Actions
     Route::prefix('subscription')->name('subscription.')->group(function () {
         Route::post('checkout', [SubscriptionController::class, 'checkout'])->name('checkout.process');
-        
+
         Route::middleware(['verified'])->group(function () {
             Route::post('cancel-subscription', [SubscriptionController::class, 'cancelSubscription'])->name('cancel-subscription');
             Route::post('resume', [SubscriptionController::class, 'resumeSubscription'])->name('resume');

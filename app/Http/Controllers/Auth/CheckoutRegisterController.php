@@ -34,7 +34,7 @@ class CheckoutRegisterController extends Controller
         // SECURITY: Do not log sensitive data like emails
         Log::info('CheckoutRegisterController::store called', [
             'price_id' => $request->price_id,
-            'has_email' => !empty($request->email),
+            'has_email' => ! empty($request->email),
         ]);
 
         $request->validate([

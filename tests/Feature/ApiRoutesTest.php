@@ -2,14 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\ApiClient;
 use App\Models\ConnectedAccount;
-use App\Models\Document;
-use App\Models\DocumentType;
 use App\Models\User;
-use App\Models\WebhookEndpoint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class ApiRoutesTest extends TestCase
@@ -50,7 +45,7 @@ class ApiRoutesTest extends TestCase
         // Make 61 requests (limit is 60/min)
         for ($i = 0; $i < 61; $i++) {
             $response = $this->getJson('/api/plans');
-            
+
             if ($i < 60) {
                 $response->assertStatus(200);
             } else {
@@ -68,7 +63,7 @@ class ApiRoutesTest extends TestCase
         // Make 4 requests (limit is 3/60min)
         for ($i = 0; $i < 4; $i++) {
             $response = $this->getJson('/api/demo/check');
-            
+
             if ($i < 3) {
                 $response->assertStatus(200);
             } else {
@@ -134,7 +129,7 @@ class ApiRoutesTest extends TestCase
         $response = $this->actingAs($user)
             ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
             ->postJson('/api/documents', []);
-        
+
         // Should still require other validations, but not fail on CSRF
         $response->assertStatus(422); // Validation error, not 419 CSRF
     }
@@ -187,7 +182,7 @@ class ApiRoutesTest extends TestCase
         $response = $this->postJson('/api/subscription/checkout', [
             'price_id' => 'price_test123',
         ]);
-        
+
         $response->assertStatus(401);
     }
 
@@ -213,7 +208,7 @@ class ApiRoutesTest extends TestCase
         // Verify token is encrypted in database
         $rawToken = $account->getAttributes()['token'];
         $this->assertNotEquals('test-access-token', $rawToken);
-        
+
         // Verify we can decrypt it
         $decrypted = decrypt($account->token);
         $this->assertEquals('test-access-token', $decrypted);
@@ -225,7 +220,7 @@ class ApiRoutesTest extends TestCase
     public function test_integration_emails_are_masked(): void
     {
         $user = User::factory()->create();
-        
+
         ConnectedAccount::create([
             'user_id' => $user->id,
             'provider' => 'google',
@@ -237,14 +232,14 @@ class ApiRoutesTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)->get('/en/settings/integrations');
-        
+
         $response->assertStatus(200);
-        
+
         // Check that email is masked in Inertia props
         $props = $response->viewData('page')['props'];
         $this->assertArrayHasKey('integrations', $props);
         $this->assertNotEmpty($props['integrations']);
-        
+
         $email = $props['integrations'][0]['email'];
         $this->assertStringStartsWith('j***@', $email);
         $this->assertStringNotContainsString('john.doe', $email);
@@ -258,7 +253,7 @@ class ApiRoutesTest extends TestCase
         $response = $this->postJson('/api/locale/update', [
             'locale' => 'pt',
         ]);
-        
+
         $response->assertStatus(401);
     }
 
@@ -272,7 +267,7 @@ class ApiRoutesTest extends TestCase
         $response = $this->actingAs($user)->postJson('/api/locale/update', [
             'locale' => 'pt',
         ]);
-        
+
         $response->assertStatus(200);
     }
 
@@ -284,7 +279,7 @@ class ApiRoutesTest extends TestCase
         $response = $this->postJson('/api/subscription/checkout', [
             'price_id' => 'price_123',
         ]);
-        
+
         $response->assertStatus(401);
     }
 
@@ -350,7 +345,7 @@ class ApiRoutesTest extends TestCase
             $response = $this->actingAs($user)->postJson('/api/locale/update', [
                 'locale' => 'pt',
             ]);
-            
+
             if ($i < 10) {
                 $response->assertStatus(200);
             } else {
@@ -369,7 +364,7 @@ class ApiRoutesTest extends TestCase
             'subject' => 'Test',
             'message' => 'Test message',
         ]);
-        
+
         $response->assertStatus(401);
     }
 

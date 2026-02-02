@@ -24,7 +24,7 @@ class FortifyServiceProvider extends ServiceProvider
         // Disable Fortify's automatic route registration
         // Must be called in register() before Fortify's boot() runs
         Fortify::ignoreRoutes();
-        
+
         $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
     }
 
@@ -36,6 +36,18 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+        $this->configureTwoFactorRoutes();
+    }
+
+    /**
+     * Configure two-factor authentication routes to use locale prefix.
+     */
+    private function configureTwoFactorRoutes(): void
+    {
+        Fortify::twoFactorChallengeView(function () {
+            $locale = app()->getLocale();
+            return redirect()->route('locale.two-factor.login', ['locale' => $locale]);
+        });
     }
 
     /**

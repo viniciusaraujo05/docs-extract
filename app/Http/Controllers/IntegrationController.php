@@ -356,20 +356,21 @@ class IntegrationController extends Controller
 
     /**
      * Mask email address for privacy protection
+     *
      * Example: john.doe@example.com -> j***@example.com
      */
     private function maskEmail(?string $email): ?string
     {
-        if (!$email || !str_contains($email, '@')) {
+        if (! $email || ! str_contains($email, '@')) {
             return $email;
         }
 
         [$local, $domain] = explode('@', $email, 2);
-        
+
         if (strlen($local) <= 1) {
             return $email;
         }
 
-        return substr($local, 0, 1) . '***@' . $domain;
+        return substr($local, 0, 1).'***@'.$domain;
     }
 }
