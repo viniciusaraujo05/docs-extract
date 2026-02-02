@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 class WebhookEndpointController extends Controller
 {
-    public function index(Request $request, string $locale): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $webhooks = WebhookEndpoint::where('user_id', $request->user()->id)
             ->orderBy('created_at', 'desc')
@@ -22,7 +22,7 @@ class WebhookEndpointController extends Controller
         return response()->json($webhooks);
     }
 
-    public function store(Request $request, string $locale): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'url' => 'required|url|max:255',
@@ -40,7 +40,7 @@ class WebhookEndpointController extends Controller
         return back();
     }
 
-    public function destroy(Request $request, string $locale, WebhookEndpoint $webhookEndpoint): RedirectResponse
+    public function destroy(Request $request, WebhookEndpoint $webhookEndpoint): RedirectResponse
     {
         if ($webhookEndpoint->user_id !== $request->user()->id) {
             abort(403);
@@ -51,7 +51,7 @@ class WebhookEndpointController extends Controller
         return back();
     }
 
-    public function regenerateSecret(Request $request, string $locale, WebhookEndpoint $webhookEndpoint): RedirectResponse
+    public function regenerateSecret(Request $request, WebhookEndpoint $webhookEndpoint): RedirectResponse
     {
         if ($webhookEndpoint->user_id !== $request->user()->id) {
             abort(403);

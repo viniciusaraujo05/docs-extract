@@ -86,7 +86,7 @@ final class DocumentTypeController extends Controller
     /**
      * Atualiza um tipo de documento.
      */
-    public function update(UpdateDocumentTypeRequest $request, string $locale, DocumentType $documentType): RedirectResponse
+    public function update(UpdateDocumentTypeRequest $request, DocumentType $documentType): RedirectResponse
     {
         $this->authorize('update', $documentType);
 
@@ -104,20 +104,20 @@ final class DocumentTypeController extends Controller
             return back()->withErrors(['fields' => $e->getMessage()]);
         }
 
-        return redirect()->route('document-types.index', ['locale' => $locale]);
+        return redirect()->route('document-types.index', ['locale' => app()->getLocale()]);
     }
 
     /**
      * Elimina um tipo de documento.
      */
-    public function destroy(string $locale, DocumentType $documentType): RedirectResponse
+    public function destroy(DocumentType $documentType): RedirectResponse
     {
         $this->authorize('delete', $documentType);
 
         $this->documentTypeRepository->delete($documentType);
 
         return redirect()
-            ->route('document-types.index', ['locale' => $locale])
+            ->route('document-types.index', ['locale' => app()->getLocale()])
             ->with('success', 'Tipo de documento eliminado com sucesso.');
     }
 }

@@ -120,7 +120,7 @@ class IntegrationController extends Controller
         }
     }
 
-    public function disconnect(Request $request, string $locale, string $provider)
+    public function disconnect(Request $request, string $provider)
     {
         /** @var User $user */
         $user = $request->user();
@@ -155,8 +155,10 @@ class IntegrationController extends Controller
             // Reload account to get updated token
             $account->refresh();
 
+            // SECURITY: Decrypt token before sending to frontend
+            // The frontend needs the plain token to use with Google Picker API
             return response()->json([
-                'token' => $account->token,
+                'token' => decrypt($account->token),
                 'connected' => true,
             ]);
         } catch (\Exception $e) {

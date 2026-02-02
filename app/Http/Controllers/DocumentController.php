@@ -187,7 +187,7 @@ final class DocumentController extends Controller
         ]);
     }
 
-    public function update(UpdateDocumentRequest $request, string $locale, string $document): RedirectResponse
+    public function update(UpdateDocumentRequest $request, string $document): RedirectResponse
     {
         $documentModel = $this->documentRepository->findById($document);
 
@@ -246,7 +246,7 @@ final class DocumentController extends Controller
         ]);
     }
 
-    public function updateData(UpdateDocumentDataRequest $request, string $locale, string $document): RedirectResponse
+    public function updateData(UpdateDocumentDataRequest $request, string $document): RedirectResponse
     {
         $documentModel = $this->documentRepository->findById($document);
 
@@ -261,7 +261,7 @@ final class DocumentController extends Controller
             ->with('success', 'Dados atualizados com sucesso.');
     }
 
-    public function reprocess(Request $request, string $locale, string $document): RedirectResponse
+    public function reprocess(Request $request, string $document): RedirectResponse
     {
         $documentModel = $this->documentRepository->findById($document);
 
@@ -283,7 +283,7 @@ final class DocumentController extends Controller
             ->with('success', 'Documento enviado para reprocessamento.');
     }
 
-    public function destroy(string $locale, string $document): RedirectResponse
+    public function destroy(string $document): RedirectResponse
     {
         $documentModel = $this->documentRepository->findById($document);
 
@@ -432,7 +432,7 @@ final class DocumentController extends Controller
     /**
      * Cancel a batch.
      */
-    public function batchCancel(Request $request, string $locale, string $batch): RedirectResponse
+    public function batchCancel(Request $request, string $batch): RedirectResponse
     {
         /** @var User $user */
         $user = $request->user();

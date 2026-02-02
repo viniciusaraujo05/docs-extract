@@ -77,8 +77,16 @@ function Integrations(_a) {
                                     React.createElement("div", { className: "flex items-center gap-1 mt-1 text-green-600" },
                                         React.createElement(lucide_react_1.CheckCircle, { className: "h-3 w-3" }),
                                         React.createElement("span", { className: "text-xs font-medium" }, t('Connected'))))),
-                            React.createElement(button_1.Button, { variant: "outline", size: "sm", onClick: function () { return handleDisconnect('google'); }, className: "text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20" }, t('Disconnect')))) : (React.createElement("div", { className: "flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" },
+                            React.createElement(button_1.Button, { variant: "outline", size: "sm", onClick: function () { return handleDisconnectClick('google'); }, className: "text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20" }, t('Disconnect')))) : (React.createElement("div", { className: "flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" },
                             React.createElement("p", { className: "text-sm text-muted-foreground max-w-md" }, t('Connect your Google account to access your Drive files directly within the app and export extracted data to Google Sheets.')),
-                            React.createElement(button_1.Button, { onClick: function () { return handleConnect('google'); } }, t('Connect Google')))))))))));
+                            React.createElement(button_1.Button, { onClick: function () { return handleConnect('google'); } }, t('Connect Google'))))))))),
+        React.createElement(AlertDialog, { open: disconnectDialogOpen, onOpenChange: setDisconnectDialogOpen },
+            React.createElement(AlertDialogContent, null,
+                React.createElement(AlertDialogHeader, null,
+                    React.createElement(AlertDialogTitle, null, t('Disconnect Account')),
+                    React.createElement(AlertDialogDescription, null, t('Are you sure you want to disconnect this account? You will need to reconnect to access your files again.'))),
+                React.createElement(AlertDialogFooter, null,
+                    React.createElement(AlertDialogCancel, null, t('Cancel')),
+                    React.createElement(AlertDialogAction, { onClick: handleDisconnectConfirm, className: "bg-red-500 hover:bg-red-600 focus:ring-red-500" }, t('Disconnect')))))));
 }
 exports["default"] = Integrations;

@@ -125,7 +125,7 @@ export default function Integrations({ integrations }: IntegrationsProps) {
                                         <Button 
                                             variant="outline" 
                                             size="sm" 
-                                            onClick={() => handleDisconnect('google')}
+                                            onClick={() => handleDisconnectClick('google')}
                                             className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
                                         >
                                             {t('Disconnect')}
@@ -146,6 +146,27 @@ export default function Integrations({ integrations }: IntegrationsProps) {
                     </div>
                 </div>
             </SettingsLayout>
+
+            {/* Disconnect Confirmation Dialog */}
+            <AlertDialog open={disconnectDialogOpen} onOpenChange={setDisconnectDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('Disconnect Account')}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('Are you sure you want to disconnect this account? You will need to reconnect to access your files again.')}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={handleDisconnectConfirm}
+                            className="bg-red-500 hover:bg-red-600 focus:ring-red-500"
+                        >
+                            {t('Disconnect')}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </AppLayout>
     );
 }
