@@ -184,6 +184,7 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
     Route::middleware(['auth'])->prefix('subscription')->name('subscription.')->group(function () {
         // Checkout flow (no verification needed)
         Route::get('checkout', [SubscriptionController::class, 'showCheckout'])->name('checkout');
+        Route::post('checkout', [SubscriptionController::class, 'checkout'])->name('checkout.process');
         Route::get('success', [SubscriptionController::class, 'success'])->name('success');
 
         // Management (requires verification)
