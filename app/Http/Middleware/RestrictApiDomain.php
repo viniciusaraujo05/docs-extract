@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Middleware to restrict API domain access to programmatic API calls only.
- * 
+ *
  * If a browser tries to access the API domain directly, it will be
  * redirected to the main application domain.
  */
@@ -20,9 +20,9 @@ class RestrictApiDomain
     public function handle(Request $request, Closure $next): Response
     {
         $apiDomain = env('API_DOMAIN');
-        
+
         // Only apply if API_DOMAIN is configured and we're on that domain
-        if (!$apiDomain || $request->getHost() !== $apiDomain) {
+        if (! $apiDomain || $request->getHost() !== $apiDomain) {
             return $next($request);
         }
 
@@ -30,8 +30,8 @@ class RestrictApiDomain
         if ($this->isBrowserRequest($request)) {
             // Redirect to main app domain
             $mainDomain = parse_url(config('app.url'), PHP_URL_HOST);
-            $redirectUrl = 'https://' . $mainDomain;
-            
+            $redirectUrl = 'https://'.$mainDomain;
+
             return redirect($redirectUrl);
         }
 
@@ -44,7 +44,7 @@ class RestrictApiDomain
     protected function isBrowserRequest(Request $request): bool
     {
         // If request has Authorization header with Bearer token, it's likely an API call
-        if ($request->hasHeader('Authorization') && 
+        if ($request->hasHeader('Authorization') &&
             str_starts_with($request->header('Authorization'), 'Bearer ')) {
             return false;
         }
@@ -72,6 +72,7 @@ class RestrictApiDomain
                 if (str_contains($accept, 'application/json')) {
                     return false;
                 }
+
                 return true;
             }
         }

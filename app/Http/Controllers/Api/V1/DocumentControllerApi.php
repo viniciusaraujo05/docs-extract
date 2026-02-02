@@ -350,6 +350,25 @@ final class DocumentControllerApi extends Controller
         $file = $request->file('file');
         $documentTypeId = $request->integer('document_type_id');
         $forceOverwrite = $request->boolean('force_overwrite', false);
+        
+        // Check for duplicate document if not forcing overwrite
+        if (!$forceOverwrite) {
+            $filename = $file->getClientOriginalName();
+            $duplicates = $this->documentRepository->findExistingNames([$filename], $apiClient->user->id);
+            
+            if (!empty($duplicates)) {
+                return response()->json(
+                    HttpResponse::CONFLICT->json(
+                        message: 'Document already exists.',
+                        meta: [
+                            'duplicate_filename' => $duplicates[0],
+                            'hint' => 'Use force_overwrite=true to replace the existing document.',
+                        ]
+                    ),
+                    HttpResponse::CONFLICT->value
+                );
+            }
+        }
 
         try {
             $document = $this->extractAndStoreDocumentAction->execute(
