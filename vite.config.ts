@@ -50,14 +50,6 @@ export default defineConfig(({ mode }) => {
         },
         build: {
             sourcemap: isDev,
-            rollupOptions: {
-                output: {
-                    manualChunks: {
-                        vendor: ['react', 'react-dom'],
-                        inertia: ['@inertiajs/react'],
-                    },
-                },
-            },
         },
         optimizeDeps: {
             include: [

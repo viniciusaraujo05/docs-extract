@@ -50,7 +50,7 @@ class ApiClientController extends Controller
         ]);
     }
 
-    public function store(StoreApiClientRequest $request, string $locale): RedirectResponse
+    public function store(StoreApiClientRequest $request): RedirectResponse
     {
         $user = $request->user();
 
@@ -79,7 +79,7 @@ class ApiClientController extends Controller
         ])->with('client_secret_once', $plainSecret);
     }
 
-    public function destroy(Request $request, string $locale, ApiClient $apiClient): RedirectResponse
+    public function destroy(Request $request, ApiClient $apiClient): RedirectResponse
     {
         $this->authorize('delete', $apiClient);
 
@@ -88,7 +88,7 @@ class ApiClientController extends Controller
         return back()->with('success', 'API Client deleted successfully.');
     }
 
-    public function regenerate(Request $request, string $locale, ApiClient $apiClient): RedirectResponse
+    public function regenerate(Request $request, ApiClient $apiClient): RedirectResponse
     {
         $this->authorize('update', $apiClient);
 
