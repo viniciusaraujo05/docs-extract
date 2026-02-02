@@ -9,6 +9,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Support\Facades\Route;
 use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -52,7 +53,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         // Force JSON responses for API v1 routes on authentication errors
         $exceptions->renderable(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
-            if ($request->is('api/v1/*')) {
+            if ($request->is('api/v1/*') || $request->is('v1/*')) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Unauthenticated.',
@@ -60,6 +61,33 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 401);
             }
         });
-    })->withExceptions(function (Exceptions $exceptions) {
-        Integration::handles($exceptions);
+    })->withRouting(function () {
+        $apiDomain = env('API_DOMAIN');
+
+        // Main Web Routes (Views)
+        Route::middleware('web')
+            ->group(base_path('routes/web.php'));
+
+        // Action Routes (Business Logic) & Internal API
+        // Loaded with 'web' middleware to inherit Session/CSRF protection
+        Route::middleware('web')
+            ->group(base_path('routes/api.php'));
+            
+        // Public API (v1)
+        if ($apiDomain) {
+            Route::middleware('api')
+                ->domain($apiDomain)
+                ->group(base_path('routes/api_v1.php'));
+        } else {
+            // Fallback for local dev
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/api_v1.php'));
+        }
+        
+        Route::middleware('web')
+             ->get('/up', function () {
+                 \Illuminate\Support\Facades\Event::dispatch(new \Illuminate\Foundation\Events\DiagnosingHealth);
+                 return response('OK');
+             });
     })->create();

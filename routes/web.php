@@ -67,95 +67,55 @@ Route::get('/{locale}/terms', function ($locale) {
 })->where(['locale' => 'pt|en'])->name('terms');
 
 // Pages with locale prefix (auth required for dashboard access)
+// ONLY GET ROUTES (VIEWS) HERE. ACTIONS ARE IN API.PHP
 Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {
 
     // Reports (was Dashboard)
     Route::get('dashboard', [ReportController::class, 'index'])->name('dashboard');
 
-    // Documents
-    Route::resource('documents', DocumentController::class)->except(['edit'])->names([
+    // Documents (Views only)
+    Route::resource('documents', DocumentController::class)->only(['index', 'create', 'show'])->names([
         'index' => 'documents.index',
         'create' => 'documents.create',
-        'store' => 'documents.store',
         'show' => 'documents.show',
-        'update' => 'documents.update',
-        'destroy' => 'documents.destroy',
     ])->parameters(['documents' => 'document']);
 
-    // Apply usage limit only to store route (creating new documents)
-    Route::post('documents', [DocumentController::class, 'store'])
-        ->name('documents.store')
-        ->middleware(['usage.limit:documents']);
-
     Route::get('documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
-    Route::put('documents/{document}/data', [DocumentController::class, 'updateData'])->name('documents.updateData');
-    Route::post('documents/{document}/reprocess', [DocumentController::class, 'reprocess'])->name('documents.reprocess');
 
-    // Google Integration
-
-    // Batch document routes (API only - UI integrated in create page)
-    Route::post('documents/batch', [DocumentController::class, 'batchStore'])
-        ->name('documents.batch.store')
-        ->middleware(['usage.limit:documents']);
+    // Batch document routes (Views only)
     Route::get('documents/batch/{batch}', [DocumentController::class, 'batchShow'])->name('documents.batch.show');
     Route::get('documents/batch/{batch}/progress', [DocumentController::class, 'batchProgress'])->name('documents.batch.progress');
 
-    Route::resource('document-types', DocumentTypeController::class)->names([
+    // Document Types (Views only)
+    Route::resource('document-types', DocumentTypeController::class)->only(['index', 'create', 'show', 'edit'])->names([
         'index' => 'document-types.index',
         'create' => 'document-types.create',
-        'store' => 'document-types.store',
         'show' => 'document-types.show',
         'edit' => 'document-types.edit',
-        'update' => 'document-types.update',
-        'destroy' => 'document-types.destroy',
     ])->parameters(['document-types' => 'documentType']);
 
-    // Apply usage limit only to store route
-    Route::post('document-types', [DocumentTypeController::class, 'store'])
-        ->name('document-types.store')
-        ->middleware(['usage.limit:models']);
-
-    // API Clients Management
+    // API Clients Management (View)
     Route::middleware(['verified'])->group(function () {
         Route::get('api', [ApiClientController::class, 'index'])->name('api.index');
-        Route::post('api/clients', [ApiClientController::class, 'store'])->name('api.clients.store');
-        Route::post('api/clients/{apiClient}/regenerate', [ApiClientController::class, 'regenerate'])->name('api.clients.regenerate');
-        Route::delete('api/clients/{apiClient}', [ApiClientController::class, 'destroy'])->name('api.clients.destroy');
-
-        // Webhook Endpoints Management
-        Route::post('api/webhooks', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'store'])->name('api.webhooks.store');
-        Route::delete('api/webhooks/{webhookEndpoint}', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'destroy'])->name('api.webhooks.destroy');
-        Route::post('api/webhooks/{webhookEndpoint}/regenerate', [\App\Http\Controllers\Api\WebhookEndpointController::class, 'regenerateSecret'])->name('api.webhooks.regenerate');
     });
-});
-
-// Settings Routes (auth only, no verified required for billing to allow subscription management)
-Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {
+    
+    // Settings (Views)
     Route::get('settings/billing', [PlanController::class, 'billing'])->name('settings.billing');
-
-    // Integrations
     Route::get('settings/integrations', [App\Http\Controllers\IntegrationController::class, 'index'])->name('settings.integrations');
     Route::get('integrations/{provider}/connect', [App\Http\Controllers\IntegrationController::class, 'connect'])->name('integrations.connect');
-    // Callback moved to non-localized group below
-    Route::post('integrations/{provider}/disconnect', [App\Http\Controllers\IntegrationController::class, 'disconnect'])->name('integrations.disconnect');
-    Route::post('integrations/google/process-file', [App\Http\Controllers\IntegrationController::class, 'processPickedFile'])->name('integrations.process-file');
-    Route::post('integrations/batch/{batch}/export', [App\Http\Controllers\IntegrationController::class, 'exportBatch'])->name('integrations.export');
 });
 
 // Non-localized authenticated routes
 Route::middleware(['auth'])->group(function () {
     Route::get('integrations/{provider}/callback', [App\Http\Controllers\IntegrationController::class, 'callback'])->name('integrations.callback');
-
-    // Google Integration Export (AJAX)
-    Route::post('integrations/google/export', [App\Http\Controllers\IntegrationController::class, 'exportRawData'])
-        ->name('integrations.google.export');
-
-    // Google Picker API - Get OAuth Token
+    
+    // Google Picker API
     Route::get('api/integrations/google/token', [App\Http\Controllers\IntegrationController::class, 'getOAuthToken'])
         ->name('integrations.google.token');
 });
 
 // Auth routes with locale (must be BEFORE authenticated routes to avoid conflicts)
+// ONLY GET ROUTES (VIEWS) HERE. ACTIONS ARE IN API.PHP
 Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->group(function () {
     // Login routes
     Route::get('login', function ($locale) {
@@ -167,9 +127,6 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
         ]);
     })->middleware('guest')->name('locale.login');
 
-    Route::post('login', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])
-        ->middleware(['guest:web', 'throttle:login'])->name('locale.login.store');
-
     // Password Reset routes
     if (Features::enabled(Features::resetPasswords())) {
         Route::get('forgot-password', function ($locale) {
@@ -179,10 +136,6 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
             ]);
         })->middleware('guest')->name('locale.password.request');
 
-        Route::post('forgot-password', [\Laravel\Fortify\Http\Controllers\PasswordResetLinkController::class, 'store'])
-            ->middleware(['guest', 'throttle:6,1'])
-            ->name('locale.password.email');
-
         Route::get('reset-password/{token}', function ($locale, $token) {
             return Inertia::render('auth/reset-password', [
                 'token' => $token,
@@ -190,10 +143,6 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
                 'locale' => $locale,
             ]);
         })->middleware('guest')->name('locale.password.reset');
-
-        Route::post('reset-password', [\Laravel\Fortify\Http\Controllers\NewPasswordController::class, 'store'])
-            ->middleware('guest')
-            ->name('locale.password.update');
     }
 
     // Email Verification routes
@@ -212,10 +161,6 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
         Route::get('email/verify/{id}/{hash}', [\Laravel\Fortify\Http\Controllers\VerifyEmailController::class, '__invoke'])
             ->middleware(['auth', 'signed', 'throttle:6,1'])
             ->name('locale.verification.verify');
-
-        Route::post('email/verification-notification', [\Laravel\Fortify\Http\Controllers\EmailVerificationNotificationController::class, 'store'])
-            ->middleware(['auth', 'throttle:6,1'])
-            ->name('locale.verification.send');
     }
 
     // Register routes
@@ -225,14 +170,6 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
             'locale' => $locale,
         ]);
     })->middleware('guest')->name('locale.register');
-
-    Route::post('register', [\App\Http\Controllers\Auth\CustomRegisteredUserController::class, 'store'])
-        ->middleware(['guest:web', 'throttle:register'])->name('locale.register.store');
-
-    // Checkout Registration (Flow B - Direct Purchase, POST only)
-    Route::post('register-checkout', [\App\Http\Controllers\Auth\CheckoutRegisterController::class, 'store'])
-        ->middleware(['guest:web', 'throttle:register'])
-        ->name('locale.register-checkout.store');
 
     // Social Login Redirect (Localized to preserve language)
     Route::get('auth/{provider}', [\App\Http\Controllers\Auth\SocialLoginController::class, 'redirectToProvider'])
@@ -245,53 +182,24 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
         ->where(['provider' => 'google|github'])
         ->name('social.callback.locale');
 
-    // Logout
-    Route::post('logout', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'destroy'])
-        ->middleware(['auth:web'])
-        ->name('locale.logout');
-
     // Subscription routes (authenticated)
     Route::middleware(['auth'])->prefix('subscription')->name('subscription.')->group(function () {
         // Checkout flow (no verification needed)
         Route::get('checkout', [SubscriptionController::class, 'showCheckout'])->name('checkout');
-        Route::post('checkout', [SubscriptionController::class, 'checkout'])->name('checkout.process');
         Route::get('success', [SubscriptionController::class, 'success'])->name('success');
 
         // Management (requires verification)
         Route::middleware(['verified'])->group(function () {
             Route::get('cancel', [SubscriptionController::class, 'cancel'])->name('cancel');
             Route::get('portal', [SubscriptionController::class, 'portal'])->name('portal');
-            Route::post('cancel-subscription', [SubscriptionController::class, 'cancelSubscription'])->name('cancel-subscription');
-            Route::post('resume', [SubscriptionController::class, 'resumeSubscription'])->name('resume');
         });
     });
 
-    // Plan API routes (protected)
-    Route::middleware(['auth'])->prefix('api/plans')->name('api.plans.')->group(function () {
-        Route::get('/current', [PlanController::class, 'current'])->name('current');
-        Route::get('/upcoming-invoice', [PlanController::class, 'upcomingInvoice'])->name('upcoming-invoice');
-        Route::get('/invoices', [PlanController::class, 'invoices'])->name('invoices');
-        Route::post('/cancel-subscription', [SubscriptionController::class, 'cancelSubscription'])->name('cancel-subscription');
-    });
-
-    // Usage API route
-    Route::middleware(['auth'])->get('api/usage', [\App\Http\Controllers\Api\UsageController::class, 'index'])->name('api.usage');
-
     // Support
     Route::get('support', [SupportController::class, 'create'])->name('support.create');
-    Route::post('support', [SupportController::class, 'store'])->name('support.store');
 });
 
-// Demo API routes (public, rate limited: 3 requests per hour)
-Route::prefix('api/demo')->middleware(['throttle:3,60'])->group(function () {
-    Route::post('extract', [\App\Http\Controllers\Api\DemoController::class, 'extract']);
-    Route::get('check', [\App\Http\Controllers\Api\DemoController::class, 'checkAvailability']);
-});
-
-// Public Plans API
-Route::get('api/plans', [PlanController::class, 'index'])->name('api.plans.index');
-
-// Stripe Webhook (must be outside auth middleware and CSRF protection)
+// Stripe Webhook
 Route::post('stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('cashier.webhook');
 
 require __DIR__.'/settings.php';

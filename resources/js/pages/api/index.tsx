@@ -202,7 +202,9 @@ export default function ApiIndex() {
         toast.success(`${label} ${t('copied to clipboard!')}`);
     };
 
-    const baseApiUrl = typeof window !== 'undefined' ? `${window.location.origin}/api/v1` : '/api/v1';
+    // @ts-ignore
+    const { api_url } = usePage().props;
+    const baseApiUrl = api_url || (typeof window !== 'undefined' ? `${window.location.origin}/api/v1` : '/api/v1');
     const breadcrumbs: BreadcrumbItem[] = [{ title: t('API'), href: `/${locale}/api` }];
     const endpointKeys = Object.keys(endpoints);
 
