@@ -157,7 +157,11 @@ class StripePlanService
      */
     public function clearCache(): void
     {
-        Cache::forget('stripe.plans');
+        $locales = ['en', 'pt-BR', 'pt-PT', 'pt', 'es', 'fr', 'de'];
+        
+        foreach ($locales as $locale) {
+            Cache::forget("stripe_plans_{$locale}");
+        }
     }
 
     /**
