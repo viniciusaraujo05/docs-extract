@@ -3,56 +3,78 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
-import { readdirSync, statSync } from 'fs';
-import { join } from 'path';
 
-// Recursively get all .tsx files from pages directory
-function getPageFiles(dir: string): string[] {
-    const files: string[] = [];
-    const items = readdirSync(dir);
-    for (const item of items) {
-        const fullPath = join(dir, item);
-        if (statSync(fullPath).isDirectory()) {
-            files.push(...getPageFiles(fullPath));
-        } else if (item.endsWith('.tsx')) {
-            files.push(fullPath);
-        }
-    }
-    return files;
-}
+export default defineConfig(({ mode }) => {
+    const isDev = mode === 'development';
 
-const pageFiles = getPageFiles('resources/js/pages');
-
-export default defineConfig({
-    plugins: [
-        laravel({
-            input: [
-                'resources/css/app.css',
-                'resources/js/app.tsx',
-                ...pageFiles,
+    return {
+        plugins: [
+            laravel({
+                input: [
+                    'resources/css/app.css',
+                    'resources/js/app.tsx',
+                ],
+                ssr: 'resources/js/ssr.tsx',
+                refresh: true,
+            }),
+            react({
+                babel: {
+                    plugins: isDev ? [] : ['babel-plugin-react-compiler'],
+                },
+            }),
+            tailwindcss(),
+            // Wayfinder desabilitado em dev para melhor performance
+            // Os tipos já foram gerados, não precisa regenerar a cada mudança
+            ...(isDev ? [] : [wayfinder({
+                php: 'php -d variables_order=EGPCS',
+                config: {
+                    cache_driver: 'file',
+                },
+            })]),
+        ],
+        esbuild: {
+            jsx: 'automatic',
+        },
+        server: {
+            host: '0.0.0.0',
+            port: 5173,
+            strictPort: false,
+            hmr: {
+                overlay: true,
+                host: 'localhost',
+            },
+            watch: {
+                usePolling: false,
+                ignored: ['**/vendor/**', '**/node_modules/**', '**/storage/**', '**/public/**'],
+            },
+        },
+        build: {
+            sourcemap: isDev,
+            rollupOptions: {
+                output: {
+                    manualChunks: {
+                        vendor: ['react', 'react-dom'],
+                        inertia: ['@inertiajs/react'],
+                    },
+                },
+            },
+        },
+        optimizeDeps: {
+            include: [
+                'react',
+                'react-dom',
+                'react/jsx-runtime',
+                '@inertiajs/react',
+                'lucide-react',
+                'clsx',
+                'tailwind-merge',
             ],
-            ssr: 'resources/js/ssr.tsx',
-            refresh: true,
-        }),
-        react({
-            babel: {
-                plugins: ['babel-plugin-react-compiler'],
+            exclude: ['@laravel/vite-plugin-wayfinder'],
+        },
+        resolve: {
+            alias: {
+                '@': '/resources/js',
             },
-        }),
-        tailwindcss(),
-        wayfinder({
-            /**
-             * Wayfinder configurado para usar file cache em vez de Redis.
-             * Isso permite builds sem depender de Redis rodando.
-             */
-            generate: true,
-            php: 'php -d variables_order=EGPCS',
-            config: {
-                cache_driver: 'file',
-            },
-        }),
-    ],
-    esbuild: {
-        jsx: 'automatic',
-    },
+        },
+    };
 });
