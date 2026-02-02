@@ -87,7 +87,7 @@ class DocumentControllerApiTest extends TestCase
             ]);
 
         $response->assertStatus(201);
-        
+
         $this->assertDatabaseHas('documents', [
             'user_id' => $this->user->id,
             'document_type_id' => $documentType->id,
@@ -207,7 +207,7 @@ class DocumentControllerApiTest extends TestCase
     public function test_list_documents_only_shows_user_documents(): void
     {
         Document::factory()->count(2)->for($this->user)->create();
-        
+
         $otherUser = User::factory()->create();
         Document::factory()->count(3)->for($otherUser)->create();
 
@@ -239,7 +239,7 @@ class DocumentControllerApiTest extends TestCase
 
         $response->assertStatus(200);
         $perPage = $response->json('meta.pagination.per_page');
-        
+
         $this->assertLessThanOrEqual(100, $perPage);
     }
 
@@ -252,7 +252,7 @@ class DocumentControllerApiTest extends TestCase
 
         $response->assertStatus(200);
         $perPage = $response->json('meta.pagination.per_page');
-        
+
         $this->assertGreaterThanOrEqual(1, $perPage);
     }
 
@@ -325,7 +325,7 @@ class DocumentControllerApiTest extends TestCase
             ->getJson(route('api.v1.documents.search.name', ['name' => 'Invoice']));
 
         $response->assertStatus(200);
-        
+
         if ($response->status() === 200) {
             $this->assertGreaterThanOrEqual(1, count($response->json('data')));
         }
@@ -563,7 +563,7 @@ class DocumentControllerApiTest extends TestCase
     {
         Storage::fake('documents');
         $file = UploadedFile::fake()->create('duplicate.pdf', 100);
-        
+
         Document::factory()->for($this->user)->create(['name' => 'duplicate.pdf']);
 
         $documentType = DocumentType::factory()->for($this->user)->create();
@@ -577,7 +577,7 @@ class DocumentControllerApiTest extends TestCase
 
         $this->assertTrue(
             $response->status() === 409 || $response->status() === 201,
-            'Expected status 409 (duplicate) or 201 (created), got ' . $response->status()
+            'Expected status 409 (duplicate) or 201 (created), got '.$response->status()
         );
     }
 
@@ -585,7 +585,7 @@ class DocumentControllerApiTest extends TestCase
     {
         Storage::fake('documents');
         $file = UploadedFile::fake()->create('duplicate.pdf', 100);
-        
+
         Document::factory()->for($this->user)->create(['name' => 'duplicate.pdf']);
 
         $documentType = DocumentType::factory()->for($this->user)->create();

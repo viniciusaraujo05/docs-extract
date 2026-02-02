@@ -68,7 +68,7 @@ return [
                     "{$limits['free']['reports']} relatório",
                     'Acesso à API',
                     "{$limits['free']['api_requests']} requisições de API por mês",
-                    "Webhooks",
+                    'Webhooks',
                     'Interface completa',
                 ],
                 'pt-PT' => [

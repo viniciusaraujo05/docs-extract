@@ -53,7 +53,7 @@ class DocumentTypeControllerApiTest extends TestCase
     public function test_list_document_types_only_shows_user_types(): void
     {
         DocumentType::factory()->count(2)->for($this->user)->create();
-        
+
         $otherUser = User::factory()->create();
         DocumentType::factory()->count(3)->for($otherUser)->create();
 
@@ -204,9 +204,9 @@ class DocumentTypeControllerApiTest extends TestCase
     public function test_create_document_type_with_all_valid_field_types(): void
     {
         $validTypes = ['string', 'number', 'date', 'boolean', 'array', 'object'];
-        
-        $fields = array_map(fn($type) => [
-            'name' => $type . '_field',
+
+        $fields = array_map(fn ($type) => [
+            'name' => $type.'_field',
             'type' => $type,
             'required' => false,
         ], $validTypes);
@@ -402,17 +402,16 @@ class DocumentTypeControllerApiTest extends TestCase
             ->assertJsonCount(2, 'data.fields');
     }
 
-
     public function test_update_document_type_with_valid_field_types(): void
     {
         $type = DocumentType::factory()->for($this->user)->create();
         $validTypes = ['string', 'number', 'date', 'boolean', 'array', 'object'];
-        
+
         foreach ($validTypes as $fieldType) {
             $response = $this->withHeader('Authorization', 'Bearer '.$this->token)
                 ->putJson(route('api.v1.document-types.update', $type->id), [
                     'fields' => [
-                        ['name' => $fieldType . '_field', 'type' => $fieldType],
+                        ['name' => $fieldType.'_field', 'type' => $fieldType],
                     ],
                 ]);
 
@@ -487,7 +486,7 @@ class DocumentTypeControllerApiTest extends TestCase
             ->deleteJson(route('api.v1.document-types.destroy', $type->id));
 
         $response->assertStatus(404);
-        
+
         $this->assertDatabaseHas('document_types', ['id' => $type->id]);
     }
 

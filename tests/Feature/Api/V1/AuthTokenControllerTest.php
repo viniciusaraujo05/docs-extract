@@ -94,7 +94,6 @@ class AuthTokenControllerTest extends TestCase
             ]);
     }
 
-
     public function test_authentication_response_contains_correct_token_type(): void
     {
         $secret = 'super-secret-key-123';
@@ -121,7 +120,7 @@ class AuthTokenControllerTest extends TestCase
 
         $response->assertStatus(200);
         $data = $response->json();
-        
+
         $this->assertIsInt($data['expires_in']);
         $this->assertGreaterThan(0, $data['expires_in']);
     }
@@ -216,7 +215,7 @@ class AuthTokenControllerTest extends TestCase
 
         $response->assertStatus(200);
         $newToken = $response->json('access_token');
-        
+
         $this->assertNotEmpty($newToken);
         $this->assertIsString($newToken);
     }

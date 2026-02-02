@@ -37,7 +37,7 @@ class DemoController extends Controller
         // Check page count for PDFs
         if ($file->getMimeType() === 'application/pdf') {
             try {
-                $parser = new \Smalot\PdfParser\Parser();
+                $parser = new \Smalot\PdfParser\Parser;
                 $pdf = $parser->parseFile($file->getPathname());
                 $pages = count($pdf->getPages());
 
