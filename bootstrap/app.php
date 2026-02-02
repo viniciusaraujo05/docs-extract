@@ -13,10 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
-        health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
@@ -50,6 +47,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->reportable(function (\Throwable $e) {
+            error_log("FATAL EXCEPTION: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
+            error_log($e->getTraceAsString());
+        });
+
         // Force JSON responses for API v1 routes on authentication errors
         $exceptions->renderable(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
             if ($request->is('api/v1/*') || $request->is('v1/*')) {
@@ -61,7 +63,9 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
     })->withRouting(function () {
+        error_log("BOOTSTRAP: withRouting custom logic started");
         $apiDomain = env('API_DOMAIN');
+        error_log("BOOTSTRAP: API_DOMAIN=" . ($apiDomain ?: 'none'));
 
         // Main Web Routes (Views)
         Route::middleware('web')
