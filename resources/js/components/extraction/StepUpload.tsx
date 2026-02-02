@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { GoogleDrivePicker } from './GoogleDrivePicker';
+import { GooglePickerWrapper } from './GooglePickerWrapper';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,8 +32,8 @@ interface StepUploadProps {
     file: File | null;
     files?: File[];  // NEW: for batch mode
     batchMode?: boolean;  // NEW: toggle between single/multiple
-    hasTemplates?: boolean;  // NEW: to show batch option
-    documentTypes: DocumentType[];
+    hasTemplates?: boolean;
+    documentTypes?: DocumentType[];
     selectedTypeId: number | null;
     newTypeName: string;
     analyzing: boolean;
@@ -43,12 +43,13 @@ interface StepUploadProps {
     locale: string;
     checkingDuplicate?: boolean;
     duplicateExists?: boolean;
-    duplicateFiles?: string[]; // NEW: List of duplicate filenames
+    duplicateFiles?: string[]; // NEW: List of duplicate filenames (from backend)
+    internalDuplicates?: string[]; // NEW: List of duplicate filenames (within selected files)
     modelLimitReached?: boolean;
     isFirstDocument?: boolean;
     onFileSelect: (file: File | null) => void;
-    onFilesSelect?: (files: File[]) => void;  // NEW: for batch
-    onBatchModeToggle?: () => void;  // NEW: toggle mode
+    onFilesSelect?: (files: File[]) => void;  // NEW: for batch mode
+    onBatchModeToggle?: (enabled: boolean) => void;  // NEW
     onTypeSelect: (typeId: number | null) => void;
     onNewTypeNameChange: (name: string) => void;
     onAnalyzeDocument: () => void;
@@ -77,6 +78,7 @@ export function StepUpload({
     checkingDuplicate = false,
     duplicateExists = false,
     duplicateFiles = [],
+    internalDuplicates = [],
     modelLimitReached = false,
     isFirstDocument = false,
     onFileSelect,
@@ -91,7 +93,7 @@ export function StepUpload({
     const { t } = useTranslation();
     const [dragActive, setDragActive] = useState(false);
     const [showNewType, setShowNewType] = useState(documentTypes.length === 0);
-    const [showDrivePicker, setShowDrivePicker] = useState(false); // NEW
+    const [showDrivePicker, setShowDrivePicker] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const handleDrag = useCallback((e: React.DragEvent) => {
@@ -526,33 +528,18 @@ export function StepUpload({
                                     </button>
 
                                     {/* Option 2: Google Drive */}
-                                    <button
-                                        type="button"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setShowDrivePicker(true);
-                                        }}
+                                    <GooglePickerWrapper
+                                        locale={locale}
+                                        onFileSelect={handleDriveFileSelect}
+                                        multiple={batchMode}
                                         disabled={!hasTypeSelected}
                                         className={cn(
-                                            "flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200",
+                                            "flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 h-full",
                                             hasTypeSelected 
-                                                ? "border-muted hover:border-blue-500/50 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 cursor-pointer" 
-                                                : "border-muted opacity-50 cursor-not-allowed"
+                                                ? "border-muted hover:border-blue-500/50 hover:bg-blue-50/50 dark:hover:bg-blue-950/20" 
+                                                : "border-muted opacity-50"
                                         )}
-                                    >
-                                        <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" role="img" className="h-6 w-6">
-                                                <path d="M23.49,12.275 C23.49,11.485 23.425,10.73 23.295,10 H12 V14.51 H18.46 C18.18,15.99 17.335,17.245 16.08,18.09 L16.08,21.09 L19.905,21.09 C22.145,19.03 23.49,15.98 23.49,12.275 Z" fill="#4285F4"/>
-                                                <path d="M12,24 C15.24,24 17.965,22.935 19.91,21.09 L16.08,18.09 C15.005,18.815 13.62,19.25 12,19.25 C8.865,19.25 6.215,17.135 5.265,14.29 L1.3,14.29 L1.3,17.385 C3.26,21.275 7.315,24 12,24 Z" fill="#34A853"/>
-                                                <path d="M5.265,14.29 C5.025,13.565 4.9,12.795 4.9,12 C4.9,11.205 5.025,10.435 5.265,9.71 L5.265,6.62 L1.3,6.62 C0.47,8.28 0,10.09 0,12 C0,13.91 0.47,15.72 1.3,17.385 L5.265,14.29 Z" fill="#FBBC05"/>
-                                                <path d="M12,4.75 C13.77,4.75 15.355,5.36 16.605,6.55 L20.02,3.135 C17.96,1.215 15.235,0 12,0 C7.315,0 3.26,2.725 1.3,6.62 L5.265,9.71 C6.215,6.865 8.865,4.75 12,4.75 Z" fill="#EA4335"/>
-                                            </svg>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <span className="font-medium block">{t('From Google Drive')}</span>
-                                            <span className="text-xs text-muted-foreground block">{t('Import from cloud')}</span>
-                                        </div>
-                                    </button>
+                                    />
                                 </div>
                                 
                                 {!hasTypeSelected && (
@@ -605,15 +592,19 @@ export function StepUpload({
                             </div>
                             <div className="max-h-60 space-y-2 overflow-y-auto rounded-lg border p-3">
                                 {files.map((f, index) => {
-                                    const isDuplicate = duplicateFiles.some(d => d.toLowerCase() === f.name.toLowerCase());
+                                    const isBackendDuplicate = duplicateFiles.some(d => d.toLowerCase() === f.name.toLowerCase());
+                                    const isInternalDuplicate = internalDuplicates.some(d => d.toLowerCase() === f.name.toLowerCase());
+                                    const isDuplicate = isBackendDuplicate || isInternalDuplicate;
                                     return (
                                         <div
                                             key={index}
                                             className={cn(
                                                 "flex items-center justify-between rounded-md border p-3 transition-colors",
-                                                isDuplicate 
-                                                    ? "bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800" 
-                                                    : "bg-card hover:bg-muted/50"
+                                                isInternalDuplicate
+                                                    ? "bg-red-50 border-red-300 dark:bg-red-950/20 dark:border-red-800"
+                                                    : isBackendDuplicate 
+                                                        ? "bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800" 
+                                                        : "bg-card hover:bg-muted/50"
                                             )}
                                         >
                                             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -627,10 +618,16 @@ export function StepUpload({
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2">
                                                         <p className="text-sm font-medium truncate">{f.name}</p>
-                                                        {isDuplicate && (
+                                                        {isInternalDuplicate && (
+                                                            <Badge variant="outline" className="h-5 gap-1 border-red-500 text-red-600 dark:text-red-400 bg-transparent text-[10px] px-1.5">
+                                                                <Info className="h-3 w-3" />
+                                                                {t('Duplicate in list')}
+                                                            </Badge>
+                                                        )}
+                                                        {isBackendDuplicate && !isInternalDuplicate && (
                                                             <Badge variant="outline" className="h-5 gap-1 border-amber-500 text-amber-600 dark:text-amber-400 bg-transparent text-[10px] px-1.5">
                                                                 <Info className="h-3 w-3" />
-                                                                {t('Duplicate')}
+                                                                {t('Already exists')}
                                                             </Badge>
                                                         )}
                                                     </div>
@@ -742,7 +739,7 @@ export function StepUpload({
                             checkingDuplicate || 
                             duplicateExists ||
                             (batchMode && duplicateFiles.length > 0) || 
-                            !hasTypeSelected || 
+                            (batchMode && internalDuplicates.length > 0) || 
                             !hasTypeSelected || 
                             (isNewType && !analysisCompleted)
                         }
@@ -767,13 +764,6 @@ export function StepUpload({
                 </div>
             </CardContent>
             
-            <GoogleDrivePicker 
-                open={showDrivePicker} 
-                onOpenChange={setShowDrivePicker}
-                onFileSelect={handleDriveFileSelect}
-                locale={locale}
-                multiple={batchMode}
-            />
         </Card>
     );
 }

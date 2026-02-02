@@ -24,52 +24,33 @@ class GoogleDriveService
     }
 
     /**
-     * List files from Google Drive.
+     * REMOVED: listFiles() method.
+     * 
+     * With drive.file scope, we cannot list arbitrary files from user's Drive.
+     * Files must be explicitly selected by the user via Google Picker API.
+     * 
+     * To implement file selection:
+     * 1. Use Google Picker API on frontend with the same OAuth token
+     * 2. User explicitly selects files through Google's UI
+     * 3. Picker returns fileId which can then be used with downloadFile()
+     * 
+     * This ensures compliance with Google's least privilege policy.
      */
-    /**
-     * List files from Google Drive.
-     */
-    public function listFiles(User $user, ?string $folderId = null)
-    {
-        $account = $this->getAccount($user);
-
-        if (! $account) {
-            throw new \Exception('Google account not connected');
-        }
-
-        $this->ensureTokenIsValid($account);
-
-        $folderId = $folderId ?: 'root';
-        $query = "'{$folderId}' in parents and trashed = false";
-
-        /** @var \Illuminate\Http\Client\Response $response */
-        $response = Http::withToken($account->token)
-            ->get(self::DRIVE_API_URL, [
-                'q' => $query,
-                'fields' => 'files(id, name, mimeType, iconLink, thumbnailLink)',
-                'pageSize' => 50,
-                'orderBy' => 'folder,name',
-            ]);
-
-        if ($response->failed()) {
-            Log::error('Google Drive List Failed', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-
-            // Handle 401 Unauthorized specifically to hint at re-auth
-            if ($response->status() === 401) {
-                throw new \Exception('Unauthorized: Please reconnect your Google account.');
-            }
-
-            throw new \Exception('Failed to fetch files from Google Drive: '.$response->body());
-        }
-
-        return $response->json();
-    }
 
     /**
      * Download a file from Google Drive.
+     * 
+     * IMPORTANT: With drive.file scope, this only works for:
+     * - Files created by this application
+     * - Files explicitly selected by user via Google Picker API
+     * 
+     * The fileId must come from user interaction (Google Picker), not from
+     * programmatic listing or search operations.
+     * 
+     * @param User $user The authenticated user
+     * @param string $fileId The Google Drive file ID (from Picker or app-created file)
+     * @return array ['content' => string, 'filename' => string, 'mime_type' => string]
+     * @throws \Exception
      */
     public function downloadFile(User $user, string $fileId)
     {
@@ -82,13 +63,19 @@ class GoogleDriveService
         $this->ensureTokenIsValid($account);
 
         // Get file metadata
+        $metadataUrl = self::DRIVE_API_URL."/{$fileId}";
+        
         /** @var \Illuminate\Http\Client\Response $metaResponse */
         $metaResponse = Http::withToken($account->token)
-            ->get(self::DRIVE_API_URL."/{$fileId}", [
+            ->get($metadataUrl, [
                 'fields' => 'name,mimeType',
             ]);
 
         if ($metaResponse->failed()) {
+            Log::error('Failed to fetch file metadata', [
+                'file_id' => $fileId,
+                'status' => $metaResponse->status(),
+            ]);
             throw new \Exception('Failed to fetch file metadata');
         }
 
@@ -125,9 +112,9 @@ class GoogleDriveService
         $response = Http::withToken($account->token)->get($url, $params);
 
         if ($response->failed()) {
-            Log::error('Google Drive Download Failed', [
+            Log::error('Failed to download file', [
+                'file_id' => $fileId,
                 'status' => $response->status(),
-                'body' => $response->body(),
             ]);
             throw new \Exception('Failed to download file');
         }

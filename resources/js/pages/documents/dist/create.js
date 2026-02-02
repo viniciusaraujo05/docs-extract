@@ -85,13 +85,19 @@ function getFilePreviewUrl(file) {
  */
 function DocumentsCreate(_a) {
     var _this = this;
-    var _b = _a.documentTypes, documentTypes = _b === void 0 ? [] : _b;
+    var _b = _a.documentTypes, documentTypes = _b === void 0 ? [] : _b, _c = _a.hasTemplates, hasTemplates = _c === void 0 ? false : _c, _d = _a.limitReached, limitReached = _d === void 0 ? false : _d, _e = _a.planName, planName = _e === void 0 ? 'Free' : _e, _f = _a.isFirstDocument, isFirstDocument = _f === void 0 ? false : _f, _g = _a.modelLimitReached, initialModelLimitReached = _g === void 0 ? false : _g;
     var t = react_i18next_1.useTranslation().t;
-    var _c = react_2.useState('pt'), locale = _c[0], setLocale = _c[1];
+    var _h = react_2.useState('pt'), locale = _h[0], setLocale = _h[1];
     react_2.useEffect(function () {
         var savedLocale = localStorage.getItem('selected-locale') || 'pt';
         setLocale(savedLocale);
     }, []);
+    // Effect to show limit error on mount if reached
+    react_2.useEffect(function () {
+        if (limitReached) {
+            setError(t('Document limit reached', { plan: planName }));
+        }
+    }, [limitReached, planName, t]);
     var BREADCRUMBS = [
         { title: t('Dashboard'), href: "/" + locale + "/dashboard" },
         { title: t('Documents'), href: "/" + locale + "/documents" },
@@ -99,24 +105,28 @@ function DocumentsCreate(_a) {
     ];
     var WIZARD_STEPS = [t('Upload'), t('Define Fields'), t('Review & Save')];
     // Estado do wizard
-    var _d = react_2.useState(1), step = _d[0], setStep = _d[1];
-    var _e = react_2.useState(null), file = _e[0], setFile = _e[1];
-    var _f = react_2.useState(null), filePreview = _f[0], setFilePreview = _f[1];
-    var _g = react_2.useState(null), selectedTypeId = _g[0], setSelectedTypeId = _g[1];
+    var _j = react_2.useState(1), step = _j[0], setStep = _j[1];
+    var _k = react_2.useState(null), file = _k[0], setFile = _k[1];
+    var _l = react_2.useState([]), files = _l[0], setFiles = _l[1]; // NEW: for batch mode
+    var _m = react_2.useState(false), batchMode = _m[0], setBatchMode = _m[1]; // NEW: toggle mode
+    var _o = react_2.useState(null), filePreview = _o[0], setFilePreview = _o[1];
+    var _p = react_2.useState(null), selectedTypeId = _p[0], setSelectedTypeId = _p[1];
     // Estado dos campos
-    var _h = react_2.useState([]), fields = _h[0], setFields = _h[1];
-    var _j = react_2.useState([]), suggestedFields = _j[0], setSuggestedFields = _j[1];
-    var _k = react_2.useState({}), extractedData = _k[0], setExtractedData = _k[1];
-    var _l = react_2.useState(''), newTypeName = _l[0], setNewTypeName = _l[1];
+    var _q = react_2.useState([]), fields = _q[0], setFields = _q[1];
+    var _r = react_2.useState([]), suggestedFields = _r[0], setSuggestedFields = _r[1];
+    var _s = react_2.useState({}), extractedData = _s[0], setExtractedData = _s[1];
+    var _t = react_2.useState(''), newTypeName = _t[0], setNewTypeName = _t[1];
     // Estado de loading
-    var _m = react_2.useState(false), analyzing = _m[0], setAnalyzing = _m[1];
-    var _o = react_2.useState(false), processing = _o[0], setProcessing = _o[1];
-    var _p = react_2.useState(false), saving = _p[0], setSaving = _p[1];
-    var _q = react_2.useState(false), checkingDuplicate = _q[0], setCheckingDuplicate = _q[1];
-    var _r = react_2.useState(null), error = _r[0], setError = _r[1];
-    var _s = react_2.useState(false), analysisCompleted = _s[0], setAnalysisCompleted = _s[1];
-    var _t = react_2.useState(false), modelLimitReached = _t[0], setModelLimitReached = _t[1];
-    var _u = react_2.useState(false), duplicateExists = _u[0], setDuplicateExists = _u[1];
+    var _u = react_2.useState(false), analyzing = _u[0], setAnalyzing = _u[1];
+    var _v = react_2.useState(false), processing = _v[0], setProcessing = _v[1];
+    var _w = react_2.useState(false), saving = _w[0], setSaving = _w[1];
+    var _x = react_2.useState(false), checkingDuplicate = _x[0], setCheckingDuplicate = _x[1];
+    var _y = react_2.useState(null), error = _y[0], setError = _y[1];
+    var _z = react_2.useState(false), analysisCompleted = _z[0], setAnalysisCompleted = _z[1];
+    var _0 = react_2.useState(initialModelLimitReached), modelLimitReached = _0[0], setModelLimitReached = _0[1];
+    var _1 = react_2.useState(false), duplicateExists = _1[0], setDuplicateExists = _1[1];
+    var _2 = react_2.useState([]), duplicateFiles = _2[0], setDuplicateFiles = _2[1];
+    var _3 = react_2.useState([]), internalDuplicates = _3[0], setInternalDuplicates = _3[1];
     /**
      * Check model limit
      */
@@ -219,6 +229,10 @@ function DocumentsCreate(_a) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    if (limitReached) {
+                        sonner_1.toast.error(t('Document limit reached', { plan: planName }));
+                        return [2 /*return*/];
+                    }
                     // Limpa preview anterior
                     if (filePreview) {
                         URL.revokeObjectURL(filePreview);
@@ -315,7 +329,7 @@ function DocumentsCreate(_a) {
                 case 10: return [2 /*return*/];
             }
         });
-    }); }, [filePreview, selectedTypeId]);
+    }); }, [filePreview, selectedTypeId, limitReached, planName, t]);
     /**
      * Handler para seleção de tipo de documento
      * IMPORTANTE: Limpa dados extraídos ao mudar tipo
@@ -414,49 +428,45 @@ function DocumentsCreate(_a) {
      * Extrai dados do documento usando IA
      */
     var handleExtract = react_2.useCallback(function () { return __awaiter(_this, void 0, void 0, function () {
-        var usageResponse, usageData, err_5, formData, response, data, suggestions, suggestions, suggestions, err_6, message;
+        var formData, response, data, suggestions, suggestions, suggestions, err_5, message;
         var _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    if (!file || fields.length === 0)
+                    if (!batchMode) return [3 /*break*/, 2];
+                    if (files.length === 0)
                         return [2 /*return*/];
-                    _b.label = 1;
-                case 1:
-                    _b.trys.push([1, 4, , 5]);
-                    return [4 /*yield*/, fetch("/" + locale + "/api/usage", {
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': getCsrfToken()
-                            }
-                        })];
-                case 2:
-                    usageResponse = _b.sent();
-                    return [4 /*yield*/, usageResponse.json()];
-                case 3:
-                    usageData = _b.sent();
-                    if (usageData.success && usageData.usage.documents.is_reached) {
-                        setError(t('Document limit reached', {
-                            used: usageData.usage.documents.used,
-                            limit: usageData.usage.documents.limit
-                        }));
+                    // Validate basic requirements before sending
+                    if (!selectedTypeId && !newTypeName) {
+                        setError(t('Please select or create a document template'));
                         return [2 /*return*/];
                     }
-                    return [3 /*break*/, 5];
-                case 4:
-                    err_5 = _b.sent();
-                    console.error('Error checking usage:', err_5);
-                    return [3 /*break*/, 5];
-                case 5:
+                    if (fields.length === 0) {
+                        setError(t('Please define at least one field'));
+                        return [2 /*return*/];
+                    }
+                    // Immediately start batch processing
+                    return [4 /*yield*/, checkAndSave()];
+                case 1:
+                    // Immediately start batch processing
+                    _b.sent();
+                    return [2 /*return*/];
+                case 2:
+                    if (!file || fields.length === 0)
+                        return [2 /*return*/];
+                    // Final backend check before costly AI op
+                    if (limitReached) {
+                        setError(t('Document limit reached', { plan: planName }));
+                        return [2 /*return*/];
+                    }
                     setProcessing(true);
                     setError(null);
                     formData = new FormData();
                     formData.append('file', file);
                     formData.append('fields', JSON.stringify(fields));
-                    _b.label = 6;
-                case 6:
-                    _b.trys.push([6, 9, 10, 11]);
+                    _b.label = 3;
+                case 3:
+                    _b.trys.push([3, 6, 7, 8]);
                     return [4 /*yield*/, fetch('/api/documents/extract', {
                             method: 'POST',
                             body: formData,
@@ -466,13 +476,13 @@ function DocumentsCreate(_a) {
                             },
                             credentials: 'same-origin'
                         })];
-                case 7:
+                case 4:
                     response = _b.sent();
                     if (!response.ok) {
                         throw new Error("HTTP " + response.status + ": " + response.statusText);
                     }
                     return [4 /*yield*/, response.json()];
-                case 8:
+                case 5:
                     data = _b.sent();
                     if (data.success && data.extracted_data) {
                         setExtractedData(data.extracted_data);
@@ -502,10 +512,10 @@ function DocumentsCreate(_a) {
                             setError((_a = data.error) !== null && _a !== void 0 ? _a : 'Erro ao extrair dados');
                         }
                     }
-                    return [3 /*break*/, 11];
-                case 9:
-                    err_6 = _b.sent();
-                    message = err_6 instanceof Error ? err_6.message : t('Error processing document');
+                    return [3 /*break*/, 8];
+                case 6:
+                    err_5 = _b.sent();
+                    message = err_5 instanceof Error ? err_5.message : t('Error processing document');
                     // Se for erro 500, mostra mensagem amigável
                     if (message.includes('500')) {
                         setError(t('document_processing_error'));
@@ -513,15 +523,15 @@ function DocumentsCreate(_a) {
                     else {
                         setError(message);
                     }
-                    console.error('Extraction error:', err_6);
-                    return [3 /*break*/, 11];
-                case 10:
+                    console.error('Extraction error:', err_5);
+                    return [3 /*break*/, 8];
+                case 7:
                     setProcessing(false);
                     return [7 /*endfinally*/];
-                case 11: return [2 /*return*/];
+                case 8: return [2 /*return*/];
             }
         });
-    }); }, [file, fields]);
+    }); }, [file, files, batchMode, fields, limitReached, planName, t]);
     /**
      * Atualiza um campo editado
      */
@@ -537,61 +547,73 @@ function DocumentsCreate(_a) {
     var checkAndSave = react_2.useCallback(function (forceOverwrite) {
         if (forceOverwrite === void 0) { forceOverwrite = false; }
         return __awaiter(_this, void 0, void 0, function () {
-            var formData, locale;
-            var _a;
-            return __generator(this, function (_b) {
-                if (!file)
+            var formData, locale, endpoint;
+            return __generator(this, function (_a) {
+                if ((!batchMode && !file) || (batchMode && files.length === 0))
                     return [2 /*return*/];
                 if (!selectedTypeId && !newTypeName) {
-                    sonner_1.toast.error('Selecione ou crie um modelo de documento');
+                    sonner_1.toast.error(t(batchMode ? 'Batch Template Requirement' : 'Please select or create a document template'));
                     return [2 /*return*/];
                 }
                 setSaving(true);
                 formData = new FormData();
-                formData.append('file', file);
+                if (batchMode) {
+                    files.forEach(function (f) { return formData.append('files[]', f); });
+                    // Batch request expects 'fields' directly, not inside schema object
+                    formData.append('fields', JSON.stringify(fields));
+                }
+                else {
+                    if (file)
+                        formData.append('file', file);
+                    // Single request expects 'schema' with fields inside
+                    formData.append('schema', JSON.stringify({ fields: fields }));
+                    formData.append('extracted_data', JSON.stringify(extractedData));
+                }
+                if (selectedTypeId) {
+                    formData.append('document_type_id', selectedTypeId.toString());
+                }
+                if (newTypeName) {
+                    formData.append('new_type_name', newTypeName);
+                }
                 formData.append('type', selectedTypeId ? 'predefined' : 'new_type');
-                formData.append('document_type_id', (_a = selectedTypeId === null || selectedTypeId === void 0 ? void 0 : selectedTypeId.toString()) !== null && _a !== void 0 ? _a : '');
-                formData.append('new_type_name', newTypeName);
-                formData.append('schema', JSON.stringify({ fields: fields }));
-                formData.append('extracted_data', JSON.stringify(extractedData));
                 formData.append('force_overwrite', forceOverwrite ? '1' : '0');
                 locale = localStorage.getItem('selected-locale') || 'pt';
-                react_1.router.post("/" + locale + "/documents", formData, {
+                endpoint = batchMode ? "/" + locale + "/documents/batch" : "/" + locale + "/documents";
+                react_1.router.post(endpoint, formData, {
                     forceFormData: true,
                     onSuccess: function (page) {
                         var _a;
-                        sonner_1.toast.success('Documento salvo com sucesso!');
+                        var message = batchMode
+                            ? t('Documents uploaded for processing!')
+                            : t('Document saved successfully!');
+                        sonner_1.toast.success(message);
                         setSaving(false);
-                        // Extrai o ID do documento da resposta
-                        var documentId = (_a = page.props.document) === null || _a === void 0 ? void 0 : _a.id;
-                        if (documentId) {
-                            // Redireciona para a página do documento criado
-                            react_1.router.visit("/" + locale + "/documents/" + documentId);
+                        if (batchMode) {
+                            // Backend redirects to batch progress page automatically
                         }
                         else {
-                            // Fallback para lista se não conseguir obter o ID
-                            react_1.router.visit("/" + locale + "/documents");
+                            // Extrai o ID do documento da resposta
+                            var documentId = (_a = page.props.document) === null || _a === void 0 ? void 0 : _a.id;
+                            if (documentId) {
+                                // Redireciona para a página do documento criado
+                                react_1.router.visit("/" + locale + "/documents/" + documentId);
+                            }
+                            else {
+                                // Fallback para lista se não conseguir obter o ID
+                                react_1.router.visit("/" + locale + "/documents");
+                            }
                         }
                     },
                     onError: function (errors) {
-                        console.error('Save errors:', errors);
-                        // Check if it's a limit error
-                        if (errors.error && errors.error.includes('limit reached')) {
-                            sonner_1.toast.error(errors.error);
-                        }
-                        else if (errors.file) {
-                            sonner_1.toast.error(errors.file);
-                        }
-                        else {
-                            sonner_1.toast.error('Erro ao salvar documento. Tente novamente.');
-                        }
                         setSaving(false);
+                        console.error('Save error:', errors);
+                        sonner_1.toast.error(t('Error saving document'));
                     }
                 });
                 return [2 /*return*/];
             });
         });
-    }, [file, selectedTypeId, newTypeName, fields, extractedData, locale]);
+    }, [file, files, batchMode, selectedTypeId, newTypeName, fields, extractedData, t]);
     /**
      * Descarta e volta à lista
      */
@@ -604,16 +626,122 @@ function DocumentsCreate(_a) {
     var handleUpgradePlan = react_2.useCallback(function () {
         react_1.router.visit("/" + locale + "/settings/billing");
     }, [locale]);
+    /**
+     * Toggle batch mode
+     */
+    var handleBatchModeToggle = react_2.useCallback(function () {
+        setBatchMode(function (prev) { return !prev; });
+        // Clear files when switching modes
+        if (batchMode) {
+            setFiles([]);
+        }
+        else {
+            setFile(null);
+        }
+    }, [batchMode]);
+    /**
+     * Handle multiple files selection
+     */
+    /**
+     * Handle multiple files selection with duplicate checking
+     */
+    var handleFilesSelect = react_2.useCallback(function (selectedFiles) { return __awaiter(_this, void 0, void 0, function () {
+        var fileNames, nameCounts, duplicateNames, response, data, error_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    setFiles(selectedFiles);
+                    setDuplicateFiles([]);
+                    setInternalDuplicates([]);
+                    setError(null);
+                    if (selectedFiles.length === 0)
+                        return [2 /*return*/];
+                    fileNames = selectedFiles.map(function (f) { return f.name; });
+                    nameCounts = new Map();
+                    duplicateNames = [];
+                    fileNames.forEach(function (name) {
+                        var count = nameCounts.get(name) || 0;
+                        nameCounts.set(name, count + 1);
+                        if (count === 1) {
+                            duplicateNames.push(name);
+                        }
+                    });
+                    if (duplicateNames.length > 0) {
+                        setInternalDuplicates(duplicateNames);
+                        setError(t('Duplicate filenames detected. Please remove duplicate files to continue.'));
+                        return [2 /*return*/];
+                    }
+                    setCheckingDuplicate(true);
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 4, 5, 6]);
+                    return [4 /*yield*/, fetch('/api/documents/check-name', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': getCsrfToken()
+                            },
+                            body: JSON.stringify({
+                                names: selectedFiles.map(function (f) { return f.name; })
+                            })
+                        })];
+                case 2:
+                    response = _a.sent();
+                    if (!response.ok)
+                        throw new Error('Network response was not ok');
+                    return [4 /*yield*/, response.json()];
+                case 3:
+                    data = _a.sent();
+                    if (data.duplicates && Array.isArray(data.duplicates)) {
+                        setDuplicateFiles(data.duplicates);
+                        if (data.duplicates.length > 0) {
+                            setError(t('Some files already exist. Please remove them to continue.'));
+                        }
+                    }
+                    return [3 /*break*/, 6];
+                case 4:
+                    error_1 = _a.sent();
+                    console.error('Error checking duplicates:', error_1);
+                    return [3 /*break*/, 6];
+                case 5:
+                    setCheckingDuplicate(false);
+                    return [7 /*endfinally*/];
+                case 6: return [2 /*return*/];
+            }
+        });
+    }); }, [t]);
     return (React.createElement(app_layout_1["default"], { breadcrumbs: BREADCRUMBS },
         React.createElement(react_1.Head, { title: t('New Document') }),
         React.createElement("div", { className: "flex h-full flex-1 flex-col gap-6 p-4" },
-            React.createElement("div", { className: "text-center" },
+            React.createElement("div", { className: "text-center space-y-2" },
                 React.createElement("h1", { className: "text-2xl font-bold" }, t('Extract Document Data')),
-                React.createElement("p", { className: "text-muted-foreground" }, t('Upload, define fields and let AI extract the data'))),
-            error && (React.createElement(ErrorAlert_1.ErrorAlert, { error: error, onDismiss: function () { return setError(''); }, showReload: true })),
+                React.createElement("p", { className: "text-muted-foreground" }, t('Upload, define fields and let AI extract the data')),
+                batchMode && files.length > 0 && (React.createElement("div", { className: "inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium animate-in fade-in-50 zoom-in-95 duration-300" },
+                    React.createElement("span", { className: "relative flex h-2 w-2" },
+                        React.createElement("span", { className: "animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" }),
+                        React.createElement("span", { className: "relative inline-flex rounded-full h-2 w-2 bg-primary" })),
+                    files.length,
+                    " ",
+                    files.length === 1 ? t('Document') : t('Documents'),
+                    " ",
+                    t('to analyze')))),
+            limitReached && (React.createElement("div", { className: "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-lg flex items-center justify-between" },
+                React.createElement("div", { className: "flex items-center gap-3" },
+                    React.createElement("div", { className: "p-2 bg-red-100 dark:bg-red-800 rounded-full text-red-600 dark:text-red-200" },
+                        React.createElement("svg", { xmlns: "http://www.w3.org/2000/svg", width: "20", height: "20", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                            React.createElement("circle", { cx: "12", cy: "12", r: "10" }),
+                            React.createElement("line", { x1: "12", y1: "8", x2: "12", y2: "12" }),
+                            React.createElement("line", { x1: "12", y1: "16", x2: "12.01", y2: "16" }))),
+                    React.createElement("div", null,
+                        React.createElement("h4", { className: "font-semibold text-red-900 dark:text-red-300" }, t('Plan Limit Reached')),
+                        React.createElement("p", { className: "text-sm text-red-700 dark:text-red-400" }, t('You have reached the page limit for your plan', { plan: planName })))),
+                React.createElement("button", { onClick: handleUpgradePlan, className: "px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm" }, t('Upgrade Plan')))),
+            error && !limitReached && (React.createElement(ErrorAlert_1.ErrorAlert, { error: error, onDismiss: function () { return setError(''); }, showReload: true })),
             React.createElement(extraction_1.WizardProgress, { currentStep: step, steps: WIZARD_STEPS }),
-            step === 1 && (React.createElement(extraction_1.StepUpload, { file: file, documentTypes: documentTypes, selectedTypeId: selectedTypeId, newTypeName: newTypeName, analyzing: analyzing, analysisCompleted: analysisCompleted, suggestedFieldsCount: suggestedFields.length, error: error, locale: locale, checkingDuplicate: checkingDuplicate, duplicateExists: duplicateExists, modelLimitReached: modelLimitReached, onFileSelect: handleFileSelect, onTypeSelect: handleTypeSelect, onNewTypeNameChange: handleNewTypeNameChange, onAnalyzeDocument: function () { return file && analyzeDocument(file); }, onNext: function () { return setStep(2); }, onUpgradePlan: handleUpgradePlan })),
-            step === 2 && (React.createElement(extraction_1.StepFields, { file: file, filePreview: filePreview, fields: fields, suggestedFields: suggestedFields, documentTypes: documentTypes, selectedTypeId: selectedTypeId, newTypeName: newTypeName, analyzing: analyzing, processing: processing, onAddField: handleAddField, onUpdateField: handleUpdateFieldStructure, onRemoveField: handleRemoveField, onAddAllSuggested: handleAddAllSuggested, onBack: function () { return setStep(1); }, onExtract: handleExtract })),
-            step === 3 && (React.createElement(extraction_1.StepReview, { file: file, filePreview: filePreview, fields: fields, extractedData: extractedData, documentTypes: documentTypes, selectedTypeId: selectedTypeId, newTypeName: newTypeName, isSaving: saving, onUpdateField: handleUpdateField, onRemoveField: handleRemoveField, onRenameField: handleRenameField, onBack: function () { return setStep(2); }, onSave: checkAndSave, onDiscard: handleDiscard })))));
+            step === 1 && (React.createElement("div", { className: limitReached ? 'opacity-50 pointer-events-none grayscale' : '' },
+                React.createElement(extraction_1.StepUpload, { file: file, files: files, batchMode: batchMode, hasTemplates: hasTemplates, documentTypes: documentTypes, selectedTypeId: selectedTypeId, newTypeName: newTypeName, analyzing: analyzing, analysisCompleted: analysisCompleted, suggestedFieldsCount: suggestedFields.length, error: error, locale: locale, checkingDuplicate: checkingDuplicate, duplicateExists: duplicateExists, modelLimitReached: modelLimitReached, isFirstDocument: isFirstDocument, onFileSelect: handleFileSelect, onFilesSelect: handleFilesSelect, duplicateFiles: duplicateFiles, internalDuplicates: internalDuplicates, onBatchModeToggle: handleBatchModeToggle, onTypeSelect: handleTypeSelect, onNewTypeNameChange: handleNewTypeNameChange, onAnalyzeDocument: function () { return file && analyzeDocument(file); }, onNext: function () { return setStep(2); }, onUpgradePlan: handleUpgradePlan }))),
+            step === 2 && (React.createElement(extraction_1.StepFields, { file: file, files: files, batchMode: batchMode, filePreview: filePreview, fields: fields, suggestedFields: suggestedFields, documentTypes: documentTypes, selectedTypeId: selectedTypeId, newTypeName: newTypeName, analyzing: analyzing, processing: processing || saving, isFirstDocument: isFirstDocument, onAddField: handleAddField, onUpdateField: handleUpdateFieldStructure, onRemoveField: handleRemoveField, onAddAllSuggested: handleAddAllSuggested, onBack: function () { return setStep(1); }, onExtract: handleExtract })),
+            step === 3 && (React.createElement(extraction_1.StepReview, { file: file, files: files, batchMode: batchMode, filePreview: filePreview, fields: fields, extractedData: extractedData, documentTypes: documentTypes, selectedTypeId: selectedTypeId, newTypeName: newTypeName, isSaving: saving, isFirstDocument: isFirstDocument, onUpdateField: handleUpdateField, onRemoveField: handleRemoveField, onRenameField: handleRenameField, onBack: function () { return setStep(2); }, onSave: checkAndSave, onDiscard: handleDiscard })))));
 }
 exports["default"] = DocumentsCreate;

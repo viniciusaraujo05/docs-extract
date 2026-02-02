@@ -102,6 +102,7 @@ export default function DocumentsCreate({
     const [modelLimitReached, setModelLimitReached] = useState(initialModelLimitReached);
     const [duplicateExists, setDuplicateExists] = useState(false);
     const [duplicateFiles, setDuplicateFiles] = useState<string[]>([]);
+    const [internalDuplicates, setInternalDuplicates] = useState<string[]>([]);
 
     /**
      * Check model limit
@@ -594,9 +595,29 @@ export default function DocumentsCreate({
     const handleFilesSelect = useCallback(async (selectedFiles: File[]) => {
         setFiles(selectedFiles);
         setDuplicateFiles([]);
+        setInternalDuplicates([]);
         setError(null);
         
         if (selectedFiles.length === 0) return;
+
+        // Check for internal duplicates (same name in the selected list)
+        const fileNames = selectedFiles.map(f => f.name);
+        const nameCounts = new Map<string, number>();
+        const duplicateNames: string[] = [];
+        
+        fileNames.forEach(name => {
+            const count = nameCounts.get(name) || 0;
+            nameCounts.set(name, count + 1);
+            if (count === 1) {
+                duplicateNames.push(name);
+            }
+        });
+        
+        if (duplicateNames.length > 0) {
+            setInternalDuplicates(duplicateNames);
+            setError(t('Duplicate filenames detected. Please remove duplicate files to continue.'));
+            return;
+        }
 
         setCheckingDuplicate(true);
         try {
@@ -709,6 +730,7 @@ export default function DocumentsCreate({
                             onFileSelect={handleFileSelect}
                             onFilesSelect={handleFilesSelect}
                             duplicateFiles={duplicateFiles}
+                            internalDuplicates={internalDuplicates}
                             onBatchModeToggle={handleBatchModeToggle}
                             onTypeSelect={handleTypeSelect}
                             onNewTypeNameChange={handleNewTypeNameChange}

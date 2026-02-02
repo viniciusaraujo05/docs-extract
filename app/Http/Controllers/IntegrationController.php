@@ -43,11 +43,10 @@ class IntegrationController extends Controller
         session(['integration_locale' => $locale]);
 
         // Request offline access to get refresh token
-        // Request specific scopes for Drive and Sheets
+        // Using drive.file scope: only access files created by this app or explicitly selected by user
         return Socialite::driver('google')
             ->scopes([
-                'https://www.googleapis.com/auth/drive.readonly',
-                'https://www.googleapis.com/auth/spreadsheets',
+                'https://www.googleapis.com/auth/drive.file',
             ])
             ->with(['access_type' => 'offline', 'prompt' => 'consent select_account'])
             ->redirectUrl(route('integrations.callback', ['provider' => $provider]))
@@ -129,30 +128,54 @@ class IntegrationController extends Controller
         return back()->with('success', 'Account disconnected.');
     }
 
-    public function listDriveFiles(Request $request, string $locale, \App\Services\GoogleDriveService $driveService)
+    /**
+     * Get OAuth token for Google Picker API.
+     * Returns the current user's Google OAuth token for use in the Picker API.
+     */
+    public function getOAuthToken(Request $request, \App\Services\GoogleDriveService $driveService)
     {
         /** @var User $user */
         $user = $request->user();
-        $folderId = $request->query('folderId');
+        $account = $user->connectedAccounts()->where('provider', 'google')->first();
+
+        if (! $account) {
+            return response()->json(['connected' => false, 'error' => 'Google account not connected'], 400);
+        }
 
         try {
-            return $driveService->listFiles($user, $folderId);
+            // This will automatically refresh the token if needed
+            // The ensureTokenIsValid method is called internally
+            $reflection = new \ReflectionClass($driveService);
+            $method = $reflection->getMethod('ensureTokenIsValid');
+            $method->setAccessible(true);
+            $method->invoke($driveService, $account);
+            
+            // Reload account to get updated token
+            $account->refresh();
+            
+            return response()->json([
+                'token' => $account->token,
+                'connected' => true,
+            ]);
         } catch (\Exception $e) {
-            if (str_contains($e->getMessage(), 'Unauthorized')) {
-                return response()->json(['error' => $e->getMessage()], 401);
-            }
-            if ($e->getMessage() === 'Google account not connected') {
-                return response()->json(['error' => $e->getMessage()], 400);
-            }
-
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['connected' => false, 'error' => $e->getMessage()], 401);
         }
     }
 
-    public function downloadDriveFile(Request $request, string $locale, string $fileId, \App\Services\GoogleDriveService $driveService)
+    /**
+     * Process a file selected via Google Picker API.
+     * The fileId must be explicitly provided by the user through the Picker.
+     * This complies with drive.file scope: only access files explicitly selected by user.
+     */
+    public function processPickedFile(Request $request, string $locale, \App\Services\GoogleDriveService $driveService)
     {
+        $request->validate([
+            'fileId' => 'required|string',
+        ]);
+
         /** @var User $user */
         $user = $request->user();
+        $fileId = $request->input('fileId');
 
         try {
             $file = $driveService->downloadFile($user, $fileId);
@@ -162,6 +185,12 @@ class IntegrationController extends Controller
                 ->header('Content-Disposition', "attachment; filename=\"{$file['filename']}\"");
 
         } catch (\Exception $e) {
+            Log::error('Failed to process picked file', [
+                'user_id' => $user->id,
+                'file_id' => $fileId,
+                'error' => $e->getMessage(),
+            ]);
+
             if ($e->getMessage() === 'Google account not connected') {
                 return response()->json(['error' => $e->getMessage()], 403);
             }

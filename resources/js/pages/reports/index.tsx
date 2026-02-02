@@ -11,6 +11,7 @@ import { ReportTableView } from '@/components/reports/ReportTableView';
 import { AIAnalysisModal } from '@/components/reports/AIAnalysisModal';
 import { TablesView } from '@/components/reports/TablesView';
 import { ExportDataButton } from '@/components/export-data-button';
+import { ExportChartsPDFButton } from '@/components/export-charts-pdf-button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
@@ -770,10 +771,9 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                                     )}
                                     {hasSavedAnalysis ? t('View AI Analysis') : t('AI Analysis')}
                                 </Button>
-                                {reportExportPayload && (
-                                    <ExportDataButton
-                                        data={reportExportPayload}
-                                        filename={`report_${selectedType?.slug || 'data'}_${new Date().toISOString().split('T')[0]}`}
+                                {reportData && (
+                                    <ExportChartsPDFButton
+                                        filename={`charts_${selectedType?.slug || 'report'}`}
                                         variant="outline"
                                         size="sm"
                                     />
@@ -901,33 +901,26 @@ export default function ReportsIndex({ documentTypes }: ReportsIndexProps) {
                                         </div>
                                     )}
 
-                                    {/* Export Button */}
-                                    {reportData && (
-                                        <ExportDataButton
-                                            data={reportData.aggregated}
-                                            filename={`report_${selectedType?.slug || 'data'}_${new Date().toISOString().split('T')[0]}`}
-                                            variant="outline"
-                                            size="sm"
-                                        />
-                                    )}
+
                                 </div>
                             </div>
 
                             {/* Charts View */}
                             <TabsContent value="charts" className="space-y-6 mt-0">
                                 {displayCharts.length > 0 ? (
-                                    <div className="grid gap-6 md:grid-cols-2">
+                                    <div className="grid gap-6 md:grid-cols-2" data-charts-container>
                                         {displayCharts.map((chart) => (
-                                            <ChartCard
-                                                key={chart.id}
-                                                title={chart.title}
-                                                description={chart.description}
-                                                data={chart.data}
-                                                chartType={chart.type}
-                                                onChartTypeChange={(type) => handleChartTypeChange(chart.id, type)}
-                                                color={chart.color}
-                                                onColorChange={(color) => setChartColors(prev => ({ ...prev, [chart.id]: color }))}
-                                            />
+                                            <div key={chart.id} data-chart-card>
+                                                <ChartCard
+                                                    title={chart.title}
+                                                    description={chart.description}
+                                                    data={chart.data}
+                                                    chartType={chart.type}
+                                                    onChartTypeChange={(type) => handleChartTypeChange(chart.id, type)}
+                                                    color={chart.color}
+                                                    onColorChange={(color) => setChartColors(prev => ({ ...prev, [chart.id]: color }))}
+                                                />
+                                            </div>
                                         ))}
                                     </div>
                                 ) : (

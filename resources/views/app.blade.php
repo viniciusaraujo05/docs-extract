@@ -104,6 +104,9 @@
 
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
+        {{-- Google Picker API for drive.file scope compliance --}}
+        <script src="https://apis.google.com/js/api.js"></script>
+
         {{-- Structured Data (JSON-LD) --}}
         @if($seoStructuredData)
         <script type="application/ld+json">{!! $seoStructuredData !!}</script>

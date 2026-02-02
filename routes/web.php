@@ -138,8 +138,7 @@ Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->g
     Route::get('integrations/{provider}/connect', [App\Http\Controllers\IntegrationController::class, 'connect'])->name('integrations.connect');
     // Callback moved to non-localized group below
     Route::post('integrations/{provider}/disconnect', [App\Http\Controllers\IntegrationController::class, 'disconnect'])->name('integrations.disconnect');
-    Route::get('integrations/list', [App\Http\Controllers\IntegrationController::class, 'listDriveFiles'])->name('integrations.files');
-    Route::get('integrations/google/download/{fileId}', [App\Http\Controllers\IntegrationController::class, 'downloadDriveFile'])->name('integrations.download');
+    Route::post('integrations/google/process-file', [App\Http\Controllers\IntegrationController::class, 'processPickedFile'])->name('integrations.process-file');
     Route::post('integrations/batch/{batch}/export', [App\Http\Controllers\IntegrationController::class, 'exportBatch'])->name('integrations.export');
 });
 
@@ -150,6 +149,10 @@ Route::middleware(['auth'])->group(function () {
     // Google Integration Export (AJAX)
     Route::post('integrations/google/export', [App\Http\Controllers\IntegrationController::class, 'exportRawData'])
         ->name('integrations.google.export');
+    
+    // Google Picker API - Get OAuth Token
+    Route::get('api/integrations/google/token', [App\Http\Controllers\IntegrationController::class, 'getOAuthToken'])
+        ->name('integrations.google.token');
 });
 
 // Auth routes with locale (must be BEFORE authenticated routes to avoid conflicts)
