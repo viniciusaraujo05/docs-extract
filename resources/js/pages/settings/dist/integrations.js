@@ -7,9 +7,11 @@ var react_i18next_1 = require("react-i18next");
 var card_1 = require("@/components/ui/card");
 var button_1 = require("@/components/ui/button");
 var lucide_react_1 = require("lucide-react");
+var react_2 = require("react");
 var alert_1 = require("@/components/ui/alert");
 var sonner_1 = require("sonner");
-var react_2 = require("@inertiajs/react");
+var react_3 = require("@inertiajs/react");
+var alert_dialog_1 = require("@/components/ui/alert-dialog");
 function Integrations(_a) {
     var _b, _c;
     var integrations = _a.integrations;
@@ -17,6 +19,8 @@ function Integrations(_a) {
     var page = react_1.usePage();
     var auth = page.props.auth;
     var locale = page.props.locale || 'pt';
+    var _d = react_2.useState(false), disconnectDialogOpen = _d[0], setDisconnectDialogOpen = _d[1];
+    var _e = react_2.useState(null), providerToDisconnect = _e[0], setProviderToDisconnect = _e[1];
     var BREADCRUMBS = [
         { title: t('Dashboard'), href: "/" + locale + "/dashboard" },
         { title: t('Settings'), href: "/" + locale + "/settings/billing" },
@@ -25,17 +29,24 @@ function Integrations(_a) {
     var handleConnect = function (provider) {
         window.location.href = "/" + locale + "/integrations/" + provider + "/connect";
     };
-    var handleDisconnect = function (provider) {
-        if (!confirm(t('Are you sure you want to disconnect this account?')))
+    var handleDisconnectClick = function (provider) {
+        setProviderToDisconnect(provider);
+        setDisconnectDialogOpen(true);
+    };
+    var handleDisconnectConfirm = function () {
+        if (!providerToDisconnect)
             return;
-        react_2.router.post("/api/integrations/" + provider + "/disconnect", {}, {
+        react_3.router.post("/api/integrations/" + providerToDisconnect + "/disconnect", {}, {
             preserveScroll: true,
             onSuccess: function () {
                 sonner_1.toast.success(t('Account disconnected successfully'));
-                // router.reload({ only: ['integrations'] }); // Optional optimized reload
+                setDisconnectDialogOpen(false);
+                setProviderToDisconnect(null);
             },
             onError: function () {
                 sonner_1.toast.error(t('Failed to disconnect account'));
+                setDisconnectDialogOpen(false);
+                setProviderToDisconnect(null);
             }
         });
     };
@@ -80,13 +91,13 @@ function Integrations(_a) {
                             React.createElement(button_1.Button, { variant: "outline", size: "sm", onClick: function () { return handleDisconnectClick('google'); }, className: "text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20" }, t('Disconnect')))) : (React.createElement("div", { className: "flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" },
                             React.createElement("p", { className: "text-sm text-muted-foreground max-w-md" }, t('Connect your Google account to access your Drive files directly within the app and export extracted data to Google Sheets.')),
                             React.createElement(button_1.Button, { onClick: function () { return handleConnect('google'); } }, t('Connect Google'))))))))),
-        React.createElement(AlertDialog, { open: disconnectDialogOpen, onOpenChange: setDisconnectDialogOpen },
-            React.createElement(AlertDialogContent, null,
-                React.createElement(AlertDialogHeader, null,
-                    React.createElement(AlertDialogTitle, null, t('Disconnect Account')),
-                    React.createElement(AlertDialogDescription, null, t('Are you sure you want to disconnect this account? You will need to reconnect to access your files again.'))),
-                React.createElement(AlertDialogFooter, null,
-                    React.createElement(AlertDialogCancel, null, t('Cancel')),
-                    React.createElement(AlertDialogAction, { onClick: handleDisconnectConfirm, className: "bg-red-500 hover:bg-red-600 focus:ring-red-500" }, t('Disconnect')))))));
+        React.createElement(alert_dialog_1.AlertDialog, { open: disconnectDialogOpen, onOpenChange: setDisconnectDialogOpen },
+            React.createElement(alert_dialog_1.AlertDialogContent, null,
+                React.createElement(alert_dialog_1.AlertDialogHeader, null,
+                    React.createElement(alert_dialog_1.AlertDialogTitle, null, t('Disconnect Account')),
+                    React.createElement(alert_dialog_1.AlertDialogDescription, null, t('Are you sure you want to disconnect this account? You will need to reconnect to access your files again.'))),
+                React.createElement(alert_dialog_1.AlertDialogFooter, null,
+                    React.createElement(alert_dialog_1.AlertDialogCancel, null, t('Cancel')),
+                    React.createElement(alert_dialog_1.AlertDialogAction, { onClick: handleDisconnectConfirm, className: "bg-red-500 hover:bg-red-600 focus:ring-red-500" }, t('Disconnect')))))));
 }
 exports["default"] = Integrations;

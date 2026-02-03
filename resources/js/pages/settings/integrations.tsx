@@ -10,6 +10,16 @@ import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { router } from '@inertiajs/react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Integration {
     provider: string;
@@ -28,6 +38,8 @@ export default function Integrations({ integrations }: IntegrationsProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const locale = (page.props as any).locale || 'pt';
+    const [disconnectDialogOpen, setDisconnectDialogOpen] = useState(false);
+    const [providerToDisconnect, setProviderToDisconnect] = useState<string | null>(null);
 
     const BREADCRUMBS: BreadcrumbItem[] = [
         { title: t('Dashboard'), href: `/${locale}/dashboard` },
@@ -39,17 +51,25 @@ export default function Integrations({ integrations }: IntegrationsProps) {
         window.location.href = `/${locale}/integrations/${provider}/connect`;
     };
 
-    const handleDisconnect = (provider: string) => {
-        if (!confirm(t('Are you sure you want to disconnect this account?'))) return;
+    const handleDisconnectClick = (provider: string) => {
+        setProviderToDisconnect(provider);
+        setDisconnectDialogOpen(true);
+    };
 
-        router.post(`/api/integrations/${provider}/disconnect`, {}, {
+    const handleDisconnectConfirm = () => {
+        if (!providerToDisconnect) return;
+
+        router.post(`/api/integrations/${providerToDisconnect}/disconnect`, {}, {
             preserveScroll: true,
             onSuccess: () => {
                 toast.success(t('Account disconnected successfully'));
-                // router.reload({ only: ['integrations'] }); // Optional optimized reload
+                setDisconnectDialogOpen(false);
+                setProviderToDisconnect(null);
             },
             onError: () => {
                 toast.error(t('Failed to disconnect account'));
+                setDisconnectDialogOpen(false);
+                setProviderToDisconnect(null);
             }
         });
     };
