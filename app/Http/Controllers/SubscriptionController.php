@@ -71,13 +71,39 @@ class SubscriptionController extends Controller
 
     public function success(Request $request): Response
     {
-        $user = auth()->user();
+        $user = $request->user();
         $planName = $this->subscriptionService->getUserPlanName($user);
 
+        $sessionId = $request->query('session_id');
+        $amount = null;
+        $currency = null;
+
+        if ($sessionId) {
+            try {
+                // Ensure Stripe API key is set (Cashier does this, but good to ensure)
+                \Stripe\Stripe::setApiKey(config('cashier.secret'));
+                
+                $session = \Stripe\Checkout\Session::retrieve($sessionId);
+                
+                // Check if the session belongs to the authenticated user to prevent data leaking
+                // We check the customer ID match
+                if ($session->customer === $user->stripe_id) {
+                     // Stripe amounts are in cents
+                    $amount = $session->amount_total / 100;
+                    $currency = strtoupper($session->currency);
+                }
+            } catch (\Exception $e) {
+                // Log the error but don't crash the page
+                Log::warning('Failed to retrieve Stripe session for conversion tracking: '.$e->getMessage());
+            }
+        }
+
         return Inertia::render('Subscription/Success', [
-            'session_id' => $request->query('session_id'),
+            'session_id' => $sessionId,
             'user_name' => $user->name,
             'plan_name' => $planName,
+            'value' => $amount,
+            'currency' => $currency,
         ]);
     }
 

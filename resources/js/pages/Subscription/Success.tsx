@@ -6,12 +6,27 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 
-export default function SubscriptionSuccess({ session_id, user_name, plan_name }: { session_id?: string; user_name: string; plan_name: string }) {
+declare global {
+    interface Window {
+        gtag: (command: string, ...args: any[]) => void;
+    }
+}
+
+export default function SubscriptionSuccess({ session_id, user_name, plan_name, value, currency }: { session_id?: string; user_name: string; plan_name: string; value?: number; currency?: string }) {
     const locale = document.documentElement.lang || 'en';
     const { t } = useTranslation();
     const [countdown, setCountdown] = useState(5);
     
     useEffect(() => {
+        // Fire Google Ads conversion event if value and currency are available
+        if (value && currency && typeof window.gtag === 'function') {
+            window.gtag('event', 'conversion', {
+                'send_to': 'AW-958866825/Jb00COzRgM4ZEInLnMkD',
+                'value': value,
+                'currency': currency
+            });
+        }
+
         const timer = setInterval(() => {
             setCountdown((prev) => {
                 if (prev <= 1) {
@@ -24,7 +39,7 @@ export default function SubscriptionSuccess({ session_id, user_name, plan_name }
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [locale]);
+    }, [locale, value, currency]);
 
     return (
         <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background">

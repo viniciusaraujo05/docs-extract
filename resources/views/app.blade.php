@@ -120,6 +120,7 @@
           gtag('js', new Date());
 
           gtag('config', 'G-5EFQBMVB3G');
+          gtag('config', 'AW-958866825');
         </script>
 
         {{-- Google Consent Mode v2 --}}
