@@ -6,6 +6,8 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(({ mode }) => {
     const isDev = mode === 'development';
+    // Só gerar tipos se a variável GENERATE_TYPES estiver definida ou em build
+    const shouldGenerateTypes = process.env.GENERATE_TYPES === 'true' || !isDev;
 
     return {
         plugins: [
@@ -23,14 +25,8 @@ export default defineConfig(({ mode }) => {
                 },
             }),
             tailwindcss(),
-            // Wayfinder desabilitado em dev para melhor performance
-            // Os tipos já foram gerados, não precisa regenerar a cada mudança
-            ...(isDev ? [] : [wayfinder({
-                php: 'php -d variables_order=EGPCS',
-                config: {
-                    cache_driver: 'file',
-                },
-            })]),
+            // Wayfinder: gera tipos apenas em build ou quando GENERATE_TYPES=true
+            ...(process.env.GENERATE_TYPES === 'true' || mode === 'build' ? [wayfinder()] : []),
         ],
         esbuild: {
             jsx: 'automatic',
@@ -50,6 +46,29 @@ export default defineConfig(({ mode }) => {
         },
         build: {
             sourcemap: isDev,
+            chunkSizeWarningLimit: 1000, // Aumentar limite para 1MB
+            rollupOptions: {
+                output: {
+                    manualChunks(id) {
+                        // Separar i18n em chunk próprio
+                        if (id.includes('i18next') || id.includes('react-i18next')) {
+                            return 'i18n';
+                        }
+                        // Separar bibliotecas de PDF em chunk próprio
+                        if (id.includes('pdfjs-dist') || id.includes('react-pdf')) {
+                            return 'pdf';
+                        }
+                        // Separar Recharts (gráficos) em chunk próprio
+                        if (id.includes('recharts')) {
+                            return 'charts';
+                        }
+                        // Separar node_modules grandes em vendor
+                        if (id.includes('node_modules')) {
+                            return 'vendor';
+                        }
+                    },
+                },
+            },
         },
         optimizeDeps: {
             include: [

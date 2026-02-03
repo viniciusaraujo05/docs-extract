@@ -103,9 +103,10 @@ class ApiClientController extends Controller
                 'public_id' => $apiClient->public_id,
                 'name' => $apiClient->name,
                 'client_id' => $apiClient->client_id,
+                'client_secret' => $plainSecret,
                 'status' => $apiClient->status,
                 'created_at' => $apiClient->created_at?->toISOString(),
             ],
-        ])->with('client_secret_once', $plainSecret);
+        ]);
     }
 }
