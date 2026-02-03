@@ -19,6 +19,7 @@ import {
   Zap,
   BarChart3,
   FileJson,
+  Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -426,12 +427,7 @@ export default function Register({ canRegister }: RegisterProps) {
                                     className="w-full h-12 bg-white text-black hover:bg-gray-200 font-semibold"
                                 >
                                     {processing ? (
-                                        <motion.div
-                                            animate={{ rotate: 360 }}
-                                            transition={{ repeat: Infinity, duration: 1 }}
-                                        >
-                                            <Sparkles className="h-5 w-5" />
-                                        </motion.div>
+                                        <Loader2 className="h-5 w-5 animate-spin" />
                                     ) : (
                                         <>
                                             {t('Create account')}

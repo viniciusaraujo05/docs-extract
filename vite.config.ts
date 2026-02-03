@@ -3,25 +3,9 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
-import { readdirSync, statSync } from 'fs';
-import { join } from 'path';
+import fg from 'fast-glob';
 
-// Recursively get all .tsx files from pages directory
-function getPageFiles(dir: string): string[] {
-    const files: string[] = [];
-    const items = readdirSync(dir);
-    for (const item of items) {
-        const fullPath = join(dir, item);
-        if (statSync(fullPath).isDirectory()) {
-            files.push(...getPageFiles(fullPath));
-        } else if (item.endsWith('.tsx')) {
-            files.push(fullPath);
-        }
-    }
-    return files;
-}
-
-const pageFiles = getPageFiles('resources/js/pages');
+const pageFiles = fg.sync('resources/js/pages/**/*.tsx');
 
 export default defineConfig({
     plugins: [
@@ -40,11 +24,8 @@ export default defineConfig({
             },
         }),
         tailwindcss(),
+        // @ts-ignore
         wayfinder({
-            /**
-             * Wayfinder configurado para usar file cache em vez de Redis.
-             * Isso permite builds sem depender de Redis rodando.
-             */
             generate: true,
             php: 'php -d variables_order=EGPCS',
             config: {
