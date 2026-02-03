@@ -82,13 +82,13 @@ class SubscriptionController extends Controller
             try {
                 // Ensure Stripe API key is set (Cashier does this, but good to ensure)
                 \Stripe\Stripe::setApiKey(config('cashier.secret'));
-                
+
                 $session = \Stripe\Checkout\Session::retrieve($sessionId);
-                
+
                 // Check if the session belongs to the authenticated user to prevent data leaking
                 // We check the customer ID match
                 if ($session->customer === $user->stripe_id) {
-                     // Stripe amounts are in cents
+                    // Stripe amounts are in cents
                     $amount = $session->amount_total / 100;
                     $currency = strtoupper($session->currency);
                 }
