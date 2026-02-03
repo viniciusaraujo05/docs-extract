@@ -112,6 +112,16 @@
         <script type="application/ld+json">{!! $seoStructuredData !!}</script>
         @endif
 
+        {{-- Google tag (gtag.js) --}}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-5EFQBMVB3G"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-5EFQBMVB3G');
+        </script>
+
         {{-- Google Consent Mode v2 --}}
         <script>
             window.dataLayer = window.dataLayer || [];
