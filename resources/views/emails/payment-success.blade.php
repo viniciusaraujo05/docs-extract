@@ -6,7 +6,7 @@
 <p>{{ __('emails.payment_success.start_date', ['date' => $date]) }}</p>
 
 <div class="button-container">
-    <a href="{{ config('app.url') . '/settings/billing' }}" class="button">{{ __('emails.payment_success.billing_link') }}</a>
+    <a href="{{ config('app.url') . '/' . $locale . '/settings/billing' }}" class="button">{{ __('emails.payment_success.billing_link') }}</a>
 </div>
 
 <div class="subtext">

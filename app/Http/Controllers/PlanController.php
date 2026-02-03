@@ -103,7 +103,7 @@ class PlanController extends Controller
                 return response()->json(null);
             }
 
-            $amount = $invoice->total();
+            $amount = $invoice->rawTotal();
 
             return response()->json([
                 'amount' => is_numeric($amount) ? (int) $amount : 0,
@@ -112,7 +112,7 @@ class PlanController extends Controller
                 'items' => collect($invoice->invoiceItems())->map(function ($item) {
                     return [
                         'description' => $item->description,
-                        'amount' => is_numeric($item->total()) ? (int) $item->total() : 0,
+                        'amount' => $item->amount,
                         'currency' => strtoupper($item->currency),
                     ];
                 })->toArray(),
@@ -129,7 +129,7 @@ class PlanController extends Controller
     {
         $user = $request->user();
         $invoices = $user->invoices()->map(function ($invoice) {
-            $amount = $invoice->total();
+            $amount = $invoice->rawTotal();
 
             return [
                 'id' => $invoice->id,

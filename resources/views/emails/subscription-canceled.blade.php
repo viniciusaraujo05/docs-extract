@@ -12,7 +12,7 @@
 
 <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 24px 0; text-align: center;">
     <p style="font-size: 16px; margin-bottom: 16px;">{{ __('emails.subscription_canceled.comeback_message') }}</p>
-    <a href="{{ url('/') }}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+    <a href="{{ url('/' . $locale) }}" style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
         {{ __('emails.subscription_canceled.comeback_button') }}
     </a>
 </div>
