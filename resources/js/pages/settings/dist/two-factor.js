@@ -19,14 +19,13 @@ var button_1 = require("@/components/ui/button");
 var use_two_factor_auth_1 = require("@/hooks/use-two-factor-auth");
 var app_layout_1 = require("@/layouts/app-layout");
 var layout_1 = require("@/layouts/settings/layout");
-var two_factor_1 = require("@/routes/two-factor");
 var react_1 = require("@inertiajs/react");
 var lucide_react_1 = require("lucide-react");
 var react_2 = require("react");
 var breadcrumbs = [
     {
         title: 'Two-Factor Authentication',
-        href: two_factor_1.show.url()
+        href: '/settings/two-factor'
     },
 ];
 function TwoFactor(_a) {
