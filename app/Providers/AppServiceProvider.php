@@ -40,6 +40,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(TranslationCacheService $translationCache): void
     {
+        // Write Passport keys to storage if provided via environment variables
+        // This is necessary for ephemeral environments (Railway, Heroku, etc.)
+        if (env('PASSPORT_PRIVATE_KEY')) {
+            $privateKeyPath = storage_path('oauth-private.key');
+            $privateKeyContent = base64_decode(env('PASSPORT_PRIVATE_KEY'));
+            file_put_contents($privateKeyPath, $privateKeyContent);
+            chmod($privateKeyPath, 0600);
+        }
+
+        if (env('PASSPORT_PUBLIC_KEY')) {
+            $publicKeyPath = storage_path('oauth-public.key');
+            $publicKeyContent = base64_decode(env('PASSPORT_PUBLIC_KEY'));
+            file_put_contents($publicKeyPath, $publicKeyContent);
+            chmod($publicKeyPath, 0600);
+        }
+
         Passport::tokensExpireIn(now()->addDays(15));
         Passport::refreshTokensExpireIn(now()->addDays(30));
         Passport::personalAccessTokensExpireIn(now()->addMonths(6));
