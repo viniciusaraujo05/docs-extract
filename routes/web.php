@@ -12,6 +12,7 @@ use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
+use App\Http\Controllers\OAuthController;
 
 // SEO Routes
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
@@ -238,6 +239,11 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
 
     // Support
     Route::get('support', [SupportController::class, 'create'])->name('support.create');
+});
+
+// Custom OAuth Authorization route (Inertia)
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/oauth/authorize', [OAuthController::class, 'authorize'])->name('passport.authorizations.authorize');
 });
 
 // Stripe Webhook

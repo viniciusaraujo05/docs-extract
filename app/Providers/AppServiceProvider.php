@@ -14,6 +14,7 @@ use App\Services\TranslationCacheService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(TranslationCacheService $translationCache): void
     {
+        Passport::enablePasswordGrant(); // Optional, but helps if needed later
         File::ensureDirectoryExists(storage_path('framework/views'));
         File::ensureDirectoryExists(storage_path('framework/cache'));
         File::ensureDirectoryExists(storage_path('framework/sessions'));
