@@ -249,6 +249,8 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
 // Custom OAuth Authorization route (Inertia)
 Route::middleware(['web'])->group(function () {
     Route::get('/oauth/authorize', [OAuthController::class, 'authorize'])->name('passport.authorizations.authorize');
+    Route::post('/oauth/authorize', [OAuthController::class, 'approve'])->name('passport.authorizations.approve');
+    Route::delete('/oauth/authorize', [OAuthController::class, 'deny'])->name('passport.authorizations.deny');
 });
 
 // Stripe Webhook

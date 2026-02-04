@@ -37,7 +37,7 @@ class OAuthController extends PassportAuthorizationController
                     // Explicitly save the intended OAuth URL in the session
                     // This is critical because we removed the 'auth' middleware to handle this manually
                     $request->session()->put('url.intended', $request->fullUrl());
-                    
+
                     return redirect()->route('login');
                 }
 
@@ -95,5 +95,61 @@ class OAuthController extends PassportAuthorizationController
             'canResetPassword' => Features::enabled(Features::resetPasswords()),
         ])->toResponse($request);
 
+    }
+
+    /**
+     * Approve the authorization request.
+     */
+    public function approve(Request $request, PsrResponseInterface $psrResponse): Response
+    {
+        $this->assertValidAuthToken($request);
+
+        $authRequest = $request->session()->get('authRequest');
+
+        if (! $authRequest) {
+            throw new \Exception('Authorization request not found in session');
+        }
+
+        $user = $this->guard->user();
+        $authRequest->setUser(new PassportUser((string) $user->getAuthIdentifier()));
+        $authRequest->setAuthorizationApproved(true);
+
+        return $this->withErrorHandling(fn () => $this->convertResponse(
+            $this->server->completeAuthorizationRequest($authRequest, $psrResponse)
+        ));
+    }
+
+    /**
+     * Deny the authorization request.
+     */
+    public function deny(Request $request, PsrResponseInterface $psrResponse): Response
+    {
+        $this->assertValidAuthToken($request);
+
+        $authRequest = $request->session()->get('authRequest');
+
+        if (! $authRequest) {
+            throw new \Exception('Authorization request not found in session');
+        }
+
+        $user = $this->guard->user();
+        $authRequest->setUser(new PassportUser((string) $user->getAuthIdentifier()));
+        $authRequest->setAuthorizationApproved(false);
+
+        return $this->withErrorHandling(fn () => $this->convertResponse(
+            $this->server->completeAuthorizationRequest($authRequest, $psrResponse)
+        ));
+    }
+
+    /**
+     * Assert that the auth token in the request matches the session.
+     */
+    protected function assertValidAuthToken(Request $request): void
+    {
+        if ($request->has('authToken') && $request->session()->get('authToken') === $request->input('authToken')) {
+            return;
+        }
+
+        throw new \Exception('Authorization token mismatch');
     }
 }
