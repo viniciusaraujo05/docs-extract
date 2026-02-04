@@ -114,9 +114,15 @@ class OAuthController extends PassportAuthorizationController
         $authRequest->setUser(new PassportUser((string) $user->getAuthIdentifier()));
         $authRequest->setAuthorizationApproved(true);
 
-        return $this->withErrorHandling(fn () => $this->convertResponse(
+        $response = $this->withErrorHandling(fn () => $this->convertResponse(
             $this->server->completeAuthorizationRequest($authRequest, $psrResponse)
         ));
+
+        if ($response->getStatusCode() === 302) {
+            return Inertia::location($response->headers->get('Location'));
+        }
+
+        return $response;
     }
 
     /**
@@ -136,9 +142,15 @@ class OAuthController extends PassportAuthorizationController
         $authRequest->setUser(new PassportUser((string) $user->getAuthIdentifier()));
         $authRequest->setAuthorizationApproved(false);
 
-        return $this->withErrorHandling(fn () => $this->convertResponse(
+        $response = $this->withErrorHandling(fn () => $this->convertResponse(
             $this->server->completeAuthorizationRequest($authRequest, $psrResponse)
         ));
+
+        if ($response->getStatusCode() === 302) {
+            return Inertia::location($response->headers->get('Location'));
+        }
+
+        return $response;
     }
 
     /**
