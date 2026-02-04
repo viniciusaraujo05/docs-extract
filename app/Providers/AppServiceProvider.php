@@ -40,6 +40,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(TranslationCacheService $translationCache): void
     {
+        Passport::tokensExpireIn(now()->addDays(15));
+        Passport::refreshTokensExpireIn(now()->addDays(30));
+        Passport::personalAccessTokensExpireIn(now()->addMonths(6));
+
         Passport::enablePasswordGrant(); // Optional, but helps if needed later
         File::ensureDirectoryExists(storage_path('framework/views'));
         File::ensureDirectoryExists(storage_path('framework/cache'));
