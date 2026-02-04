@@ -8,13 +8,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Laravel\Fortify\Features;
 use Laravel\Passport\Bridge\User as PassportUser;
 use Laravel\Passport\Contracts\AuthorizationViewResponse;
 use Laravel\Passport\Exceptions\OAuthServerException as PassportException;
 use Laravel\Passport\Http\Controllers\AuthorizationController as PassportAuthorizationController;
-use Laravel\Fortify\Features;
 use League\OAuth2\Server\Exception\OAuthServerException as LeagueException;
-
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,7 +34,11 @@ class OAuthController extends PassportAuthorizationController
                 $authRequest = $this->server->validateAuthorizationRequest($psrRequest);
 
                 if ($this->guard->guest()) {
-                    return $this->promptForLogin($request);
+                    // Explicitly save the intended OAuth URL in the session
+                    // This is critical because we removed the 'auth' middleware to handle this manually
+                    $request->session()->put('url.intended', $request->fullUrl());
+                    
+                    return redirect()->route('login');
                 }
 
                 $user = $this->guard->user();

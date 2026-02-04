@@ -19,7 +19,7 @@ class IntegrationController extends Controller
 
         // Check if Zapier is connected
         $zapierClientId = config('services.zapier.client_id');
-        
+
         $isZapierConnected = false;
         if ($zapierClientId) {
             $isZapierConnected = \Illuminate\Support\Facades\DB::table('oauth_access_tokens')

@@ -22,6 +22,11 @@ class LoginResponse implements LoginResponseContract
             return new JsonResponse('', 204);
         }
 
+        \Illuminate\Support\Facades\Log::info('LoginResponse Check', [
+            'url_intended' => $request->session()->get('url.intended'),
+            'session_all' => $request->session()->all(),
+        ]);
+
         // Explicitly check if there is an intended URL (like OAuth authorize)
         // If so, go there. Otherwise, standard dashboard.
         if ($request->session()->has('url.intended')) {

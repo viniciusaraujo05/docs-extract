@@ -247,7 +247,7 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
 });
 
 // Custom OAuth Authorization route (Inertia)
-Route::middleware(['web', 'auth'])->group(function () {
+Route::middleware(['web'])->group(function () {
     Route::get('/oauth/authorize', [OAuthController::class, 'authorize'])->name('passport.authorizations.authorize');
 });
 
