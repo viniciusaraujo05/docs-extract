@@ -86,10 +86,10 @@ class OAuthController extends PassportAuthorizationController
 
     private function handleOAuthError($e, Request $request)
     {
-        Log::warning('[OAuth] Validation Error: '.$e->getMessage());
+        Log::warning('[OAuth] Validation Error: '.$e->getMessage(), ['exception' => $e]);
 
         return Inertia::render('auth/login', [
-            'error' => 'Erro de validação OAuth: '.$e->getMessage(),
+            'error' => 'Erro na autenticação. Por favor, tente novamente.',
             'locale' => app()->getLocale(),
             'canRegister' => Features::enabled(Features::registration()),
             'canResetPassword' => Features::enabled(Features::resetPasswords()),

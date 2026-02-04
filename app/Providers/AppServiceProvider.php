@@ -44,51 +44,17 @@ class AppServiceProvider extends ServiceProvider
         // Write Passport keys to storage if provided via environment variables
         // This is necessary for ephemeral environments (Railway, Heroku, etc.)
         if (env('PASSPORT_PRIVATE_KEY')) {
-            try {
-                $privateKeyPath = storage_path('oauth-private.key');
-                $privateKeyContent = base64_decode(env('PASSPORT_PRIVATE_KEY'));
-                
-                // Validate that decoded content looks like a PEM key
-                if (! str_contains($privateKeyContent, '-----BEGIN')) {
-                    Log::error('PASSPORT_PRIVATE_KEY does not contain valid PEM format after decode');
-                } else {
-                    file_put_contents($privateKeyPath, $privateKeyContent);
-                    try {
-                        chmod($privateKeyPath, 0600);
-                    } catch (\Exception $e) {
-                        Log::warning('Could not chmod private key file: ' . $e->getMessage());
-                    }
-                    Log::info('Passport private key written to storage', ['path' => $privateKeyPath, 'size' => strlen($privateKeyContent)]);
-                }
-            } catch (\Exception $e) {
-                Log::error('Failed to write Passport private key', ['error' => $e->getMessage()]);
-            }
-        } else {
-            Log::warning('PASSPORT_PRIVATE_KEY environment variable not set');
+            $privateKeyPath = storage_path('oauth-private.key');
+            $privateKeyContent = base64_decode(env('PASSPORT_PRIVATE_KEY'));
+            file_put_contents($privateKeyPath, $privateKeyContent);
+            @chmod($privateKeyPath, 0600);
         }
 
         if (env('PASSPORT_PUBLIC_KEY')) {
-            try {
-                $publicKeyPath = storage_path('oauth-public.key');
-                $publicKeyContent = base64_decode(env('PASSPORT_PUBLIC_KEY'));
-                
-                // Validate that decoded content looks like a PEM key
-                if (! str_contains($publicKeyContent, '-----BEGIN')) {
-                    Log::error('PASSPORT_PUBLIC_KEY does not contain valid PEM format after decode');
-                } else {
-                    file_put_contents($publicKeyPath, $publicKeyContent);
-                    try {
-                        chmod($publicKeyPath, 0600);
-                    } catch (\Exception $e) {
-                        Log::warning('Could not chmod public key file: ' . $e->getMessage());
-                    }
-                    Log::info('Passport public key written to storage', ['path' => $publicKeyPath, 'size' => strlen($publicKeyContent)]);
-                }
-            } catch (\Exception $e) {
-                Log::error('Failed to write Passport public key', ['error' => $e->getMessage()]);
-            }
-        } else {
-            Log::warning('PASSPORT_PUBLIC_KEY environment variable not set');
+            $publicKeyPath = storage_path('oauth-public.key');
+            $publicKeyContent = base64_decode(env('PASSPORT_PUBLIC_KEY'));
+            file_put_contents($publicKeyPath, $publicKeyContent);
+            @chmod($publicKeyPath, 0600);
         }
 
         Passport::tokensExpireIn(now()->addDays(15));
