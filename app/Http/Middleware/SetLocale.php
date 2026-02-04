@@ -33,8 +33,12 @@ class SetLocale
             return $next($request);
         }
 
-        // Allow Social Auth Callback (Global) without locale redirect to preserve query params
-        if ($request->is('auth/*/callback') || $request->is('integrations/*/callback') || $request->is('integrations/*/export')) {
+        // Allow Social Auth Callback and OAuth endpoints without locale redirect
+        if ($request->is('auth/*/callback') || 
+            $request->is('integrations/*/callback') || 
+            $request->is('integrations/*/export') ||
+            $request->is('oauth/*') ||
+            $request->is('login')) {
             return $next($request);
         }
 

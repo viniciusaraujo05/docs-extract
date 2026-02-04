@@ -20,15 +20,17 @@ interface AuthorizeProps {
         email: string;
     };
     scopes: string[];
+    authToken: string;
     request: any;
 }
 
-export default function Authorize({ client, user, scopes, request }: AuthorizeProps) {
+export default function Authorize({ client, user, scopes, authToken, request }: AuthorizeProps) {
     const handleApprove = () => {
         // Passport expects a POST to /oauth/authorize with state and other params
         router.post('/oauth/authorize', {
             ...request,
             client_id: client.id,
+            authToken: authToken,
         });
     };
 
@@ -38,6 +40,7 @@ export default function Authorize({ client, user, scopes, request }: AuthorizePr
           data: {
             ...request,
             client_id: client.id,
+            authToken: authToken,
           }
         });
     };

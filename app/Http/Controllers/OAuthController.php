@@ -11,6 +11,11 @@ use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Laravel\Passport\Contracts\AuthorizationViewResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Laravel\Passport\Bridge\User as PassportUser;
+use Illuminate\Support\Str;
+use League\OAuth2\Server\Exception\OAuthServerException as LeagueException;
+use Laravel\Passport\Exceptions\OAuthServerException as PassportException;
+use Illuminate\Support\Facades\Log;
 
 class OAuthController extends PassportAuthorizationController
 {
@@ -29,34 +34,60 @@ class OAuthController extends PassportAuthorizationController
         PsrResponseInterface $psrResponse,
         AuthorizationViewResponse $viewResponse
     ): Response|AuthorizationViewResponse {
-        return $this->withErrorHandling(function () use ($psrRequest, $request) {
-            $authRequest = $this->server->validateAuthorizationRequest($psrRequest);
+        try {
+            return $this->withErrorHandling(function () use ($psrRequest, $request, $psrResponse) {
+                $authRequest = $this->server->validateAuthorizationRequest($psrRequest);
 
-            $scopes = $this->parseScopes($authRequest);
+                if ($this->guard->guest()) {
+                    return $this->promptForLogin($request);
+                }
 
-            $token = $request->user()->tokens()
-                ->where('client_id', $authRequest->getClient()->getIdentifier())
-                ->where('revoked', false)
-                ->where('expires_at', '>', now())
-                ->first();
+                $user = $this->guard->user();
+                $authRequest->setUser(new PassportUser($user->getAuthIdentifier()));
 
-            // If the user has already authorized the client, just approve it
-            if ($token) {
-                return $this->approveRequest($authRequest, $request->user());
-            }
+                $scopes = $this->parseScopes($authRequest);
+                $client = $this->clients->find($authRequest->getClient()->getIdentifier());
 
-            return Inertia::render('auth/authorize', [
-                'client' => [
-                    'id' => $authRequest->getClient()->getIdentifier(),
-                    'name' => $authRequest->getClient()->getName(),
-                ],
-                'user' => [
-                    'name' => $request->user()->name,
-                    'email' => $request->user()->email,
-                ],
-                'scopes' => $scopes,
-                'request' => $request->all(),
-            ]);
-        });
+                if (! $client) {
+                    return abort(404, 'Client not found');
+                }
+
+                if ($request->input('prompt') !== 'consent' &&
+                    ($client->skipsAuthorization($user, $scopes) || $this->hasGrantedScopes($user, $client, $scopes))) {
+                    return $this->approveRequest($authRequest, $psrResponse);
+                }
+
+                $request->session()->put('authToken', $authToken = Str::random());
+                $request->session()->put('authRequest', $authRequest);
+
+                return Inertia::render('auth/authorize', [
+                    'client' => $client,
+                    'user' => $user,
+                    'scopes' => $scopes,
+                    'authToken' => $authToken,
+                    'request' => $request->all(),
+                ])->toResponse($request);
+            });
+        } catch (LeagueException $e) {
+            return $this->handleOAuthError($e, $request);
+        } catch (PassportException $e) {
+            return $this->handleOAuthError($e, $request);
+        } catch (\Throwable $e) {
+            Log::error('[OAuth] Unexpected Exception: ' . $e->getMessage(), ['exception' => $e]);
+            return Inertia::render('auth/login', [
+                'error' => 'Erro inesperado na autenticação: ' . $e->getMessage(),
+                'locale' => app()->getLocale(),
+            ])->toResponse($request);
+        }
+    }
+
+    private function handleOAuthError($e, Request $request)
+    {
+        Log::warning('[OAuth] Validation Error: ' . $e->getMessage());
+        
+        return Inertia::render('auth/login', [
+            'error' => 'Erro de validação OAuth: ' . $e->getMessage(),
+            'locale' => app()->getLocale(),
+        ])->toResponse($request);
     }
 }

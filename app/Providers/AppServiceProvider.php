@@ -15,13 +15,25 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
+use Laravel\Passport\Contracts\AuthorizationViewResponse;
+use Laravel\Passport\Contracts\DeviceAuthorizationViewResponse;
+use Laravel\Passport\Http\Responses\SimpleViewResponse;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
      */
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->singleton(AuthorizationViewResponse::class, function () {
+            return new SimpleViewResponse('auth.authorize'); // This won't be used but satisfies DI
+        });
+
+        $this->app->singleton(DeviceAuthorizationViewResponse::class, function () {
+            return new SimpleViewResponse('auth.authorize');
+        });
+    }
 
     /**
      * Bootstrap any application services.

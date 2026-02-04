@@ -3,6 +3,7 @@
 use App\Http\Controllers\ApiClientController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentTypeController;
+use App\Http\Controllers\OAuthController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SitemapController;
@@ -12,7 +13,6 @@ use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
-use App\Http\Controllers\OAuthController;
 
 // SEO Routes
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
@@ -22,6 +22,11 @@ Route::get('auth/{provider}/callback', [\App\Http\Controllers\Auth\SocialLoginCo
     ->middleware(['web', 'guest'])
     ->where(['provider' => 'google|github'])
     ->name('social.callback');
+
+// Global login route to fix auth middleware redirection (points to default locale)
+Route::get('login', function () {
+    return redirect()->route('locale.login', ['locale' => app()->getLocale()]);
+})->name('login');
 
 Route::get('/', function () {
     $planService = app(\App\Services\StripePlanService::class);
