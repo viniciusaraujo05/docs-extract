@@ -26,21 +26,9 @@ return [
     |
     */
 
-    'private_key' => function () {
-        $key = env('PASSPORT_PRIVATE_KEY');
-        if (! $key) {
-            return null;
-        }
-        return str_contains($key, '-----BEGIN') ? $key : base64_decode($key);
-    },
+    'private_key' => env('PASSPORT_PRIVATE_KEY') ? base64_decode(env('PASSPORT_PRIVATE_KEY')) : null,
 
-    'public_key' => function () {
-        $key = env('PASSPORT_PUBLIC_KEY');
-        if (! $key) {
-            return null;
-        }
-        return str_contains($key, '-----BEGIN') ? $key : base64_decode($key);
-    },
+    'public_key' => env('PASSPORT_PUBLIC_KEY') ? base64_decode(env('PASSPORT_PUBLIC_KEY')) : null,
 
     /*
     |--------------------------------------------------------------------------
