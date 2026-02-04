@@ -29,7 +29,7 @@ export default function Privacy() {
                             onClick={() => router.visit(`/${locale}`)}
                         >
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                                <FileJson className="h-5 w-5 text-white" />
+                                <img src="/docset.png" alt="Docset Logo" className="w-full h-full object-cover" />
                             </div>
                             <span className="font-bold text-lg">DOCSET</span>
                         </motion.div>

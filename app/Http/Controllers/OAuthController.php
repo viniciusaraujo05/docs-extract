@@ -5,28 +5,22 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Laravel\Passport\Bridge\User as PassportUser;
+use Laravel\Passport\Contracts\AuthorizationViewResponse;
+use Laravel\Passport\Exceptions\OAuthServerException as PassportException;
 use Laravel\Passport\Http\Controllers\AuthorizationController as PassportAuthorizationController;
+use League\OAuth2\Server\Exception\OAuthServerException as LeagueException;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Laravel\Passport\Contracts\AuthorizationViewResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Laravel\Passport\Bridge\User as PassportUser;
-use Illuminate\Support\Str;
-use League\OAuth2\Server\Exception\OAuthServerException as LeagueException;
-use Laravel\Passport\Exceptions\OAuthServerException as PassportException;
-use Illuminate\Support\Facades\Log;
 
 class OAuthController extends PassportAuthorizationController
 {
     /**
      * Authorize a client to access the user's account.
-     *
-     * @param  \Psr\Http\Message\ServerRequestInterface  $psrRequest
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Psr\Http\Message\ResponseInterface  $psrResponse
-     * @param  \Laravel\Passport\Contracts\AuthorizationViewResponse  $viewResponse
-     * @return \Symfony\Component\HttpFoundation\Response|\Laravel\Passport\Contracts\AuthorizationViewResponse
      */
     public function authorize(
         ServerRequestInterface $psrRequest,
@@ -43,7 +37,7 @@ class OAuthController extends PassportAuthorizationController
                 }
 
                 $user = $this->guard->user();
-                $authRequest->setUser(new PassportUser($user->getAuthIdentifier()));
+                $authRequest->setUser(new PassportUser((string) $user->getAuthIdentifier()));
 
                 $scopes = $this->parseScopes($authRequest);
                 $client = $this->clients->find($authRequest->getClient()->getIdentifier());
@@ -73,9 +67,10 @@ class OAuthController extends PassportAuthorizationController
         } catch (PassportException $e) {
             return $this->handleOAuthError($e, $request);
         } catch (\Throwable $e) {
-            Log::error('[OAuth] Unexpected Exception: ' . $e->getMessage(), ['exception' => $e]);
+            Log::error('[OAuth] Unexpected Exception: '.$e->getMessage(), ['exception' => $e]);
+
             return Inertia::render('auth/login', [
-                'error' => 'Erro inesperado na autenticação: ' . $e->getMessage(),
+                'error' => 'Erro inesperado na autenticação: '.$e->getMessage(),
                 'locale' => app()->getLocale(),
             ])->toResponse($request);
         }
@@ -83,10 +78,10 @@ class OAuthController extends PassportAuthorizationController
 
     private function handleOAuthError($e, Request $request)
     {
-        Log::warning('[OAuth] Validation Error: ' . $e->getMessage());
-        
+        Log::warning('[OAuth] Validation Error: '.$e->getMessage());
+
         return Inertia::render('auth/login', [
-            'error' => 'Erro de validação OAuth: ' . $e->getMessage(),
+            'error' => 'Erro de validação OAuth: '.$e->getMessage(),
             'locale' => app()->getLocale(),
         ])->toResponse($request);
     }

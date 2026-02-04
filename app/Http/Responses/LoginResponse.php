@@ -18,8 +18,16 @@ class LoginResponse implements LoginResponseContract
             $locale = config('app.locale', 'pt');
         }
 
-        return $request->wantsJson()
-            ? new JsonResponse('', 204)
-            : redirect()->intended("/{$locale}/documents");
+        if ($request->wantsJson()) {
+            return new JsonResponse('', 204);
+        }
+
+        // Explicitly check if there is an intended URL (like OAuth authorize)
+        // If so, go there. Otherwise, standard dashboard.
+        if ($request->session()->has('url.intended')) {
+            return redirect()->intended();
+        }
+
+        return redirect()->intended("/{$locale}/documents");
     }
 }

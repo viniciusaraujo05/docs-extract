@@ -34,8 +34,8 @@ class SetLocale
         }
 
         // Allow Social Auth Callback and OAuth endpoints without locale redirect
-        if ($request->is('auth/*/callback') || 
-            $request->is('integrations/*/callback') || 
+        if ($request->is('auth/*/callback') ||
+            $request->is('integrations/*/callback') ||
             $request->is('integrations/*/export') ||
             $request->is('oauth/*') ||
             $request->is('login')) {

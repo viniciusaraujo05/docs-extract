@@ -10,6 +10,8 @@ import {
   X
 } from 'lucide-react';
 
+
+
 interface AuthorizeProps {
     client: {
         id: string;
@@ -72,9 +74,11 @@ export default function Authorize({ client, user, scopes, authToken, request }: 
                 >
                     <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 lg:p-10 shadow-2xl">
                         <div className="flex justify-center mb-8 gap-4 items-center">
-                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                                <span className="text-2xl font-bold">D</span>
+                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20 overflow-hidden">
+                                <img src="/docset.png" alt="Docset Logo" className="w-full h-full object-cover" />
                             </div>
+
+
                             <div className="w-8 h-px bg-white/10" />
                             <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
                                 <Zap className="h-8 w-8 text-yellow-400" />

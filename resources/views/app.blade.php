@@ -112,30 +112,33 @@
         <script type="application/ld+json">{!! $seoStructuredData !!}</script>
         @endif
 
-        {{-- Google tag (gtag.js) --}}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-5EFQBMVB3G"></script>
-        <script>
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
+        {{-- Analytics & Cookies (Production Only) --}}
+        @production
+            {{-- Google tag (gtag.js) --}}
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-5EFQBMVB3G"></script>
+            <script>
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
 
-          gtag('config', 'G-5EFQBMVB3G');
-          gtag('config', 'AW-958866825');
-        </script>
+              gtag('config', 'G-5EFQBMVB3G');
+              gtag('config', 'AW-958866825');
+            </script>
 
-        {{-- Google Consent Mode v2 --}}
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('consent', 'default', {
-                'ad_storage': 'denied',
-                'ad_user_data': 'denied',
-                'ad_personalization': 'denied',
-                'analytics_storage': 'denied',
-                'wait_for_update': 500
-            });
-        </script>
-        <script type="text/javascript" charset="UTF-8" src="//cdn.cookie-script.com/s/515ed2cba50c7a9fc9f575d03a7aa1df.js"></script>
+            {{-- Google Consent Mode v2 --}}
+            <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'ad_user_data': 'denied',
+                    'ad_personalization': 'denied',
+                    'analytics_storage': 'denied',
+                    'wait_for_update': 500
+                });
+            </script>
+            <script type="text/javascript" charset="UTF-8" src="//cdn.cookie-script.com/s/515ed2cba50c7a9fc9f575d03a7aa1df.js"></script>
+        @endproduction
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
         @inertiaHead

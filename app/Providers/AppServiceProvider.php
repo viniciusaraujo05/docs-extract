@@ -14,10 +14,10 @@ use App\Services\TranslationCacheService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
-use Laravel\Passport\Passport;
 use Laravel\Passport\Contracts\AuthorizationViewResponse;
 use Laravel\Passport\Contracts\DeviceAuthorizationViewResponse;
 use Laravel\Passport\Http\Responses\SimpleViewResponse;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {

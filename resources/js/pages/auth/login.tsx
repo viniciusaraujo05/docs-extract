@@ -23,11 +23,14 @@ import { toast } from 'sonner';
 
 interface LoginProps {
     status?: string;
+    error?: string;
     canResetPassword: boolean;
     canRegister: boolean;
 }
 
-export default function Login({ status, canResetPassword, canRegister }: LoginProps) {
+
+export default function Login({ status, error, canResetPassword, canRegister }: LoginProps) {
+
     const { t, i18n } = useTranslation();
     const { props } = usePage<{ auth?: { user?: any }; locale: string }>();
     const locale = props.locale || 'en';
@@ -46,10 +49,17 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
     const [errors, setErrors] = useState<any>({});
 
     useEffect(() => {
+        // If there is a critical error (like OAuth failure), DO NOT redirect
+        if (error) {
+            toast.error(error);
+            return;
+        }
+
         if (props.auth?.user) {
             router.visit(`/${locale}/dashboard`);
             return;
         }
+
         
         if (status) {
             toast.success(status);
@@ -122,7 +132,15 @@ export default function Login({ status, canResetPassword, canRegister }: LoginPr
                         className="w-full max-w-md relative z-10"
                     >
                         <div className="mb-8">
+                            {error && (
+                                <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm flex items-center gap-3">
+                                    <Shield className="h-5 w-5 text-red-400 shrink-0" />
+                                    <span>{error}</span>
+                                </div>
+                            )}
+
                             <motion.div
+
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.2 }}
