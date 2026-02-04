@@ -52,4 +52,8 @@ return [
         'redirect' => env('GITHUB_REDIRECT_URI', 'http://localhost/auth/github/callback'),
     ],
 
+    'zapier' => [
+        'client_id' => env('ZAPIER_CLIENT_ID'),
+    ],
+
 ];

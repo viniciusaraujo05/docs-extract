@@ -17,6 +17,18 @@ class IntegrationController extends Controller
         /** @var User $user */
         $user = $request->user();
 
+        // Check if Zapier is connected
+        $zapierClientId = config('services.zapier.client_id');
+        
+        $isZapierConnected = false;
+        if ($zapierClientId) {
+            $isZapierConnected = \Illuminate\Support\Facades\DB::table('oauth_access_tokens')
+                ->where('user_id', $user->id)
+                ->where('client_id', $zapierClientId)
+                ->where('revoked', false)
+                ->exists();
+        }
+
         return \Inertia\Inertia::render('settings/integrations', [
             'integrations' => $user->connectedAccounts()->get()->map(fn ($account) => [
                 'provider' => $account->provider,
@@ -26,6 +38,7 @@ class IntegrationController extends Controller
                 'avatar' => $account->avatar,
                 'created_at' => $account->created_at,
             ]),
+            'isZapierConnected' => $isZapierConnected,
         ]);
     }
 

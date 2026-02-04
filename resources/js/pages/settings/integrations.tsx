@@ -5,7 +5,7 @@ import { type BreadcrumbItem, type SharedData } from "@/types";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, XCircle, RefreshCw, AlertCircle } from "lucide-react";
+import { CheckCircle, XCircle, RefreshCw, AlertCircle, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
@@ -31,9 +31,10 @@ interface Integration {
 
 interface IntegrationsProps {
     integrations: Integration[];
+    isZapierConnected: boolean;
 }
 
-export default function Integrations({ integrations }: IntegrationsProps) {
+export default function Integrations({ integrations, isZapierConnected }: IntegrationsProps) {
     const { t } = useTranslation();
     const page = usePage<SharedData>();
     const { auth } = page.props;
@@ -158,6 +159,52 @@ export default function Integrations({ integrations }: IntegrationsProps) {
                                         </p>
                                         <Button onClick={() => handleConnect('google')}>
                                             {t('Connect Google')}
+                                        </Button>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Zapier Integration */}
+                        <Card>
+                            <CardHeader>
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-[#FF4F00]/10 rounded-full shadow-sm">
+                                        <Zap className="h-6 w-6 text-[#FF4F00]" fill="currentColor" />
+                                    </div>
+                                    <div>
+                                        <CardTitle>Zapier</CardTitle>
+                                        <CardDescription>{t('Automate workflows by connecting Docset to 5,000+ apps.')}</CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                {isZapierConnected ? (
+                                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-[#FF4F00] flex items-center justify-center">
+                                                <Zap className="h-6 w-6 text-white" fill="currentColor" />
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-sm">Zapier</p>
+                                                <div className="flex items-center gap-1 mt-1 text-green-600">
+                                                    <CheckCircle className="h-3 w-3" />
+                                                    <span className="text-xs font-medium">{t('Connected')}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                        <p className="text-sm text-muted-foreground max-w-md">
+                                            {t('Connect Docset to Zapier to automatically export data, trigger actions, and streamline your workflow.')}
+                                        </p>
+                                        <Button 
+                                            variant="outline"
+                                            onClick={() => window.open('https://zapier.com/apps/docset/integrations', '_blank')}
+                                            className="border-[#FF4F00] text-[#FF4F00] hover:bg-[#FF4F00]/10"
+                                        >
+                                            {t('Connect Zapier')}
                                         </Button>
                                     </div>
                                 )}
