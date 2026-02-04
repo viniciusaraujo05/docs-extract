@@ -31,7 +31,10 @@ Route::prefix('v1')->name('api.v1.')->middleware([\App\Http\Middleware\ApiV1Json
         Route::get('documents/{id}', [DocumentControllerApi::class, 'show'])->name('documents.show')->middleware('track.usage:api_requests');
     });
 
-    // Zapier Routes (require Passport)
+});
+    
+// Separate Zapier Routes (using api/v1 prefix to match Zapier expectation)
+Route::prefix('api/v1')->name('api.v1.')->middleware([\App\Http\Middleware\ApiV1JsonResponse::class])->group(function () {
     Route::middleware(['auth:passport', 'throttle:60,1'])->group(function () {
         Route::get('zapier/me', [\App\Http\Controllers\Api\V1\ZapierController::class, 'me'])->name('zapier.me');
     });
