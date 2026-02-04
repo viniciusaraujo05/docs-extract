@@ -12,7 +12,9 @@ use Laravel\Passport\Bridge\User as PassportUser;
 use Laravel\Passport\Contracts\AuthorizationViewResponse;
 use Laravel\Passport\Exceptions\OAuthServerException as PassportException;
 use Laravel\Passport\Http\Controllers\AuthorizationController as PassportAuthorizationController;
+use Laravel\Fortify\Features;
 use League\OAuth2\Server\Exception\OAuthServerException as LeagueException;
+
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -72,7 +74,10 @@ class OAuthController extends PassportAuthorizationController
             return Inertia::render('auth/login', [
                 'error' => 'Erro inesperado na autenticação: '.$e->getMessage(),
                 'locale' => app()->getLocale(),
+                'canRegister' => Features::enabled(Features::registration()),
+                'canResetPassword' => Features::enabled(Features::resetPasswords()),
             ])->toResponse($request);
+
         }
     }
 
@@ -83,6 +88,9 @@ class OAuthController extends PassportAuthorizationController
         return Inertia::render('auth/login', [
             'error' => 'Erro de validação OAuth: '.$e->getMessage(),
             'locale' => app()->getLocale(),
+            'canRegister' => Features::enabled(Features::registration()),
+            'canResetPassword' => Features::enabled(Features::resetPasswords()),
         ])->toResponse($request);
+
     }
 }
