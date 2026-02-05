@@ -244,7 +244,6 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
 
     // Support
     Route::get('support', [SupportController::class, 'create'])->name('support.create');
-    Route::post('support', [SupportController::class, 'store'])->name('support.store');
 });
 
 // Custom OAuth Authorization route (Inertia)

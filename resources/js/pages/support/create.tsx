@@ -38,7 +38,7 @@ export default function SupportCreate() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(`/${i18n.language}/support`, {
+        post('/api/support', {
             onSuccess: () => {
                 reset();
                 // Toast handled by useEffect watching flash
