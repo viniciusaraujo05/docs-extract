@@ -134,9 +134,6 @@ Route::middleware(['web', 'auth'])->group(function () {
             Route::post('resume', [SubscriptionController::class, 'resumeSubscription'])->name('resume');
         });
     });
-
-    // Support Actions
-    Route::post('support', [SupportController::class, 'store'])->name('support.store');
 });
 
 // Non-localized Authenticated Actions
