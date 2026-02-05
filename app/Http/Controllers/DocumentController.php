@@ -176,13 +176,13 @@ final class DocumentController extends Controller
 
         if ($request->wantsJson()) {
             return response()->json([
-                'document' => $documentModel->load('user'),
+                'document' => $documentModel,
                 'previewUrl' => $previewUrl,
             ]);
         }
 
         return Inertia::render('documents/show', [
-            'document' => $documentModel->load('user'),
+            'document' => $documentModel,
             'previewUrl' => $previewUrl,
         ]);
     }

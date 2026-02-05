@@ -48,6 +48,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'two_factor_secret',
         'two_factor_recovery_codes',
         'remember_token',
+        'stripe_id',
+        'pm_type',
+        'pm_last_four',
+        'trial_ends_at',
+        'google_id',
+        'github_id',
     ];
 
     public function organization(): BelongsTo
