@@ -101,44 +101,99 @@ class ZapierController extends Controller
     /**
      * Process a PDF with a specific document type.
      * Main action for Zapier document extraction.
+     * Accepts file URL from Zapier (hydrated file from S3).
      */
     public function processDocument(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'document_type_id' => 'required|exists:document_types,id',
-            'file' => 'required|file|mimes:pdf|max:10240',
+            'document_type_id' => 'nullable|exists:document_types,id',
+            'file' => 'required|string', // URL from Zapier
         ]);
 
-        $documentType = DocumentType::findOrFail($validated['document_type_id']);
-        $this->authorize('view', $documentType);
+        // Verify document type ownership if provided
+        $documentType = null;
+        if (isset($validated['document_type_id'])) {
+            $documentType = DocumentType::findOrFail($validated['document_type_id']);
+            $this->authorize('view', $documentType);
+        }
 
-        // Store file
-        $filePath = $request->file('file')->store('documents', config('filesystems.default'));
+        // Download file from Zapier URL
+        try {
+            $fileUrl = $validated['file'];
+            
+            // Download file contents
+            $fileContents = @file_get_contents($fileUrl);
+            
+            if ($fileContents === false) {
+                return response()->json([
+                    'error' => 'Failed to download file',
+                    'message' => 'Could not download file from the provided URL. Please ensure the file is accessible.'
+                ], 400);
+            }
 
-        // Create document
-        $document = Document::create([
-            'user_id' => $request->user()->id,
-            'document_type_id' => $documentType->id,
-            'file_path' => $filePath,
-            'original_name' => $request->file('file')->getClientOriginalName(),
-            'mime_type' => 'application/pdf',
-            'schema_used' => ['fields' => $documentType->fields],
-            'status' => 'pending',
-        ]);
+            // Detect MIME type
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->buffer($fileContents);
 
-        // Process using existing service
-        $processed = $this->documentService->processDocument($document);
+            // Validate file type
+            $allowedMimes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+            if (!in_array($mimeType, $allowedMimes)) {
+                return response()->json([
+                    'error' => 'Invalid file type',
+                    'message' => 'Only PDF, PNG, and JPEG files are supported. Detected: ' . $mimeType
+                ], 400);
+            }
 
-        return response()->json([
-            'id' => $processed->id,
-            'status' => $processed->status,
-            'extracted_data' => $processed->extracted_data,
-            'download_links' => [
-                'excel' => route('api.v1.documents.export', ['document' => $processed->id, 'format' => 'xlsx']),
-                'csv' => route('api.v1.documents.export', ['document' => $processed->id, 'format' => 'csv']),
-                'json' => route('api.v1.documents.export', ['document' => $processed->id, 'format' => 'json']),
-            ],
-        ]);
+            // Get filename from URL or use default
+            $filename = basename(parse_url($fileUrl, PHP_URL_PATH)) ?: 'document.pdf';
+
+            // Create temporary file
+            $tempPath = tempnam(sys_get_temp_dir(), 'zapier_');
+            file_put_contents($tempPath, $fileContents);
+
+            // Create UploadedFile instance
+            $uploadedFile = new \Illuminate\Http\UploadedFile(
+                $tempPath,
+                $filename,
+                $mimeType,
+                null,
+                true // test mode - don't validate file exists
+            );
+
+            // Store file
+            $filePath = $uploadedFile->store('documents', config('filesystems.default'));
+
+            // Create document
+            $document = Document::create([
+                'user_id' => $request->user()->id,
+                'document_type_id' => $documentType?->id,
+                'file_path' => $filePath,
+                'original_name' => $filename,
+                'mime_type' => $mimeType,
+                'schema_used' => $documentType ? ['fields' => $documentType->fields] : null,
+                'status' => 'pending',
+            ]);
+
+            // Clean up temp file
+            @unlink($tempPath);
+
+            // Process using existing service
+            $processed = $this->documentService->processDocument($document);
+
+            return response()->json([
+                'id' => $processed->id,
+                'status' => $processed->status,
+                'extracted_data' => $processed->extracted_data,
+                'document_type' => $documentType?->name,
+                'created_at' => $processed->created_at?->toISOString(),
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Processing failed',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

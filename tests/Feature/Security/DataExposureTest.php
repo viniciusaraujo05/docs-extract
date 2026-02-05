@@ -81,7 +81,7 @@ class DataExposureTest extends TestCase
             ->get("/en/documents/{$document->id}");
 
         $response->assertStatus(200);
-        
+
         // Email should not be in the response
         $this->assertStringNotContainsString('secret@example.com', $response->getContent());
     }
