@@ -79,6 +79,25 @@ class TriggerDocumentWebhooks
                     'id' => $document->id,
                     'type' => 'document',
                     'status' => $status,
+                    'original_name' => $document->original_name,
+                    'document_type' => $document->documentType ? [
+                        'id' => $document->documentType->id,
+                        'name' => $document->documentType->name,
+                        'slug' => $document->documentType->slug,
+                    ] : null,
+                    'extracted_data' => $document->extracted_data,
+                    'download_links' => [
+                        'csv' => route('api.v1.zapier.documents.export', [
+                            'document' => $document->id,
+                            'format' => 'csv',
+                        ]),
+                        'json' => route('api.v1.zapier.documents.export', [
+                            'document' => $document->id,
+                            'format' => 'json',
+                        ]),
+                    ],
+                    'created_at' => $document->created_at?->toIso8601String(),
+                    'processed_at' => now()->toIso8601String(),
                 ],
             ];
 

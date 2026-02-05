@@ -13,7 +13,6 @@ use App\Services\DocumentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
 
 class ZapierController extends Controller
 {
@@ -80,7 +79,7 @@ class ZapierController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:string,number,date,boolean',
+            'type' => 'required|in:string,integer,number,boolean,datetime,text,dictionary,password',
             'required' => 'boolean',
         ]);
 

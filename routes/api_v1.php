@@ -37,18 +37,18 @@ Route::prefix('v1')->name('api.v1.')->middleware([\App\Http\Middleware\ApiV1Json
 Route::prefix('api/v1')->name('api.v1.')->middleware([\App\Http\Middleware\ApiV1JsonResponse::class])->group(function () {
     Route::middleware(['auth:passport', 'throttle:60,1'])->group(function () {
         Route::get('zapier/me', [\App\Http\Controllers\Api\V1\ZapierController::class, 'me'])->name('zapier.me');
-        
+
         // Document Types
         Route::get('zapier/document-types', [\App\Http\Controllers\Api\V1\ZapierController::class, 'listDocumentTypes'])->name('zapier.document-types.index');
         Route::get('zapier/document-types/{documentType}/fields', [\App\Http\Controllers\Api\V1\ZapierController::class, 'getDocumentTypeFields'])->name('zapier.document-types.fields');
         Route::post('zapier/document-types/{documentType}/fields', [\App\Http\Controllers\Api\V1\ZapierController::class, 'addCustomField'])->name('zapier.document-types.fields.store');
-        
+
         // Document Processing
         Route::post('zapier/process', [\App\Http\Controllers\Api\V1\ZapierController::class, 'processDocument'])->name('zapier.process');
-        
+
         // Document Export
         Route::get('zapier/documents/{document}/export/{format}', [\App\Http\Controllers\Api\V1\ZapierController::class, 'exportDocument'])->name('zapier.documents.export');
-        
+
         // Webhooks
         Route::post('zapier/webhooks/subscribe', [\App\Http\Controllers\Api\V1\ZapierController::class, 'subscribeWebhook'])->name('zapier.webhooks.subscribe');
         Route::delete('zapier/webhooks/{webhookEndpoint}', [\App\Http\Controllers\Api\V1\ZapierController::class, 'unsubscribeWebhook'])->name('zapier.webhooks.unsubscribe');

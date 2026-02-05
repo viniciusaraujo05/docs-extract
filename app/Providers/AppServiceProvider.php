@@ -12,7 +12,6 @@ use App\Observers\ReportAnalysisObserver;
 use App\Observers\UserObserver;
 use App\Services\TranslationCacheService;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Contracts\AuthorizationViewResponse;
