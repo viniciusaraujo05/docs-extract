@@ -212,13 +212,29 @@ class ZapierController extends Controller
             // Process using existing service
             $processed = $this->documentService->processDocument($document);
 
-            return response()->json([
+            // Flatten extracted_data for Zapier compatibility
+            // Zapier works better with flat structures instead of nested objects
+            $response = [
                 'id' => $processed->id,
                 'status' => $processed->status,
-                'extracted_data' => $processed->extracted_data,
                 'document_type' => $documentType?->name,
                 'created_at' => $processed->created_at?->toISOString(),
-            ]);
+            ];
+
+            // Add extracted data fields at root level
+            if ($processed->extracted_data && is_array($processed->extracted_data)) {
+                foreach ($processed->extracted_data as $key => $value) {
+                    // Skip complex nested arrays/objects for now
+                    if (!is_array($value) && !is_object($value)) {
+                        $response[$key] = $value;
+                    } else {
+                        // For arrays/objects, convert to JSON string
+                        $response[$key] = json_encode($value);
+                    }
+                }
+            }
+
+            return response()->json($response);
 
         } catch (\Exception $e) {
             return response()->json([
