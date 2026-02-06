@@ -224,12 +224,20 @@ class ZapierController extends Controller
             // Add extracted data fields at root level
             if ($processed->extracted_data && is_array($processed->extracted_data)) {
                 foreach ($processed->extracted_data as $key => $value) {
-                    // Skip complex nested arrays/objects for now
-                    if (!is_array($value) && !is_object($value)) {
+                    if (! is_array($value) && ! is_object($value)) {
+                        // Simple scalar values - add directly
                         $response[$key] = $value;
                     } else {
-                        // For arrays/objects, convert to JSON string
+                        // For arrays/objects, add both JSON and formatted versions
                         $response[$key] = json_encode($value);
+
+                        // Create a human-readable formatted version
+                        if (is_array($value) && ! empty($value)) {
+                            $formatted = $this->formatArrayForDisplay($value, $key);
+                            if ($formatted) {
+                                $response[$key.'_formatted'] = $formatted;
+                            }
+                        }
                     }
                 }
             }
@@ -289,6 +297,54 @@ class ZapierController extends Controller
         $webhookEndpoint->delete();
 
         return response()->json(['message' => 'Webhook unsubscribed successfully']);
+    }
+
+    /**
+     * Format an array field into a human-readable string for Zapier display.
+     */
+    private function formatArrayForDisplay(array $data, string $fieldName): ?string
+    {
+        if (empty($data)) {
+            return null;
+        }
+
+        // Check if it's an array of objects (like line_items)
+        $firstItem = reset($data);
+        if (is_array($firstItem)) {
+            $count = count($data);
+            $items = [];
+
+            foreach ($data as $item) {
+                // Try to create a meaningful summary of each item
+                $summary = [];
+
+                // Common fields to include in summary
+                $priorityFields = ['description', 'name', 'title', 'qty', 'quantity', 'total', 'amount', 'price'];
+
+                foreach ($priorityFields as $field) {
+                    if (isset($item[$field]) && $item[$field] !== null && $item[$field] !== '') {
+                        $value = $item[$field];
+                        // Format numbers as currency if it looks like money
+                        if (in_array($field, ['total', 'amount', 'price', 'unit_price']) && is_numeric($value)) {
+                            $value = '$'.number_format((float) $value, 2);
+                        }
+                        $summary[] = $value;
+                    }
+                }
+
+                if (! empty($summary)) {
+                    $items[] = implode(' - ', $summary);
+                }
+            }
+
+            if (! empty($items)) {
+                $label = ucfirst(str_replace('_', ' ', $fieldName));
+
+                return "{$count} {$label}: ".implode(' | ', $items);
+            }
+        }
+
+        return null;
     }
 
     /**
