@@ -120,14 +120,14 @@ class ZapierController extends Controller
         // Download file from Zapier URL
         try {
             $fileUrl = $validated['file'];
-            
+
             // Download file contents
             $fileContents = @file_get_contents($fileUrl);
-            
+
             if ($fileContents === false) {
                 return response()->json([
                     'error' => 'Failed to download file',
-                    'message' => 'Could not download file from the provided URL. Please ensure the file is accessible.'
+                    'message' => 'Could not download file from the provided URL. Please ensure the file is accessible.',
                 ], 400);
             }
 
@@ -137,10 +137,10 @@ class ZapierController extends Controller
 
             // Validate file type
             $allowedMimes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
-            if (!in_array($mimeType, $allowedMimes)) {
+            if (! in_array($mimeType, $allowedMimes)) {
                 return response()->json([
                     'error' => 'Invalid file type',
-                    'message' => 'Only PDF, PNG, and JPEG files are supported. Detected: ' . $mimeType
+                    'message' => 'Only PDF, PNG, and JPEG files are supported. Detected: '.$mimeType,
                 ], 400);
             }
 
@@ -167,8 +167,9 @@ class ZapierController extends Controller
             $document = Document::create([
                 'user_id' => $request->user()->id,
                 'document_type_id' => $documentType?->id,
+                'name' => pathinfo($filename, PATHINFO_FILENAME), // Extract name without extension
                 'file_path' => $filePath,
-                'original_name' => $filename,
+                'original_filename' => $filename,
                 'mime_type' => $mimeType,
                 'schema_used' => $documentType ? ['fields' => $documentType->fields] : null,
                 'status' => 'pending',
@@ -191,7 +192,7 @@ class ZapierController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'error' => 'Processing failed',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
