@@ -147,11 +147,11 @@ class ZapierController extends Controller
             // Get filename from URL or use default
             $urlPath = parse_url($fileUrl, PHP_URL_PATH);
             $filename = $urlPath ? basename($urlPath) : 'document.pdf';
-            
+
             // If filename is too long (from Zapier URLs), use a cleaner name
             if (strlen($filename) > 100) {
                 $extension = pathinfo($filename, PATHINFO_EXTENSION) ?: 'pdf';
-                $filename = 'zapier_document_' . time() . '.' . $extension;
+                $filename = 'zapier_document_'.time().'.'.$extension;
             }
 
             // Create temporary file
@@ -169,15 +169,15 @@ class ZapierController extends Controller
 
             // Store file
             $filePath = $uploadedFile->store('documents', config('filesystems.default'));
-            
+
             // Get file size
             $fileSize = strlen($fileContents);
-            
+
             // Detect page count for PDFs
             $pageCount = 1; // Default for images
             if ($mimeType === 'application/pdf') {
                 try {
-                    $parser = new \Smalot\PdfParser\Parser();
+                    $parser = new \Smalot\PdfParser\Parser;
                     $pdf = $parser->parseFile($tempPath);
                     $pageCount = count($pdf->getPages());
                 } catch (\Exception $e) {
@@ -185,6 +185,11 @@ class ZapierController extends Controller
                     $pageCount = 1;
                 }
             }
+
+            // Determine document type category
+            // type is just a category (invoice/receipt/custom/predefined)
+            // The actual document type is stored in document_type_id
+            $type = $documentType ? 'predefined' : 'custom';
 
             // Create document
             $document = Document::create([
@@ -196,7 +201,7 @@ class ZapierController extends Controller
                 'mime_type' => $mimeType,
                 'file_size' => $fileSize,
                 'page_count' => $pageCount,
-                'type' => $documentType?->slug ?? 'custom',
+                'type' => $type,
                 'schema_used' => $documentType ? ['fields' => $documentType->fields] : null,
                 'status' => 'pending',
             ]);
