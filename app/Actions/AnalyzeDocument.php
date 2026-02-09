@@ -29,9 +29,11 @@ class AnalyzeDocument
         // Try normal extraction first
         try {
             $mime = $file->getMimeType();
+            \Illuminate\Support\Facades\Log::info("AnalyzeDocument: Starting for file {$file->getClientOriginalName()}", ['mime' => $mime]);
 
             // If it's an image, skip text extraction and use Vision
             if (str_starts_with($mime, 'image/')) {
+                // ...
                 $base64 = base64_encode(file_get_contents($file->getRealPath()));
                 $fields = $this->fieldDetector->detectFromImage($base64);
 
@@ -42,9 +44,12 @@ class AnalyzeDocument
                 ];
             }
 
+            \Illuminate\Support\Facades\Log::info("AnalyzeDocument: Attempting text extraction for {$mime}");
             $text = $this->textExtractor->extract($file);
+            \Illuminate\Support\Facades\Log::info("AnalyzeDocument: Text extraction result", ['length' => strlen($text)]);
 
             if ($text === '') {
+                \Illuminate\Support\Facades\Log::warning("AnalyzeDocument: Text extraction returned empty string");
                 throw new \RuntimeException('No text extracted');
             }
 
@@ -58,6 +63,10 @@ class AnalyzeDocument
             ];
 
         } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("AnalyzeDocument: Extraction failed, attempting fallback", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             // If extraction failed and it's a PDF, try conversion
             if ($file->getMimeType() === 'application/pdf') {
                 return $this->handlePdfConversion($file);
