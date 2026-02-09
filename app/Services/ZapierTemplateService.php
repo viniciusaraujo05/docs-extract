@@ -44,15 +44,29 @@ class ZapierTemplateService
         string $templateName
     ): ?DocumentType {
         try {
+            Log::info('ZapierTemplateService: createFromDocument start', [
+                'template_name' => $templateName,
+                'mime_type' => $mimeType,
+                'file_size' => strlen($fileContents),
+                'temp_path' => $tempPath,
+            ]);
+
             // Detect fields from document
             $detectedFields = $this->detectFields($tempPath, $filename, $mimeType, $fileContents);
 
+            Log::info('ZapierTemplateService: fields detected', [
+                'count' => $detectedFields ? count($detectedFields) : 0,
+                'fields_sample' => $detectedFields ? array_slice($detectedFields, 0, 3) : null,
+            ]);
+
             if (! $detectedFields) {
+                Log::warning('ZapierTemplateService: No fields detected, aborting template creation');
+
                 return null;
             }
 
             // Create template
-            return DocumentType::create([
+            $template = DocumentType::create([
                 'user_id' => $user->id,
                 'organization_id' => $user->organization_id,
                 'name' => $templateName,
@@ -61,10 +75,15 @@ class ZapierTemplateService
                 'fields' => $detectedFields,
                 'is_active' => true,
             ]);
+
+            Log::info('ZapierTemplateService: Template created', ['id' => $template->id]);
+
+            return $template;
         } catch (\Exception $e) {
             Log::warning('Template creation failed in Zapier', [
                 'error' => $e->getMessage(),
                 'template_name' => $templateName,
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return null;

@@ -39,12 +39,21 @@ class ProcessZapierDocumentAction
         $createdTemplate = null;
         $documentType = $existingDocumentType; // Initialize with passed value
 
+        \Illuminate\Support\Facades\Log::info('ProcessZapierDocumentAction: start', [
+            'has_existing_type' => $existingDocumentType ? true : false,
+            'save_as_template' => $validated['save_as_template'] ?? false,
+            'template_name' => $validated['template_name'] ?? null,
+        ]);
+
         // PRIORIDADE 1: Se já tem Document Type (selecionado no dropdown), usa ele e ignora o resto
         if ($existingDocumentType) {
+            \Illuminate\Support\Facades\Log::info('ProcessZapierDocumentAction: Using existing document type from dropdown');
             $this->associateDocumentWithTemplate($document, $documentType);
         }
         // PRIORIDADE 2: Se não tem, e pediu para salvar como template (ou usar pelo nome)
         elseif (($validated['save_as_template'] ?? false) && ! empty($validated['template_name'])) {
+            \Illuminate\Support\Facades\Log::info('ProcessZapierDocumentAction: Processing save_as_template logic');
+
             // Check if template already exists by name
             $existingTemplate = $this->templateService->findByName(
                 $request->user(),
@@ -52,10 +61,12 @@ class ProcessZapierDocumentAction
             );
 
             if ($existingTemplate) {
+                \Illuminate\Support\Facades\Log::info('ProcessZapierDocumentAction: Found existing template by name', ['id' => $existingTemplate->id]);
                 // Use existing template found by name
                 $documentType = $existingTemplate;
                 $this->associateDocumentWithTemplate($document, $documentType);
             } else {
+                \Illuminate\Support\Facades\Log::info('ProcessZapierDocumentAction: Creating new template');
                 // Create new template using AI field detection
                 $createdTemplate = $this->templateService->createFromDocument(
                     $request->user(),
@@ -67,10 +78,15 @@ class ProcessZapierDocumentAction
                 );
 
                 if ($createdTemplate) {
+                    \Illuminate\Support\Facades\Log::info('ProcessZapierDocumentAction: Template created successfully', ['id' => $createdTemplate->id]);
                     $documentType = $createdTemplate;
                     $this->associateDocumentWithTemplate($document, $documentType);
+                } else {
+                    \Illuminate\Support\Facades\Log::warning('ProcessZapierDocumentAction: Failed to create template');
                 }
             }
+        } else {
+            \Illuminate\Support\Facades\Log::info('ProcessZapierDocumentAction: No template logic applied (Generic extraction)');
         }
 
         // Process document (with or without template)

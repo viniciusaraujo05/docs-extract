@@ -223,6 +223,14 @@ class ZapierController extends Controller
             ]);
 
             // Process document using Action (BEFORE deleting temp file!)
+            \Illuminate\Support\Facades\Log::info('ZapierController: calling Action', [
+                'document_id' => $document->id,
+                'has_document_type' => $documentType ? true : false,
+                'document_type_id' => $documentType?->id,
+                'temp_path_exists' => file_exists($tempPath),
+                'temp_path_size' => file_exists($tempPath) ? filesize($tempPath) : 0,
+            ]);
+
             /** @var \App\Actions\Zapier\ProcessZapierDocumentAction $action */
             $action = app(\App\Actions\Zapier\ProcessZapierDocumentAction::class);
 
@@ -239,6 +247,13 @@ class ZapierController extends Controller
 
             $processed = $result['document'];
             $createdTemplate = $result['created_template'];
+
+            \Illuminate\Support\Facades\Log::info('ZapierController: Action completed', [
+                'processed_id' => $processed->id,
+                'template_created' => $createdTemplate ? true : false,
+                'created_template_name' => $createdTemplate?->name,
+                'extracted_data_keys' => array_keys($processed->extracted_data ?? []),
+            ]);
 
             // If a template was created, use it for the response
             if ($createdTemplate) {
