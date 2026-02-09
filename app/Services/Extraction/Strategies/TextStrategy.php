@@ -42,7 +42,7 @@ class TextStrategy implements ExtractionStrategyInterface
         if (str_contains($document->mime_type, 'pdf') && mb_strlen(trim($text)) < 300) {
             Log::warning('TextStrategy: Text extracted is too short/sparse, assuming scanned PDF.', [
                 'document_id' => $document->id,
-                'length' => mb_strlen($text)
+                'length' => mb_strlen($text),
             ]);
             throw new \App\Exceptions\ExtractionException('extraction.scanned_pdf_detected');
         }
