@@ -187,6 +187,14 @@ class ZapierController extends Controller
                 }
             }
 
+            // Get document type if provided
+            $documentType = null;
+            if (! empty($validated['document_type_id'])) {
+                $documentType = DocumentType::where('user_id', $request->user()->id)
+                    ->where('id', $validated['document_type_id'])
+                    ->first();
+            }
+
             // Determine document type category
             // type is just a category (invoice/receipt/custom/predefined)
             // The actual document type is stored in document_type_id
@@ -231,6 +239,11 @@ class ZapierController extends Controller
 
             $processed = $result['document'];
             $createdTemplate = $result['created_template'];
+
+            // If a template was created, use it for the response
+            if ($createdTemplate) {
+                $documentType = $createdTemplate;
+            }
 
             // Clean up temp file AFTER processing
             @unlink($tempPath);
