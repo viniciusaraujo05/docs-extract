@@ -56,8 +56,8 @@ class AnalyzeDocument
             // Heuristic for scanned PDFs: If text is very short/sparse for a PDF, it's likely noise/watermark
             // 250 chars is a conservative threshold. A real invoice usually has >500-1000 chars.
             if (mb_strlen(trim($text)) < 300) {
-                 \Illuminate\Support\Facades\Log::warning('AnalyzeDocument: Text extracted is too short/sparse, assuming scanned PDF. Triggering fallback.', ['length' => mb_strlen($text)]);
-                 throw new \RuntimeException('Scanned PDF detected (sparse text)');
+                \Illuminate\Support\Facades\Log::warning('AnalyzeDocument: Text extracted is too short/sparse, assuming scanned PDF. Triggering fallback.', ['length' => mb_strlen($text)]);
+                throw new \RuntimeException('Scanned PDF detected (sparse text)');
             }
 
             // If we got valid text, detect fields
@@ -75,11 +75,16 @@ class AnalyzeDocument
                 'trace' => $e->getTraceAsString(),
             ]);
             // If extraction failed and it's a PDF, try conversion
-            if ($file->getMimeType() === 'application/pdf') {
+            $mime = $file->getMimeType();
+            \Illuminate\Support\Facades\Log::info("AnalyzeDocument: Checking fallback condition. MIME: {$mime}");
+            
+            if ($mime === 'application/pdf') {
+                 \Illuminate\Support\Facades\Log::info("AnalyzeDocument: Fallback triggered for PDF");
                 return $this->handlePdfConversion($file);
             }
 
             // For non-PDF files or if conversion fails, return error
+            \Illuminate\Support\Facades\Log::warning("AnalyzeDocument: Fallback skipped. Re-throwing exception.");
             throw $e;
         }
     }
