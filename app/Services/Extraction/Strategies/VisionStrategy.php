@@ -21,50 +21,30 @@ class VisionStrategy implements ExtractionStrategyInterface
     {
         $mime = $document->mime_type;
 
-        // Always support images (they don't need PDF conversion)
-        if (str_starts_with($mime, 'image/')) {
-            return true;
-        }
-
-        // Support PDFs only if we can convert them to images
-        if ($mime === 'application/pdf' && class_exists('Imagick')) {
-            return true;
-        }
-
-        return false;
+        // Support images and PDFs directly
+        return str_starts_with($mime, 'image/') || $mime === 'application/pdf';
     }
 
     public function extract(Document $document, array $schema): array
     {
-        $images = $this->getImagesFromDocument($document);
+        $files = $this->getDocumentContent($document);
 
-        if (empty($images)) {
-            throw new RuntimeException('Could not convert document to images for Vision processing.');
+        if (empty($files)) {
+            throw new RuntimeException('Could not load document content for Vision processing.');
         }
 
-        // For now, we only process the first image/page or merge them?
-        // To keep it simple for MVP/Improvement, let's take the first 3 pages/images maximum (to handle long docs partially)
-        // ideally we stitch them or send multiple images in payload.
-        // GPT-4o supports multiple images.
-
-        return $this->processWithVision($images, $schema);
+        return $this->processWithVision($files, $schema);
     }
 
     /**
-     * @return array<string> Array of base64 encoded images
+     * @return array<array{data: string, mime: string}>
      */
-    /**
-     * @return array<string> Array of base64 encoded images
-     */
-    private function getImagesFromDocument(Document $document): array
+    private function getDocumentContent(Document $document): array
     {
         // Use document's storage_disk if set (for temp files), otherwise use default
         $diskName = $document->storage_disk ?? config('filesystems.default');
         $disk = Storage::disk($diskName);
-        $images = [];
-
-        // ... (remote storage handling logic remains same, implicit via context) ...
-        // For brevity in replacement, re-implementing the core logic
+        $content = [];
 
         // For remote storage (R2, S3), download to temp location first
         $isRemote = ! in_array($diskName, ['local', 'public']);
@@ -91,38 +71,20 @@ class VisionStrategy implements ExtractionStrategyInterface
                 if ($this->isLongImage($path)) {
                     // Slices are JPEGs
                     foreach ($this->sliceImage($path) as $slice) {
-                        $images[] = ['data' => $slice, 'mime' => 'image/jpeg'];
+                        $content[] = ['data' => $slice, 'mime' => 'image/jpeg'];
                     }
                 } else {
-                    $images[] = [
+                    $content[] = [
                         'data' => base64_encode(file_get_contents($path)),
                         'mime' => $document->mime_type,
                     ];
                 }
             } elseif ($document->mime_type === 'application/pdf') {
-                try {
-                    /** @var \App\Services\PdfToImageService $pdfService */
-                    $pdfService = app(\App\Services\PdfToImageService::class);
-
-                    $imagePaths = $pdfService->convertPdf($path);
-
-                    foreach ($imagePaths as $imagePath) {
-                        // PdfToImageService now returns PNGs
-                        $images[] = [
-                            'data' => base64_encode(file_get_contents($imagePath)),
-                            'mime' => 'image/png',
-                        ];
-                    }
-
-                    $pdfService->cleanup($imagePaths);
-
-                } catch (\Exception $e) {
-                    // PDF conversion failed
-                    \Illuminate\Support\Facades\Log::error('VisionStrategy: PDF conversion failed', [
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString(),
-                    ]);
-                }
+                // Direct PDF support (skip ImageMagick conversion)
+                $content[] = [
+                    'data' => base64_encode(file_get_contents($path)),
+                    'mime' => 'application/pdf',
+                ];
             }
         } finally {
             if ($isRemote && isset($tempPath) && file_exists($tempPath)) {
@@ -130,7 +92,7 @@ class VisionStrategy implements ExtractionStrategyInterface
             }
         }
 
-        return $images;
+        return $content;
     }
 
     private function isLongImage(string $path): bool
@@ -175,9 +137,9 @@ class VisionStrategy implements ExtractionStrategyInterface
     }
 
     /**
-     * @param  array<array{data: string, mime: string}>  $images
+     * @param  array<array{data: string, mime: string}>  $files
      */
-    private function processWithVision(array $images, array $schema): array
+    private function processWithVision(array $files, array $schema): array
     {
         // ... (Prompt building remains same) ...
         $apiKey = config('services.openai.api_key');
@@ -201,7 +163,7 @@ class VisionStrategy implements ExtractionStrategyInterface
 
         $instructions = <<<INSTRUCTIONS
 IMPORTANT INSTRUCTIONS:
-1. Extract ALL fields listed below from the document image(s).
+1. Extract ALL fields listed below from the document image(s) or PDF.
 2. For ARRAY fields (tables/lists): 
    - Extract ALL rows as an array of objects
    - Each object MUST contain ALL specified sub-fields (columns), even if a cell is empty
@@ -218,7 +180,7 @@ FIELDS TO EXTRACT:
 Return a JSON object with 'extracted_data' containing the field values, and 'confidence' (0-100).
 INSTRUCTIONS;
 
-        // Build user content array with text first, then images
+        // Build user content array with text first, then files
         $userContent = [
             [
                 'type' => 'text',
@@ -226,12 +188,12 @@ INSTRUCTIONS;
             ],
         ];
 
-        // Add all images to the content using dynamic MIME type
-        foreach ($images as $img) {
+        // Add all files to the content using dynamic MIME type
+        foreach ($files as $file) {
             $userContent[] = [
-                'type' => 'image_url',
+                'type' => 'image_url', // Use image_url for consistency, GPT-4o handles PDF/Images via this structure
                 'image_url' => [
-                    'url' => "data:{$img['mime']};base64,{$img['data']}",
+                    'url' => "data:{$file['mime']};base64,{$file['data']}",
                 ],
             ];
         }
@@ -243,7 +205,7 @@ INSTRUCTIONS;
             ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => $model,
                 'messages' => [
-                    ['role' => 'system', 'content' => 'You are an expert at extracting structured data from document images. Return only valid JSON.'],
+                    ['role' => 'system', 'content' => 'You are an expert at extracting structured data from document images and PDFs. Return only valid JSON.'],
                     ['role' => 'user', 'content' => $userContent],
                 ],
                 'temperature' => 0.0,
