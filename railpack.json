@@ -1,6 +1,7 @@
 {
     "$schema": "https://schema.railpack.com",
     "deploy": {
+        "startCommand": "export MAGICK_CONFIGURE_PATH='' && identify -list policy && php artisan serve --host=0.0.0.0 --port=$PORT",
         "aptPackages": ["ghostscript"],
         "inputs": [
             {
