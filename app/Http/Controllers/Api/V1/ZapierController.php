@@ -71,6 +71,130 @@ class ZapierController extends Controller
     }
 
     /**
+     * Create a new document type from a sample file.
+     * Zapier Action: "Create Document Type from Sample"
+     */
+    public function createDocumentType(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'file' => 'required|string', // URL from Zapier
+        ]);
+
+        try {
+            $fileUrl = $validated['file'];
+            
+            // Download file contents
+            $fileContents = @file_get_contents($fileUrl);
+            
+            if ($fileContents === false) {
+                return response()->json([
+                    'error' => 'Failed to download file',
+                    'message' => 'Could not download sample file from the provided URL.',
+                ], 400);
+            }
+
+            // Detect MIME type
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->buffer($fileContents);
+
+            // Validate file type
+            $allowedMimes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'];
+            if (! in_array($mimeType, $allowedMimes)) {
+                return response()->json([
+                    'error' => 'Invalid file type',
+                    'message' => 'Only PDF, PNG, and JPEG files are supported.',
+                ], 400);
+            }
+
+            // Create temporary file
+            $tempPath = tempnam(sys_get_temp_dir(), 'zapier_sample_');
+            file_put_contents($tempPath, $fileContents);
+
+            // Create temporary document to analyze
+            $filename = 'sample_'.time().'.pdf';
+            $uploadedFile = new \Illuminate\Http\UploadedFile(
+                $tempPath,
+                $filename,
+                $mimeType,
+                null,
+                true
+            );
+
+            $filePath = $uploadedFile->store('samples', config('filesystems.default'));
+
+            // Create temporary document for analysis
+            $tempDocument = Document::create([
+                'user_id' => $request->user()->id,
+                'name' => 'Sample for '.$validated['name'],
+                'file_path' => $filePath,
+                'original_filename' => $filename,
+                'mime_type' => $mimeType,
+                'file_size' => strlen($fileContents),
+                'page_count' => 1,
+                'type' => 'custom',
+                'status' => 'pending',
+            ]);
+
+            // Process to extract fields
+            $processed = $this->documentService->processDocument($tempDocument);
+
+            // Extract field definitions from the processed data
+            $fields = [];
+            if ($processed->extracted_data && is_array($processed->extracted_data)) {
+                foreach ($processed->extracted_data as $key => $value) {
+                    $type = 'string'; // Default
+                    
+                    if (is_numeric($value)) {
+                        $type = str_contains((string) $value, '.') ? 'number' : 'integer';
+                    } elseif (is_bool($value)) {
+                        $type = 'boolean';
+                    } elseif (is_array($value)) {
+                        $type = 'array';
+                    }
+
+                    $fields[] = [
+                        'name' => $key,
+                        'label' => ucwords(str_replace('_', ' ', $key)),
+                        'type' => $type,
+                        'source' => 'ai',
+                        'required' => false,
+                    ];
+                }
+            }
+
+            // Create the document type
+            $documentType = DocumentType::create([
+                'user_id' => $request->user()->id,
+                'organization_id' => $request->user()->organization_id,
+                'name' => $validated['name'],
+                'slug' => \Illuminate\Support\Str::slug($validated['name']).'-'.uniqid(),
+                'description' => 'Created from sample via Zapier',
+                'fields' => $fields,
+                'is_active' => true,
+            ]);
+
+            // Clean up temporary document
+            $tempDocument->delete();
+            @unlink($tempPath);
+
+            return response()->json([
+                'id' => $documentType->id,
+                'name' => $documentType->name,
+                'slug' => $documentType->slug,
+                'fields' => $documentType->fields,
+                'fields_count' => count($fields),
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to create document type',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Add a custom field to an existing document type.
      */
     public function addCustomField(Request $request, DocumentType $documentType): JsonResponse
@@ -228,10 +352,10 @@ class ZapierController extends Controller
                         // Simple scalar values - add directly
                         $response[$key] = $value;
                     } else {
-                        // For arrays/objects, add both JSON and formatted versions
-                        $response[$key] = json_encode($value);
-
-                        // Create a human-readable formatted version
+                        // For arrays/objects, add as native array (Zapier handles this)
+                        $response[$key] = $value;
+                        
+                        // Also create a human-readable formatted version
                         if (is_array($value) && ! empty($value)) {
                             $formatted = $this->formatArrayForDisplay($value, $key);
                             if ($formatted) {
