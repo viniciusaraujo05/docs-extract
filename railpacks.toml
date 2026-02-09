@@ -2,5 +2,5 @@
 nixPkgs = ['imagemagick', 'ghostscript', 'php85Extensions.imagick']
 aptPkgs = ['imagemagick', 'ghostscript', 'libmagickwand-dev']
 
-[start]
-cmd = "sed -i 's/rights=\"none\"/rights=\"read|write\"/g' /etc/ImageMagick-6/policy.xml 2>/dev/null || true && php artisan serve --host=0.0.0.0 --port=$PORT"
+[variables]
+MAGICK_CONFIGURE_PATH = '/app/.railway'
