@@ -1,0 +1,5 @@
+<policymap>
+  <policy domain="coder" rights="read|write" pattern="PDF" />
+  <policy domain="coder" rights="read|write" pattern="LABEL" />
+  <policy domain="path" rights="read|write" pattern="@*" />
+</policymap>

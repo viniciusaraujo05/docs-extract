@@ -1,4 +1,7 @@
 <IfModule mod_rewrite.c>
+    # Set ImageMagick policy path for Railway/Railpack
+    SetEnv MAGICK_CONFIGURE_PATH /app/.railway
+
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>

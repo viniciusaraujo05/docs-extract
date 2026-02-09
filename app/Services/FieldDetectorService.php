@@ -76,6 +76,13 @@ class FieldDetectorService
             } else {
                 // Backward compatibility or simple string
                 $b64 = is_array($img) ? ($img['data'] ?? '') : $img;
+
+                if (empty($b64)) {
+                    Log::warning('FieldDetectorService: Empty image data provided');
+
+                    continue;
+                }
+
                 $url = "data:image/jpeg;base64,{$b64}";
             }
 

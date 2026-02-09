@@ -37,7 +37,7 @@ class PdfToImageService
                 try {
                     $imagick = new Imagick;
 
-                    $imagick->setResolution(300, 300);
+                    $imagick->setResolution(150, 150); // Optimized for Vision API (300dpi is too large)
                     $imagick->setColorspace(Imagick::COLORSPACE_SRGB);
                     $imagick->readImage($path.'['.$i.']');
                     $imagick->setImageBackgroundColor('white');
@@ -49,6 +49,10 @@ class PdfToImageService
 
                     $tempPath = tempnam(sys_get_temp_dir(), 'pdf_img_').'.png';
                     $imagick->writeImage($tempPath);
+
+                    if (! file_exists($tempPath) || filesize($tempPath) === 0) {
+                        throw new RuntimeException("Generated image is empty or missing for page {$i}");
+                    }
 
                     $images[] = $tempPath;
 
