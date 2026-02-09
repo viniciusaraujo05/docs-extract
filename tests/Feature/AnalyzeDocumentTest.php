@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Actions\AnalyzeDocument;
 use App\Services\FieldDetectorService;
-use App\Services\PdfToImageService;
 use App\Services\PdfValidationService;
 use App\Services\TextExtractorManager;
 use Illuminate\Http\UploadedFile;
@@ -19,15 +18,10 @@ class AnalyzeDocumentTest extends TestCase
         $mockTextExtractor = Mockery::mock(TextExtractorManager::class);
         $mockFieldDetector = Mockery::mock(FieldDetectorService::class);
         $mockPdfValidation = Mockery::mock(PdfValidationService::class);
-        $mockPdfService = Mockery::mock(PdfToImageService::class);
+        // PdfToImageService no longer used
 
         $file = UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
-
-        // Create dummy temp images so file_get_contents works
-        $tempImg1 = tempnam(sys_get_temp_dir(), 'test_p1_');
-        $tempImg2 = tempnam(sys_get_temp_dir(), 'test_p2_');
-        file_put_contents($tempImg1, 'image1data');
-        file_put_contents($tempImg2, 'image2data');
+        $fileContent = file_get_contents($file->getRealPath());
 
         // 1. Text extraction fails
         $mockTextExtractor->shouldReceive('extract')
@@ -35,28 +29,21 @@ class AnalyzeDocumentTest extends TestCase
             ->with($file)
             ->andThrow(new \Exception('Secured PDF'));
 
-        // 2. Fallback: PdfToImageService returns paths to existing files
-        $mockPdfService->shouldReceive('convertPdf')
-            ->once()
-            ->with($file)
-            ->andReturn([$tempImg1, $tempImg2]);
-
-        $mockPdfService->shouldReceive('cleanup')
-            ->once()
-            ->with([$tempImg1, $tempImg2]);
-
-        // 3. FieldDetectorService should receive array of 2 images
+        // 2. Fallback: should call detectFromImage with PDF payload directly
         $mockFieldDetector->shouldReceive('detectFromImage')
             ->once()
-            ->withArgs(function ($images) {
-                if (! is_array($images) || count($images) !== 2) {
+            ->withArgs(function ($payload) use ($fileContent) {
+                // Should pass array with data and mime
+                if (! is_array($payload)) {
                     return false;
                 }
-                if ($images[0]['mime'] !== 'image/png') {
+                
+                if (($payload['mime'] ?? '') !== 'application/pdf') {
                     return false;
                 }
-                // verify data is base64 of 'image1data'
-                if ($images[0]['data'] !== base64_encode('image1data')) {
+                
+                // Verify content matches file
+                if (($payload['data'] ?? '') !== base64_encode($fileContent)) {
                     return false;
                 }
 
@@ -70,17 +57,12 @@ class AnalyzeDocumentTest extends TestCase
         $this->app->instance(TextExtractorManager::class, $mockTextExtractor);
         $this->app->instance(FieldDetectorService::class, $mockFieldDetector);
         $this->app->instance(PdfValidationService::class, $mockPdfValidation);
-        $this->app->instance(PdfToImageService::class, $mockPdfService);
 
         // Execute Action
         $action = resolve(AnalyzeDocument::class);
         $result = $action->execute($file);
 
-        // Cleanup
-        @unlink($tempImg1);
-        @unlink($tempImg2);
-
-        $this->assertEquals('PDF analyzed using AI Vision (converted to image)', $result['message']);
+        $this->assertEquals('PDF analyzed using AI Vision (Direct Input)', $result['message']);
         $this->assertCount(1, $result['fields']);
     }
 }

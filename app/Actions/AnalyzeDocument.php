@@ -72,7 +72,7 @@ class AnalyzeDocument
      * Handles PDF conversion when normal extraction fails.
      */
     /**
-     * Handles PDF conversion when normal extraction fails.
+     * Handles PDF conversion/analysis when normal extraction fails.
      */
     private function handlePdfConversion(UploadedFile $file): array
     {
@@ -86,35 +86,21 @@ class AnalyzeDocument
         }
 
         try {
-            /** @var \App\Services\PdfToImageService $pdfService */
-            $pdfService = app(\App\Services\PdfToImageService::class);
+            // Updated Logic: Send PDF base64 directly to Vision (bypassing ImageMagick/PdfToImageService)
+            // This aligns with the VisionStrategy implementation.
+            
+            $payload = [
+                'data' => base64_encode(file_get_contents($file->getRealPath())),
+                'mime' => 'application/pdf',
+            ];
 
-            // Convert ALL pages for analysis (PdfToImageService now handles this efficiently)
-            $imagePaths = $pdfService->convertPdf($file);
-
-            if (empty($imagePaths)) {
-                throw new \RuntimeException('Failed to convert PDF to images');
-            }
-
-            // Prepare all images for detection
-            $imagesPayload = [];
-            foreach ($imagePaths as $path) {
-                $imagesPayload[] = [
-                    'data' => base64_encode(file_get_contents($path)),
-                    'mime' => 'image/png', // PdfToImageService produces PNGs now
-                ];
-            }
-
-            // Clean up
-            $pdfService->cleanup($imagePaths);
-
-            // Detect from ALL images
-            $fields = $this->fieldDetector->detectFromImage($imagesPayload);
+            // Detect from PDF payload (FieldDetectorService supports this structure via image_url)
+            $fields = $this->fieldDetector->detectFromImage($payload);
 
             return [
                 'fields' => $fields,
-                'text' => '', // No text text for image analysis
-                'message' => 'PDF analyzed using AI Vision (converted to image)',
+                'text' => '', // No text text for image/vision analysis
+                'message' => 'PDF analyzed using AI Vision (Direct Input)',
             ];
 
         } catch (\Throwable $e) {
