@@ -316,7 +316,8 @@ class ZapierController extends Controller
                 $type = 'array';
 
                 // Detect array item structure from first element
-                if (! empty($value) && is_array($value[0])) {
+                // Only if it's an array of arrays (not a simple associative array)
+                if (! empty($value) && isset($value[0]) && is_array($value[0])) {
                     $items = [];
                     foreach ($value[0] as $itemKey => $itemValue) {
                         $itemType = 'string';
@@ -382,7 +383,8 @@ class ZapierController extends Controller
                 $type = 'array';
 
                 // Detect array item structure from first element
-                if (! empty($value) && is_array($value[0])) {
+                // Only if it's an array of arrays (not a simple associative array)
+                if (! empty($value) && isset($value[0]) && is_array($value[0])) {
                     $items = [];
                     foreach ($value[0] as $itemKey => $itemValue) {
                         $itemType = 'string';
