@@ -99,18 +99,15 @@ class ZapierController extends Controller
     }
 
     /**
-     * Process a PDF with a specific document type.
-     * Main action for Zapier document extraction.
-     * Accepts file URL from Zapier (hydrated file from S3).
-     *
-     * Can optionally save extracted fields as a template for reuse.
+     * Process a PDF or image file with optional document type.
+     * Zapier Action: "Process Document"
      */
     public function processDocument(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'document_type_id' => 'nullable|exists:document_types,id',
             'file' => 'required|string', // URL from Zapier
-            'save_as_template' => 'boolean',
+            'document_type_id' => 'nullable|integer|exists:document_types,id',
+            'save_as_template' => 'nullable|boolean',
             'template_name' => 'nullable|string|max:255',
         ]);
 
@@ -220,38 +217,22 @@ class ZapierController extends Controller
             // Clean up temp file
             @unlink($tempPath);
 
-            // Process using existing service
-            $processed = $this->documentService->processDocument($document);
+            // Process document using Action
+            /** @var \App\Actions\Zapier\ProcessZapierDocumentAction $action */
+            $action = app(\App\Actions\Zapier\ProcessZapierDocumentAction::class);
 
-            // If no document type was provided, create schema from extracted data
-            // This is needed for frontend to display the fields
-            if (! $documentType && $processed->extracted_data) {
-                $detectedFields = $this->createFieldsFromExtractedData($processed->extracted_data);
-                $processed->update([
-                    'schema_used' => ['fields' => $detectedFields],
-                ]);
-                $processed->refresh();
-            }
+            $result = $action->execute(
+                $request,
+                $document,
+                $tempPath,
+                $filename,
+                $mimeType,
+                $fileContents,
+                $validated
+            );
 
-            // Create template if requested
-            $createdTemplate = null;
-            if (($validated['save_as_template'] ?? false) && ! $documentType) {
-                $createdTemplate = $this->createTemplateFromExtractedData(
-                    $request->user(),
-                    $processed->extracted_data,
-                    $validated['template_name'] ?? null
-                );
-
-                // Associate document with the newly created template
-                if ($createdTemplate) {
-                    $processed->update([
-                        'document_type_id' => $createdTemplate->id,
-                        'type' => 'predefined',
-                        'schema_used' => ['fields' => $createdTemplate->fields],
-                    ]);
-                    $processed->refresh();
-                }
-            }
+            $processed = $result['document'];
+            $createdTemplate = $result['created_template'];
 
             // Flatten extracted_data for Zapier compatibility
             // Zapier works better with flat structures instead of nested objects
@@ -298,141 +279,6 @@ class ZapierController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
-    }
-
-    /**
-     * Create field definitions from extracted data for schema_used.
-     * This allows frontend to display fields even without a document type.
-     */
-    private function createFieldsFromExtractedData(array $extractedData): array
-    {
-        $fields = [];
-
-        foreach ($extractedData as $key => $value) {
-            $type = 'string'; // Default
-            $items = null;
-
-            if (is_array($value)) {
-                $type = 'array';
-
-                // Detect array item structure from first element
-                // Only if it's an array of arrays (not a simple associative array)
-                if (! empty($value) && isset($value[0]) && is_array($value[0])) {
-                    $items = [];
-                    foreach ($value[0] as $itemKey => $itemValue) {
-                        $itemType = 'string';
-                        if (is_numeric($itemValue)) {
-                            $itemType = str_contains((string) $itemValue, '.') ? 'number' : 'integer';
-                        } elseif (is_bool($itemValue)) {
-                            $itemType = 'boolean';
-                        }
-
-                        $items[] = [
-                            'name' => $itemKey,
-                            'label' => ucwords(str_replace('_', ' ', $itemKey)),
-                            'type' => $itemType,
-                        ];
-                    }
-                }
-            } elseif (is_numeric($value)) {
-                $type = str_contains((string) $value, '.') ? 'number' : 'integer';
-            } elseif (is_bool($value)) {
-                $type = 'boolean';
-            }
-
-            $field = [
-                'name' => $key,
-                'label' => ucwords(str_replace('_', ' ', $key)),
-                'type' => $type,
-                'source' => 'ai',
-                'required' => false,
-            ];
-
-            // Add items structure for arrays
-            if ($items !== null) {
-                $field['items'] = $items;
-            }
-
-            $fields[] = $field;
-        }
-
-        return $fields;
-    }
-
-    /**
-     * Create a document type template from extracted data.
-     */
-    private function createTemplateFromExtractedData($user, ?array $extractedData, ?string $templateName): ?DocumentType
-    {
-        if (! $extractedData || empty($extractedData)) {
-            return null;
-        }
-
-        // Generate template name if not provided
-        if (! $templateName) {
-            $templateName = 'Template '.now()->format('Y-m-d H:i');
-        }
-
-        // Extract field definitions from the extracted data
-        $fields = [];
-        foreach ($extractedData as $key => $value) {
-            $type = 'string'; // Default
-            $items = null;
-
-            if (is_array($value)) {
-                $type = 'array';
-
-                // Detect array item structure from first element
-                // Only if it's an array of arrays (not a simple associative array)
-                if (! empty($value) && isset($value[0]) && is_array($value[0])) {
-                    $items = [];
-                    foreach ($value[0] as $itemKey => $itemValue) {
-                        $itemType = 'string';
-                        if (is_numeric($itemValue)) {
-                            $itemType = str_contains((string) $itemValue, '.') ? 'number' : 'integer';
-                        } elseif (is_bool($itemValue)) {
-                            $itemType = 'boolean';
-                        }
-
-                        $items[] = [
-                            'name' => $itemKey,
-                            'label' => ucwords(str_replace('_', ' ', $itemKey)),
-                            'type' => $itemType,
-                        ];
-                    }
-                }
-            } elseif (is_numeric($value)) {
-                $type = str_contains((string) $value, '.') ? 'number' : 'integer';
-            } elseif (is_bool($value)) {
-                $type = 'boolean';
-            }
-
-            $field = [
-                'name' => $key,
-                'label' => ucwords(str_replace('_', ' ', $key)),
-                'type' => $type,
-                'source' => 'ai',
-                'required' => false,
-            ];
-
-            // Add items structure for arrays
-            if ($items !== null) {
-                $field['items'] = $items;
-            }
-
-            $fields[] = $field;
-        }
-
-        // Create the document type
-        return DocumentType::create([
-            'user_id' => $user->id,
-            'organization_id' => $user->organization_id,
-            'name' => $templateName,
-            'slug' => \Illuminate\Support\Str::slug($templateName).'-'.uniqid(),
-            'description' => 'Auto-created from document processing via Zapier',
-            'fields' => $fields,
-            'is_active' => true,
-        ]);
     }
 
     /**
