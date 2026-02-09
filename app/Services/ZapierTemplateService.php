@@ -17,7 +17,8 @@ use Illuminate\Support\Str;
 class ZapierTemplateService
 {
     public function __construct(
-        private readonly FieldDetectorService $fieldDetector
+        private readonly FieldDetectorService $fieldDetector,
+        private readonly TextExtractorManager $textExtractor
     ) {}
 
     /**
@@ -103,6 +104,44 @@ class ZapierTemplateService
         string $fileContents
     ): ?array {
         if ($mimeType === 'application/pdf') {
+            try {
+                // Ensure temp file exists with .pdf extension for text extractor checks
+                $tempPdfPath = $tempPath.'.pdf';
+                if (! file_exists($tempPdfPath)) {
+                    copy($tempPath, $tempPdfPath);
+                }
+
+                $file = new UploadedFile(
+                    $tempPdfPath,
+                    $filename,
+                    $mimeType,
+                    null,
+                    true
+                );
+
+                // Try to extract text first (simulating frontend AnalyzeDocument logic)
+                if ($this->textExtractor->canExtract($file)) {
+                    $text = $this->textExtractor->extract($file);
+
+                    // If we got meaningful text, use it and skip ImageMagick conversion
+                    if (! empty($text) && strlen(trim($text)) > 50) {
+                        Log::info('ZapierTemplateService: Extracted text from PDF, skipping ImageMagick conversion', ['text_length' => strlen($text)]);
+                        if (file_exists($tempPdfPath)) {
+                            @unlink($tempPdfPath);
+                        }
+
+                        return $this->fieldDetector->detect($text);
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::warning('ZapierTemplateService: Text extraction failed/skipped, falling back to Vision', ['error' => $e->getMessage()]);
+            } finally {
+                if (isset($tempPdfPath) && file_exists($tempPdfPath)) {
+                    @unlink($tempPdfPath);
+                }
+            }
+
+            // Fallback to Image Conversion (Vision) - This uses ImageMagick
             return $this->detectFieldsFromPdf($fileContents, $filename, $mimeType);
         }
 

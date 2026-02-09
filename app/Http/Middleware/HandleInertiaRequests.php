@@ -37,12 +37,6 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        \Illuminate\Support\Facades\Log::info('HandleInertiaRequests::share START', [
-            'url' => $request->url(),
-            'method' => $request->method(),
-            'user_id' => $request->user()?->id,
-        ]);
-
         try {
             $quoteString = Inspiring::quotes()->random();
             $parts = str($quoteString)->explode('-');
