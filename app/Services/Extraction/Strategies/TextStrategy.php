@@ -8,6 +8,7 @@ use App\Models\Document;
 use App\Services\AI\PromptFactory;
 use App\Services\Extraction\Contracts\ExtractionStrategyInterface;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Smalot\PdfParser\Parser;
@@ -26,9 +27,14 @@ class TextStrategy implements ExtractionStrategyInterface
 
     public function extract(Document $document, array $schema): array
     {
+        Log::info('TextStrategy: Starting extraction', ['document_id' => $document->id]);
+
         $text = $this->extractText($document);
 
+        Log::info('TextStrategy: Extracted text', ['length' => strlen($text)]);
+
         if (trim($text) === '') {
+            Log::warning('TextStrategy: Extracted text is empty', ['document_id' => $document->id]);
             throw new \App\Exceptions\ExtractionException('extraction.empty_text');
         }
 
@@ -54,11 +60,13 @@ class TextStrategy implements ExtractionStrategyInterface
 
             $content = $disk->get($document->file_path);
             if ($content === false || $content === null) {
+                Log::error('TextStrategy: Failed to download file', ['path' => $document->file_path, 'disk' => $diskName]);
                 throw new RuntimeException('Failed to download file from remote storage');
             }
 
             $written = file_put_contents($tempPath, $content);
             if ($written === false) {
+                Log::error('TextStrategy: Failed to write temp file', ['path' => $tempPath]);
                 throw new RuntimeException("Failed to write temp file: {$tempPath}");
             }
 
@@ -67,6 +75,14 @@ class TextStrategy implements ExtractionStrategyInterface
         } else {
             $path = $disk->path($document->file_path);
         }
+
+        Log::info('TextStrategy: Processing file', [
+            'path' => $path,
+            'is_remote' => $isRemote,
+            'exists' => file_exists($path),
+            'size' => file_exists($path) ? filesize($path) : 0,
+            'mime_type' => $document->mime_type
+        ]);
 
         try {
             if (str_contains($document->mime_type, 'pdf')) {
@@ -79,6 +95,7 @@ class TextStrategy implements ExtractionStrategyInterface
 
             return $text;
         } catch (\Exception $e) {
+            Log::error('TextStrategy: Exception during parsing', ['error' => $e->getMessage()]);
             throw $e;
         } finally {
             // Cleanup temp file if we downloaded from remote storage
