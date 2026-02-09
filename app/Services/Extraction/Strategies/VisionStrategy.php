@@ -120,7 +120,7 @@ class VisionStrategy implements ExtractionStrategyInterface
                     // PDF conversion failed
                     \Illuminate\Support\Facades\Log::error('VisionStrategy: PDF conversion failed', [
                         'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
+                        'trace' => $e->getTraceAsString(),
                     ]);
                 }
             }

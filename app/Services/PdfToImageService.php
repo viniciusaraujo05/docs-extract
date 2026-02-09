@@ -26,7 +26,7 @@ class PdfToImageService
         \Illuminate\Support\Facades\Log::info('PdfToImageService: Starting conversion', [
             'path' => $path,
             'env_magick_path' => getenv('MAGICK_CONFIGURE_PATH'),
-            'imagick_version' => \Imagick::getVersion()['versionString'] ?? 'unknown'
+            'imagick_version' => \Imagick::getVersion()['versionString'] ?? 'unknown',
         ]);
 
         try {
@@ -75,7 +75,7 @@ class PdfToImageService
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('PdfToImageService: Exception during conversion', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             throw new RuntimeException('Error converting PDF to images: '.$e->getMessage());
         }

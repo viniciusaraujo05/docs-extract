@@ -2,5 +2,5 @@
 nixPkgs = ['imagemagick', 'ghostscript', 'php85Extensions.imagick']
 aptPkgs = ['imagemagick', 'ghostscript', 'libmagickwand-dev']
 
-[variables]
-MAGICK_CONFIGURE_PATH = '/app/.railway'
+[start]
+cmd = "mkdir -p ~/.magick ~/.config/ImageMagick && cp .railway/policy.xml ~/.magick/policy.xml && cp .railway/policy.xml ~/.config/ImageMagick/policy.xml"
