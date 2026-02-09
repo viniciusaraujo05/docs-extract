@@ -23,6 +23,12 @@ class PdfToImageService
             throw new RuntimeException('Não foi possível acessar o arquivo');
         }
 
+        \Illuminate\Support\Facades\Log::info('PdfToImageService: Starting conversion', [
+            'path' => $path,
+            'env_magick_path' => getenv('MAGICK_CONFIGURE_PATH'),
+            'imagick_version' => \Imagick::getVersion()['versionString'] ?? 'unknown'
+        ]);
+
         try {
             // 1. Contador Leve (Ping)
             $counter = new Imagick;
@@ -67,6 +73,10 @@ class PdfToImageService
             return $images;
 
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('PdfToImageService: Exception during conversion', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             throw new RuntimeException('Error converting PDF to images: '.$e->getMessage());
         }
     }

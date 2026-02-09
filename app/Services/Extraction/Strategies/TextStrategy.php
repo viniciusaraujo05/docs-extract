@@ -81,7 +81,7 @@ class TextStrategy implements ExtractionStrategyInterface
             'is_remote' => $isRemote,
             'exists' => file_exists($path),
             'size' => file_exists($path) ? filesize($path) : 0,
-            'mime_type' => $document->mime_type
+            'mime_type' => $document->mime_type,
         ]);
 
         try {
