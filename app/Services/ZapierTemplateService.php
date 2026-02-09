@@ -74,6 +74,9 @@ class ZapierTemplateService
     /**
      * Detect fields from document using FieldDetectorService.
      */
+    /**
+     * Detect fields from document using FieldDetectorService.
+     */
     private function detectFields(
         string $tempPath,
         string $filename,
@@ -81,7 +84,7 @@ class ZapierTemplateService
         string $fileContents
     ): ?array {
         if ($mimeType === 'application/pdf') {
-            return $this->detectFieldsFromPdf($tempPath, $filename, $mimeType);
+            return $this->detectFieldsFromPdf($fileContents, $filename, $mimeType);
         }
 
         return $this->detectFieldsFromImage($fileContents);
@@ -90,34 +93,43 @@ class ZapierTemplateService
     /**
      * Detect fields from PDF by converting to images.
      */
-    private function detectFieldsFromPdf(string $tempPath, string $filename, string $mimeType): ?array
+    private function detectFieldsFromPdf(string $fileContents, string $filename, string $mimeType): ?array
     {
-        /** @var \App\Services\PdfToImageService $pdfService */
-        $pdfService = app(\App\Services\PdfToImageService::class);
+        // Create a dedicated temp file to ensure it exists and matches contents
+        $tempPath = tempnam(sys_get_temp_dir(), 'zapier_tpl_');
+        file_put_contents($tempPath, $fileContents);
 
-        $imagePaths = $pdfService->convertPdf(new UploadedFile(
-            $tempPath,
-            $filename,
-            $mimeType,
-            null,
-            true
-        ));
+        try {
+            /** @var \App\Services\PdfToImageService $pdfService */
+            $pdfService = app(\App\Services\PdfToImageService::class);
 
-        if (empty($imagePaths)) {
-            return null;
+            $imagePaths = $pdfService->convertPdf(new UploadedFile(
+                $tempPath,
+                $filename,
+                $mimeType,
+                null,
+                true
+            ));
+
+            if (empty($imagePaths)) {
+                return null;
+            }
+
+            $imagesPayload = [];
+            foreach ($imagePaths as $path) {
+                $imagesPayload[] = [
+                    'data' => base64_encode(file_get_contents($path)),
+                    'mime' => 'image/png',
+                ];
+            }
+
+            $pdfService->cleanup($imagePaths);
+
+            return $this->fieldDetector->detectFromImage($imagesPayload);
+        } finally {
+            // Cleanup our local temp file
+            @unlink($tempPath);
         }
-
-        $imagesPayload = [];
-        foreach ($imagePaths as $path) {
-            $imagesPayload[] = [
-                'data' => base64_encode(file_get_contents($path)),
-                'mime' => 'image/png',
-            ];
-        }
-
-        $pdfService->cleanup($imagePaths);
-
-        return $this->fieldDetector->detectFromImage($imagesPayload);
     }
 
     /**

@@ -36,19 +36,23 @@ class ProcessZapierDocumentAction
         string $fileContents,
         array $validated
     ): array {
-        $documentType = $existingDocumentType; // Use pre-selected document type if provided
         $createdTemplate = null;
 
-        // Handle template logic ONLY if save_as_template is true
-        if (($validated['save_as_template'] ?? false) && ! empty($validated['template_name'])) {
-            // Check if template already exists
+        // PRIORIDADE 1: Se já tem Document Type (selecionado no dropdown), usa ele e ignora o resto
+        if ($existingDocumentType) {
+            $documentType = $existingDocumentType;
+            $this->associateDocumentWithTemplate($document, $documentType);
+        }
+        // PRIORIDADE 2: Se não tem, e pediu para salvar como template (ou usar pelo nome)
+        elseif (($validated['save_as_template'] ?? false) && ! empty($validated['template_name'])) {
+            // Check if template already exists by name
             $existingTemplate = $this->templateService->findByName(
                 $request->user(),
                 $validated['template_name']
             );
 
             if ($existingTemplate) {
-                // Use existing template
+                // Use existing template found by name
                 $documentType = $existingTemplate;
                 $this->associateDocumentWithTemplate($document, $documentType);
             } else {
@@ -67,9 +71,6 @@ class ProcessZapierDocumentAction
                     $this->associateDocumentWithTemplate($document, $documentType);
                 }
             }
-        } elseif ($documentType) {
-            // User provided document_type_id - associate document with it
-            $this->associateDocumentWithTemplate($document, $documentType);
         }
 
         // Process document (with or without template)
