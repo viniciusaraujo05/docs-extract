@@ -180,33 +180,32 @@ FIELDS TO EXTRACT:
 Return a JSON object with 'extracted_data' containing the field values, and 'confidence' (0-100).
 INSTRUCTIONS;
 
-        // Build user content array with text structure for v1/responses
+        // Build user content array with text first
         $userContent = [
             [
-                'type' => 'input_text',
+                'type' => 'text',
                 'text' => $instructions,
             ],
         ];
 
-        // Add all files to the content using dynamic types
+        // Add all files to the content using standard Chat Completions types
         foreach ($files as $file) {
             if ($file['mime'] === 'application/pdf') {
+                // PDF uses specific "file" type with nested "file" object (per OpenAI docs)
                 $userContent[] = [
-                    'type' => 'input_file',
-                    'filename' => 'document.pdf', // Name can be generic or derived
-                    'file_data' => "data:{$file['mime']};base64,{$file['data']}", // Base64 encoded PDF with Data URI
+                    'type' => 'file',
+                    'file' => [ // Nested object required for chat/completions PDF input
+                        'filename' => 'document.pdf',
+                        'file_data' => "data:{$file['mime']};base64,{$file['data']}",
+                    ],
                 ];
             } else {
-                // Images still use standard image input or input_image if v1/responses unifies it
-                // Based on user doc, pdf uses input_file. Images likely same or input_image.
-                // Sticking to image_url for images if supported, or falling back to input_file for all?
-                // Let's assume input_file works for all files in v1/responses or stick to hybrid if allowed.
-                // User doc snippet showed 'input_file' for PDF.
-                // Let's use input_file for images too if base64 to be consistent "file inputs".
+                // Images use standard image_url
                 $userContent[] = [
-                    'type' => 'input_file', // Assuming input_file handles images too as per unified API
-                    'filename' => 'image.' . explode('/', $file['mime'])[1],
-                    'file_data' => "data:{$file['mime']};base64,{$file['data']}",
+                    'type' => 'image_url',
+                    'image_url' => [
+                        'url' => "data:{$file['mime']};base64,{$file['data']}",
+                    ],
                 ];
             }
         }
@@ -215,17 +214,14 @@ INSTRUCTIONS;
         $response = Http::withToken($apiKey)
             ->timeout(180)
             ->withoutVerifying()
-            ->post('https://api.openai.com/v1/responses', [ // Updated endpoint
+            ->post('https://api.openai.com/v1/chat/completions', [
                 'model' => $model,
-                'input' => [ // v1/responses uses 'input' instead of 'messages'
-                    [
-                        'role' => 'user',
-                        'content' => $userContent,
-                    ],
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are an expert at extracting structured data from document images and PDFs. Return only valid JSON.'],
+                    ['role' => 'user', 'content' => $userContent],
                 ],
                 'temperature' => 0.0,
-                // v1/responses might handle JSON output differently, but let's try standard hint or prompt instructions
-                // The snippet used -d '...' for body.
+                'response_format' => ['type' => 'json_object'],
             ]);
 
         // ... (Response handling remains same) ...
@@ -237,13 +233,7 @@ INSTRUCTIONS;
             );
         }
 
-        // v1/responses output parsing might differ. Assuming standard choice/message structure or similar 'output' key.
-        // If v1/responses returns just text or different structure, we need to adapt.
-        // Assuming user just wanted INPUT structure fixed. I will try standard access first or dump body if needed.
-        // Documentation implies it's a "response" object.
-        // Let's look for 'output' or 'message'.
-        // Falling back to standard check for now, assuming backward compat or similar key names for contents.
-        $content = $response->json('output.0.content.0.text') ?? $response->json('choices.0.message.content');
+        $content = $response->json('choices.0.message.content');
 
         if (empty($content)) {
              throw new RuntimeException('Empty response from OpenAI API');
