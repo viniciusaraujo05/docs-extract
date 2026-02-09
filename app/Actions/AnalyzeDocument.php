@@ -88,14 +88,16 @@ class AnalyzeDocument
         try {
             // Updated Logic: Send PDF base64 directly to Vision (bypassing ImageMagick/PdfToImageService)
             // This aligns with the VisionStrategy implementation.
-            
+
             $payload = [
                 'data' => base64_encode(file_get_contents($file->getRealPath())),
                 'mime' => 'application/pdf',
             ];
 
             // Detect from PDF payload (FieldDetectorService supports this structure via image_url)
-            $fields = $this->fieldDetector->detectFromImage($payload);
+            // WRAP IN ARRAY: detectFromImage expects a list of images or a single string.
+            // If we pass an associative array directly, it iterates keys/values as separate "images".
+            $fields = $this->fieldDetector->detectFromImage([$payload]);
 
             return [
                 'fields' => $fields,

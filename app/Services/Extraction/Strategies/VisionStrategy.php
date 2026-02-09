@@ -236,7 +236,7 @@ INSTRUCTIONS;
         $content = $response->json('choices.0.message.content');
 
         if (empty($content)) {
-             throw new RuntimeException('Empty response from OpenAI API');
+            throw new RuntimeException('Empty response from OpenAI API');
         }
 
         $data = json_decode($content, true);

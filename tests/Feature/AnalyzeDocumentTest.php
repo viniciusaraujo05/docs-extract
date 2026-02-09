@@ -32,16 +32,18 @@ class AnalyzeDocumentTest extends TestCase
         // 2. Fallback: should call detectFromImage with PDF payload directly
         $mockFieldDetector->shouldReceive('detectFromImage')
             ->once()
-            ->withArgs(function ($payload) use ($fileContent) {
-                // Should pass array with data and mime
-                if (! is_array($payload)) {
+            ->withArgs(function ($payloads) use ($fileContent) {
+                // Should pass ARRAY of payloads
+                if (! is_array($payloads) || empty($payloads[0])) {
                     return false;
                 }
                 
+                $payload = $payloads[0];
+
                 if (($payload['mime'] ?? '') !== 'application/pdf') {
                     return false;
                 }
-                
+
                 // Verify content matches file
                 if (($payload['data'] ?? '') !== base64_encode($fileContent)) {
                     return false;
