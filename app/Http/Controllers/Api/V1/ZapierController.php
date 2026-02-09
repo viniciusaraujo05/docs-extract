@@ -241,6 +241,16 @@ class ZapierController extends Controller
                     $processed->extracted_data,
                     $validated['template_name'] ?? null
                 );
+
+                // Associate document with the newly created template
+                if ($createdTemplate) {
+                    $processed->update([
+                        'document_type_id' => $createdTemplate->id,
+                        'type' => 'predefined',
+                        'schema_used' => ['fields' => $createdTemplate->fields],
+                    ]);
+                    $processed->refresh();
+                }
             }
 
             // Flatten extracted_data for Zapier compatibility
@@ -299,14 +309,11 @@ class ZapierController extends Controller
         $fields = [];
 
         foreach ($extractedData as $key => $value) {
-            // Skip nested objects/arrays for schema (they're still in extracted_data)
-            if (is_array($value) || is_object($value)) {
-                continue;
-            }
-
             $type = 'string'; // Default
 
-            if (is_numeric($value)) {
+            if (is_array($value)) {
+                $type = 'array';
+            } elseif (is_numeric($value)) {
                 $type = str_contains((string) $value, '.') ? 'number' : 'integer';
             } elseif (is_bool($value)) {
                 $type = 'boolean';
