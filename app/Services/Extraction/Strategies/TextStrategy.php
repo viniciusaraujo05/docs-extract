@@ -27,11 +27,11 @@ class TextStrategy implements ExtractionStrategyInterface
 
     public function extract(Document $document, array $schema): array
     {
-        Log::info('TextStrategy: Starting extraction', ['document_id' => $document->id]);
+
 
         $text = $this->extractText($document);
 
-        Log::info('TextStrategy: Extracted text', ['length' => strlen($text)]);
+
 
         if (trim($text) === '') {
             Log::warning('TextStrategy: Extracted text is empty', ['document_id' => $document->id]);
@@ -85,13 +85,7 @@ class TextStrategy implements ExtractionStrategyInterface
             $path = $disk->path($document->file_path);
         }
 
-        Log::info('TextStrategy: Processing file', [
-            'path' => $path,
-            'is_remote' => $isRemote,
-            'exists' => file_exists($path),
-            'size' => file_exists($path) ? filesize($path) : 0,
-            'mime_type' => $document->mime_type,
-        ]);
+
 
         try {
             if (str_contains($document->mime_type, 'pdf')) {

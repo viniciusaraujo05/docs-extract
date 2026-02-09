@@ -22,7 +22,7 @@ class SmartPdfStrategy implements ExtractionStrategyInterface
 
     public function extract(Document $document, array $schema): array
     {
-        Log::info('SmartPdfStrategy: Starting extraction', ['document_id' => $document->id ?? 'temp']);
+
 
         try {
             // 1. Try Text Strategy first (Cheaper, Faster)

@@ -65,10 +65,7 @@ class AnalyzeDocument
             ];
 
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('AnalyzeDocument: Extraction failed, attempting fallback', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
+
             // If extraction failed and it's a PDF, try conversion
             $mime = $file->getMimeType();
 
