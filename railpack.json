@@ -1,0 +1,6 @@
+{
+    "$schema": "https://schema.railpack.com",
+    "deploy": {
+        "startCommand": "export MAGICK_CONFIGURE_PATH='' && mkdir -p ~/.magick ~/.config/ImageMagick && cp .railway/policy.xml ~/.magick/policy.xml && cp .railway/policy.xml ~/.config/ImageMagick/policy.xml && cp .railway/policy.xml /etc/ImageMagick-6/policy.xml 2>/dev/null || true && identify -list policy && php artisan serve --host=0.0.0.0 --port=$PORT"
+    }
+}
