@@ -191,11 +191,12 @@ INSTRUCTIONS;
         // Add all files to the content using standard Chat Completions types
         foreach ($files as $file) {
             if ($file['mime'] === 'application/pdf') {
-                // User's Method 3: Base64 direct for PDF uses "image_url" type with data URI
+                // PDF uses specific "file" type with nested "file" object (per OpenAI docs)
                 $userContent[] = [
-                    'type' => 'image_url', 
-                    'image_url' => [
-                        'url' => "data:{$file['mime']};base64,{$file['data']}",
+                    'type' => 'file',
+                    'file' => [ // Nested object required for chat/completions PDF input
+                        'filename' => 'document.pdf',
+                        'file_data' => "data:{$file['mime']};base64,{$file['data']}",
                     ],
                 ];
             } else {
