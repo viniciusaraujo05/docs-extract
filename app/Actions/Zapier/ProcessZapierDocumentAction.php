@@ -37,10 +37,10 @@ class ProcessZapierDocumentAction
         array $validated
     ): array {
         $createdTemplate = null;
+        $documentType = $existingDocumentType; // Initialize with passed value
 
         // PRIORIDADE 1: Se já tem Document Type (selecionado no dropdown), usa ele e ignora o resto
         if ($existingDocumentType) {
-            $documentType = $existingDocumentType;
             $this->associateDocumentWithTemplate($document, $documentType);
         }
         // PRIORIDADE 2: Se não tem, e pediu para salvar como template (ou usar pelo nome)
