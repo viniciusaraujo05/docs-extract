@@ -77,14 +77,15 @@ class AnalyzeDocument
             // If extraction failed and it's a PDF, try conversion
             $mime = $file->getMimeType();
             \Illuminate\Support\Facades\Log::info("AnalyzeDocument: Checking fallback condition. MIME: {$mime}");
-            
+
             if ($mime === 'application/pdf') {
-                 \Illuminate\Support\Facades\Log::info("AnalyzeDocument: Fallback triggered for PDF");
+                \Illuminate\Support\Facades\Log::info('AnalyzeDocument: Fallback triggered for PDF');
+
                 return $this->handlePdfConversion($file);
             }
 
             // For non-PDF files or if conversion fails, return error
-            \Illuminate\Support\Facades\Log::warning("AnalyzeDocument: Fallback skipped. Re-throwing exception.");
+            \Illuminate\Support\Facades\Log::warning('AnalyzeDocument: Fallback skipped. Re-throwing exception.');
             throw $e;
         }
     }
@@ -110,15 +111,21 @@ class AnalyzeDocument
             // Updated Logic: Send PDF base64 directly to Vision (bypassing ImageMagick/PdfToImageService)
             // This aligns with the VisionStrategy implementation.
 
+            \Illuminate\Support\Facades\Log::info("handlePdfConversion: Starting PDF conversion for file {$file->getClientOriginalName()}");
+
             $payload = [
                 'data' => base64_encode(file_get_contents($file->getRealPath())),
                 'mime' => 'application/pdf',
             ];
 
+            \Illuminate\Support\Facades\Log::info("handlePdfConversion: Payload prepared (size: " . strlen($payload['data']) . ")");
+
             // Detect from PDF payload (FieldDetectorService supports this structure via image_url)
             // WRAP IN ARRAY: detectFromImage expects a list of images or a single string.
             // If we pass an associative array directly, it iterates keys/values as separate "images".
             $fields = $this->fieldDetector->detectFromImage([$payload]);
+
+            \Illuminate\Support\Facades\Log::info("handlePdfConversion: Vision detection completed", ['fields_count' => count($fields)]);
 
             return [
                 'fields' => $fields,
@@ -127,6 +134,11 @@ class AnalyzeDocument
             ];
 
         } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("handlePdfConversion: Failed", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             // Fallback
             return [
                 'fields' => $this->fieldDetector->getDefaultFields(),
