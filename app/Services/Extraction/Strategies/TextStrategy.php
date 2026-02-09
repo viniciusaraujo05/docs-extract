@@ -38,6 +38,15 @@ class TextStrategy implements ExtractionStrategyInterface
             throw new \App\Exceptions\ExtractionException('extraction.empty_text');
         }
 
+        // Heuristic for scanned PDFs: If text is very short/sparse for a PDF, it's likely noise/watermark
+        if (str_contains($document->mime_type, 'pdf') && mb_strlen(trim($text)) < 300) {
+            Log::warning('TextStrategy: Text extracted is too short/sparse, assuming scanned PDF.', [
+                'document_id' => $document->id,
+                'length' => mb_strlen($text)
+            ]);
+            throw new \App\Exceptions\ExtractionException('extraction.scanned_pdf_detected');
+        }
+
         return $this->processWithLLM($text, $schema);
     }
 

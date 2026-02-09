@@ -60,11 +60,20 @@ class VisionStrategy implements ExtractionStrategyInterface
             if (! $disk->exists($document->file_path)) {
                 throw new RuntimeException("File does not exist: {$document->file_path}");
             }
-            file_put_contents($tempPath, $disk->get($document->file_path));
+            $fileContent = $disk->get($document->file_path);
+            \Illuminate\Support\Facades\Log::info("VisionStrategy: Downloaded file content check", ['path' => $document->file_path, 'size' => strlen($fileContent)]);
+
+            if (empty($fileContent)) {
+                 throw new RuntimeException("Downloaded file content is empty: {$document->file_path}");
+            }
+
+            file_put_contents($tempPath, $fileContent);
             $path = $tempPath;
         } else {
             $path = $disk->path($document->file_path);
         }
+
+        \Illuminate\Support\Facades\Log::info("VisionStrategy: Document path prepared", ['path' => $path, 'size' => @filesize($path)]);
 
         try {
             if (str_starts_with($document->mime_type, 'image/')) {
@@ -161,7 +170,7 @@ class VisionStrategy implements ExtractionStrategyInterface
             })
             ->implode("\n");
 
-        $instructions = <<<INSTRUCTIONS
+$instructions = <<<INSTRUCTIONS
 IMPORTANT INSTRUCTIONS:
 1. Extract ALL fields listed below from the document image(s) or PDF.
 2. For ARRAY fields (tables/lists): 
@@ -169,6 +178,13 @@ IMPORTANT INSTRUCTIONS:
    - Each object MUST contain ALL specified sub-fields (columns), even if a cell is empty
    - If a column value is missing/empty in the document, use null or empty string, but ALWAYS include the key
    - Extract every single row from the table - be thorough and complete
+   - If the table spans multiple pages, combine all rows into a single array
+   - Detect column headers in the image to map values correctly
+   - Example output for array:
+     "items": [
+       {"description": "Item 1", "qty": 2, "price": 10.50},
+       {"description": "Item 2", "qty": null, "price": 25.00}
+     ]
 3. If a regular field is not found, use null.
 4. Format dates as YYYY-MM-DD.
 5. Return raw numeric values (e.g., 10.50 not \$10.50).

@@ -118,14 +118,14 @@ class AnalyzeDocument
                 'mime' => 'application/pdf',
             ];
 
-            \Illuminate\Support\Facades\Log::info("handlePdfConversion: Payload prepared (size: " . strlen($payload['data']) . ")");
+            \Illuminate\Support\Facades\Log::info('handlePdfConversion: Payload prepared (size: '.strlen($payload['data']).')');
 
             // Detect from PDF payload (FieldDetectorService supports this structure via image_url)
             // WRAP IN ARRAY: detectFromImage expects a list of images or a single string.
             // If we pass an associative array directly, it iterates keys/values as separate "images".
             $fields = $this->fieldDetector->detectFromImage([$payload]);
 
-            \Illuminate\Support\Facades\Log::info("handlePdfConversion: Vision detection completed", ['fields_count' => count($fields)]);
+            \Illuminate\Support\Facades\Log::info('handlePdfConversion: Vision detection completed', ['fields_count' => count($fields)]);
 
             return [
                 'fields' => $fields,
@@ -134,11 +134,11 @@ class AnalyzeDocument
             ];
 
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error("handlePdfConversion: Failed", [
+            \Illuminate\Support\Facades\Log::error('handlePdfConversion: Failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
-            
+
             // Fallback
             return [
                 'fields' => $this->fieldDetector->getDefaultFields(),

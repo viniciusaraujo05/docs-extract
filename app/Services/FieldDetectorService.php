@@ -71,8 +71,16 @@ class FieldDetectorService
         $imgs = is_array($images) ? $images : [$images];
 
         foreach ($imgs as $img) {
+            $isPdf = false;
+            $url = '';
+
             if (is_array($img) && isset($img['data'], $img['mime'])) {
-                $url = "data:{$img['mime']};base64,{$img['data']}";
+                if ($img['mime'] === 'application/pdf') {
+                    $isPdf = true;
+                    $url = "data:{$img['mime']};base64,{$img['data']}";
+                } else {
+                    $url = "data:{$img['mime']};base64,{$img['data']}";
+                }
             } else {
                 // Backward compatibility or simple string
                 $b64 = is_array($img) ? ($img['data'] ?? '') : $img;
@@ -86,12 +94,23 @@ class FieldDetectorService
                 $url = "data:image/jpeg;base64,{$b64}";
             }
 
-            $content[] = [
-                'type' => 'image_url',
-                'image_url' => [
-                    'url' => $url,
-                ],
-            ];
+            if ($isPdf) {
+                // PDF uses specific "file" type with nested "file" object (matches VisionStrategy)
+                $content[] = [
+                    'type' => 'file',
+                    'file' => [
+                        'filename' => 'document.pdf',
+                        'file_data' => $url,
+                    ],
+                ];
+            } else {
+                $content[] = [
+                    'type' => 'image_url',
+                    'image_url' => [
+                        'url' => $url,
+                    ],
+                ];
+            }
         }
 
         return $this->callOpenAi([
