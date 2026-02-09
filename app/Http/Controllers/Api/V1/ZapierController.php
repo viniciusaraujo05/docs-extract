@@ -214,16 +214,14 @@ class ZapierController extends Controller
                 'storage_disk' => config('filesystems.default'), // Required for file access
             ]);
 
-            // Clean up temp file
-            @unlink($tempPath);
-
-            // Process document using Action
+            // Process document using Action (BEFORE deleting temp file!)
             /** @var \App\Actions\Zapier\ProcessZapierDocumentAction $action */
             $action = app(\App\Actions\Zapier\ProcessZapierDocumentAction::class);
 
             $result = $action->execute(
                 $request,
                 $document,
+                $documentType, // Pass pre-selected document type
                 $tempPath,
                 $filename,
                 $mimeType,
@@ -233,6 +231,9 @@ class ZapierController extends Controller
 
             $processed = $result['document'];
             $createdTemplate = $result['created_template'];
+
+            // Clean up temp file AFTER processing
+            @unlink($tempPath);
 
             // Flatten extracted_data for Zapier compatibility
             // Zapier works better with flat structures instead of nested objects

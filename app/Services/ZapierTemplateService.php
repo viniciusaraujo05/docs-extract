@@ -143,11 +143,12 @@ class ZapierTemplateService
             $items = null;
 
             if (is_array($value)) {
-                $type = 'array';
+                // Check if it's an indexed array (list) or associative array (object)
+                $isIndexedArray = array_keys($value) === range(0, count($value) - 1);
 
-                // Detect array item structure from first element
-                // Only if it's an array of arrays (not a simple associative array)
-                if (! empty($value) && isset($value[0]) && is_array($value[0])) {
+                if ($isIndexedArray && ! empty($value) && is_array($value[0])) {
+                    // It's an array of objects (like items) - use type 'array'
+                    $type = 'array';
                     $items = [];
                     foreach ($value[0] as $itemKey => $itemValue) {
                         $itemType = 'string';
@@ -163,7 +164,39 @@ class ZapierTemplateService
                             'type' => $itemType,
                         ];
                     }
+
+                    $field = [
+                        'name' => $key,
+                        'label' => ucwords(str_replace('_', ' ', $key)),
+                        'type' => $type,
+                        'source' => 'ai',
+                        'required' => false,
+                        'items' => $items,
+                    ];
+
+                    $fields[] = $field;
+                } else {
+                    // It's an associative array (object like seller, bill_to)
+                    // Flatten it into individual fields
+                    foreach ($value as $subKey => $subValue) {
+                        $subType = 'string';
+                        if (is_numeric($subValue)) {
+                            $subType = str_contains((string) $subValue, '.') ? 'number' : 'integer';
+                        } elseif (is_bool($subValue)) {
+                            $subType = 'boolean';
+                        }
+
+                        $fields[] = [
+                            'name' => $key.'_'.$subKey,
+                            'label' => ucwords(str_replace('_', ' ', $key)).' '.ucwords(str_replace('_', ' ', $subKey)),
+                            'type' => $subType,
+                            'source' => 'ai',
+                            'required' => false,
+                        ];
+                    }
                 }
+
+                continue; // Skip the default field creation below
             } elseif (is_numeric($value)) {
                 $type = str_contains((string) $value, '.') ? 'number' : 'integer';
             } elseif (is_bool($value)) {
@@ -177,11 +210,6 @@ class ZapierTemplateService
                 'source' => 'ai',
                 'required' => false,
             ];
-
-            // Add items structure for arrays
-            if ($items !== null) {
-                $field['items'] = $items;
-            }
 
             $fields[] = $field;
         }

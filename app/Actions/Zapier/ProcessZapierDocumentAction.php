@@ -29,16 +29,17 @@ class ProcessZapierDocumentAction
     public function execute(
         Request $request,
         Document $document,
+        ?DocumentType $existingDocumentType,
         string $tempPath,
         string $filename,
         string $mimeType,
         string $fileContents,
         array $validated
     ): array {
-        $documentType = null;
+        $documentType = $existingDocumentType; // Use pre-selected document type if provided
         $createdTemplate = null;
 
-        // Handle template logic
+        // Handle template logic ONLY if save_as_template is true
         if (($validated['save_as_template'] ?? false) && ! empty($validated['template_name'])) {
             // Check if template already exists
             $existingTemplate = $this->templateService->findByName(
@@ -66,6 +67,9 @@ class ProcessZapierDocumentAction
                     $this->associateDocumentWithTemplate($document, $documentType);
                 }
             }
+        } elseif ($documentType) {
+            // User provided document_type_id - associate document with it
+            $this->associateDocumentWithTemplate($document, $documentType);
         }
 
         // Process document (with or without template)
