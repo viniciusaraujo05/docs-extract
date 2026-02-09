@@ -86,8 +86,6 @@ class FieldDetectorService
                 $b64 = is_array($img) ? ($img['data'] ?? '') : $img;
 
                 if (empty($b64)) {
-                    Log::warning('FieldDetectorService: Empty image data provided');
-
                     continue;
                 }
 
@@ -260,11 +258,6 @@ PROMPT;
                 return $field;
             }, $fields);
         } catch (\JsonException $e) {
-            Log::warning('Failed to parse field detector response', [
-                'error' => $e->getMessage(),
-                'content_preview' => mb_substr($content, 0, 200),
-            ]);
-
             return $this->getDefaultFields();
         }
     }

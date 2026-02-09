@@ -28,22 +28,15 @@ class TextStrategy implements ExtractionStrategyInterface
     public function extract(Document $document, array $schema): array
     {
 
-
         $text = $this->extractText($document);
 
-
-
         if (trim($text) === '') {
-            Log::warning('TextStrategy: Extracted text is empty', ['document_id' => $document->id]);
+
             throw new \App\Exceptions\ExtractionException('extraction.empty_text');
         }
 
         // Heuristic for scanned PDFs: If text is very short/sparse for a PDF, it's likely noise/watermark
         if (str_contains($document->mime_type, 'pdf') && mb_strlen(trim($text)) < 300) {
-            Log::warning('TextStrategy: Text extracted is too short/sparse, assuming scanned PDF.', [
-                'document_id' => $document->id,
-                'length' => mb_strlen($text),
-            ]);
             throw new \App\Exceptions\ExtractionException('extraction.scanned_pdf_detected');
         }
 
@@ -69,13 +62,11 @@ class TextStrategy implements ExtractionStrategyInterface
 
             $content = $disk->get($document->file_path);
             if ($content === false || $content === null) {
-                Log::error('TextStrategy: Failed to download file', ['path' => $document->file_path, 'disk' => $diskName]);
                 throw new RuntimeException('Failed to download file from remote storage');
             }
 
             $written = file_put_contents($tempPath, $content);
             if ($written === false) {
-                Log::error('TextStrategy: Failed to write temp file', ['path' => $tempPath]);
                 throw new RuntimeException("Failed to write temp file: {$tempPath}");
             }
 
@@ -84,8 +75,6 @@ class TextStrategy implements ExtractionStrategyInterface
         } else {
             $path = $disk->path($document->file_path);
         }
-
-
 
         try {
             if (str_contains($document->mime_type, 'pdf')) {
@@ -98,7 +87,7 @@ class TextStrategy implements ExtractionStrategyInterface
 
             return $text;
         } catch (\Exception $e) {
-            Log::error('TextStrategy: Exception during parsing', ['error' => $e->getMessage()]);
+
             throw $e;
         } finally {
             // Cleanup temp file if we downloaded from remote storage

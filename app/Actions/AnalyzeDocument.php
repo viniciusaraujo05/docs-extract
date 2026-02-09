@@ -111,13 +111,7 @@ class AnalyzeDocument
                 'text' => '', // No text text for image/vision analysis
                 'message' => 'PDF analyzed using AI Vision (Direct Input)',
             ];
-
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('handlePdfConversion: Failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
             // Fallback
             return [
                 'fields' => $this->fieldDetector->getDefaultFields(),

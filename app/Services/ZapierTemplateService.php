@@ -111,7 +111,7 @@ class ZapierTemplateService
                     copy($tempPath, $tempPdfPath);
                 }
 
-                $file = new UploadedFile(
+                $file = new \Illuminate\Http\UploadedFile(
                     $tempPdfPath,
                     $filename,
                     $mimeType,
@@ -123,9 +123,10 @@ class ZapierTemplateService
                 if ($this->textExtractor->canExtract($file)) {
                     $text = $this->textExtractor->extract($file);
 
-                    // If we got meaningful text, use it and skip ImageMagick conversion
-                    if (! empty($text) && strlen(trim($text)) > 50) {
-                        Log::info('ZapierTemplateService: Extracted text from PDF, skipping ImageMagick conversion', ['text_length' => strlen($text)]);
+                    // If we got meaningful text, use it and skip direct PDF conversion
+                    // Using 300 char threshold for consistency with AnalyzeDocument/TextStrategy
+                    if (! empty($text) && mb_strlen(trim($text)) >= 300) {
+                        Log::info('ZapierTemplateService: Extracted text from PDF, skipping direct PDF analysis', ['text_length' => strlen($text)]);
                         if (file_exists($tempPdfPath)) {
                             @unlink($tempPdfPath);
                         }
@@ -141,53 +142,14 @@ class ZapierTemplateService
                 }
             }
 
-            // Fallback to Image Conversion (Vision) - This uses ImageMagick
-            return $this->detectFieldsFromPdf($fileContents, $filename, $mimeType);
+            // Fallback: Direct PDF Vision Analysis (skipping ImageMagick)
+            return $this->fieldDetector->detectFromImage([[
+                'data' => base64_encode($fileContents),
+                'mime' => 'application/pdf',
+            ]]);
         }
 
         return $this->detectFieldsFromImage($fileContents);
-    }
-
-    /**
-     * Detect fields from PDF by converting to images.
-     */
-    private function detectFieldsFromPdf(string $fileContents, string $filename, string $mimeType): ?array
-    {
-        // Create a dedicated temp file to ensure it exists and matches contents
-        $tempPath = tempnam(sys_get_temp_dir(), 'zapier_tpl_');
-        file_put_contents($tempPath, $fileContents);
-
-        try {
-            /** @var \App\Services\PdfToImageService $pdfService */
-            $pdfService = app(\App\Services\PdfToImageService::class);
-
-            $imagePaths = $pdfService->convertPdf(new UploadedFile(
-                $tempPath,
-                $filename,
-                $mimeType,
-                null,
-                true
-            ));
-
-            if (empty($imagePaths)) {
-                return null;
-            }
-
-            $imagesPayload = [];
-            foreach ($imagePaths as $path) {
-                $imagesPayload[] = [
-                    'data' => base64_encode(file_get_contents($path)),
-                    'mime' => 'image/png',
-                ];
-            }
-
-            $pdfService->cleanup($imagePaths);
-
-            return $this->fieldDetector->detectFromImage($imagesPayload);
-        } finally {
-            // Cleanup our local temp file
-            @unlink($tempPath);
-        }
     }
 
     /**

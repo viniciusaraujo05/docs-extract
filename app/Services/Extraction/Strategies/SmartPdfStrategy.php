@@ -23,7 +23,6 @@ class SmartPdfStrategy implements ExtractionStrategyInterface
     public function extract(Document $document, array $schema): array
     {
 
-
         try {
             // 1. Try Text Strategy first (Cheaper, Faster)
             return $this->textStrategy->extract($document, $schema);
