@@ -37,7 +37,7 @@ class AnalyzeDocumentTest extends TestCase
                 if (! is_array($payloads) || empty($payloads[0])) {
                     return false;
                 }
-                
+
                 $payload = $payloads[0];
 
                 if (($payload['mime'] ?? '') !== 'application/pdf') {

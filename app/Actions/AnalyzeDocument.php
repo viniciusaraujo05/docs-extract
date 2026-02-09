@@ -46,14 +46,21 @@ class AnalyzeDocument
 
             \Illuminate\Support\Facades\Log::info("AnalyzeDocument: Attempting text extraction for {$mime}");
             $text = $this->textExtractor->extract($file);
-            \Illuminate\Support\Facades\Log::info("AnalyzeDocument: Text extraction result", ['length' => strlen($text)]);
+            \Illuminate\Support\Facades\Log::info('AnalyzeDocument: Text extraction result', ['length' => strlen($text)]);
 
             if ($text === '') {
-                \Illuminate\Support\Facades\Log::warning("AnalyzeDocument: Text extraction returned empty string");
+                \Illuminate\Support\Facades\Log::warning('AnalyzeDocument: Text extraction returned empty string');
                 throw new \RuntimeException('No text extracted');
             }
 
-            // If we got text, detect fields
+            // Heuristic for scanned PDFs: If text is very short/sparse for a PDF, it's likely noise/watermark
+            // 250 chars is a conservative threshold. A real invoice usually has >500-1000 chars.
+            if (mb_strlen(trim($text)) < 300) {
+                 \Illuminate\Support\Facades\Log::warning('AnalyzeDocument: Text extracted is too short/sparse, assuming scanned PDF. Triggering fallback.', ['length' => mb_strlen($text)]);
+                 throw new \RuntimeException('Scanned PDF detected (sparse text)');
+            }
+
+            // If we got valid text, detect fields
             $fields = $this->fieldDetector->detect($text);
 
             return [
@@ -63,9 +70,9 @@ class AnalyzeDocument
             ];
 
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error("AnalyzeDocument: Extraction failed, attempting fallback", [
+            \Illuminate\Support\Facades\Log::error('AnalyzeDocument: Extraction failed, attempting fallback', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             // If extraction failed and it's a PDF, try conversion
             if ($file->getMimeType() === 'application/pdf') {
