@@ -310,22 +310,49 @@ class ZapierController extends Controller
 
         foreach ($extractedData as $key => $value) {
             $type = 'string'; // Default
+            $items = null;
 
             if (is_array($value)) {
                 $type = 'array';
+
+                // Detect array item structure from first element
+                if (! empty($value) && is_array($value[0])) {
+                    $items = [];
+                    foreach ($value[0] as $itemKey => $itemValue) {
+                        $itemType = 'string';
+                        if (is_numeric($itemValue)) {
+                            $itemType = str_contains((string) $itemValue, '.') ? 'number' : 'integer';
+                        } elseif (is_bool($itemValue)) {
+                            $itemType = 'boolean';
+                        }
+
+                        $items[] = [
+                            'name' => $itemKey,
+                            'label' => ucwords(str_replace('_', ' ', $itemKey)),
+                            'type' => $itemType,
+                        ];
+                    }
+                }
             } elseif (is_numeric($value)) {
                 $type = str_contains((string) $value, '.') ? 'number' : 'integer';
             } elseif (is_bool($value)) {
                 $type = 'boolean';
             }
 
-            $fields[] = [
+            $field = [
                 'name' => $key,
                 'label' => ucwords(str_replace('_', ' ', $key)),
                 'type' => $type,
                 'source' => 'ai',
                 'required' => false,
             ];
+
+            // Add items structure for arrays
+            if ($items !== null) {
+                $field['items'] = $items;
+            }
+
+            $fields[] = $field;
         }
 
         return $fields;
@@ -349,22 +376,49 @@ class ZapierController extends Controller
         $fields = [];
         foreach ($extractedData as $key => $value) {
             $type = 'string'; // Default
+            $items = null;
 
-            if (is_numeric($value)) {
+            if (is_array($value)) {
+                $type = 'array';
+
+                // Detect array item structure from first element
+                if (! empty($value) && is_array($value[0])) {
+                    $items = [];
+                    foreach ($value[0] as $itemKey => $itemValue) {
+                        $itemType = 'string';
+                        if (is_numeric($itemValue)) {
+                            $itemType = str_contains((string) $itemValue, '.') ? 'number' : 'integer';
+                        } elseif (is_bool($itemValue)) {
+                            $itemType = 'boolean';
+                        }
+
+                        $items[] = [
+                            'name' => $itemKey,
+                            'label' => ucwords(str_replace('_', ' ', $itemKey)),
+                            'type' => $itemType,
+                        ];
+                    }
+                }
+            } elseif (is_numeric($value)) {
                 $type = str_contains((string) $value, '.') ? 'number' : 'integer';
             } elseif (is_bool($value)) {
                 $type = 'boolean';
-            } elseif (is_array($value)) {
-                $type = 'array';
             }
 
-            $fields[] = [
+            $field = [
                 'name' => $key,
                 'label' => ucwords(str_replace('_', ' ', $key)),
                 'type' => $type,
                 'source' => 'ai',
                 'required' => false,
             ];
+
+            // Add items structure for arrays
+            if ($items !== null) {
+                $field['items'] = $items;
+            }
+
+            $fields[] = $field;
         }
 
         // Create the document type
