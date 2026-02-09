@@ -40,7 +40,6 @@ Route::prefix('api/v1')->name('api.v1.')->middleware([\App\Http\Middleware\ApiV1
 
         // Document Types
         Route::get('zapier/document-types', [\App\Http\Controllers\Api\V1\ZapierController::class, 'listDocumentTypes'])->name('zapier.document-types.index');
-        Route::post('zapier/document-types', [\App\Http\Controllers\Api\V1\ZapierController::class, 'createDocumentType'])->name('zapier.document-types.create');
         Route::get('zapier/document-types/{documentType}/fields', [\App\Http\Controllers\Api\V1\ZapierController::class, 'getDocumentTypeFields'])->name('zapier.document-types.fields');
         Route::post('zapier/document-types/{documentType}/fields', [\App\Http\Controllers\Api\V1\ZapierController::class, 'addCustomField'])->name('zapier.document-types.fields.store');
 
