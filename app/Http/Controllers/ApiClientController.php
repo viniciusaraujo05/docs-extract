@@ -43,10 +43,22 @@ class ApiClientController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $zapierClientId = config('services.zapier.client_id');
+        $isZapierConnected = false;
+
+        if ($zapierClientId) {
+            $isZapierConnected = \Illuminate\Support\Facades\DB::table('oauth_access_tokens')
+                ->where('user_id', $user->id)
+                ->where('client_id', $zapierClientId)
+                ->where('revoked', false)
+                ->exists();
+        }
+
         return Inertia::render('api/index', [
             'locale' => $locale,
             'clients' => $clients,
             'webhooks' => $webhooks,
+            'isZapierConnected' => $isZapierConnected,
         ]);
     }
 

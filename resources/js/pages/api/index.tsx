@@ -1,13 +1,13 @@
 
 import AppLayout from '@/layouts/app-layout';
-import { Head, useForm, usePage } from '@inertiajs/react';
+import { Head, useForm, usePage, router } from '@inertiajs/react';
 import apiRoutes from '@/routes/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -15,7 +15,7 @@ import { Copy, Key, Plus, Trash2, AlertCircle, ChevronDown, BookOpen, Shield, Fi
 import { useCallback, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type SharedData } from '@/types';
 import { useApiDocumentation } from '@/components/api/ApiDocumentation';
 import { Input } from '@/components/ui/input';
 import {
@@ -56,18 +56,23 @@ interface NewClient extends ApiClient {
     client_secret: string;
 }
 
-interface PageProps {
+interface ApiPageProps extends SharedData {
     clients: ApiClient[];
     webhooks: WebhookEndpoint[];
-    flash?: {
+    flash: {
+        success?: string | null;
+        error?: string | null;
+        warning?: string | null;
+        info?: string | null;
         newClient?: NewClient;
     };
+    isZapierConnected?: boolean;
 }
 
 export default function ApiIndex() {
     const { t } = useTranslation();
-    const page = usePage<PageProps & { locale?: string }>();
-    const { clients, webhooks, flash } = page.props;
+    const page = usePage<ApiPageProps>();
+    const { clients, webhooks, flash, isZapierConnected = false } = page.props;
     const locale = page.props.locale ?? 'pt';
     const [selectedEndpoint, setSelectedEndpoint] = useState<string>('auth.token');
     const [selectedResponseCode, setSelectedResponseCode] = useState<number>(200);
@@ -81,6 +86,8 @@ export default function ApiIndex() {
     const regenerateWebhookForm = useForm({});
     const newClient = flash?.newClient;
     const [shownSecrets, setShownSecrets] = useState<Set<number>>(new Set());
+
+    const [activeTab, setActiveTab] = useState('api-keys');
 
     useEffect(() => {
         if (newClient && !shownSecrets.has(newClient.id)) {
@@ -197,6 +204,21 @@ export default function ApiIndex() {
         });
     };
 
+    const [disconnectZapierDialogOpen, setDisconnectZapierDialogOpen] = useState(false);
+    const handleDisconnectZapier = () => {
+        router.post(`/api/integrations/zapier/disconnect`, {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success(t('Zapier disconnected successfully'));
+                setDisconnectZapierDialogOpen(false);
+            },
+            onError: () => {
+                toast.error(t('Failed to disconnect Zapier'));
+                setDisconnectZapierDialogOpen(false);
+            }
+        });
+    };
+
     const copyToClipboard = (text: string, label: string) => {
         navigator.clipboard.writeText(text);
         toast.success(`${label} ${t('copied to clipboard!')}`);
@@ -204,7 +226,7 @@ export default function ApiIndex() {
 
     // @ts-ignore
     const { api_url } = usePage().props;
-    const baseApiUrl = api_url || (typeof window !== 'undefined' ? `${window.location.origin}/api/v1` : '/api/v1');
+    const baseApiUrl = api_url || (typeof window !== 'undefined' ? `${window.location.origin}/v1` : '/v1');
     const breadcrumbs: BreadcrumbItem[] = [{ title: t('API'), href: `/${locale}/api` }];
     const endpointKeys = Object.keys(endpoints);
 
@@ -237,6 +259,17 @@ export default function ApiIndex() {
                             className="w-full justify-start rounded-md px-4 py-2 hover:bg-muted/50 data-[state=active]:bg-muted data-[state=active]:shadow-none border-l-2 border-transparent data-[state=active]:border-primary transition-all"
                         >
                             <Radio className="mr-2 h-4 w-4" />{t('Webhooks')}
+                        </TabsTrigger>
+                        <TabsTrigger 
+                            value="zapier" 
+                            className="w-full justify-start rounded-md px-4 py-2 hover:bg-muted/50 data-[state=active]:bg-muted data-[state=active]:shadow-none border-l-2 border-transparent data-[state=active]:border-primary transition-all"
+                        >
+                            <div className="mr-2 p-1 bg-[#FF4F00]/10 rounded-full">
+                                <span className="flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 text-[#FF4F00]"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                </span>
+                            </div>
+                            {t('Zapier Integration')}
                         </TabsTrigger>
                         <TabsTrigger 
                             value="docs" 
@@ -617,6 +650,110 @@ if (signature !== computed) {
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
+
+                        {/* Zapier Disconnect Dialog */}
+                        <AlertDialog open={disconnectZapierDialogOpen} onOpenChange={setDisconnectZapierDialogOpen}>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>{t('Disconnect Zapier?')}</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        {t('Are you sure you want to disconnect your Zapier integration? Existing Zaps may stop working until you reconnect.')}
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>{t('Cancel')}</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleDisconnectZapier} className="bg-red-500 hover:bg-red-600 focus:ring-red-500">
+                                        {t('Disconnect')}
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </TabsContent>
+
+                    <TabsContent value="zapier" className="space-y-4">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <div className="p-2 bg-[#FF4F00]/10 rounded-full shadow-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-[#FF4F00]"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                    </div>
+                                    {t('Zapier Integration')}
+                                </CardTitle>
+                                <CardDescription>{t('Connect DOCSET with 5,000+ apps using Zapier')}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                {isZapierConnected && (
+                                    <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-950/20 border border-green-100 dark:border-green-900 rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600 dark:text-green-400"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-sm text-green-900 dark:text-green-100">{t('Zapier Connected')}</p>
+                                                <p className="text-xs text-green-700 dark:text-green-300">{t('Your account is successfully connected to Zapier.')}</p>
+                                            </div>
+                                        </div>
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm" 
+                                            onClick={() => setDisconnectZapierDialogOpen(true)}
+                                            className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 border-red-200 dark:border-red-900/50"
+                                        >
+                                            {t('Disconnect')}
+                                        </Button>
+                                    </div>
+                                )}
+
+                                <Alert className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-blue-600 dark:text-blue-400"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                    <AlertTitle className="text-blue-900 dark:text-blue-100">{t('How it works')}</AlertTitle>
+                                    <AlertDescription className="text-blue-700 dark:text-blue-300 leading-relaxed">
+                                        {t('Our Zapier integration uses OAuth2 for secure authentication. When you connect your account in Zapier, a secure access token is automatically generated and stored by Zapier to authorize requests on your behalf. No manual API key handling is required.')}
+                                    </AlertDescription>
+                                </Alert>
+
+                                <div className="space-y-4">
+                                    <h3 className="font-semibold text-lg">{t('Connection Steps')}</h3>
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        <div className="rounded-lg border p-4 space-y-3 bg-muted/20">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">1</div>
+                                            <h4 className="font-medium">{t('Find Docset in Zapier')}</h4>
+                                            <p className="text-sm text-muted-foreground">{t('Search for "Docset" in the Zapier app directory or click the invite link below if in private beta.')}</p>
+                                        </div>
+                                        <div className="rounded-lg border p-4 space-y-3 bg-muted/20">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">2</div>
+                                            <h4 className="font-medium">{t('Connect Account')}</h4>
+                                            <p className="text-sm text-muted-foreground">{t('Click "Connect" in Zapier. You will be redirected to Docset to authorize the connection securely.')}</p>
+                                        </div>
+                                        <div className="rounded-lg border p-4 space-y-3 bg-muted/20">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">3</div>
+                                            <h4 className="font-medium">{t('Accept Invite')}</h4>
+                                            <p className="text-sm text-muted-foreground">{t('Accept the invitation to use the Docset integration and grant the necessary permissions.')}</p>
+                                        </div>
+                                        <div className="rounded-lg border p-4 space-y-3 bg-muted/20">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">4</div>
+                                            <h4 className="font-medium">{t('Start Automating')}</h4>
+                                            <p className="text-sm text-muted-foreground">{t('Create Zaps using "Document Processed" triggers or "Extract Data" actions.')}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="rounded-lg bg-orange-50 dark:bg-orange-950/20 p-6 border border-orange-100 dark:border-orange-900/50 flex flex-col items-center text-center space-y-4">
+                                    <div className="p-3 bg-white dark:bg-background rounded-full shadow-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8 text-[#FF4F00]"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                    </div>
+                                    <div className="space-y-2 max-w-lg">
+                                        <h3 className="text-xl font-bold text-orange-950 dark:text-orange-100">{t('Explore Docset on Zapier')}</h3>
+                                        <p className="text-orange-800 dark:text-orange-200/80">
+                                            {t('Browse our pre-built templates and start automating your document workflows in minutes.')}
+                                        </p>
+                                    </div>
+                                    <Button size="lg" className="bg-[#FF4F00] hover:bg-[#FF4F00]/90 text-white border-0 shadow-lg shadow-orange-500/20" onClick={() => window.open('https://zapier.com/apps/docset/integrations', '_blank')}>
+                                        {t('Go to Zapier')}
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </TabsContent>
 
                     <TabsContent value="docs" className="space-y-4">
@@ -656,6 +793,19 @@ if (signature !== computed) {
                                                                             <div>
                                                                                 <div className="flex items-center gap-2">
                                                                                     <span className="font-mono font-semibold">{endpoint.path}</span>
+                                                                                    <Button 
+                                                                                        size="icon" 
+                                                                                        variant="ghost" 
+                                                                                        className="h-6 w-6 text-muted-foreground hover:text-foreground" 
+                                                                                        onClick={(e) => { 
+                                                                                            e.stopPropagation(); 
+                                                                                            const origin = typeof window !== 'undefined' ? window.location.origin : '';
+                                                                                            copyToClipboard(`${origin}${endpoint.path}`, t('Endpoint URL')); 
+                                                                                        }}
+                                                                                        title={t('Copy endpoint URL')}
+                                                                                    >
+                                                                                        <Copy className="h-3 w-3" />
+                                                                                    </Button>
                                                                                     {endpoint.requiresAuth && <Badge variant="outline" className="text-xs">JWT</Badge>}
                                                                                 </div>
                                                                                 <p className="text-sm text-muted-foreground mt-1">{endpoint.description}</p>

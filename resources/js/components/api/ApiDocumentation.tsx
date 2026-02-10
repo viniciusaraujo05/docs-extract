@@ -42,25 +42,25 @@ export const useApiDocumentation = () => {
                 number: 2,
                 title: t('Obtain JWT Token'),
                 description: t('Use your credentials to obtain a JWT token that will be used to authenticate all subsequent requests.'),
-                endpoint: '/api/v1/auth/token',
+                endpoint: '/v1/auth/token',
             },
             {
                 number: 3,
                 title: t('Create Document Type (Model)'),
                 description: t('Define a document type with custom fields that the AI will extract. This is required before extracting documents.'),
-                endpoint: '/api/v1/document-types',
+                endpoint: '/v1/document-types',
             },
             {
                 number: 4,
                 title: t('Extract Document'),
                 description: t('Upload a document and extract data instantly using your document type. The AI will extract fields according to your model schema.'),
-                endpoint: '/api/v1/documents/extract',
+                endpoint: '/v1/documents/extract',
             },
             {
                 number: 5,
                 title: t('Refresh Token'),
                 description: t('Tokens expire after 60 minutes. Use the refresh endpoint to obtain a new token before expiration.'),
-                endpoint: '/api/v1/auth/refresh',
+                endpoint: '/v1/auth/refresh',
             },
         ],
     };
@@ -68,7 +68,7 @@ export const useApiDocumentation = () => {
     const endpoints: Record<string, ApiEndpoint> = {
         'auth.token': {
             method: 'POST',
-            path: '/api/v1/auth/token',
+            path: '/v1/auth/token',
             description: t('Obtain a JWT token using your API client credentials'),
             requiresAuth: false,
             requestBody: {
@@ -110,7 +110,7 @@ export const useApiDocumentation = () => {
         },
         'auth.refresh': {
             method: 'POST',
-            path: '/api/v1/auth/refresh',
+            path: '/v1/auth/refresh',
             description: t('Refresh your JWT token before it expires'),
             requiresAuth: true,
             responses: [
@@ -136,7 +136,7 @@ export const useApiDocumentation = () => {
         },
         'auth.logout': {
             method: 'POST',
-            path: '/api/v1/auth/logout',
+            path: '/v1/auth/logout',
             description: t('Invalidate your current JWT token'),
             requiresAuth: true,
             responses: [
@@ -160,7 +160,7 @@ export const useApiDocumentation = () => {
         },
         'documents.index': {
             method: 'GET',
-            path: '/api/v1/documents',
+            path: '/v1/documents',
             description: t('List all documents with pagination'),
             requiresAuth: true,
             queryParams: [
@@ -215,7 +215,7 @@ export const useApiDocumentation = () => {
         },
         'documents.show': {
             method: 'GET',
-            path: '/api/v1/documents/{id}',
+            path: '/v1/documents/{id}',
             description: t('Get details of a specific document including extracted data'),
             requiresAuth: true,
             responses: [
@@ -264,7 +264,7 @@ export const useApiDocumentation = () => {
         },
         'documents.filter': {
             method: 'GET',
-            path: '/api/v1/documents/filter',
+            path: '/v1/documents/filter',
             description: t('Filter documents by type, date range, and name'),
             requiresAuth: true,
             queryParams: [
@@ -345,7 +345,7 @@ export const useApiDocumentation = () => {
         },
         'documents.searchByName': {
             method: 'GET',
-            path: '/api/v1/documents/search/name',
+            path: '/v1/documents/search/name',
             description: t('Search documents by name'),
             requiresAuth: true,
             queryParams: [
@@ -401,7 +401,7 @@ export const useApiDocumentation = () => {
         },
         'documents.searchByDate': {
             method: 'POST',
-            path: '/api/v1/documents/search/date',
+            path: '/v1/documents/search/date',
             description: t('Search documents by date range'),
             requiresAuth: true,
             requestBody: {
@@ -470,7 +470,7 @@ export const useApiDocumentation = () => {
         },
         'documents.extract': {
             method: 'POST',
-            path: '/api/v1/documents/extract',
+            path: '/v1/documents/extract',
             description: t('Extract and store document data instantly using a document type model'),
             requiresAuth: true,
             requestBody: {
@@ -542,7 +542,7 @@ export const useApiDocumentation = () => {
         },
         'documentTypes.index': {
             method: 'GET',
-            path: '/api/v1/document-types',
+            path: '/v1/document-types',
             description: t('List all document types (models) created by you'),
             requiresAuth: true,
             responses: [
@@ -580,7 +580,7 @@ export const useApiDocumentation = () => {
         },
         'documentTypes.store': {
             method: 'POST',
-            path: '/api/v1/document-types',
+            path: '/v1/document-types',
             description: t('Create a new document type (model) with custom fields'),
             requiresAuth: true,
             requestBody: {
@@ -655,7 +655,7 @@ export const useApiDocumentation = () => {
         },
         'documentTypes.show': {
             method: 'GET',
-            path: '/api/v1/document-types/{id}',
+            path: '/v1/document-types/{id}',
             description: t('Get details of a specific document type'),
             requiresAuth: true,
             responses: [
@@ -692,7 +692,7 @@ export const useApiDocumentation = () => {
         },
         'documentTypes.update': {
             method: 'PUT',
-            path: '/api/v1/document-types/{id}',
+            path: '/v1/document-types/{id}',
             description: t('Update an existing document type'),
             requiresAuth: true,
             requestBody: {
@@ -736,7 +736,7 @@ export const useApiDocumentation = () => {
         },
         'documentTypes.destroy': {
             method: 'DELETE',
-            path: '/api/v1/document-types/{id}',
+            path: '/v1/document-types/{id}',
             description: t('Delete a document type'),
             requiresAuth: true,
             responses: [

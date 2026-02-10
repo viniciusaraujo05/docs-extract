@@ -201,7 +201,7 @@ export default function Integrations({ integrations, isZapierConnected }: Integr
                                         </p>
                                         <Button 
                                             variant="outline"
-                                            onClick={() => window.open('https://zapier.com/apps/docset/integrations', '_blank')}
+                                            onClick={() => window.location.href = `/${locale}/api?tab=zapier`}
                                             className="border-[#FF4F00] text-[#FF4F00] hover:bg-[#FF4F00]/10"
                                         >
                                             {t('Connect Zapier')}
