@@ -28,6 +28,11 @@ Route::get('login', function () {
     return redirect()->route('locale.login', ['locale' => app()->getLocale()]);
 })->name('login');
 
+// Global verification route to fix auth middleware redirection
+Route::get('email/verify', function () {
+    return redirect()->route('locale.verification.notice', ['locale' => app()->getLocale()]);
+})->name('verification.notice');
+
 Route::get('/', function () {
     $planService = app(\App\Services\StripePlanService::class);
     // Get plans as array list (not object/associative array) to avoid .map() errors on frontend

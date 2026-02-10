@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Models\DocumentType;
 use App\Models\User;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 

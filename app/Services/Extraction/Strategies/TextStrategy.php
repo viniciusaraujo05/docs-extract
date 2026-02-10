@@ -8,7 +8,6 @@ use App\Models\Document;
 use App\Services\AI\PromptFactory;
 use App\Services\Extraction\Contracts\ExtractionStrategyInterface;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Smalot\PdfParser\Parser;
