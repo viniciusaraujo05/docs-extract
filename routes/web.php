@@ -106,9 +106,7 @@ Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->g
     ])->parameters(['document-types' => 'documentType']);
 
     // API Clients Management (View)
-    Route::middleware(['verified'])->group(function () {
-        Route::get('api', [ApiClientController::class, 'index'])->name('api.index');
-    });
+    Route::get('api', [ApiClientController::class, 'index'])->name('api.index');
 
     // Settings (Views)
     Route::get('settings/billing', [PlanController::class, 'billing'])->name('settings.billing');
