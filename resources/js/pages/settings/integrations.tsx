@@ -5,6 +5,7 @@ import { type BreadcrumbItem, type SharedData } from "@/types";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, RefreshCw, AlertCircle, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -173,7 +174,10 @@ export default function Integrations({ integrations, isZapierConnected }: Integr
                                         <Zap className="h-6 w-6 text-[#FF4F00]" fill="currentColor" />
                                     </div>
                                     <div>
-                                        <CardTitle>Zapier</CardTitle>
+                                        <CardTitle className="flex items-center gap-2">
+                                            Zapier
+                                            <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200">SOON</Badge>
+                                        </CardTitle>
                                         <CardDescription>{t('Automate workflows by connecting Docset to 5,000+ apps.')}</CardDescription>
                                     </div>
                                 </div>

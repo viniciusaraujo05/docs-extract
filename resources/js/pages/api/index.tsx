@@ -270,6 +270,7 @@ export default function ApiIndex() {
                                 </span>
                             </div>
                             {t('Zapier Integration')}
+                            <Badge variant="secondary" className="ml-2 text-[10px] h-5 px-1.5 bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200">SOON</Badge>
                         </TabsTrigger>
                         <TabsTrigger 
                             value="docs" 
@@ -678,6 +679,7 @@ if (signature !== computed) {
                                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-[#FF4F00]"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                                     </div>
                                     {t('Zapier Integration')}
+                                    <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200">SOON</Badge>
                                 </CardTitle>
                                 <CardDescription>{t('Connect DOCSET with 5,000+ apps using Zapier')}</CardDescription>
                             </CardHeader>
