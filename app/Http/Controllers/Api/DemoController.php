@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DemoExtractionRequest;
+use App\Models\DemoUsage;
 use App\Services\Demo\DemoRateLimiter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -69,6 +70,16 @@ class DemoController extends Controller
             }
 
             $this->rateLimiter->increment($ip);
+
+            // Persist demo usage for admin analytics
+            DemoUsage::create([
+                'ip_address' => $ip,
+                'user_agent' => $request->userAgent(),
+                'filename' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+                'success' => true,
+            ]);
 
             Log::info('Demo extraction used', [
                 'ip' => $ip,

@@ -38,6 +38,7 @@ class SetLocale
             $request->is('integrations/*/callback') ||
             $request->is('integrations/*/export') ||
             $request->is('oauth/*') ||
+            $request->is('admin-030399*') ||
             $request->is('login')) {
             return $next($request);
         }

@@ -9,10 +9,18 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\SupportController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
+
+// Super Admin (hidden, password-protected)
+Route::get('/admin-030399', [SuperAdminController::class, 'index']);
+Route::post('/admin-030399/setup', [SuperAdminController::class, 'setup']);
+Route::post('/admin-030399/login', [SuperAdminController::class, 'login']);
+Route::get('/admin-030399/api/users', [SuperAdminController::class, 'users']);
+Route::get('/admin-030399/api/users/{id}', [SuperAdminController::class, 'userDetail']);
 
 // SEO Routes
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
