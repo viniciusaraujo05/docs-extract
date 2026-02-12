@@ -100,7 +100,7 @@ class SuperAdminController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'ilike', "%{$search}%")
-                  ->orWhere('email', 'ilike', "%{$search}%");
+                    ->orWhere('email', 'ilike', "%{$search}%");
             });
         }
 
@@ -194,6 +194,8 @@ class SuperAdminController extends Controller
         $totalUsers = User::count();
         $totalDocuments = Document::count();
         $totalDemoUsages = DemoUsage::count();
+        $demoSuccess = DemoUsage::where('success', true)->count();
+        $demoFailed = DemoUsage::where('success', false)->count();
         $usersWithStripe = User::whereNotNull('stripe_id')->count();
 
         $recentDemos = DemoUsage::orderBy('created_at', 'desc')
@@ -202,7 +204,7 @@ class SuperAdminController extends Controller
 
         // Demo usage per day (last 30 days)
         $demoPerDay = DemoUsage::where('created_at', '>=', now()->subDays(30))
-            ->selectRaw("DATE(created_at) as date, COUNT(*) as count")
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupByRaw('DATE(created_at)')
             ->orderBy('date')
             ->get();
@@ -211,6 +213,8 @@ class SuperAdminController extends Controller
             'total_users' => $totalUsers,
             'total_documents' => $totalDocuments,
             'total_demo_usages' => $totalDemoUsages,
+            'demo_success' => $demoSuccess,
+            'demo_failed' => $demoFailed,
             'users_with_stripe' => $usersWithStripe,
             'recent_demos' => $recentDemos,
             'demo_per_day' => $demoPerDay,

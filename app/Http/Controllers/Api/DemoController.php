@@ -95,6 +95,16 @@ class DemoController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            // Persist failed demo usage for admin analytics
+            DemoUsage::create([
+                'ip_address' => $ip,
+                'user_agent' => $request->userAgent(),
+                'filename' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+                'success' => false,
+            ]);
+
             Log::error('Demo extraction failed', [
                 'ip' => $ip,
                 'error' => $e->getMessage(),
