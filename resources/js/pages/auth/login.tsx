@@ -327,80 +327,131 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="hidden lg:flex flex-1 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 p-12 items-center justify-center relative overflow-hidden"
+                    className="hidden lg:flex flex-1 p-10 items-center justify-center relative overflow-hidden bg-zinc-950 border-l border-white/5"
                 >
-                    <div className="absolute inset-0">
-                        {[...Array(30)].map((_, i) => (
-                            <motion.div
-                                key={i}
-                                animate={{
-                                    y: [0, -150, 0],
-                                    x: [0, Math.random() * 100 - 50, 0],
-                                    opacity: [0, 0.8, 0],
-                                }}
-                                transition={{
-                                    repeat: Infinity,
-                                    duration: Math.random() * 8 + 5,
-                                    delay: Math.random() * 5,
-                                }}
-                                className="absolute w-1 h-1 bg-white rounded-full"
-                                style={{
-                                    left: `${Math.random() * 100}%`,
-                                    top: `${Math.random() * 100}%`,
-                                }}
-                            />
-                        ))}
-                    </div>
+                    {/* Fine grid background */}
+                    <div className="absolute inset-0 opacity-[0.04]"
+                        style={{ backgroundImage: "linear-gradient(to right,#60a5fa 1px,transparent 1px),linear-gradient(to bottom,#60a5fa 1px,transparent 1px)", backgroundSize: "32px 32px" }} />
+                    {/* Subtle background glow */}
+                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_30%_60%,rgba(37,99,235,0.18),transparent)]" />
 
-                    <div className="relative z-10 max-w-md text-white">
+                    <div className="relative z-10 max-w-md w-full">
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 16 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 }}
+                            transition={{ delay: 0.3 }}
                         >
-                            <h2 className="text-5xl font-bold mb-6 leading-tight">
-                                Turn documents into structured data
+                            <h2 className="text-3xl font-bold mb-3 text-white leading-tight">
+                                {locale === 'pt'
+                                    ? 'Os seus documentos,\nprontos em minutos.'
+                                    : 'Your documents,\ndone in minutes.'}
                             </h2>
-                            <p className="text-xl text-blue-100 mb-10 leading-relaxed">
-                                Extract, validate, and export data from PDFs and images with AI-powered precision.
+                            <p className="text-gray-400 mb-8 leading-relaxed">
+                                {locale === 'pt'
+                                    ? 'Carregue um PDF. Confirme os campos. Exporte para a sua folha de cálculo. Sem digitar nada.'
+                                    : 'Upload a PDF. Check the fields. Export to your spreadsheet. No typing needed.'}
                             </p>
 
-                            <div className="space-y-4">
-                                {[
-                                    { icon: <Sparkles className="h-5 w-5" />, text: 'AI-powered extraction' },
-                                    { icon: <Zap className="h-5 w-5" />, text: 'Process in seconds' },
-                                    { icon: <Shield className="h-5 w-5" />, text: 'Bank-level security' },
-                                ].map((benefit, i) => (
+                            {/* Data transformation visual */}
+                            <div className="relative mb-8 rounded-xl overflow-hidden border border-white/8 bg-[#06090f]"
+                                style={{ background: "linear-gradient(135deg,#06090f 0%,#080d18 100%)" }}>
+                                {/* Fine grid */}
+                                <div className="absolute inset-0 opacity-[0.07]"
+                                    style={{ backgroundImage: "linear-gradient(to right,#60a5fa 1px,transparent 1px),linear-gradient(to bottom,#60a5fa 1px,transparent 1px)", backgroundSize: "24px 24px" }} />
+                                {/* Radial glow */}
+                                <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(59,130,246,0.12),transparent)]" />
+
+                                <div className="relative z-10 flex items-center justify-between gap-3 px-6 py-6">
+                                    {/* PDF node */}
+                                    <motion.div
+                                        animate={{ y: [0, -4, 0] }}
+                                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                                        className="flex flex-col items-center gap-2"
+                                    >
+                                        <div className="w-14 h-[4.5rem] rounded-md border border-blue-500/30 bg-[#0d1b33] flex flex-col items-center justify-center relative shadow-lg shadow-blue-900/20">
+                                            {/* Corner fold */}
+                                            <div className="absolute top-0 right-0 w-0 h-0" style={{ borderLeft: "10px solid transparent", borderBottom: "10px solid #1e3a5f", borderTop: "10px solid #0d1b33", borderRight: "10px solid #0d1b33" }} />
+                                            <div className="w-7 space-y-[4px] mt-2">
+                                                {[1,0.6,1,0.7,1].map((w,i) => (
+                                                    <div key={i} className="h-[2.5px] rounded-full bg-blue-400/40" style={{ width: `${w * 100}%` }} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <span className="text-[10px] text-blue-400/60 font-mono tracking-wide">PDF</span>
+                                    </motion.div>
+
+                                    {/* Animated pipeline */}
+                                    <div className="flex-1 flex flex-col items-center gap-1.5">
+                                        {/* Flow dots */}
+                                        <div className="flex items-center gap-1 w-full justify-center">
+                                            {[0,1,2,3,4,5].map((i) => (
+                                                <motion.div
+                                                    key={i}
+                                                    className="w-1.5 h-1.5 rounded-full bg-cyan-400"
+                                                    animate={{ opacity: [0.15, 0.9, 0.15], scale: [0.7, 1.1, 0.7] }}
+                                                    transition={{ duration: 1.4, delay: i * 0.18, repeat: Infinity }}
+                                                />
+                                            ))}
+                                        </div>
+                                        <div className="w-full h-px bg-gradient-to-r from-blue-500/20 via-cyan-400/40 to-blue-500/20" />
+                                        <span className="text-[9px] text-cyan-400/50 font-mono tracking-widest uppercase">parsing</span>
+                                    </div>
+
+                                    {/* Data table node */}
+                                    <motion.div
+                                        animate={{ y: [0, 4, 0] }}
+                                        transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                                        className="flex flex-col items-center gap-2"
+                                    >
+                                        <div className="rounded-md border border-cyan-500/25 bg-[#051a1a] overflow-hidden shadow-lg shadow-cyan-900/20">
+                                            {/* Header */}
+                                            <div className="bg-blue-900/40 px-2 py-[3px] flex gap-1.5">
+                                                {['A','B','C'].map(c => (
+                                                    <div key={c} className="text-[7px] text-blue-300/60 font-mono w-6 text-center">{c}</div>
+                                                ))}
+                                            </div>
+                                            {/* Rows */}
+                                            {[0,1,2,3].map((row) => (
+                                                <motion.div
+                                                    key={row}
+                                                    className="flex gap-1.5 px-2 py-[3px] border-t border-white/5"
+                                                    animate={{ opacity: [0.4, 0.9, 0.4] }}
+                                                    transition={{ duration: 2, delay: row * 0.3 + 0.8, repeat: Infinity }}
+                                                >
+                                                    {[0,1,2].map((col) => (
+                                                        <div key={col} className="w-6 h-[5px] rounded-sm bg-cyan-400/25" />
+                                                    ))}
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                        <span className="text-[10px] text-cyan-400/60 font-mono tracking-wide">DATA</span>
+                                    </motion.div>
+                                </div>
+                            </div>
+
+                            {/* Benefits */}
+                            <div className="space-y-3">
+                                {(locale === 'pt' ? [
+                                    { text: 'Sem mais digitação manual de PDFs', color: 'text-blue-400' },
+                                    { text: 'Confirme antes de exportar — você decide', color: 'text-green-400' },
+                                    { text: 'Gratuito para começar, sem cartão', color: 'text-emerald-400' },
+                                ] : [
+                                    { text: 'No more typing from PDFs by hand', color: 'text-blue-400' },
+                                    { text: 'Review before exporting — you stay in control', color: 'text-green-400' },
+                                    { text: 'Free to start, no credit card needed', color: 'text-emerald-400' },
+                                ]).map((item, i) => (
                                     <motion.div
                                         key={i}
-                                        initial={{ opacity: 0, x: -20 }}
+                                        initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: 0.6 + i * 0.1 }}
-                                        className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10"
+                                        transition={{ delay: 0.5 + i * 0.1 }}
+                                        className="flex items-center gap-3 text-sm text-gray-300"
                                     >
-                                        <div className="bg-white/20 rounded-lg p-2">
-                                            {benefit.icon}
-                                        </div>
-                                        <span className="font-medium text-lg">{benefit.text}</span>
+                                        <CheckCircle className={`h-4 w-4 shrink-0 ${item.color}`} />
+                                        <span>{item.text}</span>
                                     </motion.div>
                                 ))}
                             </div>
-
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 1 }}
-                                className="mt-10 flex items-center gap-6 text-sm"
-                            >
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle className="h-5 w-5 text-green-400" />
-                                    <span>Free plan available</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <CheckCircle className="h-5 w-5 text-green-400" />
-                                    <span>No credit card required</span>
-                                </div>
-                            </motion.div>
                         </motion.div>
                     </div>
                 </motion.div>

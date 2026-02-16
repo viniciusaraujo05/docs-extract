@@ -1,5 +1,10 @@
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, lazy, Suspense } from "react";
+
+// Lazy-load the heavy R3F canvas — never runs on SSR
+const DataBackground = typeof window !== "undefined"
+  ? lazy(() => import("@/components/landing/DataBackground"))
+  : null;
 import { useTranslation } from "react-i18next";
 import { router, usePage } from "@inertiajs/react";
 import { Button } from "@/components/ui/button";
@@ -61,6 +66,37 @@ import {
 import { toast } from "sonner";
 
 
+// ── Data Pipeline Divider — animated connector between sections ──────────────
+function PipelineDivider() {
+  return (
+    <div className="relative h-16 overflow-hidden flex items-center justify-center pointer-events-none select-none" aria-hidden>
+      <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="pg" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="transparent" />
+            <stop offset="30%" stopColor="#3b82f6" />
+            <stop offset="70%" stopColor="#06b6d4" />
+            <stop offset="100%" stopColor="transparent" />
+          </linearGradient>
+        </defs>
+        <line x1="0" y1="50%" x2="100%" y2="50%" stroke="url(#pg)" strokeWidth="1" strokeDasharray="4 8">
+          <animate attributeName="stroke-dashoffset" from="0" to="-60" dur="1.5s" repeatCount="indefinite" />
+        </line>
+      </svg>
+      <div className="relative z-10 flex items-center gap-1.5">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <motion.div
+            key={i}
+            className="w-1 h-1 rounded-full bg-blue-400"
+            animate={{ opacity: [0.1, 0.7, 0.1], scale: [0.8, 1.2, 0.8] }}
+            transition={{ duration: 1.4, delay: i * 0.22, repeat: Infinity, ease: "easeInOut" }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // Fallbacks removed to use direct translation keys
 
 export default function Welcome() {
@@ -96,14 +132,14 @@ export default function Welcome() {
 
     const currentUrlLocale = props.locale as 'pt' | 'en';
     const savedLocale = localStorage.getItem('selected-locale') as 'pt' | 'en' | null;
-    
+
     // Se estamos na rota raiz (/) e temos preferência salva diferente do padrão
     if (window.location.pathname === '/' && savedLocale && savedLocale !== currentUrlLocale) {
       // Redirecionar para a URL com o idioma preferido
       window.location.href = `/${savedLocale}`;
       return;
     }
-    
+
     if (currentUrlLocale && currentUrlLocale !== locale) {
       setLocale(currentUrlLocale);
       i18n.changeLanguage(currentUrlLocale);
@@ -183,10 +219,14 @@ export default function Welcome() {
       />
       <Hero locale={fullLocale} onOpenDemo={() => setShowDemo(true)} />
       <TrustSignals />
+      <PipelineDivider />
       <UseCases />
+      <PipelineDivider />
       <ProductFlow locale={fullLocale} />
+      <PipelineDivider />
       <GoogleIntegrations locale={fullLocale} />
       <Features locale={fullLocale} />
+      <PipelineDivider />
       <CodeExample locale={fullLocale} onOpenDemo={() => setShowDemo(true)} />
       <Pricing locale={fullLocale} isAuthenticated={isAuthenticated} localeShort={locale} plans={props.plans} />
       <FinalCTA locale={fullLocale} />
@@ -230,11 +270,11 @@ function Header({
       pricing: t('landing.nav.pricing'),
       api: t('API'),
       login: t('Login'),
-      startFree: t('Get Started'), 
+      startFree: t('Get Started'),
       dashboard: t('Dashboard')
     };
   };
-  
+
   const headerText = getHeaderText();
 
   useEffect(() => {
@@ -469,378 +509,255 @@ function Header({
 function Hero({ locale, onOpenDemo }: { locale: string; onOpenDemo: () => void }) {
   const { t } = useTranslation();
   const { scrollY } = useScroll();
-  const rotateX = useTransform(scrollY, [0, 500], [20, 0]);
-  const scale = useTransform(scrollY, [0, 500], [1, 0.9]);
-  
-  const [step, setStep] = useState(0);
-  const [formatIndex, setFormatIndex] = useState(0);
 
+  // Only mount heavy WebGL canvas on non-mobile
+  const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {
-    // Step 2 animation no longer uses cycling formatIndex
-    // We can remove the formatIndex logic if it's not used elsewhere
-    // Keeping step cycle logic
-  }, [step]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStep((prev) => (prev + 1) % 3);
-    }, 4000); // Slower cycle to let users appreciate the animations
-    return () => clearInterval(interval);
+    const check = () => setIsDesktop(window.innerWidth >= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
-  
-  const getHeroText = () => {
-    return {
-      title: t('landing.hero.title'),
-      highlight: t('landing.hero.highlight'),
-      subtitle: t('landing.hero.subtitle'),
-      cta_primary: t('landing.hero.cta_primary'),
-      cta_demo: t('landing.hero.cta_secondary'),
-      eyebrow: t('landing.hero.eyebrow')
-    };
-  };
-  
-  const heroRaw = getHeroText();
+
+  // Multi-layer parallax — each element moves at a different speed
+  const bgY = useTransform(scrollY, [0, 800], [0, -200]);
+  const textY = useTransform(scrollY, [0, 500], [0, -90]);
+  const textOpacity = useTransform(scrollY, [0, 380], [1, 0]);
+  const screenshotY = useTransform(scrollY, [0, 700], [0, 40]);
+  const screenshotOpacity = useTransform(scrollY, [150, 700], [1, 0.35]);
+
+  const pt = locale.startsWith('pt');
+  const trustText = pt
+    ? 'Sem cartão de crédito. Plano gratuito para começar.'
+    : 'No credit card required. Free plan to get started.';
+
+  // Localized headline lines
+  const line1 = pt ? 'Chega de' : 'Stop typing';
+  const line2 = pt ? 'digitar PDFs' : 'from PDFs';
+  const line3 = pt ? 'à mão.' : 'by hand.';
 
   return (
-    <section className="relative overflow-hidden pt-24 pb-20 md:pt-32 md:pb-24 bg-black selection:bg-blue-500/30">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-zinc-950 to-zinc-950" />
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
-      
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+    <section className="relative bg-black overflow-hidden min-h-screen flex flex-col selection:bg-blue-500/30">
+      {/* ── R3F 3D particle scene — desktop only (skip WebGL cost on mobile) ── */}
+      {DataBackground && isDesktop && (
+        <Suspense fallback={null}>
+          <DataBackground />
+        </Suspense>
+      )}
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <div className="flex flex-col items-center text-center">
+      {/* Mobile-only CSS gradient background (replaces WebGL canvas) */}
+      {!isDesktop && (
+        <div className="absolute inset-0 pointer-events-none md:hidden">
           <motion.div
-            initial={{ opacity: 1, y: 0 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Badge className="mb-6 bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20 px-3 py-1 text-xs backdrop-blur-md">
-              <Sparkles className="w-3 h-3 mr-2 text-blue-400" />
-              {heroRaw.eyebrow}
-            </Badge>
-          </motion.div>
-
-          <motion.h1 
-            initial={{ opacity: 1, y: 0 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white via-white/90 to-white/70 max-w-4xl"
-          >
-            {heroRaw.title} <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">
-              {heroRaw.highlight}
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 1, y: 0 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg md:text-xl text-zinc-400 leading-relaxed mb-10 max-w-2xl mx-auto"
-          >
-            {heroRaw.subtitle}
-          </motion.p>
-
+            animate={{ opacity: [0.5, 0.75, 0.5], scale: [1, 1.08, 1] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[140vw] h-[55vw] rounded-full bg-blue-700/15 blur-[90px]"
+          />
           <motion.div
-            initial={{ opacity: 1, y: 0 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto"
-          >
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-full sm:w-auto"
-            >
-              <Button
-                size="lg"
-                onClick={() => router.visit(`/${locale}/register`)}
-                className="w-full sm:w-auto bg-blue-600 hover:bg-blue-500 text-white px-8 h-12 text-base font-semibold shadow-[0_0_40px_-10px_rgba(37,99,235,0.5)] border border-blue-500/20 rounded-xl"
-              >
-                {heroRaw.cta_primary}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </motion.div>
-
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-full sm:w-auto"
-            >
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={onOpenDemo}
-                className="w-full sm:w-auto border-white/10 bg-white/5 hover:bg-white/10 text-white px-8 h-12 text-base font-semibold backdrop-blur-sm rounded-xl"
-              >
-                <Play className="mr-2 h-4 w-4 fill-current" />
-                {heroRaw.cta_demo}
-              </Button>
-            </motion.div>
-          </motion.div>
+            animate={{ opacity: [0.3, 0.55, 0.3] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            className="absolute top-[15%] left-[20%] w-[60vw] h-[40vw] rounded-full bg-cyan-600/10 blur-[70px]"
+          />
         </div>
+      )}
 
+      {/* Radial vignette — darkens edges so text stays readable over the canvas */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_85%_70%_at_50%_30%,transparent_40%,rgba(0,0,0,0.75)_100%)]" />
+
+      {/* Subtle CSS top-center glow to complement the 3D scene */}
+      <motion.div style={{ y: bgY }} className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[80vw] h-[50vh] rounded-full bg-blue-600/10 blur-[140px]" />
+      </motion.div>
+
+      {/* Fine grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_80%_55%_at_50%_0%,#000_55%,transparent_100%)] pointer-events-none" />
+
+      {/* ── TEXT BLOCK — fades + rises on scroll ── */}
+      <motion.div
+        style={{ y: textY, opacity: textOpacity }}
+        className="relative z-10 flex flex-col items-center text-center px-4 sm:px-6 pt-24 sm:pt-28 md:pt-36 max-w-6xl mx-auto w-full"
+      >
+        {/* Eyebrow pill */}
         <motion.div
-          style={{ rotateX, scale, perspective: 1000 }}
-          initial={{ opacity: 1, y: 100, rotateX: 20 }}
-          animate={{ opacity: 1, y: 0, rotateX: 20 }}
-          transition={{ duration: 1, delay: 0.4, type: "spring", bounce: 0.2 }}
-          className="mt-20 relative perspective-1000 mx-auto max-w-5xl"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
         >
-          {/* Main 3D Container with Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[400px] bg-blue-500/20 rounded-[100px] blur-[80px] pointer-events-none" />
-          
-          <div className="relative z-10 rounded-2xl border border-white/10 bg-zinc-950/80 backdrop-blur-xl shadow-2xl shadow-blue-500/10 overflow-hidden ring-1 ring-white/10 group">
-             
-             {/* Header Bar */}
-             <div className="flex border-b border-white/10 bg-white/5 px-4 py-3 items-center gap-3 relative z-20">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/50" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/50" />
-                </div>
-                
-                {/* Step Indicators in Header */}
-                <div className="flex-1 flex justify-center gap-2">
-                    {['Upload', 'Process', 'Export'].map((label, i) => (
-                        <div key={label} className={`flex items-center gap-2 px-3 py-1 rounded-full border transition-all duration-500 ${
-                            step === i 
-                            ? 'bg-blue-500/20 border-blue-500/50 text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.3)]' 
-                            : 'bg-transparent border-transparent text-gray-600'
-                        }`}>
-                            <div className={`w-1.5 h-1.5 rounded-full ${step === i ? 'bg-blue-500 animate-pulse' : 'bg-gray-700'}`} />
-                            <span className="text-[10px] font-mono uppercase tracking-wider">{label}</span>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="w-16"></div> {/* Spacer for balance */}
-              </div>
-
-            {/* Dynamic "Virtual Document" Stage */}
-            <div className="relative aspect-[16/9] bg-zinc-900/50 flex items-center justify-center overflow-hidden">
-                <AnimatePresence mode="wait">
-                    {step === 0 && (
-                        <motion.div 
-                            key="step-upload"
-                            initial={{ opacity: 1 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="flex flex-col items-center justify-center w-full h-full relative"
-                        >
-                            {/* Drop Zone Animation */}
-                            <motion.div 
-                                initial={{ scale: 0.9, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                transition={{ duration: 0.5 }}
-                                className="w-64 h-80 border-2 border-dashed border-white/20 rounded-xl flex flex-col items-center justify-center bg-white/5"
-                            >
-                                <motion.div
-                                    initial={{ y: -50, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    transition={{ duration: 0.8, type: "spring" }}
-                                >
-                                    <FileText className="w-16 h-16 text-blue-400 mb-4" />
-                                </motion.div>
-                                <div className="space-y-2 text-center">
-                                    <div className="w-32 h-2 bg-white/10 rounded-full overflow-hidden mx-auto">
-                                        <motion.div 
-                                            initial={{ width: "0%" }}
-                                            animate={{ width: "100%" }}
-                                            transition={{ duration: 2, ease: "easeInOut" }}
-                                            className="h-full bg-blue-500"
-                                        />
-                                    </div>
-                                    <p className="text-xs text-gray-400 font-mono">Uploading...</p>
-                                </div>
-                            </motion.div>
-                            
-                            {/* Floating Particles */}
-                            {[...Array(5)].map((_, i) => (
-                                <motion.div
-                                    key={i}
-                                    className="absolute w-1 h-1 bg-blue-400 rounded-full"
-                                    initial={{ 
-                                        x: (Math.random() - 0.5) * 300, 
-                                        y: 100, 
-                                        opacity: 0 
-                                    }}
-                                    animate={{ 
-                                        y: -200, 
-                                        opacity: [0, 1, 0] 
-                                    }}
-                                    transition={{ 
-                                        duration: 2 + Math.random(), 
-                                        repeat: Infinity,
-                                        delay: Math.random() * 2 
-                                    }}
-                                />
-                            ))}
-                        </motion.div>
-                    )}
-
-                    {step === 1 && (
-                        <motion.div 
-                            key="step-process"
-                            className="relative w-64 h-80 bg-white rounded-xl shadow-2xl overflow-hidden"
-                            initial={{ scale: 0.9, opacity: 0, rotateX: 20 }}
-                            animate={{ scale: 1, opacity: 1, rotateX: 0 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                        >
-                             {/* Document Content Simulation */}
-                             <div className="p-6 space-y-4 opacity-50 blur-[0.5px]">
-                                <div className="w-16 h-4 bg-gray-200 rounded" />
-                                <div className="space-y-2">
-                                    <div className="w-full h-2 bg-gray-100 rounded" />
-                                    <div className="w-full h-2 bg-gray-100 rounded" />
-                                    <div className="w-2/3 h-2 bg-gray-100 rounded" />
-                                </div>
-                                <div className="flex justify-between pt-8">
-                                    <div className="w-20 h-2 bg-gray-100 rounded" />
-                                    <div className="w-10 h-2 bg-gray-200 rounded" />
-                                </div>
-                                 <div className="space-y-2 pt-4">
-                                    <div className="w-full h-2 bg-gray-100 rounded" />
-                                    <div className="w-full h-2 bg-gray-100 rounded" />
-                                </div>
-                             </div>
-
-                             {/* Scanner Beam */}
-                             <motion.div 
-                                initial={{ top: "-10%" }}
-                                animate={{ top: "120%" }}
-                                transition={{ duration: 2, ease: "linear", repeat: Infinity }}
-                                className="absolute left-0 w-full h-20 bg-gradient-to-b from-blue-500/0 via-blue-500/20 to-blue-500/0 border-b border-blue-400/50 shadow-[0_0_20px_rgba(59,130,246,0.3)] z-10"
-                             />
-                             
-                             {/* Highlighted Fields appearing after scan */}
-                             <motion.div 
-                                initial={{ opacity: 1 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.5 }}
-                                className="absolute top-[20%] left-6 right-6 h-8 border-2 border-green-500/50 bg-green-500/10 rounded flex items-center justify-center"
-                             >
-                                <span className="text-[10px] text-green-700 font-bold bg-white/80 px-1 rounded">INVOICE #9923</span>
-                             </motion.div>
-
-                             <motion.div 
-                                initial={{ opacity: 1 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 1 }}
-                                className="absolute bottom-20 right-6 w-24 h-8 border-2 border-green-500/50 bg-green-500/10 rounded flex items-center justify-center"
-                             >
-                                <span className="text-[10px] text-green-700 font-bold bg-white/80 px-1 rounded">$2,450.00</span>
-                             </motion.div>
-                        </motion.div>
-                    )}
-
-                    {step === 2 && (
-                        <motion.div 
-                            key="step-export"
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className="w-full h-full p-6 relative flex items-center justify-center"
-                        >
-                            {/* Floating "Surprise" Elements - Appearing sequentially */}
-                            
-                            {/* JSON Top Left */}
-                            <motion.div
-                                initial={{ x: -140, y: -80, opacity: 0, scale: 0.9 }}
-                                animate={{ x: -140, y: -80, opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.2 }}
-                                className="absolute bg-zinc-900 border border-blue-500/30 p-4 rounded-xl shadow-2xl w-48 z-10"
-                            >
-                                <div className="text-xs text-gray-400 font-mono mb-2 flex items-center gap-2">
-                                    <FileJson className="w-4 h-4 text-blue-400" /> 
-                                    <span className="text-blue-100">data.json</span>
-                                </div>
-                                <div className="text-[10px] font-mono text-blue-300 bg-zinc-950/50 p-2 rounded border border-blue-500/10">
-                                    <div className="flex gap-1"><span className="text-blue-500">"id"</span>: <span className="text-orange-300">"INV-001"</span>,</div>
-                                    <div className="flex gap-1"><span className="text-blue-500">"total"</span>: <span className="text-orange-300">1250.00</span>,</div>
-                                    <div className="flex gap-1"><span className="text-blue-500">"status"</span>: <span className="text-green-400">"paid"</span></div>
-                                </div>
-                            </motion.div>
-
-                            {/* Excel/Table Bottom Right (Center-Right actually) */}
-                            <motion.div
-                                initial={{ x: 80, y: -40, opacity: 0, scale: 0.9 }}
-                                animate={{ x: 80, y: -40, opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.4 }}
-                                className="absolute bg-zinc-900 border border-emerald-500/30 p-4 rounded-xl shadow-2xl w-56 z-20"
-                            >
-                                <div className="text-xs text-gray-400 font-mono mb-2 flex items-center gap-2">
-                                    <FileSpreadsheet className="w-4 h-4 text-emerald-400" /> 
-                                    <span className="text-emerald-100">export.xlsx</span>
-                                </div>
-                                {/* Excel Grid Visualization */}
-                                <div className="grid grid-cols-3 gap-px bg-zinc-800 border border-zinc-800 rounded overflow-hidden text-[10px] font-mono">
-                                    {/* Header */}
-                                    <div className="bg-zinc-800/80 p-1.5 text-center text-gray-400">ID</div>
-                                    <div className="bg-zinc-800/80 p-1.5 text-center text-gray-400">Date</div>
-                                    <div className="bg-zinc-800/80 p-1.5 text-right text-gray-400">Total</div>
-                                    
-                                    {/* Row 1 */}
-                                    <div className="bg-zinc-950 p-1.5 text-gray-300">001</div>
-                                    <div className="bg-zinc-950 p-1.5 text-gray-500">Oct 24</div>
-                                    <div className="bg-zinc-950 p-1.5 text-right text-emerald-400">$1,250</div>
-
-                                    {/* Row 2 */}
-                                    <div className="bg-zinc-950 p-1.5 text-gray-300">002</div>
-                                    <div className="bg-zinc-950 p-1.5 text-gray-500">Oct 25</div>
-                                    <div className="bg-zinc-950 p-1.5 text-right text-emerald-400">$850</div>
-                                </div>
-                            </motion.div>
-
-                            {/* XML Top Right-ish (shifted) */}
-                            <motion.div
-                                initial={{ x: 160, y: 70, opacity: 0, scale: 0.9 }}
-                                animate={{ x: 160, y: 70, opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.6 }}
-                                className="absolute bg-zinc-900 border border-purple-500/30 p-4 rounded-xl shadow-2xl w-44 z-10"
-                            >
-                                <div className="text-xs text-gray-400 font-mono mb-2 flex items-center gap-2">
-                                    <FileCode className="w-4 h-4 text-purple-400" /> 
-                                    <span className="text-purple-100">data.xml</span>
-                                </div>
-                                <div className="text-[10px] font-mono text-purple-300 bg-zinc-950/50 p-2 rounded border border-purple-500/10">
-                                    &lt;invoice&gt;<br/>
-                                    &nbsp;&nbsp;&lt;id&gt;001&lt;/id&gt;<br/>
-                                    &nbsp;&nbsp;&lt;total&gt;1250&lt;/total&gt;<br/>
-                                    &lt;/invoice&gt;
-                                </div>
-                            </motion.div>
-
-                            {/* CSV Bottom Left */}
-                            <motion.div
-                                initial={{ x: -100, y: 80, opacity: 0, scale: 0.9 }}
-                                animate={{ x: -100, y: 80, opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.8 }}
-                                className="absolute bg-zinc-900 border border-indigo-500/30 p-4 rounded-xl shadow-2xl w-48 z-10"
-                            >
-                                <div className="text-xs text-gray-400 font-mono mb-2 flex items-center gap-2">
-                                    <FileText className="w-4 h-4 text-indigo-400" /> 
-                                    <span className="text-indigo-100">data.csv</span>
-                                </div>
-                                <div className="text-[10px] font-mono text-indigo-300 bg-zinc-950/50 p-2 rounded border border-indigo-500/10 whitespace-pre">
-                                    id,date,total,status<br/>
-                                    001,2024-10-24,1250,paid<br/>
-                                    002,2024-10-25,850,paid
-                                </div>
-                            </motion.div>
-
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
-            
-            {/* Overlay gradient for better blend */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md text-xs text-gray-400 mb-10">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse shrink-0" />
+            {t('landing.hero.eyebrow')}
           </div>
         </motion.div>
-      </div>
+
+        {/* ── MASSIVE HEADLINE ── */}
+        <h1
+          className="font-black leading-[0.9] tracking-tighter overflow-hidden"
+          style={{ fontSize: 'clamp(2.5rem, 6.5vw, 6.5rem)' }}
+        >
+          {/* Line 1 — dimmed, whisper */}
+          <div className="overflow-hidden">
+            <motion.span
+              initial={{ y: '110%' }}
+              animate={{ y: 0 }}
+              transition={{ duration: 0.65, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+              className="block text-white/25"
+            >
+              {line1}
+            </motion.span>
+          </div>
+
+          {/* Line 2 — full white, the hero */}
+          <div className="overflow-hidden">
+            <motion.span
+              initial={{ y: '110%' }}
+              animate={{ y: 0 }}
+              transition={{ duration: 0.65, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="block text-white"
+            >
+              {line2}
+            </motion.span>
+          </div>
+
+          {/* Line 3 — gradient accent */}
+          <div className="overflow-hidden">
+            <motion.span
+              initial={{ y: '110%' }}
+              animate={{ y: 0 }}
+              transition={{ duration: 0.65, delay: 0.32, ease: [0.16, 1, 0.3, 1] }}
+              className="block bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-400"
+            >
+              {line3}
+            </motion.span>
+          </div>
+        </h1>
+
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.52 }}
+          className="mt-8 text-lg md:text-xl text-zinc-400 leading-relaxed max-w-xl mx-auto"
+        >
+          {t('landing.hero.subtitle')}
+        </motion.p>
+
+        {/* CTAs */}
+        <motion.div
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.68 }}
+          className="mt-9 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto"
+        >
+          <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
+            <Button
+              size="lg"
+              onClick={() => router.visit(`/${locale}/register`)}
+              className="w-full sm:w-auto bg-white text-black hover:bg-gray-100 px-9 h-12 text-base font-bold rounded-xl shadow-[0_0_60px_-8px_rgba(255,255,255,0.25)] transition-shadow hover:shadow-[0_0_80px_-8px_rgba(255,255,255,0.4)]"
+            >
+              {t('landing.hero.cta_primary')}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} className="w-full sm:w-auto">
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={onOpenDemo}
+              className="w-full sm:w-auto border-white/12 bg-white/5 hover:bg-white/10 text-white px-9 h-12 text-base font-semibold backdrop-blur-sm rounded-xl"
+            >
+              <Play className="mr-2 h-4 w-4 fill-current" />
+              {t('landing.hero.cta_secondary')}
+            </Button>
+          </motion.div>
+        </motion.div>
+
+        {/* Trust text */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.9 }}
+          className="mt-5 text-sm text-gray-600"
+        >
+          {trustText}
+        </motion.p>
+      </motion.div>
+
+      {/* ── SCREENSHOT — independent parallax layer ── */}
+      <motion.div
+        style={{ y: screenshotY, opacity: screenshotOpacity }}
+        initial={{ opacity: 0, y: 70 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-10 mt-10 md:mt-16 mx-auto w-full max-w-5xl px-3 sm:px-6 pb-0"
+      >
+        {/* Ambient glow beneath the screenshot */}
+        <div className="absolute -inset-6 bg-blue-500/12 rounded-[60px] blur-[90px] pointer-events-none" />
+
+        {/* App window frame */}
+        <div className="relative z-10 rounded-2xl border border-white/10 bg-zinc-950 shadow-[0_50px_120px_-20px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.05)] overflow-hidden">
+          {/* Browser chrome */}
+          <div className="flex items-center gap-3 px-4 py-3 bg-zinc-900/90 border-b border-white/8">
+            <div className="flex gap-1.5 shrink-0">
+              <div className="w-3 h-3 rounded-full bg-red-500/55" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500/55" />
+              <div className="w-3 h-3 rounded-full bg-green-500/55" />
+            </div>
+            <div className="flex-1 flex justify-center">
+              <div className="bg-white/5 border border-white/8 rounded-md px-4 py-1 text-[11px] text-gray-500 font-mono flex items-center gap-2 max-w-[260px] w-full justify-center">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0 animate-pulse" />
+                app.docset.io — Review &amp; Save
+              </div>
+            </div>
+            <div className="w-16 shrink-0" />
+          </div>
+
+          <img
+            src="/Screenshot%202026-02-04%20095031.png"
+            alt="Docset — Extracted invoice data ready to review"
+            className="w-full block"
+          />
+        </div>
+
+        {/* Floating badge — fields detected */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, x: 20 }}
+          animate={{ opacity: 1, scale: 1, x: 0 }}
+          transition={{ delay: 1.05, type: "spring", stiffness: 180 }}
+          className="absolute -right-2 sm:-right-8 top-14 z-20 bg-zinc-900/95 backdrop-blur-md border border-green-500/30 rounded-2xl px-4 py-3 shadow-2xl shadow-green-500/10 hidden sm:flex items-center gap-3"
+        >
+          <div className="w-8 h-8 rounded-xl bg-green-500/15 flex items-center justify-center shrink-0">
+            <CheckCircle className="w-4 h-4 text-green-400" />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-white leading-none mb-0.5">
+              18 {pt ? 'campos detectados' : 'fields detected'}
+            </div>
+            <div className="text-[10px] text-gray-400">{pt ? 'Pronto para rever' : 'Ready to review'}</div>
+          </div>
+        </motion.div>
+
+        {/* Floating badge — exported */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, x: -20 }}
+          animate={{ opacity: 1, scale: 1, x: 0 }}
+          transition={{ delay: 1.25, type: "spring", stiffness: 180 }}
+          className="absolute -left-2 sm:-left-8 bottom-8 z-20 bg-zinc-900/95 backdrop-blur-md border border-emerald-500/30 rounded-2xl px-4 py-3 shadow-2xl shadow-emerald-500/10 hidden sm:flex items-center gap-3"
+        >
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0">
+            <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+          </div>
+          <div>
+            <div className="text-xs font-bold text-white leading-none mb-0.5">
+              {pt ? 'Exportado para Sheets' : 'Exported to Sheets'}
+            </div>
+            <div className="text-[10px] text-gray-400">{pt ? '5 faturas · agora' : '5 invoices · just now'}</div>
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Bottom gradient — blends into next section */}
+      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black to-transparent pointer-events-none z-20" />
     </section>
   );
 }
@@ -857,52 +774,53 @@ function TrustSignals() {
   };
 
   return (
-    <section className="py-10 border-y border-white/5 bg-black/50 backdrop-blur-sm relative z-20">
+    <section className="py-10 border-y border-white/5 bg-zinc-950/80 backdrop-blur-sm relative z-20">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div
-           initial={{ opacity: 0, y: 0 }}
+           initial={{ opacity: 0, y: 16 }}
            whileInView={{ opacity: 1, y: 0 }}
-           viewport={{ once: true }}
-           className="flex flex-col md:flex-row items-center justify-between gap-8 ssr-fade-in"
+           viewport={{ once: true, margin: "-60px" }}
+           transition={{ duration: 0.5 }}
+           className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8"
         >
-            <div className="flex flex-wrap justify-center gap-4 md:gap-8">
+            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
                {trust.badges && Array.isArray(trust.badges) ? (
                  trust.badges.map((badge: any, i: number) => {
                    const Icon = iconMap[badge.icon] || Shield;
                    const colors = ['text-green-400', 'text-blue-400', 'text-purple-400'];
                    return (
-                     <div key={i} className="flex items-center gap-2 text-gray-400 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                       <Icon className={`w-4 h-4 ${colors[i] || 'text-gray-400'}`} />
-                       <span className="text-sm font-medium">{badge.title}</span>
+                     <div key={i} className="flex items-center gap-2 text-gray-400 bg-white/[0.04] hover:bg-white/[0.07] px-4 py-2 rounded-full border border-white/8 transition-colors">
+                       <Icon className={`w-3.5 h-3.5 ${colors[i] || 'text-gray-400'}`} />
+                       <span className="text-xs font-medium tracking-wide">{badge.title}</span>
                      </div>
                    );
                  })
                ) : (
-                 /* Fallback for old structure */
                  <>
-                   <div className="flex items-center gap-2 text-gray-400 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                      <Shield className="w-4 h-4 text-green-400" />
-                      <span className="text-sm font-medium">{trust.badges?.gdpr || 'GDPR Compliant'}</span>
+                   <div className="flex items-center gap-2 text-gray-400 bg-white/[0.04] px-4 py-2 rounded-full border border-white/8">
+                      <Shield className="w-3.5 h-3.5 text-green-400" />
+                      <span className="text-xs font-medium">{trust.badges?.gdpr || 'GDPR Compliant'}</span>
                    </div>
-                   <div className="flex items-center gap-2 text-gray-400 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                      <Lock className="w-4 h-4 text-blue-400" />
-                      <span className="text-sm font-medium">{trust.badges?.encrypted || 'Encrypted Data'}</span>
+                   <div className="flex items-center gap-2 text-gray-400 bg-white/[0.04] px-4 py-2 rounded-full border border-white/8">
+                      <Lock className="w-3.5 h-3.5 text-blue-400" />
+                      <span className="text-xs font-medium">{trust.badges?.encrypted || 'Encrypted Data'}</span>
                    </div>
-                   <div className="flex items-center gap-2 text-gray-400 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                      <Server className="w-4 h-4 text-purple-400" />
-                      <span className="text-sm font-medium">{trust.badges?.no_training || 'Privacy Protected'}</span>
+                   <div className="flex items-center gap-2 text-gray-400 bg-white/[0.04] px-4 py-2 rounded-full border border-white/8">
+                      <Server className="w-3.5 h-3.5 text-purple-400" />
+                      <span className="text-xs font-medium">{trust.badges?.no_training || 'Privacy Protected'}</span>
                    </div>
                  </>
                )}
             </div>
-            
-            <div className="flex items-center gap-4 text-gray-500 font-mono text-sm">
-                <span className="hidden lg:block opacity-50">{(trust.exports || 'Export:').split(':')[0]}:</span>
-                <div className="flex flex-wrap gap-3 md:gap-4 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-                    <span className="font-bold flex items-center gap-2" title="Excel / CSV"><FileSpreadsheet className="w-4 h-4" /> XLS/CSV</span>
-                    <span className="font-bold flex items-center gap-2" title="Google Sheets"><FileSpreadsheet className="w-4 h-4 text-emerald-400" /> Sheets</span>
-                    <span className="font-bold flex items-center gap-2" title="JSON"><FileJson className="w-4 h-4" /> JSON</span>
-                    <span className="font-bold flex items-center gap-2" title="XML"><FileCode className="w-4 h-4" /> XML</span>
+
+            <div className="flex items-center gap-2 text-gray-600 text-xs font-mono">
+                <span className="hidden lg:block opacity-40 uppercase tracking-widest text-[10px]">Exports</span>
+                <span className="hidden lg:block opacity-20">·</span>
+                <div className="flex flex-wrap gap-3 md:gap-4">
+                    <span className="flex items-center gap-1.5 text-gray-500 hover:text-gray-300 transition-colors cursor-default" title="Excel / CSV"><FileSpreadsheet className="w-3.5 h-3.5" /> XLS/CSV</span>
+                    <span className="flex items-center gap-1.5 text-gray-500 hover:text-emerald-400 transition-colors cursor-default" title="Google Sheets"><FileSpreadsheet className="w-3.5 h-3.5" /> Sheets</span>
+                    <span className="flex items-center gap-1.5 text-gray-500 hover:text-gray-300 transition-colors cursor-default" title="JSON"><FileJson className="w-3.5 h-3.5" /> JSON</span>
+                    <span className="flex items-center gap-1.5 text-gray-500 hover:text-gray-300 transition-colors cursor-default" title="XML"><FileCode className="w-3.5 h-3.5" /> XML</span>
                 </div>
             </div>
         </motion.div>
@@ -914,56 +832,60 @@ function TrustSignals() {
 function UseCases() {
   const { t } = useTranslation();
   const content = t('landing.useCases', { returnObjects: true }) as any;
-  const icons = [FileText, Receipt, IdCard, Sparkles];
+  const icons = [FileText, Receipt, IdCard, TrendingUp];
 
   return (
-    <section className="py-24 bg-zinc-950 relative overflow-hidden">
+    <section className="py-14 md:py-32 bg-zinc-950 relative overflow-hidden">
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(59,130,246,0.04),transparent_70%)]" />
         <div className="max-w-7xl mx-auto px-6 relative z-10">
             <div className="text-center mb-16">
-                 <h2 className="text-3xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70">{content.title}</h2>
-                 <p className="text-xl text-gray-400 max-w-2xl mx-auto">{content.subtitle}</p>
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.55 }}
+                >
+                  <h2 className="text-3xl md:text-5xl font-bold mb-5 text-white">{content.title}</h2>
+                  <p className="text-lg text-gray-500 max-w-2xl mx-auto">{content.subtitle}</p>
+                </motion.div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                 {content.items.map((item: any, i: number) => {
                     const Icon = icons[i] || FileText;
                     return (
-                        <motion.div 
+                        <motion.div
                             key={i}
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 28 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
-                            className="bg-zinc-900/50 border border-white/10 p-6 rounded-2xl hover:bg-white/5 transition duration-300 group hover:border-blue-500/30 flex flex-col ssr-fade-in"
+                            viewport={{ once: true, margin: "-60px" }}
+                            transition={{ delay: i * 0.08, duration: 0.5 }}
+                            className="bg-zinc-900/40 border border-white/8 p-6 rounded-2xl hover:bg-zinc-900/70 transition-all duration-300 group hover:border-blue-500/25 hover:shadow-lg hover:shadow-blue-500/5 flex flex-col"
                         >
-                            <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition-colors">
-                                <Icon className="w-6 h-6 text-blue-400" />
+                            <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center mb-4 group-hover:bg-blue-500/20 transition-colors">
+                                <Icon className="w-5 h-5 text-blue-400" />
                             </div>
-                            <h3 className="text-lg font-bold mb-3">{item.title}</h3>
-                            
-                            {/* Problem */}
+                            <h3 className="text-base font-bold mb-3 text-white">{item.title}</h3>
+
                             {item.problem && (
-                              <div className="mb-3 p-3 bg-red-500/5 border border-red-500/20 rounded-lg">
-                                <p className="text-sm text-red-200/80">{item.problem}</p>
+                              <div className="mb-3 p-3 bg-red-500/5 border border-red-500/15 rounded-lg">
+                                <p className="text-xs text-red-200/70">{item.problem}</p>
                               </div>
                             )}
-                            
-                            {/* Solution */}
+
                             {item.solution && (
-                              <p className="text-sm text-gray-400 leading-relaxed mb-3">{item.solution}</p>
+                              <p className="text-sm text-gray-500 leading-relaxed mb-3">{item.solution}</p>
                             )}
-                            
-                            {/* Benefit */}
+
                             {item.benefit && (
-                              <div className="mt-auto p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-lg">
-                                <p className="text-sm font-medium text-emerald-200/90">✓ {item.benefit}</p>
+                              <div className="mt-auto p-3 bg-emerald-500/5 border border-emerald-500/15 rounded-lg">
+                                <p className="text-xs font-medium text-emerald-300/80">✓ {item.benefit}</p>
                               </div>
                             )}
-                            
-                            {/* Old desc fallback if new structure not available */}
+
                             {!item.problem && !item.solution && item.desc && (
-                              <p className="text-gray-400 leading-relaxed">{item.desc}</p>
+                              <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
                             )}
                         </motion.div>
                     );
@@ -987,41 +909,98 @@ function ProductFlow({ locale }: { locale: string }) {
         ]
     };
   };
-  
+
   const flowText = getProductFlowText();
   const iconMap = [Upload, Eye, Database];
+  const screenshots = [
+    '/Screenshot%202026-02-04%20094931.png',
+    '/Screenshot%202026-02-04%20094945.png',
+    '/Screenshot%202026-02-04%20095346.png',
+  ];
 
   return (
-    <section className="py-20 md:py-32 relative overflow-hidden">
+    <section className="py-14 md:py-32 relative overflow-hidden bg-black">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-20">
-          <Badge className="mb-6 bg-blue-500/10 text-blue-300 border-blue-500/20">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.55 }}
+          className="text-center mb-20"
+        >
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs text-gray-400 mb-8">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
             {flowText.badge}
-          </Badge>
-          <h2 className="text-4xl md:text-5xl font-bold">
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold text-white">
             {flowText.title}
           </h2>
+        </motion.div>
+
+        {/* Step connector — animated dashed line visible only on desktop */}
+        <div className="hidden md:block relative h-0 mb-0 pointer-events-none" style={{ marginTop: '-2.5rem', marginBottom: '2.5rem' }}>
+          <svg className="absolute left-1/2 -translate-x-1/2 w-[66%]" height="2" xmlns="http://www.w3.org/2000/svg">
+            <motion.line
+              x1="0" y1="1" x2="100%" y2="1"
+              stroke="#3b82f6" strokeWidth="1"
+              strokeDasharray="6 6"
+              initial={{ pathLength: 0, opacity: 0 }}
+              whileInView={{ pathLength: 1, opacity: 0.35 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
+            />
+          </svg>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-6">
           {flowText.steps.map((item, i) => (
-            <motion.div
-              key={item.step}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="relative ssr-fade-in"
-            >
-              <div className="bg-gradient-to-b from-white/5 to-transparent border border-white/10 rounded-2xl p-8 hover:border-blue-500/50 transition-all duration-300">
-                <div className="text-5xl font-bold text-white/10 mb-4">{item.step}</div>
-                <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-6">
-                  {React.createElement(iconMap[i], { className: "w-6 h-6 text-blue-400" })}
+            <React.Fragment key={item.step}>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ delay: i * 0.12, duration: 0.55 }}
+                className="relative"
+              >
+                <div className="bg-gradient-to-b from-white/[0.04] to-transparent border border-white/8 rounded-2xl p-5 sm:p-6 hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 flex flex-col h-full group">
+                  {/* Step number — top-right watermark */}
+                  <div className="absolute top-4 right-5 text-5xl font-black text-white/5 leading-none select-none">{item.step}</div>
+
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/15 flex items-center justify-center mb-4 group-hover:bg-blue-500/25 transition-colors">
+                    {React.createElement(iconMap[i], { className: "w-5 h-5 text-blue-400" })}
+                  </div>
+                  <h3 className="text-lg font-bold mb-2 text-white">{item.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed mb-4 sm:mb-5">{item.description}</p>
+                  <div className="rounded-xl overflow-hidden border border-white/8 mt-auto ring-1 ring-white/5">
+                    <img
+                      src={screenshots[i]}
+                      alt={item.title}
+                      className="w-full block opacity-55 group-hover:opacity-85 transition-opacity duration-500"
+                    />
+                  </div>
                 </div>
-                <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
-                <p className="text-gray-400 leading-relaxed">{item.description}</p>
-              </div>
-            </motion.div>
+
+                {/* Arrow between steps — desktop horizontal */}
+                {i < flowText.steps.length - 1 && (
+                  <div className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-8 items-center justify-center">
+                    <ArrowRight className="w-4 h-4 text-blue-500/40" />
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Mobile: animated down-arrow connector between steps */}
+              {i < flowText.steps.length - 1 && (
+                <div className="flex md:hidden justify-center py-3">
+                  <motion.div
+                    animate={{ y: [0, 4, 0] }}
+                    transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <ArrowRight className="w-5 h-5 text-blue-400/40 rotate-90" />
+                  </motion.div>
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
       </div>
@@ -1031,78 +1010,61 @@ function ProductFlow({ locale }: { locale: string }) {
 
 function GoogleIntegrations({ locale }: { locale: string }) {
   const { t } = useTranslation();
-  
+
   return (
-    <section className="py-20 md:py-28 relative overflow-hidden bg-gradient-to-b from-zinc-950 via-blue-950/10 to-zinc-950">
+    <section className="py-14 md:py-28 relative overflow-hidden bg-gradient-to-b from-zinc-950 via-blue-950/10 to-zinc-950">
       {/* Background Effects */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-600/10 via-transparent to-transparent" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:32px_32px]"></div>
-      
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <div className="text-center mb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 backdrop-blur-sm"
-          >
-            <Cloud className="w-4 h-4 text-blue-400" />
-            <span className="text-sm font-medium text-blue-300">
-              {locale.startsWith('pt') ? 'Integrações Poderosas' : 'Powerful Integrations'}
-            </span>
-          </motion.div>
-          
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70"
-          >
-            {locale.startsWith('pt') 
-              ? 'Integração Nativa com Google' 
-              : 'Native Google Integration'}
-          </motion.h2>
-          
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-xl text-gray-400 max-w-3xl mx-auto"
-          >
-            {locale.startsWith('pt')
-              ? 'Conecte-se diretamente ao Google Drive e exporte para Google Sheets com apenas alguns cliques. Automatize seu fluxo de trabalho sem esforço.'
-              : 'Connect directly to Google Drive and export to Google Sheets with just a few clicks. Automate your workflow effortlessly.'}
-          </motion.p>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.55 }}
+          className="text-center mb-16"
+        >
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs text-gray-400 mb-8">
+            <Cloud className="w-3 h-3 text-blue-400" />
+            {locale.startsWith('pt') ? 'Integrações Poderosas' : 'Powerful Integrations'}
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold mb-5 text-white">
+            {locale.startsWith('pt') ? 'Integração Nativa com Google' : 'Native Google Integration'}
+          </h2>
+          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+            {locale.startsWith('pt')
+              ? 'Novos PDFs são detectados automaticamente e transformados em dados prontos para usar.'
+              : 'New PDFs are picked up automatically and turned into ready-to-use information.'}
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 max-w-5xl mx-auto">
           {/* Google Drive Card */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] p-8 hover:border-blue-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10"
+            className="group relative overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] p-5 sm:p-8 hover:border-blue-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10"
           >
             <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px] group-hover:bg-blue-500/20 transition-all duration-500" />
-            
+
             <div className="relative z-10">
               <div className="mb-6 inline-flex rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/20 p-4 text-blue-400 ring-1 ring-inset ring-blue-500/30 group-hover:scale-110 transition-transform duration-300">
                 <Cloud className="w-8 h-8" />
               </div>
-              
+
               <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-blue-100 transition-colors">
                 Google Drive
               </h3>
-              
+
               <p className="text-gray-400 leading-relaxed mb-6 group-hover:text-gray-300 transition-colors">
                 {locale.startsWith('pt')
                   ? 'Importe documentos diretamente do seu Google Drive. Acesse e processe seus arquivos sem precisar fazer download manual.'
                   : 'Import documents directly from your Google Drive. Access and process your files without manual downloads.'}
               </p>
-              
+
               <ul className="space-y-3">
                 <li className="flex items-start gap-3 text-sm text-gray-300">
                   <Check className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
@@ -1138,25 +1100,43 @@ function GoogleIntegrations({ locale }: { locale: string }) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
-            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] p-8 hover:border-emerald-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10"
+            className="group relative overflow-hidden rounded-2xl md:rounded-3xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] p-5 sm:p-8 hover:border-emerald-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/10"
           >
             <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-emerald-500/10 blur-[80px] group-hover:bg-emerald-500/20 transition-all duration-500" />
-            
+
             <div className="relative z-10">
               <div className="mb-6 inline-flex rounded-2xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 p-4 text-emerald-400 ring-1 ring-inset ring-emerald-500/30 group-hover:scale-110 transition-transform duration-300">
                 <FileSpreadsheet className="w-8 h-8" />
               </div>
-              
+
               <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-emerald-100 transition-colors">
                 Google Sheets
               </h3>
-              
+
               <p className="text-gray-400 leading-relaxed mb-6 group-hover:text-gray-300 transition-colors">
                 {locale.startsWith('pt')
                   ? 'Exporte dados extraídos diretamente para Google Sheets. Organize e analise suas informações em tempo real.'
                   : 'Export extracted data directly to Google Sheets. Organize and analyze your information in real-time.'}
               </p>
-              
+
+              {/* Mini spreadsheet preview */}
+              <div className="mb-6 rounded-lg overflow-hidden border border-emerald-500/20">
+                <div className="grid grid-cols-4 text-[10px] font-mono">
+                  <div className="bg-zinc-800/80 px-2 py-1.5 text-gray-400 border-b border-r border-white/5">Invoice</div>
+                  <div className="bg-zinc-800/80 px-2 py-1.5 text-gray-400 border-b border-r border-white/5">Date</div>
+                  <div className="bg-zinc-800/80 px-2 py-1.5 text-gray-400 border-b border-r border-white/5">Supplier</div>
+                  <div className="bg-zinc-800/80 px-2 py-1.5 text-gray-400 border-b border-white/5 text-right">Total</div>
+                  <div className="bg-zinc-950 px-2 py-1.5 text-gray-300 border-b border-r border-white/5">INV-001</div>
+                  <div className="bg-zinc-950 px-2 py-1.5 text-gray-400 border-b border-r border-white/5">26/01</div>
+                  <div className="bg-zinc-950 px-2 py-1.5 text-gray-400 border-b border-r border-white/5">Acme Ltd</div>
+                  <div className="bg-zinc-950 px-2 py-1.5 text-emerald-400 border-b border-white/5 text-right">€1,250</div>
+                  <div className="bg-zinc-950 px-2 py-1.5 text-gray-300 border-r border-white/5">INV-002</div>
+                  <div className="bg-zinc-950 px-2 py-1.5 text-gray-400 border-r border-white/5">26/01</div>
+                  <div className="bg-zinc-950 px-2 py-1.5 text-gray-400 border-r border-white/5">Beta Co.</div>
+                  <div className="bg-zinc-950 px-2 py-1.5 text-emerald-400 text-right">€850</div>
+                </div>
+              </div>
+
               <ul className="space-y-3">
                 <li className="flex items-start gap-3 text-sm text-gray-300">
                   <Check className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
@@ -1187,7 +1167,7 @@ function GoogleIntegrations({ locale }: { locale: string }) {
           </motion.div>
         </div>
 
-        {/* Bottom CTA */}
+        {/* Bottom caption */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -1202,7 +1182,6 @@ function GoogleIntegrations({ locale }: { locale: string }) {
                 ? 'Conecte sua conta Google em segundos'
                 : 'Connect your Google account in seconds'}
             </span>
-            <Sparkles className="w-4 h-4 text-yellow-400" />
           </div>
         </motion.div>
       </div>
@@ -1226,42 +1205,49 @@ function Features({ locale }: { locale: string }) {
         ]
     };
   };
-  
+
   const featuresText = getFeaturesText();
 
   return (
-    <section id="features" className="py-24 md:py-32 relative bg-zinc-950/50">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-      
+    <section id="features" className="py-14 md:py-32 relative bg-zinc-950">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_30%,#000_40%,transparent_100%)]" />
+
       <div className="max-w-7xl mx-auto px-6 relative">
-        <div className="text-center mb-20 max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.55 }}
+          className="text-center mb-16 max-w-3xl mx-auto"
+        >
+          <h2 className="text-3xl md:text-5xl font-bold mb-5 text-white">
             {featuresText.title}
           </h2>
-          <p className="text-xl text-gray-400">
+          <p className="text-lg text-gray-500">
             {featuresText.subtitle}
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {featuresText.items.map((feature, i) => (
             <motion.div
               key={feature.title}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 28 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-              whileHover={{ y: -5 }}
-              className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 transition-colors hover:bg-white/10 hover:shadow-2xl hover:shadow-blue-500/10 ${feature.className} ssr-fade-in`}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ delay: i * 0.06, duration: 0.5 }}
+              whileHover={{ y: -4 }}
+              className={`group relative overflow-hidden rounded-2xl border border-white/8 bg-white/[0.03] p-7 transition-all duration-300 hover:bg-white/[0.06] hover:border-white/15 hover:shadow-xl hover:shadow-blue-500/8 ${feature.className}`}
             >
-              <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-blue-500/10 blur-[80px] group-hover:bg-blue-500/20 transition-all duration-500" />
-              
+              <div className="absolute -right-12 -top-12 h-48 w-48 rounded-full bg-blue-500/8 blur-[60px] group-hover:bg-blue-500/15 transition-all duration-500" />
+
               <div className="relative z-10">
-                <div className="mb-6 inline-flex rounded-xl bg-blue-500/10 p-3 text-blue-400 ring-1 ring-inset ring-blue-500/20">
-                    <feature.icon className="w-6 h-6" />
+                <div className="mb-5 inline-flex rounded-xl bg-blue-500/10 p-3 text-blue-400 ring-1 ring-inset ring-blue-500/15">
+                    <feature.icon className="w-5 h-5" />
                 </div>
-                <h3 className="text-xl font-bold mb-3 text-white group-hover:text-blue-200 transition-colors">{feature.title}</h3>
-                <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">{feature.desc}</p>
+                <h3 className="text-lg font-bold mb-2.5 text-white group-hover:text-blue-100 transition-colors">{feature.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed group-hover:text-gray-400 transition-colors">{feature.desc}</p>
               </div>
             </motion.div>
           ))}
@@ -1282,7 +1268,7 @@ function CodeExample({ locale, onOpenDemo }: { locale: string; onOpenDemo: () =>
       tabs: { upload: t('landing.howItWorks.steps.0.title'), retrieve: t('landing.integration.cards.2.title').split(' ')[0] }, // "Upload", "Structured" (approx)
     };
   };
-  
+
   const codeText = getCodeExampleText();
   const [activeTab, setActiveTab] = useState<'upload' | 'retrieve'>('upload');
 
@@ -1291,7 +1277,7 @@ function CodeExample({ locale, onOpenDemo }: { locale: string; onOpenDemo: () =>
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -F "file=@invoice.pdf" \\
   -F "template=invoice_template"
-  
+
 // Response
 {
   "id": "doc_abc123",
@@ -1300,7 +1286,7 @@ function CodeExample({ locale, onOpenDemo }: { locale: string; onOpenDemo: () =>
 }`,
     retrieve: `curl https://api.docset.app/v1/documents/doc_abc123 \\
   -H "Authorization: Bearer YOUR_API_KEY"
-  
+
 // Response
 {
   "id": "doc_abc123",
@@ -1314,51 +1300,76 @@ function CodeExample({ locale, onOpenDemo }: { locale: string; onOpenDemo: () =>
   };
 
   return (
-    <section id="api" className="py-20 md:py-32 relative overflow-hidden">
+    <section id="api" className="py-14 md:py-32 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-950/10 to-transparent" />
-      
+
       <div className="max-w-6xl mx-auto px-6 relative">
-        <div className="text-center mb-16">
-          <Badge className="mb-6 bg-blue-500/10 text-blue-300 border-blue-500/20">
-            <Code className="w-3 h-3 mr-1" />
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.55 }}
+          className="text-center mb-16"
+        >
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs text-gray-400 mb-8">
+            <Code className="w-3 h-3 text-blue-400" />
             {codeText.badge}
-          </Badge>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold mb-5 text-white">
             {codeText.title}
           </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
             {codeText.subtitle}
           </p>
-        </div>
+        </motion.div>
 
-        <div className="bg-zinc-900 rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
-          <div className="border-b border-white/10 p-4 flex gap-4">
-            <button
-              onClick={() => setActiveTab('upload')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                activeTab === 'upload'
-                  ? 'bg-blue-500 text-white'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              {codeText.tabs.upload}
-            </button>
-            <button
-              onClick={() => setActiveTab('retrieve')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                activeTab === 'retrieve'
-                  ? 'bg-blue-500 text-white'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              {codeText.tabs.retrieve}
-            </button>
+        <div className="grid md:grid-cols-5 gap-8 items-center">
+          {/* Left: bullets */}
+          <div className="md:col-span-2 space-y-5">
+            {[
+              locale.startsWith('pt') ? 'Conecte o Docset aos seus próprios sistemas' : 'Connect Docset to your own systems',
+              locale.startsWith('pt') ? 'Use webhooks para receber resultados automaticamente' : 'Use webhooks to get results automatically',
+              locale.startsWith('pt') ? 'Escale sem mudar o seu processo' : 'Scale up without changing your process',
+            ].map((text, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center shrink-0 mt-0.5">
+                  <Check className="w-3 h-3 text-blue-400" />
+                </div>
+                <p className="text-gray-300 leading-relaxed">{text}</p>
+              </div>
+            ))}
           </div>
 
-          <div className="p-6">
-            <pre className="text-sm font-mono text-gray-300 overflow-x-auto">
-              <code>{codeExamples[activeTab]}</code>
-            </pre>
+          {/* Right: code block */}
+          <div className="md:col-span-3 bg-zinc-900 rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+            <div className="border-b border-white/10 p-4 flex gap-4">
+              <button
+                onClick={() => setActiveTab('upload')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                  activeTab === 'upload'
+                    ? 'bg-blue-500 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                {codeText.tabs.upload}
+              </button>
+              <button
+                onClick={() => setActiveTab('retrieve')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                  activeTab === 'retrieve'
+                    ? 'bg-blue-500 text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                {codeText.tabs.retrieve}
+              </button>
+            </div>
+
+            <div className="p-6">
+              <pre className="text-[11px] sm:text-sm font-mono text-gray-300 overflow-x-auto leading-relaxed">
+                <code>{codeExamples[activeTab]}</code>
+              </pre>
+            </div>
           </div>
         </div>
 
@@ -1387,7 +1398,7 @@ interface Plan {
   id: string;
   name: string;
   display_name: string;
-  tagline: string; 
+  tagline: string;
   description?: string;
   price: string | null;
   interval: string | null;
@@ -1399,37 +1410,31 @@ interface Plan {
 
 function Pricing({ locale, isAuthenticated, localeShort, plans }: { locale: string; isAuthenticated: boolean; localeShort: string; plans: any[] }) {
   const { t } = useTranslation();
-  
+
   // Use server-provided plans directly
   const plansData = plans || [];
 
   return (
-    <section className="py-24 bg-zinc-950 relative overflow-hidden" id="pricing">
+    <section className="py-14 md:py-24 bg-zinc-950 relative overflow-hidden" id="pricing">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.05),transparent_70%)]" />
-      
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <motion.h2
-            viewport={{ once: true }}
-            initial={{ opacity: 0, y: 0 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl md:text-4xl font-bold text-white mb-6 ssr-fade-in"
-          >
-            {t('landing.pricing.title')}
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 0 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-lg text-zinc-400 ssr-fade-in"
-          >
-            {t('landing.pricing.subtitle')}
-          </motion.p>
-        </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+      <div className="container mx-auto px-4 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.55 }}
+          className="text-center max-w-2xl mx-auto mb-16"
+        >
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-5">
+            {t('landing.pricing.title')}
+          </h2>
+          <p className="text-lg text-gray-500">
+            {t('landing.pricing.subtitle')}
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 max-w-7xl mx-auto">
           {plansData.length === 0 ? (
              // Fallback skeleton if no plans - though SSR should provide them
              Array.from({ length: 4 }).map((_, i) => (
@@ -1445,9 +1450,9 @@ function Pricing({ locale, isAuthenticated, localeShort, plans }: { locale: stri
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className={`relative p-8 rounded-2xl border ${
+                className={`relative p-5 sm:p-8 rounded-2xl border ${
                   recommended
-                    ? 'bg-blue-600/10 border-blue-500/50 shadow-lg shadow-blue-500/10' 
+                    ? 'bg-blue-600/10 border-blue-500/50 shadow-lg shadow-blue-500/10'
                     : 'bg-white/5 border-white/10 hover:border-white/20'
                 } backdrop-blur-sm transition-all duration-300 group hover:-translate-y-1 flex flex-col ssr-fade-in`}
               >
@@ -1459,8 +1464,8 @@ function Pricing({ locale, isAuthenticated, localeShort, plans }: { locale: stri
                 <div className="mb-8">
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold text-white">
-                          {plan.price === null || plan.price === 0 || parseFloat(String(plan.price)) === 0 
-                            ? new Intl.NumberFormat(locale, { style: 'currency', currency: plan.currency || 'EUR' }).format(0) 
+                          {plan.price === null || plan.price === 0 || parseFloat(String(plan.price)) === 0
+                            ? new Intl.NumberFormat(locale, { style: 'currency', currency: plan.currency || 'EUR' }).format(0)
                             : new Intl.NumberFormat(locale, { style: 'currency', currency: plan.currency }).format(plan.price)}
                     </span>
                     {(plan.price !== null || plan.interval) && (
@@ -1478,10 +1483,10 @@ function Pricing({ locale, isAuthenticated, localeShort, plans }: { locale: stri
                   ))}
                 </div>
 
-                <Button 
+                <Button
                   className={`w-full ${
                     recommended
-                      ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25' 
+                      ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25'
                       : 'bg-white text-zinc-900 hover:bg-zinc-100'
                   }`}
                   onClick={() => {
@@ -1506,7 +1511,7 @@ function Pricing({ locale, isAuthenticated, localeShort, plans }: { locale: stri
             )})
           )}
         </div>
-        
+
         <div className="mt-12 text-center">
             <p className="text-zinc-500 text-sm">
                 {t('landing.pricing.disclaimer')}
@@ -1520,43 +1525,53 @@ function Pricing({ locale, isAuthenticated, localeShort, plans }: { locale: stri
 
 function FinalCTA({ locale }: { locale: string }) {
   const { t } = useTranslation();
-  const getFinalCTAText = () => {
-    return {
-      title: t('landing.cta.title'),
-      subtitle: t('landing.cta.subtitle'),
-      cta: t('landing.cta.primary'),
-    };
+  const ctaText = {
+    title: t('landing.cta.title'),
+    subtitle: t('landing.cta.subtitle'),
+    cta: t('landing.cta.primary'),
   };
-  
-  const ctaText = getFinalCTAText();
 
   return (
-    <section className="py-20 md:py-32 relative overflow-hidden">
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-blue-900/20 to-transparent" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/20 rounded-full blur-3xl" />
+    <section className="py-16 md:py-36 relative overflow-hidden bg-zinc-950">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+      {/* Fine grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
+      {/* Radial glow */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-blue-600/18 rounded-full blur-[130px]" />
       </div>
 
       <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
         <motion.div
-          initial={{ opacity: 1, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.6 }}
         >
-          <h2 className="text-5xl md:text-6xl font-bold mb-6">
+          {/* Bold white headline — same style as hero */}
+          <h2
+            className="font-black leading-[0.9] tracking-tighter mb-8 text-white"
+            style={{ fontSize: 'clamp(2.2rem, 5.5vw, 5.5rem)' }}
+          >
             {ctaText.title}
           </h2>
-          <p className="text-xl text-gray-400 mb-10">
+          <p className="text-lg text-gray-500 mb-10 max-w-xl mx-auto">
             {ctaText.subtitle}
           </p>
-          <Button
-            size="lg"
-            onClick={() => router.visit(`/${locale.split('-')[0]}/register`)}
-            className="bg-white text-black hover:bg-gray-200 px-8 h-14 text-lg font-semibold shadow-lg shadow-white/20"
+          <motion.div
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.97 }}
+            className="inline-block"
           >
-            {ctaText.cta}
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+            <Button
+              size="lg"
+              onClick={() => router.visit(`/${locale.split('-')[0]}/register`)}
+              className="bg-white text-black hover:bg-gray-100 px-6 sm:px-10 h-12 sm:h-14 text-base font-bold rounded-xl shadow-[0_0_80px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_100px_-10px_rgba(255,255,255,0.45)] transition-shadow"
+            >
+              {ctaText.cta}
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </motion.div>
         </motion.div>
       </div>
     </section>
@@ -1565,7 +1580,7 @@ function FinalCTA({ locale }: { locale: string }) {
 
 function Footer({ locale }: { locale: string }) {
   const { t } = useTranslation();
-  
+
   const handleOpenCookieSettings = (e: React.MouseEvent) => {
     e.preventDefault();
     window.dispatchEvent(new Event('openCookieSettings'));
@@ -1574,8 +1589,8 @@ function Footer({ locale }: { locale: string }) {
   return (
     <footer className="bg-zinc-950 border-t border-white/10 py-12 px-6">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-          <div className="col-span-1 md:col-span-1">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+          <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
                 <img src="/docset.png" alt="Docset" className="w-6 h-6" />
@@ -1583,13 +1598,13 @@ function Footer({ locale }: { locale: string }) {
               <span className="font-bold text-xl">DOCSET</span>
             </div>
             <p className="text-gray-400 text-sm mb-6">
-              Automated document processing powered by Advanced AI Vision.
+              Turn PDFs into ready-to-use data. No manual typing needed.
             </p>
           <div className="flex gap-4">
               {/* Social Links would go here */}
             </div>
           </div>
-          
+
           <div>
             <h3 className="font-semibold mb-4">Product</h3>
             <ul className="space-y-2 text-sm text-gray-400">
@@ -1598,15 +1613,15 @@ function Footer({ locale }: { locale: string }) {
               <li><a href="#api" className="hover:text-white transition">API</a></li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="font-semibold mb-4">Legal</h3>
             <ul className="space-y-2 text-sm text-gray-400">
               <li><a href={`/${locale}/privacy`} className="hover:text-white transition">{t('Privacy Policy')}</a></li>
               <li><a href={`/${locale}/terms`} className="hover:text-white transition">{t('Terms of Service')}</a></li>
               <li>
-                <button 
-                  onClick={handleOpenCookieSettings} 
+                <button
+                  onClick={handleOpenCookieSettings}
                   className="hover:text-white transition text-left"
                 >
                 </button>
@@ -1614,7 +1629,7 @@ function Footer({ locale }: { locale: string }) {
             </ul>
           </div>
         </div>
-        
+
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-gray-500">
             © {new Date().getFullYear()} Docset. All rights reserved.
@@ -1650,14 +1665,14 @@ function DemoModal({
     setError(null);
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
-      
+
       if (selectedFile.size > MAX_FILE_SIZE) {
         setError(t('File too large', { size: 5 }));
         setFile(null);
         e.target.value = '';
         return;
       }
-      
+
       setFile(selectedFile);
     }
   };
@@ -1757,7 +1772,7 @@ function DemoModal({
                 {t('Click to upload')}
               </Label>
               <p className="text-sm text-gray-400 mt-3">
-                {t('PDF, JPG, PNG (max 10MB)')} 
+                {t('PDF, JPG, PNG (max 10MB)')}
               </p>
               {file && (
                 <motion.div
@@ -1781,10 +1796,10 @@ function DemoModal({
               )}
             </div>
 
-            <Button 
-              onClick={handleProcess} 
-              disabled={!file || processing || !!error} 
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white" 
+            <Button
+              onClick={handleProcess}
+              disabled={!file || processing || !!error}
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white"
               size="lg"
             >
               {processing ? (
@@ -1811,7 +1826,7 @@ function DemoModal({
                 <CheckCircle className="h-10 w-10 text-green-500" />
                 <div>
                   <h3 className="text-xl font-bold text-green-400">{t('Data Extracted Successfully!')}</h3>
-                  <p className="text-sm text-gray-400">{t('landing.howItWorks.steps.2.desc')}</p> {/* Reusing "Review & approve" desc approx or just leave hardcoded if no exact match */}
+                  <p className="text-sm text-gray-400">{t('landing.howItWorks.steps.2.desc')}</p>
                 </div>
               </div>
               <div className="space-y-3">
@@ -1827,7 +1842,7 @@ function DemoModal({
                         {key.replace('_', ' ')}
                         </span>
                     </div>
-                    
+
                     <div className="w-full">
                         {Array.isArray(value) ? (
                             <div className="space-y-2 mt-2">
@@ -1875,9 +1890,9 @@ function DemoModal({
               </p>
             </div>
 
-            <Button 
-              onClick={onDemoComplete} 
-              className="w-full bg-white text-black hover:bg-gray-200" 
+            <Button
+              onClick={onDemoComplete}
+              className="w-full bg-white text-black hover:bg-gray-200"
               size="lg"
             >
               {t('Register to Continue')}
