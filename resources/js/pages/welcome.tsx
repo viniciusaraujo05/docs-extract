@@ -133,7 +133,6 @@ function HeroPdfAnimation() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.35, ease: 'easeOut' }}
             className="w-full"
-            style={{ rotate: -1 }}
         >
             <div className="overflow-hidden rounded-xl border border-white/10 shadow-2xl shadow-black/50">
                 <div className="flex items-center gap-1.5 border-b border-white/10 bg-zinc-900 px-4 py-3">
@@ -720,7 +719,7 @@ function Hero({
                 <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16">
 
                     {/* ── Left: copy ── */}
-                    <div>
+                    <div className="text-center md:text-left">
                         {/* Main headline: stop typing / from PDFs / by hand. */}
                         <div className="mb-8 space-y-1 md:space-y-2">
                             {/* Line 1: stop typing — Caveat handwriting */}
@@ -794,7 +793,7 @@ function Hero({
                             initial={{ opacity: 0, y: 16 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.4 }}
-                            className="mb-8 max-w-lg text-base leading-relaxed text-gray-400 md:text-lg"
+                            className="mb-8 max-w-lg mx-auto md:mx-0 text-base leading-relaxed text-gray-400 md:text-lg"
                         >
                             {copy.sub}
                         </motion.p>
@@ -804,14 +803,14 @@ function Hero({
                             initial={{ opacity: 0, y: 16 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.5 }}
-                            className="flex flex-col gap-3 sm:flex-row"
+                            className="flex flex-col items-center gap-3 sm:flex-row sm:items-start md:justify-start"
                         >
                             <Button
                                 size="lg"
                                 onClick={() =>
                                     router.visit(`/${locale.split('-')[0]}/register`)
                                 }
-                                className="h-12 w-full rounded-xl bg-white px-8 font-semibold text-black shadow-lg shadow-white/10 transition-all hover:scale-[1.02] hover:bg-gray-100 sm:h-14 sm:w-auto"
+                                className="h-12 w-full rounded-xl bg-white px-8 font-semibold text-black shadow-lg shadow-white/10 transition-all hover:scale-[1.02] hover:bg-gray-100 sm:h-14 sm:w-auto max-w-xs sm:max-w-none"
                             >
                                 {copy.cta1}
                                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -820,7 +819,7 @@ function Hero({
                                 size="lg"
                                 variant="outline"
                                 onClick={onOpenDemo}
-                                className="h-12 w-full rounded-xl border-white/20 bg-transparent px-8 font-semibold text-white hover:bg-white/5 sm:h-14 sm:w-auto"
+                                className="h-12 w-full rounded-xl border-white/20 bg-transparent px-8 font-semibold text-white hover:bg-white/5 sm:h-14 sm:w-auto max-w-xs sm:max-w-none"
                             >
                                 <Play className="mr-2 h-4 w-4" />
                                 {copy.cta2}
@@ -839,7 +838,9 @@ function Hero({
                     </div>
 
                     {/* ── Right: PDF extraction animation ── */}
-                    <HeroPdfAnimation />
+                    <div className="px-2 sm:px-0">
+                        <HeroPdfAnimation />
+                    </div>
                 </div>
             </div>
         </section>
