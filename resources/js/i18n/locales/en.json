@@ -670,17 +670,28 @@
             "pricing": "Pricing"
         },
         "hero": {
-            "eyebrow": "Save hours every week on data entry",
+            "eyebrow": "The future of document processing",
+            "line1": "PDFs into",
+            "line2": "structured data",
+            "accent": "in seconds",
             "title": "Get your hours back.",
             "highlight": "Stop typing invoices and receipts.",
-            "subtitle": "Turn any PDF into Excel or JSON in seconds. No coding. No developers. Just upload and export.",
-            "cta_primary": "Start Free — No Credit Card",
-            "cta_secondary": "See How It Works",
+            "subtitle": "The AI that reads, understands, and exports. No coding. No developers. Just upload.",
+            "cta_primary": "Start Free",
+            "cta_secondary": "See It Work",
             "triggers": [
                 "Works in 2 minutes, not 2 weeks",
                 "You control what data to extract",
                 "Export to Excel, JSON, or your system"
             ]
+        },
+        "transformation": {
+            "title": "What took 47 minutes now takes 4 seconds",
+            "subtitle": "Watch the transformation happen in real-time"
+        },
+        "newStandard": {
+            "title": "The new standard for document processing",
+            "subtitle": "Speed, accuracy, and control you have never experienced"
         },
         "useCases": {
             "title": "Stop wasting time on these tasks",

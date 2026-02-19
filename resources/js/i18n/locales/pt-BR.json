@@ -559,17 +559,28 @@
             "pricing": "Preços"
         },
         "hero": {
-            "eyebrow": "Economize horas toda semana com digitação",
+            "eyebrow": "O futuro do processamento de documentos",
+            "line1": "PDFs em",
+            "line2": "dados estruturados",
+            "accent": "em segundos",
             "title": "Recupere suas horas.",
             "highlight": "Pare de digitar notas fiscais e recibos.",
-            "subtitle": "Converta qualquer PDF em Excel ou JSON em segundos. Sem código. Sem desenvolvedores. Apenas envie e exporte.",
-            "cta_primary": "Comece Grátis — Sem Cartão",
-            "cta_secondary": "Veja Como Funciona",
+            "subtitle": "A IA que lê, compreende e exporta. Sem código. Sem desenvolvedores. Apenas envie.",
+            "cta_primary": "Começar Grátis",
+            "cta_secondary": "Ver Funcionar",
             "triggers": [
                 "Funciona em 2 minutos, não 2 semanas",
                 "Você controla quais dados extrair",
                 "Exporte para Excel, JSON ou seu sistema"
             ]
+        },
+        "transformation": {
+            "title": "O que levava 47 minutos agora leva 4 segundos",
+            "subtitle": "Veja a transformação acontecer em tempo real"
+        },
+        "newStandard": {
+            "title": "O novo padrão para processamento de documentos",
+            "subtitle": "Velocidade, precisão e controle que você nunca experimentou"
         },
         "useCases": {
             "title": "Pare de perder tempo com estas tarefas",
