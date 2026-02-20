@@ -87,7 +87,22 @@ final readonly class StoreDocumentAction
 
     private function storeFile(UploadedFile $file, int $userId): string
     {
-        $filename = Str::uuid()->toString().'.'.$file->getClientOriginalExtension();
+        $mime = $file->getMimeType();
+
+        $ext = match ($mime) {
+            'application/pdf' => 'pdf',
+            'image/jpeg'      => 'jpg',
+            'image/png'       => 'png',
+            'image/webp'      => 'webp',
+            default           => throw new \RuntimeException('Unsupported file type.'),
+        };
+
+        $filename = Str::uuid()->toString().'.'.$ext;
+
+        // Strip EXIF/metadata from images before storage
+        if (str_starts_with($mime, 'image/')) {
+            $this->stripImageMetadata($file->getPathname(), $mime);
+        }
 
         $path = $file->storeAs("documents/{$userId}", $filename, config('filesystems.default'));
 
@@ -96,5 +111,38 @@ final readonly class StoreDocumentAction
         }
 
         return $path;
+    }
+
+    private function stripImageMetadata(string $path, string $mime): void
+    {
+        // Re-encode via GD to drop all EXIF/metadata. Non-fatal on failure.
+        try {
+            $img = match ($mime) {
+                'image/jpeg' => imagecreatefromjpeg($path),
+                'image/png'  => imagecreatefrompng($path),
+                'image/webp' => imagecreatefromwebp($path),
+                default      => false,
+            };
+
+            if ($img === false) {
+                return;
+            }
+
+            match ($mime) {
+                'image/jpeg' => imagejpeg($img, $path, 95),
+                'image/png'  => (static function ($i, $p): void {
+                    imagesavealpha($i, true);
+                    imagepng($i, $p, 9);
+                })($img, $path),
+                'image/webp' => imagewebp($img, $path, 90),
+                default      => null,
+            };
+
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Failed to strip image metadata', [
+                'mime' => $mime,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

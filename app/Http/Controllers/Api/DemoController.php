@@ -38,8 +38,14 @@ class DemoController extends Controller
         // Check page count for PDFs
         if ($file->getMimeType() === 'application/pdf') {
             try {
-                $parser = new \Smalot\PdfParser\Parser;
+                $config = new \Smalot\PdfParser\Config;
+                $config->setRetainImageContent(false);
+                $parser = new \Smalot\PdfParser\Parser([], $config);
+
+                $previousLimit = set_time_limit(10);
                 $pdf = $parser->parseFile($file->getPathname());
+                set_time_limit($previousLimit);
+
                 $pages = count($pdf->getPages());
 
                 if ($pages > 2) {
@@ -51,7 +57,6 @@ class DemoController extends Controller
                     ], 422);
                 }
             } catch (\Exception $e) {
-                // Ignore parsing errors here, let the main extractor handle valid/invalid files
                 Log::warning('Demo check: Failed to count pages', ['error' => $e->getMessage()]);
             }
         }
@@ -112,7 +117,7 @@ class DemoController extends Controller
 
             return response()->json([
                 'error' => 'Extraction failed',
-                'message' => 'An error occurred while processing your document. Please try again. '.$e->getMessage(),
+                'message' => 'An error occurred while processing your document. Please try again.',
             ], 500);
         }
     }

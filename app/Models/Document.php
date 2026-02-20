@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Modelo para documentos extraídos.
@@ -37,7 +38,18 @@ class Document extends Model
         'error_message',
         'credits_used',
         'processed_at',
+        'storage_disk',
     ];
+
+    protected static function booted(): void
+    {
+        static::deleted(function (self $document): void {
+            $disk = $document->storage_disk ?? config('filesystems.default');
+            if ($document->file_path) {
+                Storage::disk($disk)->delete($document->file_path);
+            }
+        });
+    }
 
     public function user(): BelongsTo
     {

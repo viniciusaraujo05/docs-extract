@@ -11,6 +11,7 @@ use App\Models\SuperAdminSetting;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -73,10 +74,23 @@ class SuperAdminController extends Controller
             'password' => 'required|string',
         ]);
 
+        $key = 'admin-login:' . $request->ip();
+
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+
+            return redirect('/admin-030399')->withErrors([
+                'password' => "Too many attempts. Try again in {$seconds} seconds.",
+            ]);
+        }
+
         if (! SuperAdminSetting::verifyPassword($request->input('password'))) {
+            RateLimiter::hit($key, 900); // 15-minute decay
+
             return redirect('/admin-030399')->withErrors(['password' => 'Incorrect password.']);
         }
 
+        RateLimiter::clear($key);
         $request->session()->put('super_admin_authenticated', true);
 
         return redirect('/admin-030399');

@@ -22,7 +22,7 @@ class StoreBatchDocumentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'files' => ['required', 'array', 'min:1', 'max:100'],
+            'files' => ['required', 'array', 'min:1', 'max:20'],
             'files.*' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg', 'max:10240'], // 10MB max per file
             'document_type_id' => ['nullable', 'integer', 'exists:document_types,id'],
             'new_type_name' => ['required_without:document_type_id', 'string', 'max:255'],
@@ -37,11 +37,31 @@ class StoreBatchDocumentRequest extends FormRequest
     /**
      * Get custom messages for validator errors.
      */
+    public function withValidator(\Illuminate\Contracts\Validation\Validator $validator): void
+    {
+        $validator->after(function (\Illuminate\Contracts\Validation\Validator $v) {
+            $files = $this->file('files', []);
+            if (! is_array($files)) {
+                return;
+            }
+
+            $totalBytes = array_sum(array_map(
+                fn ($f) => $f instanceof \Illuminate\Http\UploadedFile ? $f->getSize() : 0,
+                $files,
+            ));
+
+            // 50 MB aggregate limit
+            if ($totalBytes > 50 * 1024 * 1024) {
+                $v->errors()->add('files', 'Total batch size must not exceed 50MB.');
+            }
+        });
+    }
+
     public function messages(): array
     {
         return [
             'files.required' => 'Please select at least one file to upload.',
-            'files.max' => 'You can upload a maximum of 100 files at once.',
+            'files.max' => 'You can upload a maximum of 20 files at once.',
             'files.*.required' => 'One or more files are missing.',
             'files.*.file' => 'One or more uploads are not valid files.',
             'files.*.mimes' => 'Only PDF, PNG, JPG, and JPEG files are allowed.',
