@@ -1462,5 +1462,7 @@
             "later": "Maybe Later"
         },
         "subscription_active": "Subscription Active! Welcome to {plan}."
-    }
+    },
+    "Zapier Beta": "Zapier Beta",
+    "To get access to the Zapier beta, please contact us at": "To get access to the Zapier beta, please contact us at"
 }

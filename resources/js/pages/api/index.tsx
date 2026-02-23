@@ -684,6 +684,13 @@ if (signature !== computed) {
                                 <CardDescription>{t('Connect DOCSET with 5,000+ apps using Zapier')}</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
+                                <Alert className="bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900">
+                                    <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                                    <AlertTitle className="text-amber-900 dark:text-amber-100">{t('Zapier Beta')}</AlertTitle>
+                                    <AlertDescription className="text-amber-700 dark:text-amber-300">
+                                        {t('To get access to the Zapier beta, please contact us at')} <a href="mailto:help@docset.app" className="font-medium underline">help@docset.app</a>
+                                    </AlertDescription>
+                                </Alert>
                                 {isZapierConnected && (
                                     <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-950/20 border border-green-100 dark:border-green-900 rounded-lg">
                                         <div className="flex items-center gap-3">

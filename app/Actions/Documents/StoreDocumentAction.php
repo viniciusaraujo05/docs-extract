@@ -91,10 +91,10 @@ final readonly class StoreDocumentAction
 
         $ext = match ($mime) {
             'application/pdf' => 'pdf',
-            'image/jpeg'      => 'jpg',
-            'image/png'       => 'png',
-            'image/webp'      => 'webp',
-            default           => throw new \RuntimeException('Unsupported file type.'),
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            default => throw new \RuntimeException('Unsupported file type.'),
         };
 
         $filename = Str::uuid()->toString().'.'.$ext;
@@ -119,9 +119,9 @@ final readonly class StoreDocumentAction
         try {
             $img = match ($mime) {
                 'image/jpeg' => imagecreatefromjpeg($path),
-                'image/png'  => imagecreatefrompng($path),
+                'image/png' => imagecreatefrompng($path),
                 'image/webp' => imagecreatefromwebp($path),
-                default      => false,
+                default => false,
             };
 
             if ($img === false) {
@@ -130,12 +130,12 @@ final readonly class StoreDocumentAction
 
             match ($mime) {
                 'image/jpeg' => imagejpeg($img, $path, 95),
-                'image/png'  => (static function ($i, $p): void {
+                'image/png' => (static function ($i, $p): void {
                     imagesavealpha($i, true);
                     imagepng($i, $p, 9);
                 })($img, $path),
                 'image/webp' => imagewebp($img, $path, 90),
-                default      => null,
+                default => null,
             };
 
         } catch (\Throwable $e) {

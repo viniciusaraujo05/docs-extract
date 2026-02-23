@@ -1119,5 +1119,7 @@
             "later": "Talvez Depois"
         },
         "subscription_active": "Assinatura Ativa! Bem-vindo ao {plan}."
-    }
+    },
+    "Zapier Beta": "Zapier Beta",
+    "To get access to the Zapier beta, please contact us at": "Para ter acesso ao beta do Zapier, entre em contato pelo e-mail"
 }

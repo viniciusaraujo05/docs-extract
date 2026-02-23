@@ -74,7 +74,7 @@ class SuperAdminController extends Controller
             'password' => 'required|string',
         ]);
 
-        $key = 'admin-login:' . $request->ip();
+        $key = 'admin-login:'.$request->ip();
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);

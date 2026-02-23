@@ -317,7 +317,7 @@ class ZapierController extends Controller
     public function listProcessedDocuments(Request $request): JsonResponse
     {
         $limit = max(1, min(50, (int) $request->input('limit', 10)));
-        
+
         $documents = Document::with('documentType')
             ->where('user_id', $request->user()->id)
             ->where('status', 'completed')
@@ -349,7 +349,7 @@ class ZapierController extends Controller
                         'format' => 'json',
                     ]),
                 ],
-                // For polling we use created_at to represent the date it finished processing, 
+                // For polling we use created_at to represent the date it finished processing,
                 // matching webhook logic.
                 'created_at' => $document->created_at?->toIso8601String(),
                 'processed_at' => $document->updated_at?->toIso8601String() ?? now()->toIso8601String(),
