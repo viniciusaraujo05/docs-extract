@@ -45,6 +45,7 @@ Route::prefix('api/v1')->name('api.v1.')->middleware([\App\Http\Middleware\ApiV1
 
         // Document Processing
         Route::post('zapier/process', [\App\Http\Controllers\Api\V1\ZapierController::class, 'processDocument'])->name('zapier.process');
+        Route::get('zapier/documents/processed', [\App\Http\Controllers\Api\V1\ZapierController::class, 'listProcessedDocuments'])->name('zapier.documents.processed.list');
 
         // Document Export
         Route::get('zapier/documents/{document}/export/{format}', [\App\Http\Controllers\Api\V1\ZapierController::class, 'exportDocument'])->name('zapier.documents.export');

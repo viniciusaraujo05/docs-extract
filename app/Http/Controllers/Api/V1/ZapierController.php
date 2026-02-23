@@ -311,6 +311,74 @@ class ZapierController extends Controller
     }
 
     /**
+     * Polling endpoint for "New Document Processed" REST Hook fallback.
+     * Zapier Trigger: "New Document Processed" (polling URL)
+     */
+    public function listProcessedDocuments(Request $request): JsonResponse
+    {
+        $limit = max(1, min(50, (int) $request->input('limit', 10)));
+        
+        $documents = Document::with('documentType')
+            ->where('user_id', $request->user()->id)
+            ->where('status', 'completed')
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+
+        $responseList = [];
+
+        foreach ($documents as $document) {
+            $formattedData = [
+                'id' => $document->id,
+                'type' => 'document',
+                'status' => $document->status,
+                'original_name' => $document->original_name,
+                'document_type' => $document->documentType ? [
+                    'id' => $document->documentType->id,
+                    'name' => $document->documentType->name,
+                    'slug' => $document->documentType->slug,
+                ] : null,
+                'extracted_data' => $document->extracted_data,
+                'download_links' => [
+                    'csv' => route('api.v1.zapier.documents.export', [
+                        'document' => $document->id,
+                        'format' => 'csv',
+                    ]),
+                    'json' => route('api.v1.zapier.documents.export', [
+                        'document' => $document->id,
+                        'format' => 'json',
+                    ]),
+                ],
+                // For polling we use created_at to represent the date it finished processing, 
+                // matching webhook logic.
+                'created_at' => $document->created_at?->toIso8601String(),
+                'processed_at' => $document->updated_at?->toIso8601String() ?? now()->toIso8601String(),
+            ];
+
+            // Add flat extracted data for Zapier
+            if ($document->extracted_data && is_array($document->extracted_data)) {
+                foreach ($document->extracted_data as $key => $value) {
+                    if (! is_array($value) && ! is_object($value)) {
+                        $formattedData[$key] = $value;
+                    } else {
+                        $formattedData[$key] = $value;
+                        if (is_array($value) && ! empty($value)) {
+                            $formatted = $this->formatArrayForDisplay($value, $key);
+                            if ($formatted) {
+                                $formattedData[$key.'_formatted'] = $formatted;
+                            }
+                        }
+                    }
+                }
+            }
+
+            $responseList[] = $formattedData;
+        }
+
+        return response()->json($responseList);
+    }
+
+    /**
      * Subscribe to webhook notifications (Zapier Instant Trigger).
      */
     public function subscribeWebhook(Request $request): JsonResponse
