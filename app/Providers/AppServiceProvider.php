@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Contracts\BlogRepositoryInterface;
 use App\Models\Document;
 use App\Models\DocumentType;
 use App\Models\ReportAnalysis;
@@ -10,6 +11,7 @@ use App\Observers\DocumentObserver;
 use App\Observers\DocumentTypeObserver;
 use App\Observers\ReportAnalysisObserver;
 use App\Observers\UserObserver;
+use App\Repositories\EloquentBlogRepository;
 use App\Services\TranslationCacheService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\URL;
@@ -33,6 +35,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(DeviceAuthorizationViewResponse::class, function () {
             return new SimpleViewResponse('auth.authorize');
         });
+
+        $this->app->bind(BlogRepositoryInterface::class, EloquentBlogRepository::class);
     }
 
     /**

@@ -85,6 +85,12 @@ Route::get('/{locale}/terms', function ($locale) {
     ]);
 })->where(['locale' => 'pt|en'])->name('terms');
 
+// Blog public routes
+Route::prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {
+    Route::get('blog', [\App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
+    Route::get('blog/{slug}', [\App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
+});
+
 // Pages with locale prefix (auth required for dashboard access)
 // ONLY GET ROUTES (VIEWS) HERE. ACTIONS ARE IN API.PHP
 Route::middleware(['auth'])->prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {

@@ -109,7 +109,7 @@ function HeroPdfAnimation() {
             if (startTime === null) startTime = now;
             const p = Math.min(((now - startTime) / SCAN) * 100, 100);
             setScanY(p);
-            setExtractedCount(fields.filter(f => p >= f.triggerAt).length);
+            setExtractedCount(fields.filter((f) => p >= f.triggerAt).length);
             if (p < 100) {
                 raf = requestAnimationFrame(tick);
             } else {
@@ -123,8 +123,13 @@ function HeroPdfAnimation() {
                 }, PAUSE);
             }
         };
-        const t = setTimeout(() => { raf = requestAnimationFrame(tick); }, 600);
-        return () => { clearTimeout(t); cancelAnimationFrame(raf); };
+        const t = setTimeout(() => {
+            raf = requestAnimationFrame(tick);
+        }, 600);
+        return () => {
+            clearTimeout(t);
+            cancelAnimationFrame(raf);
+        };
     }, []);
 
     return (
@@ -160,13 +165,19 @@ function HeroPdfAnimation() {
                             <div className="space-y-1.5">
                                 {lineWidths.map((w, i) => {
                                     const pos = (i / lineWidths.length) * 100;
-                                    const active = phase === 'scanning' && Math.abs(scanY - pos) < 10;
-                                    const scanned = phase === 'scanning' && scanY > pos;
+                                    const active =
+                                        phase === 'scanning' &&
+                                        Math.abs(scanY - pos) < 10;
+                                    const scanned =
+                                        phase === 'scanning' && scanY > pos;
                                     return (
                                         <div
                                             key={i}
                                             className={`rounded-full transition-colors duration-150 ${active ? 'bg-blue-400/50' : scanned ? 'bg-white/15' : 'bg-white/6'}`}
-                                            style={{ height: '5px', width: `${w}%` }}
+                                            style={{
+                                                height: '5px',
+                                                width: `${w}%`,
+                                            }}
                                         />
                                     );
                                 })}
@@ -176,8 +187,10 @@ function HeroPdfAnimation() {
                                     className="pointer-events-none absolute right-3 left-3 h-px"
                                     style={{
                                         top: `calc(${scanY * 0.68}% + 44px)`,
-                                        background: 'linear-gradient(to right, transparent, rgba(96,165,250,0.9), transparent)',
-                                        boxShadow: '0 0 10px 3px rgba(96,165,250,0.25)',
+                                        background:
+                                            'linear-gradient(to right, transparent, rgba(96,165,250,0.9), transparent)',
+                                        boxShadow:
+                                            '0 0 10px 3px rgba(96,165,250,0.25)',
                                     }}
                                 />
                             )}
@@ -186,7 +199,11 @@ function HeroPdfAnimation() {
                         <div className="flex items-center justify-center pt-10">
                             <motion.div
                                 animate={{ x: [0, 4, 0] }}
-                                transition={{ repeat: Infinity, duration: 1.2, ease: 'easeInOut' }}
+                                transition={{
+                                    repeat: Infinity,
+                                    duration: 1.2,
+                                    ease: 'easeInOut',
+                                }}
                             >
                                 <ArrowRight className="h-4 w-4 text-blue-400" />
                             </motion.div>
@@ -194,7 +211,7 @@ function HeroPdfAnimation() {
                         {/* Data panel */}
                         <div className="rounded-lg border border-white/10 bg-zinc-900 p-3">
                             <div className="mb-2 flex items-center justify-between">
-                                <span className="text-[9px] font-semibold uppercase tracking-widest text-gray-500">
+                                <span className="text-[9px] font-semibold tracking-widest text-gray-500 uppercase">
                                     Extracted
                                 </span>
                                 <AnimatePresence>
@@ -206,7 +223,9 @@ function HeroPdfAnimation() {
                                             className="flex items-center gap-1 rounded-full bg-green-500/15 px-1.5 py-0.5"
                                         >
                                             <CheckCircle className="h-2.5 w-2.5 text-green-400" />
-                                            <span className="text-[9px] text-green-400">Done</span>
+                                            <span className="text-[9px] text-green-400">
+                                                Done
+                                            </span>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
@@ -216,23 +235,37 @@ function HeroPdfAnimation() {
                                     <motion.div
                                         key={field.label}
                                         initial={false}
-                                        animate={i < extractedCount ? { opacity: 1, x: 0 } : { opacity: 0, x: 8 }}
+                                        animate={
+                                            i < extractedCount
+                                                ? { opacity: 1, x: 0 }
+                                                : { opacity: 0, x: 8 }
+                                        }
                                         transition={{ duration: 0.25 }}
                                         className="grid grid-cols-2 gap-1 rounded border border-white/5 bg-white/[0.04] px-2 py-1.5"
                                     >
-                                        <span className="truncate text-[9px] text-gray-500">{field.label}</span>
-                                        <span className="truncate text-right font-mono text-[9px] text-blue-300">{field.value}</span>
+                                        <span className="truncate text-[9px] text-gray-500">
+                                            {field.label}
+                                        </span>
+                                        <span className="truncate text-right font-mono text-[9px] text-blue-300">
+                                            {field.value}
+                                        </span>
                                     </motion.div>
                                 ))}
                             </div>
                             <motion.div
                                 initial={false}
-                                animate={phase === 'done' ? { opacity: 1, y: 0 } : { opacity: 0, y: 4 }}
+                                animate={
+                                    phase === 'done'
+                                        ? { opacity: 1, y: 0 }
+                                        : { opacity: 0, y: 4 }
+                                }
                                 transition={{ duration: 0.3 }}
                                 className="mt-3 flex items-center justify-center gap-1.5 rounded border border-blue-500/20 bg-blue-500/10 py-1.5"
                             >
                                 <Download className="h-3 w-3 text-blue-400" />
-                                <span className="text-[9px] font-medium text-blue-300">Export Excel</span>
+                                <span className="text-[9px] font-medium text-blue-300">
+                                    Export Excel
+                                </span>
                             </motion.div>
                         </div>
                     </div>
@@ -525,23 +558,36 @@ function Header({
                                         <span className="flex items-center gap-2">
                                             <span>{getLocaleFlag(locale)}</span>
                                             <span className="text-sm">
-                                                {getLocaleLabel(locale).split(' ')[0]}
+                                                {
+                                                    getLocaleLabel(
+                                                        locale,
+                                                    ).split(' ')[0]
+                                                }
                                             </span>
                                         </span>
                                     </SelectValue>
                                 </SelectTrigger>
                                 <SelectContent className="border-white/10 bg-zinc-900">
-                                    <SelectItem value="en" className="text-white">
+                                    <SelectItem
+                                        value="en"
+                                        className="text-white"
+                                    >
                                         <span className="flex items-center gap-2">
                                             🇬🇧 <span>English</span>
                                         </span>
                                     </SelectItem>
-                                    <SelectItem value="pt-BR" className="text-white">
+                                    <SelectItem
+                                        value="pt-BR"
+                                        className="text-white"
+                                    >
                                         <span className="flex items-center gap-2">
                                             🇧🇷 <span>Português (BR)</span>
                                         </span>
                                     </SelectItem>
-                                    <SelectItem value="pt-PT" className="text-white">
+                                    <SelectItem
+                                        value="pt-PT"
+                                        className="text-white"
+                                    >
                                         <span className="flex items-center gap-2">
                                             🇵🇹 <span>Português (PT)</span>
                                         </span>
@@ -552,7 +598,9 @@ function Header({
                             {isAuthenticated ? (
                                 <Button
                                     onClick={() =>
-                                        router.visit(`/${locale.split('-')[0]}/dashboard`)
+                                        router.visit(
+                                            `/${locale.split('-')[0]}/dashboard`,
+                                        )
                                     }
                                     className="bg-blue-500 text-white hover:bg-blue-600"
                                 >
@@ -563,7 +611,9 @@ function Header({
                                     <Button
                                         variant="ghost"
                                         onClick={() =>
-                                            router.visit(`/${locale.split('-')[0]}/login`)
+                                            router.visit(
+                                                `/${locale.split('-')[0]}/login`,
+                                            )
                                         }
                                         className="text-white hover:bg-white/10"
                                     >
@@ -571,7 +621,9 @@ function Header({
                                     </Button>
                                     <Button
                                         onClick={() =>
-                                            router.visit(`/${locale.split('-')[0]}/register`)
+                                            router.visit(
+                                                `/${locale.split('-')[0]}/register`,
+                                            )
                                         }
                                         className="bg-white text-black hover:bg-gray-200"
                                     >
@@ -604,41 +656,71 @@ function Header({
                     <div className="flex items-center justify-between border-b border-white/10 p-6">
                         <div className="flex items-center gap-2">
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
-                                <img src="/docset.png" alt="Docset" className="h-full w-full object-contain" />
+                                <img
+                                    src="/docset.png"
+                                    alt="Docset"
+                                    className="h-full w-full object-contain"
+                                />
                             </div>
                             <span className="text-lg font-bold">DOCSET</span>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)} className="text-white">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="text-white"
+                        >
                             <X className="h-6 w-6" />
                         </Button>
                     </div>
 
                     <div className="flex-1 space-y-8 overflow-y-auto p-6">
                         <nav className="flex flex-col gap-6 text-xl">
-                            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-gray-400 transition hover:text-white">
+                            <a
+                                href="#features"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="text-gray-400 transition hover:text-white"
+                            >
                                 {headerText.features}
                             </a>
-                            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-gray-400 transition hover:text-white">
+                            <a
+                                href="#pricing"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="text-gray-400 transition hover:text-white"
+                            >
                                 {headerText.pricing}
                             </a>
-                            <a href="#api" onClick={() => setMobileMenuOpen(false)} className="text-gray-400 transition hover:text-white">
+                            <a
+                                href="#api"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="text-gray-400 transition hover:text-white"
+                            >
                                 {headerText.api}
                             </a>
                         </nav>
 
                         <div className="space-y-6 border-t border-white/10 pt-8">
                             <div className="space-y-3">
-                                <p className="text-sm tracking-wider text-gray-500 uppercase">Language</p>
+                                <p className="text-sm tracking-wider text-gray-500 uppercase">
+                                    Language
+                                </p>
                                 <div className="grid grid-cols-1 gap-2">
                                     {['en', 'pt-BR', 'pt-PT'].map((loc) => (
                                         <button
                                             key={loc}
-                                            onClick={() => { onLocaleChange(loc); setMobileMenuOpen(false); }}
+                                            onClick={() => {
+                                                onLocaleChange(loc);
+                                                setMobileMenuOpen(false);
+                                            }}
                                             className={`flex items-center gap-3 rounded-lg p-3 transition ${locale === loc ? 'bg-blue-500/10 text-blue-400' : 'text-gray-400 hover:bg-white/5'}`}
                                         >
-                                            <span className="text-xl">{getLocaleFlag(loc)}</span>
+                                            <span className="text-xl">
+                                                {getLocaleFlag(loc)}
+                                            </span>
                                             <span>{getLocaleLabel(loc)}</span>
-                                            {locale === loc && <Check className="ml-auto h-4 w-4" />}
+                                            {locale === loc && (
+                                                <Check className="ml-auto h-4 w-4" />
+                                            )}
                                         </button>
                                     ))}
                                 </div>
@@ -647,7 +729,11 @@ function Header({
                             <div className="flex flex-col gap-3 pt-4">
                                 {isAuthenticated ? (
                                     <Button
-                                        onClick={() => router.visit(`/${locale.split('-')[0]}/dashboard`)}
+                                        onClick={() =>
+                                            router.visit(
+                                                `/${locale.split('-')[0]}/dashboard`,
+                                            )
+                                        }
                                         className="h-12 w-full bg-blue-500 text-lg text-white hover:bg-blue-600"
                                     >
                                         {headerText.dashboard}
@@ -656,13 +742,21 @@ function Header({
                                     <>
                                         <Button
                                             variant="outline"
-                                            onClick={() => router.visit(`/${locale.split('-')[0]}/login`)}
+                                            onClick={() =>
+                                                router.visit(
+                                                    `/${locale.split('-')[0]}/login`,
+                                                )
+                                            }
                                             className="h-12 w-full border-white/10 text-lg text-white hover:bg-white/5"
                                         >
                                             {headerText.login}
                                         </Button>
                                         <Button
-                                            onClick={() => router.visit(`/${locale.split('-')[0]}/register`)}
+                                            onClick={() =>
+                                                router.visit(
+                                                    `/${locale.split('-')[0]}/register`,
+                                                )
+                                            }
                                             className="h-12 w-full bg-white text-lg text-black hover:bg-gray-200"
                                         >
                                             {headerText.startFree}
@@ -709,7 +803,7 @@ function Hero({
           };
 
     return (
-        <section className="relative overflow-hidden bg-black pt-28 pb-16 md:pb-24 md:pt-36">
+        <section className="relative overflow-hidden bg-black pt-28 pb-16 md:pt-36 md:pb-24">
             {/* Subtle grid */}
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:48px_48px]" />
             {/* Static glow */}
@@ -717,7 +811,6 @@ function Hero({
 
             <div className="relative mx-auto max-w-7xl px-4 md:px-6">
                 <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-2 md:gap-16">
-
                     {/* ── Left: copy ── */}
                     <div className="text-center md:text-left">
                         {/* Main headline: stop typing / from PDFs / by hand. */}
@@ -745,7 +838,7 @@ function Hero({
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                                <span className="block text-4xl font-bold leading-none text-red-400/60 line-through decoration-red-400/60 decoration-[3px] md:text-5xl lg:text-6xl">
+                                <span className="block text-4xl leading-none font-bold text-red-400/60 line-through decoration-red-400/60 decoration-[3px] md:text-5xl lg:text-6xl">
                                     {copy.line2}
                                 </span>
                             </motion.div>
@@ -756,11 +849,14 @@ function Hero({
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.5, delay: 0.3 }}
                             >
-                                <span className="relative inline-block text-4xl font-bold leading-none md:text-5xl lg:text-6xl">
+                                <span className="relative inline-block text-4xl leading-none font-bold md:text-5xl lg:text-6xl">
                                     {/* Marker background */}
                                     <span
                                         className="absolute inset-0 rounded-sm bg-amber-300"
-                                        style={{ transform: 'rotate(-0.8deg) scaleX(1.04) scaleY(1.08)' }}
+                                        style={{
+                                            transform:
+                                                'rotate(-0.8deg) scaleX(1.04) scaleY(1.08)',
+                                        }}
                                     />
                                     {/* Hand-drawn underline SVG */}
                                     <svg
@@ -773,7 +869,11 @@ function Hero({
                                         <motion.path
                                             initial={{ pathLength: 0 }}
                                             animate={{ pathLength: 1 }}
-                                            transition={{ duration: 0.8, delay: 0.6, ease: 'easeOut' }}
+                                            transition={{
+                                                duration: 0.8,
+                                                delay: 0.6,
+                                                ease: 'easeOut',
+                                            }}
                                             d="M3,5 Q30,2 60,5 Q90,8 117,4"
                                             stroke="#f59e0b"
                                             strokeWidth="2.5"
@@ -793,7 +893,7 @@ function Hero({
                             initial={{ opacity: 0, y: 16 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.4 }}
-                            className="mb-8 max-w-lg mx-auto md:mx-0 text-base leading-relaxed text-gray-400 md:text-lg"
+                            className="mx-auto mb-8 max-w-lg text-base leading-relaxed text-gray-400 md:mx-0 md:text-lg"
                         >
                             {copy.sub}
                         </motion.p>
@@ -808,9 +908,11 @@ function Hero({
                             <Button
                                 size="lg"
                                 onClick={() =>
-                                    router.visit(`/${locale.split('-')[0]}/register`)
+                                    router.visit(
+                                        `/${locale.split('-')[0]}/register`,
+                                    )
                                 }
-                                className="h-12 w-full rounded-xl bg-white px-8 font-semibold text-black shadow-lg shadow-white/10 transition-all hover:scale-[1.02] hover:bg-gray-100 sm:h-14 sm:w-auto max-w-xs sm:max-w-none"
+                                className="h-12 w-full max-w-xs rounded-xl bg-white px-8 font-semibold text-black shadow-lg shadow-white/10 transition-all hover:scale-[1.02] hover:bg-gray-100 sm:h-14 sm:w-auto sm:max-w-none"
                             >
                                 {copy.cta1}
                                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -819,7 +921,7 @@ function Hero({
                                 size="lg"
                                 variant="outline"
                                 onClick={onOpenDemo}
-                                className="h-12 w-full rounded-xl border-white/20 bg-transparent px-8 font-semibold text-white hover:bg-white/5 sm:h-14 sm:w-auto max-w-xs sm:max-w-none"
+                                className="h-12 w-full max-w-xs rounded-xl border-white/20 bg-transparent px-8 font-semibold text-white hover:bg-white/5 sm:h-14 sm:w-auto sm:max-w-none"
                             >
                                 <Play className="mr-2 h-4 w-4" />
                                 {copy.cta2}
@@ -962,21 +1064,32 @@ function TransformationDemo({ locale }: { locale: string }) {
                         <div className="rounded-2xl border border-white/10 bg-zinc-900 p-5">
                             <div className="mb-4 flex items-center gap-2">
                                 <FileText className="h-5 w-5 text-gray-400" />
-                                <span className="text-sm text-gray-400">invoice_2024.pdf</span>
+                                <span className="text-sm text-gray-400">
+                                    invoice_2024.pdf
+                                </span>
                             </div>
                             <div className="space-y-3">
                                 {fields.map((field, i) => (
                                     <motion.div
                                         key={field.key}
                                         animate={{
-                                            backgroundColor: activeField === i ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.03)',
+                                            backgroundColor:
+                                                activeField === i
+                                                    ? 'rgba(59,130,246,0.15)'
+                                                    : 'rgba(255,255,255,0.03)',
                                         }}
                                         className={`rounded-lg p-3 ring-1 transition-all duration-300 ${activeField === i ? 'ring-blue-500/50' : 'ring-transparent'}`}
                                     >
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs text-gray-500 uppercase">{field.key.replace('_', ' ')}</span>
+                                            <span className="text-xs text-gray-500 uppercase">
+                                                {field.key.replace('_', ' ')}
+                                            </span>
                                             {activeField === i && (
-                                                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="h-2 w-2 rounded-full bg-blue-400" />
+                                                <motion.div
+                                                    initial={{ scale: 0 }}
+                                                    animate={{ scale: 1 }}
+                                                    className="h-2 w-2 rounded-full bg-blue-400"
+                                                />
                                             )}
                                         </div>
                                     </motion.div>
@@ -984,7 +1097,10 @@ function TransformationDemo({ locale }: { locale: string }) {
                             </div>
                         </div>
                         <div className="absolute top-1/2 -right-4 z-10 hidden -translate-y-1/2 md:block">
-                            <motion.div animate={{ x: [0, 8, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
+                            <motion.div
+                                animate={{ x: [0, 8, 0] }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                            >
                                 <ArrowRight className="h-8 w-8 text-blue-400" />
                             </motion.div>
                         </div>
@@ -999,7 +1115,9 @@ function TransformationDemo({ locale }: { locale: string }) {
                         <div className="rounded-2xl border border-emerald-500/20 bg-zinc-900 p-5">
                             <div className="mb-4 flex items-center gap-2">
                                 <FileJson className="h-5 w-5 text-emerald-400" />
-                                <span className="text-sm text-gray-400">extracted_data.json</span>
+                                <span className="text-sm text-gray-400">
+                                    extracted_data.json
+                                </span>
                                 <Badge className="ml-auto bg-emerald-500/20 text-emerald-400">
                                     {pt ? 'Extraído' : 'Extracted'}
                                 </Badge>
@@ -1009,12 +1127,19 @@ function TransformationDemo({ locale }: { locale: string }) {
                                     <motion.div
                                         key={field.key}
                                         initial={{ opacity: 0.3 }}
-                                        animate={{ opacity: activeField >= i ? 1 : 0.3, x: activeField === i ? 4 : 0 }}
+                                        animate={{
+                                            opacity: activeField >= i ? 1 : 0.3,
+                                            x: activeField === i ? 4 : 0,
+                                        }}
                                         transition={{ duration: 0.3 }}
                                         className="flex items-center gap-3 rounded bg-white/5 px-3 py-2"
                                     >
-                                        <span className="text-gray-500">"{field.key}":</span>
-                                        <span className="text-emerald-400">"{field.value}"</span>
+                                        <span className="text-gray-500">
+                                            "{field.key}":
+                                        </span>
+                                        <span className="text-emerald-400">
+                                            "{field.value}"
+                                        </span>
                                     </motion.div>
                                 ))}
                             </div>
@@ -1036,13 +1161,17 @@ function TheNewStandard({ locale }: { locale: string }) {
         {
             value: 500,
             suffix: '+',
-            label: pt ? 'faturas em uma pausa para café' : 'invoices in one coffee break',
+            label: pt
+                ? 'faturas em uma pausa para café'
+                : 'invoices in one coffee break',
             icon: FileText,
         },
         {
             value: 99.2,
             suffix: '%',
-            label: pt ? 'precisão sem verificação manual' : 'accuracy without manual check',
+            label: pt
+                ? 'precisão sem verificação manual'
+                : 'accuracy without manual check',
             icon: CheckCircle,
         },
         {
@@ -1101,11 +1230,18 @@ function TheNewStandard({ locale }: { locale: string }) {
                                 {metric.isInfinite ? (
                                     <span>∞</span>
                                 ) : (
-                                    <CountUp value={metric.value} isInView={isInView} />
+                                    <CountUp
+                                        value={metric.value}
+                                        isInView={isInView}
+                                    />
                                 )}
-                                <span className="text-blue-400">{metric.suffix}</span>
+                                <span className="text-blue-400">
+                                    {metric.suffix}
+                                </span>
                             </div>
-                            <p className="text-xs text-gray-400 md:text-sm">{metric.label}</p>
+                            <p className="text-xs text-gray-400 md:text-sm">
+                                {metric.label}
+                            </p>
                         </motion.div>
                     ))}
                 </div>
@@ -1153,19 +1289,32 @@ function UploadPreview() {
             const p = Math.min((now - start) / 900, 1);
             const y = -40 + p * 70;
             setPdfY(y);
-            if (p < 1) { raf = requestAnimationFrame(run); }
-            else {
+            if (p < 1) {
+                raf = requestAnimationFrame(run);
+            } else {
                 setDropped(true);
-                setTimeout(() => { setDropped(false); setPdfY(-40); start = null; raf = requestAnimationFrame(run); }, 1800);
+                setTimeout(() => {
+                    setDropped(false);
+                    setPdfY(-40);
+                    start = null;
+                    raf = requestAnimationFrame(run);
+                }, 1800);
             }
         };
-        const t = setTimeout(() => { raf = requestAnimationFrame(run); }, 400);
-        return () => { clearTimeout(t); cancelAnimationFrame(raf); };
+        const t = setTimeout(() => {
+            raf = requestAnimationFrame(run);
+        }, 400);
+        return () => {
+            clearTimeout(t);
+            cancelAnimationFrame(raf);
+        };
     }, []);
 
     return (
         <div className="relative mx-auto mb-5 flex h-28 w-full max-w-[180px] flex-col items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-zinc-900">
-            <div className={`absolute inset-3 rounded-lg border-2 border-dashed transition-colors duration-300 ${dropped ? 'border-blue-500/60 bg-blue-500/5' : 'border-white/10'}`} />
+            <div
+                className={`absolute inset-3 rounded-lg border-2 border-dashed transition-colors duration-300 ${dropped ? 'border-blue-500/60 bg-blue-500/5' : 'border-white/10'}`}
+            />
             <motion.div
                 animate={{ y: pdfY, opacity: pdfY > -20 ? 1 : 0 }}
                 transition={{ duration: 0 }}
@@ -1181,9 +1330,15 @@ function UploadPreview() {
                 </div>
             </motion.div>
             {dropped && (
-                <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="absolute bottom-4 flex items-center gap-1">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="absolute bottom-4 flex items-center gap-1"
+                >
                     <CheckCircle className="h-3 w-3 text-blue-400" />
-                    <span className="text-[9px] text-blue-300">PDF uploaded</span>
+                    <span className="text-[9px] text-blue-300">
+                        PDF uploaded
+                    </span>
                 </motion.div>
             )}
         </div>
@@ -1203,13 +1358,24 @@ function ExtractPreview() {
             const p = Math.min((now - start) / 2000, 1) * 100;
             setScanY(p);
             setFields(Math.floor(p / 30));
-            if (p < 100) { raf = requestAnimationFrame(run); }
-            else {
-                setTimeout(() => { setScanY(0); setFields(0); start = null; raf = requestAnimationFrame(run); }, 1500);
+            if (p < 100) {
+                raf = requestAnimationFrame(run);
+            } else {
+                setTimeout(() => {
+                    setScanY(0);
+                    setFields(0);
+                    start = null;
+                    raf = requestAnimationFrame(run);
+                }, 1500);
             }
         };
-        const t = setTimeout(() => { raf = requestAnimationFrame(run); }, 300);
-        return () => { clearTimeout(t); cancelAnimationFrame(raf); };
+        const t = setTimeout(() => {
+            raf = requestAnimationFrame(run);
+        }, 300);
+        return () => {
+            clearTimeout(t);
+            cancelAnimationFrame(raf);
+        };
     }, []);
 
     return (
@@ -1218,14 +1384,32 @@ function ExtractPreview() {
                 {lineW.map((w, i) => {
                     const pos = (i / lineW.length) * 100;
                     const active = Math.abs(scanY - pos) < 18;
-                    return <div key={i} className={`rounded-full transition-colors duration-100 ${active ? 'bg-blue-400/60' : 'bg-white/10'}`} style={{ height: '4px', width: `${w}%` }} />;
+                    return (
+                        <div
+                            key={i}
+                            className={`rounded-full transition-colors duration-100 ${active ? 'bg-blue-400/60' : 'bg-white/10'}`}
+                            style={{ height: '4px', width: `${w}%` }}
+                        />
+                    );
                 })}
-                <div className="pointer-events-none absolute right-2 left-2 h-px" style={{ top: `calc(${scanY * 0.72}% + 6px)`, background: 'linear-gradient(to right, transparent, rgba(96,165,250,0.8), transparent)' }} />
+                <div
+                    className="pointer-events-none absolute right-2 left-2 h-px"
+                    style={{
+                        top: `calc(${scanY * 0.72}% + 6px)`,
+                        background:
+                            'linear-gradient(to right, transparent, rgba(96,165,250,0.8), transparent)',
+                    }}
+                />
             </div>
             <ArrowRight className="h-3 w-3 text-blue-400/70" />
             <div className="space-y-1 rounded-lg bg-zinc-800 p-2">
-                {[0, 1, 2].map(i => (
-                    <motion.div key={i} animate={i < fields ? { opacity: 1 } : { opacity: 0 }} transition={{ duration: 0.2 }} className="rounded bg-white/8 px-1.5 py-0.5">
+                {[0, 1, 2].map((i) => (
+                    <motion.div
+                        key={i}
+                        animate={i < fields ? { opacity: 1 } : { opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="rounded bg-white/8 px-1.5 py-0.5"
+                    >
                         <div className="h-1.5 w-full rounded-full bg-blue-300/40" />
                     </motion.div>
                 ))}
@@ -1252,24 +1436,53 @@ function ExportPreview() {
     return (
         <div className="mx-auto mb-5 flex h-28 w-full max-w-[180px] flex-col justify-between overflow-hidden rounded-xl border border-white/10 bg-zinc-900 p-3">
             <div className="space-y-1">
-                {[['Vendor', 'Acme Corp.'], ['Total', '€12,450'], ['Tax', '€2,860']].map(([k, v]) => (
-                    <div key={k} className="flex items-center justify-between rounded bg-white/5 px-2 py-0.5">
+                {[
+                    ['Vendor', 'Acme Corp.'],
+                    ['Total', '€12,450'],
+                    ['Tax', '€2,860'],
+                ].map(([k, v]) => (
+                    <div
+                        key={k}
+                        className="flex items-center justify-between rounded bg-white/5 px-2 py-0.5"
+                    >
                         <span className="text-[8px] text-gray-500">{k}</span>
-                        <span className="font-mono text-[8px] text-gray-300">{v}</span>
+                        <span className="font-mono text-[8px] text-gray-300">
+                            {v}
+                        </span>
                     </div>
                 ))}
             </div>
             <motion.div
-                animate={step === 0 ? { scale: 1, backgroundColor: 'rgba(59,130,246,0.15)' } : step === 1 ? { scale: 0.96, backgroundColor: 'rgba(59,130,246,0.3)' } : { scale: 1, backgroundColor: 'rgba(34,197,94,0.2)' }}
+                animate={
+                    step === 0
+                        ? { scale: 1, backgroundColor: 'rgba(59,130,246,0.15)' }
+                        : step === 1
+                          ? {
+                                scale: 0.96,
+                                backgroundColor: 'rgba(59,130,246,0.3)',
+                            }
+                          : { scale: 1, backgroundColor: 'rgba(34,197,94,0.2)' }
+                }
                 transition={{ duration: 0.2 }}
                 className="flex items-center justify-center gap-1 rounded-md border border-white/10 py-1"
             >
                 {step < 2 ? (
-                    <><Download className="h-2.5 w-2.5 text-blue-400" /><span className="text-[9px] text-blue-300">Export .xlsx</span></>
+                    <>
+                        <Download className="h-2.5 w-2.5 text-blue-400" />
+                        <span className="text-[9px] text-blue-300">
+                            Export .xlsx
+                        </span>
+                    </>
                 ) : (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex items-center gap-1"
+                    >
                         <CheckCircle className="h-2.5 w-2.5 text-green-400" />
-                        <span className="text-[9px] text-green-300">Downloaded!</span>
+                        <span className="text-[9px] text-green-300">
+                            Downloaded!
+                        </span>
                     </motion.div>
                 )}
             </motion.div>
@@ -1308,10 +1521,7 @@ function HowItWorks({ locale }: { locale: string }) {
     ];
 
     return (
-        <section
-            id="features"
-            className="relative bg-zinc-950 py-20 md:py-28"
-        >
+        <section id="features" className="relative bg-zinc-950 py-20 md:py-28">
             <div className="pointer-events-none absolute top-0 left-1/2 h-px w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
             <div className="mx-auto max-w-5xl px-4 md:px-6">
                 <motion.div
@@ -1355,8 +1565,12 @@ function HowItWorks({ locale }: { locale: string }) {
                                 <div className="relative z-10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-800 ring-1 ring-white/10">
                                     <step.icon className="h-5 w-5 text-blue-400" />
                                 </div>
-                                <h3 className="mb-2 text-lg font-bold text-white">{step.title}</h3>
-                                <p className="text-sm leading-relaxed text-gray-400">{step.desc}</p>
+                                <h3 className="mb-2 text-lg font-bold text-white">
+                                    {step.title}
+                                </h3>
+                                <p className="text-sm leading-relaxed text-gray-400">
+                                    {step.desc}
+                                </p>
                             </motion.div>
                         ))}
                     </div>
@@ -1403,13 +1617,19 @@ function ProductShowcase({ locale }: { locale: string }) {
     useEffect(() => {
         if (paused) return;
         const interval = setInterval(() => {
-            setActive(prev => (prev + 1) % screenshots.length);
+            setActive((prev) => (prev + 1) % screenshots.length);
         }, 4000);
         return () => clearInterval(interval);
     }, [paused, screenshots.length]);
 
-    const goPrev = () => { setActive(p => (p - 1 + screenshots.length) % screenshots.length); setPaused(true); };
-    const goNext = () => { setActive(p => (p + 1) % screenshots.length); setPaused(true); };
+    const goPrev = () => {
+        setActive((p) => (p - 1 + screenshots.length) % screenshots.length);
+        setPaused(true);
+    };
+    const goNext = () => {
+        setActive((p) => (p + 1) % screenshots.length);
+        setPaused(true);
+    };
 
     return (
         <section className="relative bg-black py-20 md:py-28">
@@ -1426,11 +1646,13 @@ function ProductShowcase({ locale }: { locale: string }) {
                     <span className="mb-4 inline-block rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-400">
                         {pt ? 'Plataforma' : 'Platform'}
                     </span>
-                    <h2 className="mb-3 mt-4 text-2xl font-bold text-white md:text-3xl">
+                    <h2 className="mt-4 mb-3 text-2xl font-bold text-white md:text-3xl">
                         {pt ? 'Veja o DocSet em ação' : 'See DocSet in action'}
                     </h2>
                     <p className="text-gray-400">
-                        {pt ? 'Uma plataforma poderosa, simples de usar' : 'A powerful platform, simple to use'}
+                        {pt
+                            ? 'Uma plataforma poderosa, simples de usar'
+                            : 'A powerful platform, simple to use'}
                     </p>
                 </motion.div>
 
@@ -1474,9 +1696,14 @@ function ProductShowcase({ locale }: { locale: string }) {
                     {screenshots.map((_, i) => (
                         <button
                             key={i}
-                            onClick={() => { setActive(i); setPaused(true); }}
+                            onClick={() => {
+                                setActive(i);
+                                setPaused(true);
+                            }}
                             className={`rounded-full transition-all duration-300 ${
-                                i === active ? 'h-1.5 w-6 bg-white' : 'h-1.5 w-1.5 bg-white/25 hover:bg-white/50'
+                                i === active
+                                    ? 'h-1.5 w-6 bg-white'
+                                    : 'h-1.5 w-1.5 bg-white/25 hover:bg-white/50'
                             }`}
                         />
                     ))}
@@ -1498,7 +1725,11 @@ function Integrations({ locale }: { locale: string }) {
                 ? 'Importe documentos diretamente do Drive. Sincronização automática.'
                 : 'Import documents directly from Drive. Automatic sync.',
             features: pt
-                ? ['Acesso direto aos arquivos', 'Processamento em lote', 'Sincronização automática']
+                ? [
+                      'Acesso direto aos arquivos',
+                      'Processamento em lote',
+                      'Sincronização automática',
+                  ]
                 : ['Direct file access', 'Batch processing', 'Automatic sync'],
             color: 'blue',
         },
@@ -1509,7 +1740,11 @@ function Integrations({ locale }: { locale: string }) {
                 ? 'Exporte dados extraídos diretamente para planilhas.'
                 : 'Export extracted data directly to spreadsheets.',
             features: pt
-                ? ['Exportação com um clique', 'Formatação automática', 'Colaboração em equipe']
+                ? [
+                      'Exportação com um clique',
+                      'Formatação automática',
+                      'Colaboração em equipe',
+                  ]
                 : ['One-click export', 'Auto formatting', 'Team collaboration'],
             color: 'emerald',
         },
@@ -1520,8 +1755,16 @@ function Integrations({ locale }: { locale: string }) {
                 ? 'Receba notificações em tempo real quando uma extração for concluída.'
                 : 'Get real-time notifications the moment an extraction completes.',
             features: pt
-                ? ['Eventos em tempo real', 'Payload configurável', 'Retry automático']
-                : ['Real-time events', 'Configurable payload', 'Automatic retry'],
+                ? [
+                      'Eventos em tempo real',
+                      'Payload configurável',
+                      'Retry automático',
+                  ]
+                : [
+                      'Real-time events',
+                      'Configurable payload',
+                      'Automatic retry',
+                  ],
             color: 'violet',
         },
         {
@@ -1531,7 +1774,11 @@ function Integrations({ locale }: { locale: string }) {
                 ? 'Integre o DocSet diretamente nos seus sistemas via API REST documentada.'
                 : 'Integrate DocSet directly into your systems via documented REST API.',
             features: pt
-                ? ['Autenticação via API key', 'Endpoints JSON', 'Documentação OpenAPI']
+                ? [
+                      'Autenticação via API key',
+                      'Endpoints JSON',
+                      'Documentação OpenAPI',
+                  ]
                 : ['API key authentication', 'JSON endpoints', 'OpenAPI docs'],
             color: 'orange',
         },
@@ -1552,11 +1799,15 @@ function Integrations({ locale }: { locale: string }) {
                         <Link className="h-3.5 w-3.5" />
                         {pt ? 'Integrações' : 'Integrations'}
                     </span>
-                    <h2 className="mb-3 mt-4 text-2xl font-bold text-white md:text-3xl">
-                        {pt ? 'Conectado ao seu fluxo de trabalho' : 'Connected to your workflow'}
+                    <h2 className="mt-4 mb-3 text-2xl font-bold text-white md:text-3xl">
+                        {pt
+                            ? 'Conectado ao seu fluxo de trabalho'
+                            : 'Connected to your workflow'}
                     </h2>
                     <p className="text-gray-400">
-                        {pt ? 'Configure uma vez, funcione para sempre' : 'Set once, works forever'}
+                        {pt
+                            ? 'Configure uma vez, funcione para sempre'
+                            : 'Set once, works forever'}
                     </p>
                 </motion.div>
 
@@ -1571,25 +1822,40 @@ function Integrations({ locale }: { locale: string }) {
                             whileHover={{ y: -4 }}
                             className="group rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.04] md:p-8"
                         >
-                            <div className={`mb-5 inline-flex rounded-2xl p-3 ${
-                                item.color === 'blue' ? 'bg-blue-500/10 text-blue-400' :
-                                item.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400' :
-                                item.color === 'violet' ? 'bg-violet-500/10 text-violet-400' :
-                                'bg-orange-500/10 text-orange-400'
-                            }`}>
+                            <div
+                                className={`mb-5 inline-flex rounded-2xl p-3 ${
+                                    item.color === 'blue'
+                                        ? 'bg-blue-500/10 text-blue-400'
+                                        : item.color === 'emerald'
+                                          ? 'bg-emerald-500/10 text-emerald-400'
+                                          : item.color === 'violet'
+                                            ? 'bg-violet-500/10 text-violet-400'
+                                            : 'bg-orange-500/10 text-orange-400'
+                                }`}
+                            >
                                 <item.icon className="h-7 w-7" />
                             </div>
-                            <h3 className="mb-2 text-xl font-bold text-white">{item.title}</h3>
+                            <h3 className="mb-2 text-xl font-bold text-white">
+                                {item.title}
+                            </h3>
                             <p className="mb-5 text-gray-400">{item.desc}</p>
                             <ul className="space-y-2">
                                 {item.features.map((feature) => (
-                                    <li key={feature} className="flex items-center gap-2 text-sm text-gray-300">
-                                        <Check className={`h-4 w-4 ${
-                                            item.color === 'blue' ? 'text-blue-400' :
-                                            item.color === 'emerald' ? 'text-emerald-400' :
-                                            item.color === 'violet' ? 'text-violet-400' :
-                                            'text-orange-400'
-                                        }`} />
+                                    <li
+                                        key={feature}
+                                        className="flex items-center gap-2 text-sm text-gray-300"
+                                    >
+                                        <Check
+                                            className={`h-4 w-4 ${
+                                                item.color === 'blue'
+                                                    ? 'text-blue-400'
+                                                    : item.color === 'emerald'
+                                                      ? 'text-emerald-400'
+                                                      : item.color === 'violet'
+                                                        ? 'text-violet-400'
+                                                        : 'text-orange-400'
+                                            }`}
+                                        />
                                         {feature}
                                     </li>
                                 ))}
@@ -1615,8 +1881,8 @@ function SavingsCalculator({
     const pt = locale.startsWith('pt');
     const [docCount, setDocCount] = useState(100);
 
-    const hours = Math.round((docCount * 5) / 60 * 10) / 10;
-    const savings = Math.round((docCount * 5) / 60 * 25);
+    const hours = Math.round(((docCount * 5) / 60) * 10) / 10;
+    const savings = Math.round(((docCount * 5) / 60) * 25);
 
     return (
         <section className="relative bg-black py-20 md:py-28">
@@ -1645,7 +1911,9 @@ function SavingsCalculator({
                     <div className="mb-10 rounded-2xl border border-white/10 bg-white/[0.02] p-6 md:p-8">
                         <label className="mb-3 block text-sm text-gray-400">
                             {pt ? 'Documentos por mês' : 'Documents per month'}:{' '}
-                            <span className="font-semibold text-white">{docCount}</span>
+                            <span className="font-semibold text-white">
+                                {docCount}
+                            </span>
                         </label>
                         <input
                             type="range"
@@ -1653,7 +1921,9 @@ function SavingsCalculator({
                             max="2000"
                             step="10"
                             value={docCount}
-                            onChange={(e) => setDocCount(Number(e.target.value))}
+                            onChange={(e) =>
+                                setDocCount(Number(e.target.value))
+                            }
                             className="w-full accent-blue-500"
                         />
                         <div className="mt-2 flex justify-between text-xs text-gray-600">
@@ -1772,16 +2042,22 @@ function Pricing({
                     <h2 className="mb-3 text-2xl font-bold text-white md:text-3xl">
                         {t('landing.pricing.title')}
                     </h2>
-                    <p className="text-gray-400">{t('landing.pricing.subtitle')}</p>
+                    <p className="text-gray-400">
+                        {t('landing.pricing.subtitle')}
+                    </p>
                 </motion.div>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {plansData.length === 0
                         ? Array.from({ length: 4 }).map((_, i) => (
-                              <div key={i} className="h-[400px] animate-pulse rounded-2xl bg-white/5" />
+                              <div
+                                  key={i}
+                                  className="h-[400px] animate-pulse rounded-2xl bg-white/5"
+                              />
                           ))
                         : plansData.map((plan, index) => {
-                              const recommended = plan.recommended || plan.is_popular;
+                              const recommended =
+                                  plan.recommended || plan.is_popular;
                               return (
                                   <motion.div
                                       key={plan.id}
@@ -1799,7 +2075,9 @@ function Pricing({
                                       {recommended && (
                                           <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                                               <Badge className="bg-blue-500 text-white">
-                                                  {pt ? 'Recomendado' : 'Recommended'}
+                                                  {pt
+                                                      ? 'Recomendado'
+                                                      : 'Recommended'}
                                               </Badge>
                                           </div>
                                       )}
@@ -1814,36 +2092,73 @@ function Pricing({
                                       <div className="mb-5">
                                           <div className="flex items-baseline gap-1">
                                               <span className="text-3xl font-bold text-white">
-                                                  {plan.price === null || plan.price === 0 || parseFloat(String(plan.price)) === 0
-                                                      ? new Intl.NumberFormat(locale, { style: 'currency', currency: plan.currency || 'EUR' }).format(0)
-                                                      : new Intl.NumberFormat(locale, { style: 'currency', currency: plan.currency }).format(plan.price)}
+                                                  {plan.price === null ||
+                                                  plan.price === 0 ||
+                                                  parseFloat(
+                                                      String(plan.price),
+                                                  ) === 0
+                                                      ? new Intl.NumberFormat(
+                                                            locale,
+                                                            {
+                                                                style: 'currency',
+                                                                currency:
+                                                                    plan.currency ||
+                                                                    'EUR',
+                                                            },
+                                                        ).format(0)
+                                                      : new Intl.NumberFormat(
+                                                            locale,
+                                                            {
+                                                                style: 'currency',
+                                                                currency:
+                                                                    plan.currency,
+                                                            },
+                                                        ).format(plan.price)}
                                               </span>
                                               {plan.interval && (
-                                                  <span className="text-gray-500">/{t(plan.interval)}</span>
+                                                  <span className="text-gray-500">
+                                                      /{t(plan.interval)}
+                                                  </span>
                                               )}
                                           </div>
                                       </div>
                                       <div className="mb-5 flex-1 space-y-2">
-                                          {plan.features?.map((feature: string, i: number) => (
-                                              <div key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                                                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
-                                                  <span>{feature}</span>
-                                              </div>
-                                          ))}
+                                          {plan.features?.map(
+                                              (feature: string, i: number) => (
+                                                  <div
+                                                      key={i}
+                                                      className="flex items-start gap-2 text-sm text-gray-300"
+                                                  >
+                                                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
+                                                      <span>{feature}</span>
+                                                  </div>
+                                              ),
+                                          )}
                                       </div>
                                       <Button
                                           className={`mt-auto w-full ${recommended ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-white text-black hover:bg-gray-100'}`}
                                           onClick={() => {
                                               if (isAuthenticated) {
-                                                  router.visit(`/${localeShort}/settings/billing`);
+                                                  router.visit(
+                                                      `/${localeShort}/settings/billing`,
+                                                  );
                                               } else if (plan.price_id) {
-                                                  router.visit(`/${localeShort}/register?plan=${plan.price_id}&plan_name=${encodeURIComponent(plan.display_name || plan.name)}`);
+                                                  router.visit(
+                                                      `/${localeShort}/register?plan=${plan.price_id}&plan_name=${encodeURIComponent(plan.display_name || plan.name)}`,
+                                                  );
                                               } else {
-                                                  router.visit(`/${localeShort}/register`);
+                                                  router.visit(
+                                                      `/${localeShort}/register`,
+                                                  );
                                               }
                                           }}
                                       >
-                                          {parseFloat(String(plan.price).replace(/[^0-9.]/g, '') || '0') === 0
+                                          {parseFloat(
+                                              String(plan.price).replace(
+                                                  /[^0-9.]/g,
+                                                  '',
+                                              ) || '0',
+                                          ) === 0
                                               ? t('Start free')
                                               : t('Get Started')}
                                       </Button>
@@ -1894,7 +2209,7 @@ function FAQ({ locale }: { locale: string }) {
               },
               {
                   q: 'Do I need to know how to code?',
-                  a: 'No. Upload the PDF, configure your fields once, and export. That\'s it. No code, no IT department, no friction.',
+                  a: "No. Upload the PDF, configure your fields once, and export. That's it. No code, no IT department, no friction.",
               },
               {
                   q: 'What file types work?',
@@ -1906,7 +2221,7 @@ function FAQ({ locale }: { locale: string }) {
               },
               {
                   q: 'What if my PDF has complex tables or layouts?',
-                  a: 'DocSet handles it. If any field doesn\'t extract perfectly, you can review and fix before exporting — you always stay in control.',
+                  a: "DocSet handles it. If any field doesn't extract perfectly, you can review and fix before exporting — you always stay in control.",
               },
           ];
 
@@ -1922,7 +2237,9 @@ function FAQ({ locale }: { locale: string }) {
                     className="mb-10 text-center"
                 >
                     <h2 className="mb-3 text-2xl font-bold text-white md:text-3xl">
-                        {pt ? 'Perguntas frequentes' : 'Frequently asked questions'}
+                        {pt
+                            ? 'Perguntas frequentes'
+                            : 'Frequently asked questions'}
                     </h2>
                     <p className="text-gray-400">
                         {pt
@@ -2038,34 +2355,78 @@ function Footer({ locale }: { locale: string }) {
                     <div className="col-span-2 md:col-span-1">
                         <div className="mb-4 flex items-center gap-2">
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
-                                <img src="/docset.png" alt="Docset" className="h-6 w-6" />
+                                <img
+                                    src="/docset.png"
+                                    alt="Docset"
+                                    className="h-6 w-6"
+                                />
                             </div>
                             <span className="text-xl font-bold">DOCSET</span>
                         </div>
                         <p className="mb-6 text-sm text-gray-400">
-                            Turn PDFs into ready-to-use data. No manual typing needed.
+                            Turn PDFs into ready-to-use data. No manual typing
+                            needed.
                         </p>
                     </div>
 
                     <div>
-                        <h3 className="mb-4 font-semibold text-white">Product</h3>
+                        <h3 className="mb-4 font-semibold text-white">
+                            Product
+                        </h3>
                         <ul className="space-y-2 text-sm text-gray-400">
-                            <li><a href="#features" className="transition hover:text-white">Features</a></li>
-                            <li><a href="#pricing" className="transition hover:text-white">Pricing</a></li>
-                            <li><a href="#api" className="transition hover:text-white">API</a></li>
+                            <li>
+                                <a
+                                    href="#features"
+                                    className="transition hover:text-white"
+                                >
+                                    Features
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href="#pricing"
+                                    className="transition hover:text-white"
+                                >
+                                    Pricing
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href="#api"
+                                    className="transition hover:text-white"
+                                >
+                                    API
+                                </a>
+                            </li>
                         </ul>
                     </div>
 
                     <div>
-                        <h3 className="mb-4 font-semibold text-white">Legal</h3>
+                        <h3 className="mb-4 font-semibold text-white">
+                            Legal & Blog
+                        </h3>
                         <ul className="space-y-2 text-sm text-gray-400">
                             <li>
-                                <a href={`/${locale}/privacy`} className="transition hover:text-white">
+                                <a
+                                    href={`/${locale}/blog`}
+                                    className="transition hover:text-white"
+                                >
+                                    Blog
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href={`/${locale}/privacy`}
+                                    className="transition hover:text-white"
+                                >
                                     {t('Privacy Policy')}
                                 </a>
                             </li>
                             <li>
-                                <a href={`/${locale}/terms`} className="transition hover:text-white">
+                                <a
+                                    href={`/${locale}/terms`}
+                                    className="transition hover:text-white"
+                                >
                                     {t('Terms of Service')}
                                 </a>
                             </li>
@@ -2075,16 +2436,26 @@ function Footer({ locale }: { locale: string }) {
                     <div>
                         <h3 className="mb-4 font-semibold text-white">Trust</h3>
                         <ul className="space-y-2 text-sm text-gray-400">
-                            <li className="flex items-center gap-2"><Shield className="h-4 w-4 text-green-400" />GDPR Compliant</li>
-                            <li className="flex items-center gap-2"><Lock className="h-4 w-4 text-blue-400" />256-bit SSL</li>
-                            <li className="flex items-center gap-2"><Server className="h-4 w-4 text-purple-400" />EU Data Storage</li>
+                            <li className="flex items-center gap-2">
+                                <Shield className="h-4 w-4 text-green-400" />
+                                GDPR Compliant
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <Lock className="h-4 w-4 text-blue-400" />
+                                256-bit SSL
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <Server className="h-4 w-4 text-purple-400" />
+                                EU Data Storage
+                            </li>
                         </ul>
                     </div>
                 </div>
 
                 <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
                     <p className="text-sm text-gray-500">
-                        © {new Date().getFullYear()} Docset. All rights reserved.
+                        © {new Date().getFullYear()} Docset. All rights
+                        reserved.
                     </p>
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                         <div className="h-2 w-2 rounded-full bg-green-500" />
@@ -2129,13 +2500,22 @@ function DemoModal({
     };
 
     const handleProcess = async () => {
-        if (typeof window !== 'undefined' && localStorage.getItem('docset_demo_used') === 'true') {
+        if (
+            typeof window !== 'undefined' &&
+            localStorage.getItem('docset_demo_used') === 'true'
+        ) {
             toast.error(t('Demo already used. Please register to continue.'));
-            setTimeout(() => { onClose(); router.visit(`/${locale}/register`); }, 1500);
+            setTimeout(() => {
+                onClose();
+                router.visit(`/${locale}/register`);
+            }, 1500);
             return;
         }
         if (!file) return;
-        if (file.size > MAX_FILE_SIZE) { setError(t('File too large', { size: 5 })); return; }
+        if (file.size > MAX_FILE_SIZE) {
+            setError(t('File too large', { size: 5 }));
+            return;
+        }
 
         setProcessing(true);
         setError(null);
@@ -2147,7 +2527,10 @@ function DemoModal({
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-CSRF-TOKEN':
+                        document
+                            .querySelector('meta[name="csrf-token"]')
+                            ?.getAttribute('content') || '',
                 },
             });
             const data = await response.json();
@@ -2155,12 +2538,24 @@ function DemoModal({
             if (!response.ok) {
                 if (response.status === 429) {
                     localStorage.setItem('docset_demo_used', 'true');
-                    toast.error(t('Demo already used. Please register to continue.'));
-                    setTimeout(() => { onClose(); router.visit(`/${locale}/register`); }, 2500);
+                    toast.error(
+                        t('Demo already used. Please register to continue.'),
+                    );
+                    setTimeout(() => {
+                        onClose();
+                        router.visit(`/${locale}/register`);
+                    }, 2500);
                     return;
                 }
-                if (response.status === 422 && data.error === 'Page limit exceeded') {
-                    setError(t('Demo is limited to 2 pages. Please register for full access.'));
+                if (
+                    response.status === 422 &&
+                    data.error === 'Page limit exceeded'
+                ) {
+                    setError(
+                        t(
+                            'Demo is limited to 2 pages. Please register for full access.',
+                        ),
+                    );
                     return;
                 }
                 throw new Error(data.message || t('document_processing_error'));
@@ -2182,9 +2577,13 @@ function DemoModal({
         <Dialog open={true} onOpenChange={onClose}>
             <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto border-white/10 bg-zinc-900 text-white">
                 <DialogHeader>
-                    <DialogTitle className="text-2xl font-bold">{t('Try DocSet Demo')}</DialogTitle>
+                    <DialogTitle className="text-2xl font-bold">
+                        {t('Try DocSet Demo')}
+                    </DialogTitle>
                     <DialogDescription className="text-gray-400">
-                        {t('Upload a document to see how DocSet extracts data automatically. This is a one-time free demo.')}
+                        {t(
+                            'Upload a document to see how DocSet extracts data automatically. This is a one-time free demo.',
+                        )}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -2192,28 +2591,53 @@ function DemoModal({
                     <div className="space-y-6">
                         <div className="rounded-xl border-2 border-dashed border-white/20 p-8 text-center transition-all hover:border-blue-500/50 md:p-12">
                             <Upload className="mx-auto mb-4 h-12 w-12 text-gray-600 md:h-16 md:w-16" />
-                            <Input type="file" onChange={handleFileChange} accept=".pdf,.jpg,.jpeg,.png" className="hidden" id="demo-file" />
-                            <Label htmlFor="demo-file" className="cursor-pointer text-lg font-semibold text-blue-400 hover:text-blue-300">
+                            <Input
+                                type="file"
+                                onChange={handleFileChange}
+                                accept=".pdf,.jpg,.jpeg,.png"
+                                className="hidden"
+                                id="demo-file"
+                            />
+                            <Label
+                                htmlFor="demo-file"
+                                className="cursor-pointer text-lg font-semibold text-blue-400 hover:text-blue-300"
+                            >
                                 {t('Click to upload')}
                             </Label>
-                            <p className="mt-3 text-sm text-gray-400">{t('PDF, JPG, PNG (max 10MB)')}</p>
+                            <p className="mt-3 text-sm text-gray-400">
+                                {t('PDF, JPG, PNG (max 10MB)')}
+                            </p>
                             {file && (
                                 <Badge className="mt-6 border-blue-500/30 bg-blue-500/20 px-4 py-2 text-sm text-blue-300">
                                     <FileText className="mr-2 h-4 w-4" />
-                                    {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                                    {file.name} (
+                                    {(file.size / 1024 / 1024).toFixed(2)} MB)
                                 </Badge>
                             )}
                             {error && (
                                 <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
-                                    <p className="text-sm font-medium text-red-400">{error}</p>
+                                    <p className="text-sm font-medium text-red-400">
+                                        {error}
+                                    </p>
                                 </div>
                             )}
                         </div>
-                        <Button onClick={handleProcess} disabled={!file || processing || !!error} className="w-full bg-blue-500 text-white hover:bg-blue-600" size="lg">
+                        <Button
+                            onClick={handleProcess}
+                            disabled={!file || processing || !!error}
+                            className="w-full bg-blue-500 text-white hover:bg-blue-600"
+                            size="lg"
+                        >
                             {processing ? (
-                                <><Sparkles className="mr-2 h-5 w-5 animate-spin" />{t('Processing...')}</>
+                                <>
+                                    <Sparkles className="mr-2 h-5 w-5 animate-spin" />
+                                    {t('Processing...')}
+                                </>
                             ) : (
-                                <><Sparkles className="mr-2 h-5 w-5" />{t('Extract Data')}</>
+                                <>
+                                    <Sparkles className="mr-2 h-5 w-5" />
+                                    {t('Extract Data')}
+                                </>
                             )}
                         </Button>
                     </div>
@@ -2223,47 +2647,97 @@ function DemoModal({
                             <div className="mb-6 flex items-center gap-3">
                                 <CheckCircle className="h-10 w-10 text-green-500" />
                                 <div>
-                                    <h3 className="text-xl font-bold text-green-400">{t('Data Extracted Successfully!')}</h3>
-                                    <p className="text-sm text-gray-400">{t('landing.howItWorks.steps.2.desc')}</p>
+                                    <h3 className="text-xl font-bold text-green-400">
+                                        {t('Data Extracted Successfully!')}
+                                    </h3>
+                                    <p className="text-sm text-gray-400">
+                                        {t('landing.howItWorks.steps.2.desc')}
+                                    </p>
                                 </div>
                             </div>
                             <div className="space-y-3">
                                 {Object.entries(result).map(([key, value]) => (
-                                    <div key={key} className="flex flex-col rounded-lg border border-white/10 bg-white/5 p-4">
-                                        <span className="mb-1 font-medium text-gray-300 capitalize">{key.replace('_', ' ')}</span>
+                                    <div
+                                        key={key}
+                                        className="flex flex-col rounded-lg border border-white/10 bg-white/5 p-4"
+                                    >
+                                        <span className="mb-1 font-medium text-gray-300 capitalize">
+                                            {key.replace('_', ' ')}
+                                        </span>
                                         <div className="w-full">
                                             {Array.isArray(value) ? (
                                                 <div className="mt-2 space-y-2">
                                                     {value.map((item, idx) => (
-                                                        <div key={idx} className="rounded border border-white/5 bg-white/5 p-3 text-sm">
-                                                            {typeof item === 'object' && item !== null ? (
+                                                        <div
+                                                            key={idx}
+                                                            className="rounded border border-white/5 bg-white/5 p-3 text-sm"
+                                                        >
+                                                            {typeof item ===
+                                                                'object' &&
+                                                            item !== null ? (
                                                                 <div className="grid grid-cols-2 gap-2">
-                                                                    {Object.entries(item).map(([sk, sv]) => (
-                                                                        <div key={sk} className="flex flex-col">
-                                                                            <span className="text-xs text-gray-500 uppercase">{sk}</span>
-                                                                            <span className="text-sm text-gray-200">{String(sv)}</span>
-                                                                        </div>
-                                                                    ))}
+                                                                    {Object.entries(
+                                                                        item,
+                                                                    ).map(
+                                                                        ([
+                                                                            sk,
+                                                                            sv,
+                                                                        ]) => (
+                                                                            <div
+                                                                                key={
+                                                                                    sk
+                                                                                }
+                                                                                className="flex flex-col"
+                                                                            >
+                                                                                <span className="text-xs text-gray-500 uppercase">
+                                                                                    {
+                                                                                        sk
+                                                                                    }
+                                                                                </span>
+                                                                                <span className="text-sm text-gray-200">
+                                                                                    {String(
+                                                                                        sv,
+                                                                                    )}
+                                                                                </span>
+                                                                            </div>
+                                                                        ),
+                                                                    )}
                                                                 </div>
                                                             ) : (
-                                                                <span className="text-gray-200">{String(item)}</span>
+                                                                <span className="text-gray-200">
+                                                                    {String(
+                                                                        item,
+                                                                    )}
+                                                                </span>
                                                             )}
                                                         </div>
                                                     ))}
                                                 </div>
-                                            ) : typeof value === 'object' && value !== null ? (
+                                            ) : typeof value === 'object' &&
+                                              value !== null ? (
                                                 <div className="mt-2 rounded border border-white/5 bg-white/5 p-3 text-sm">
                                                     <div className="grid grid-cols-2 gap-2">
-                                                        {Object.entries(value).map(([sk, sv]) => (
-                                                            <div key={sk} className="flex flex-col">
-                                                                <span className="text-xs text-gray-500 uppercase">{sk}</span>
-                                                                <span className="text-sm text-gray-200">{String(sv)}</span>
+                                                        {Object.entries(
+                                                            value,
+                                                        ).map(([sk, sv]) => (
+                                                            <div
+                                                                key={sk}
+                                                                className="flex flex-col"
+                                                            >
+                                                                <span className="text-xs text-gray-500 uppercase">
+                                                                    {sk}
+                                                                </span>
+                                                                <span className="text-sm text-gray-200">
+                                                                    {String(sv)}
+                                                                </span>
                                                             </div>
                                                         ))}
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <span className="block text-right font-bold text-white">{String(value)}</span>
+                                                <span className="block text-right font-bold text-white">
+                                                    {String(value)}
+                                                </span>
                                             )}
                                         </div>
                                     </div>
@@ -2272,13 +2746,21 @@ function DemoModal({
                         </div>
 
                         <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-6">
-                            <p className="mb-2 font-medium text-blue-300">{t('🎉 Demo completed!')}</p>
+                            <p className="mb-2 font-medium text-blue-300">
+                                {t('🎉 Demo completed!')}
+                            </p>
                             <p className="text-sm text-gray-400">
-                                {t('Register now to unlock unlimited document processing with advanced features.')}
+                                {t(
+                                    'Register now to unlock unlimited document processing with advanced features.',
+                                )}
                             </p>
                         </div>
 
-                        <Button onClick={onDemoComplete} className="w-full bg-white text-black hover:bg-gray-200" size="lg">
+                        <Button
+                            onClick={onDemoComplete}
+                            className="w-full bg-white text-black hover:bg-gray-200"
+                            size="lg"
+                        >
                             {t('Register to Continue')}
                             <ArrowRight className="ml-2" />
                         </Button>

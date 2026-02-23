@@ -1,8 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&display=swap');
 
 @import 'tailwindcss';
+@plugin "@tailwindcss/typography";
 
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -145,27 +146,47 @@
 }
 
 @layer components {
-  .react-pdf__Document {
-    display: inline-block !important;
-  }
+    .react-pdf__Document {
+        display: inline-block !important;
+    }
 
-  .react-pdf__Page {
-    display: block !important;
-  }
+    .react-pdf__Page {
+        display: block !important;
+    }
 
-  .react-pdf__Page canvas {
-    display: block !important;
-    max-width: none !important;
-  }
+    .react-pdf__Page canvas {
+        display: block !important;
+        max-width: none !important;
+    }
 
-  /* Checkerboard continua OK */
-  .bg-checkerboard {
-    background-image: 
-      linear-gradient(45deg, hsl(var(--muted) / 0.5) 25%, transparent 25%),
-      linear-gradient(-45deg, hsl(var(--muted) / 0.5) 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, hsl(var(--muted) / 0.5) 75%),
-      linear-gradient(-45deg, transparent 75%, hsl(var(--muted) / 0.5) 75%);
-    background-size: 20px 20px;
-    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-  }
+    /* Checkerboard continua OK */
+    .bg-checkerboard {
+        background-image:
+            linear-gradient(
+                45deg,
+                hsl(var(--muted) / 0.5) 25%,
+                transparent 25%
+            ),
+            linear-gradient(
+                -45deg,
+                hsl(var(--muted) / 0.5) 25%,
+                transparent 25%
+            ),
+            linear-gradient(
+                45deg,
+                transparent 75%,
+                hsl(var(--muted) / 0.5) 75%
+            ),
+            linear-gradient(
+                -45deg,
+                transparent 75%,
+                hsl(var(--muted) / 0.5) 75%
+            );
+        background-size: 20px 20px;
+        background-position:
+            0 0,
+            0 10px,
+            10px -10px,
+            -10px 0px;
+    }
 }

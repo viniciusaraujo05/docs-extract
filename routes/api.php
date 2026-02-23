@@ -31,6 +31,9 @@ Route::middleware(['throttle:60,1'])->group(function () {
 
     // Public plans (for landing page)
     Route::get('plans', [\App\Http\Controllers\PlanController::class, 'index'])->name('plans.index');
+
+    // Newsletter subscription
+    Route::post('newsletter/subscribe', [\App\Http\Controllers\Api\NewsletterController::class, 'subscribe']);
 });
 
 // Locale update requires authentication
@@ -61,6 +64,9 @@ Route::prefix('demo')->middleware(['throttle:3,60'])->group(function () {
     Route::post('extract', [\App\Http\Controllers\Api\DemoController::class, 'extract']);
     Route::get('check', [\App\Http\Controllers\Api\DemoController::class, 'checkAvailability']);
 });
+
+// Blog Webhook
+Route::post('webhooks/blog/sync', [\App\Http\Controllers\Webhook\BlogWebhookController::class, 'sync']);
 
 // Authenticated API Routes (No locale prefix - APIs are language-agnostic)
 // IMPORTANT: 'web' middleware includes CSRF protection
