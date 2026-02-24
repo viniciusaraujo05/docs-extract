@@ -3,8 +3,8 @@
 use App\Http\Middleware\CheckUsageLimit;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
-use App\Http\Middleware\RedirectToCanonicalHost;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\RedirectToCanonicalHost;
 use App\Http\Middleware\RestrictApiDomain;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
