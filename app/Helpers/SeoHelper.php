@@ -8,17 +8,17 @@ class SeoHelper
     {
         $content = [
             'en' => [
-                'title' => 'Stop Typing Invoices & Receipts | PDF to Excel Converter - DocSet',
+                'title' => 'PDF to Excel Converter & Invoice OCR | DocSet',
                 'description' => 'Turn PDFs into Excel in seconds. No coding required. Extract invoice data, receipts, and IDs automatically with our PDF to Excel converter and invoice OCR software.',
                 'keywords' => 'invoice data entry automation, receipt scanner excel, PDF invoice to excel, automated invoice processing, expense receipt OCR, KYC document extraction, invoice OCR software, PDF to Excel converter, stop typing invoices, automate data entry, receipt scanner, ID verification OCR',
             ],
             'pt-BR' => [
-                'title' => 'Pare de Digitar Notas Fiscais | Conversor PDF para Excel - DocSet',
+                'title' => 'Conversor PDF para Excel e OCR de Notas | DocSet',
                 'description' => 'Converta PDFs em Excel em segundos. Sem código. Extraia dados de notas fiscais, recibos e documentos automaticamente com nosso conversor PDF para Excel e software de OCR.',
                 'keywords' => 'automação nota fiscal, digitação automática nfe, PDF para Excel, OCR de recibos, extração de dados CNH, automação contas a pagar, parar de digitar notas fiscais, automatizar entrada de dados, scanner de recibos',
             ],
             'pt-PT' => [
-                'title' => 'Pare de Digitar Faturas | Conversor PDF para Excel - DocSet',
+                'title' => 'Conversor PDF para Excel e OCR de Faturas | DocSet',
                 'description' => 'Converta PDFs em Excel em segundos. Sem código. Extraia dados de faturas, recibos e documentos automaticamente com nosso conversor PDF para Excel e software de OCR.',
                 'keywords' => 'automação faturas, digitalização faturas excel, PDF para Excel, OCR recibos, extração dados cartão cidadão, automação contas a pagar, parar de digitar faturas, automatizar introdução dados',
             ],
@@ -113,16 +113,27 @@ class SeoHelper
         });
     }
 
-    public static function getAlternateLocales(string $currentLocale): array
+    public static function getAlternateLocales(string $currentLocale, string $path = ''): array
     {
-        $siteUrl = config('app.url', 'https://docset.com');
+        $siteUrl = rtrim(config('app.url', 'https://docset.com'), '/');
+
+        // Remove leading slash from path
+        $path = ltrim($path, '/');
+
+        // Strip out existing locale prefix from path if present (e.g., 'en/blog' -> 'blog')
+        $pathParts = explode('/', $path);
+        if (count($pathParts) > 0 && in_array($pathParts[0], ['en', 'pt', 'pt-pt', 'pt-br'])) {
+            array_shift($pathParts);
+        }
+        $cleanPath = implode('/', $pathParts);
+        $suffix = $cleanPath ? '/'.$cleanPath : '';
 
         // Return all locales including x-default for proper hreflang
         return [
-            ['locale' => 'en', 'url' => $siteUrl.'/en'],
-            ['locale' => 'pt-BR', 'url' => $siteUrl.'/pt'],
-            ['locale' => 'pt-PT', 'url' => $siteUrl.'/pt-pt'],
-            ['locale' => 'x-default', 'url' => $siteUrl.'/en'],
+            ['locale' => 'en', 'url' => $siteUrl.'/en'.$suffix],
+            ['locale' => 'pt-BR', 'url' => $siteUrl.'/pt'.$suffix],
+            ['locale' => 'pt-PT', 'url' => $siteUrl.'/pt-pt'.$suffix],
+            ['locale' => 'x-default', 'url' => $siteUrl.'/en'.$suffix],
         ];
     }
 }

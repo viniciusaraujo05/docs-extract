@@ -80,7 +80,14 @@ function BrowserFrame({
                     docset.app
                 </div>
             </div>
-            <img src={src} alt={alt} className="w-full" loading="lazy" />
+            <img
+                src={src}
+                alt={alt}
+                width={1200}
+                height={800}
+                className="w-full"
+                loading="lazy"
+            />
         </div>
     );
 }
@@ -519,6 +526,8 @@ function Header({
                                 <img
                                     src="/docset.png"
                                     alt="Docset"
+                                    width={32}
+                                    height={32}
                                     className="h-full w-full object-contain"
                                 />
                             </div>
@@ -659,6 +668,8 @@ function Header({
                                 <img
                                     src="/docset.png"
                                     alt="Docset"
+                                    width={32}
+                                    height={32}
                                     className="h-full w-full object-contain"
                                 />
                             </div>
@@ -814,7 +825,12 @@ function Hero({
                     {/* ── Left: copy ── */}
                     <div className="text-center md:text-left">
                         {/* Main headline: stop typing / from PDFs / by hand. */}
-                        <div className="mb-8 space-y-1 md:space-y-2">
+                        <h1 className="mb-8 space-y-1 md:space-y-2">
+                            <span className="sr-only">
+                                {pt
+                                    ? 'Conversor PDF para Excel e OCR de Notas'
+                                    : 'PDF to Excel Converter and Invoice OCR'}
+                            </span>
                             {/* Line 1: stop typing — Caveat handwriting */}
                             <motion.div
                                 initial={{ opacity: 0, x: -20 }}
@@ -886,7 +902,7 @@ function Hero({
                                     </span>
                                 </span>
                             </motion.div>
-                        </div>
+                        </h1>
 
                         {/* Subheadline */}
                         <motion.p
@@ -2358,6 +2374,8 @@ function Footer({ locale }: { locale: string }) {
                                 <img
                                     src="/docset.png"
                                     alt="Docset"
+                                    width={24}
+                                    height={24}
                                     className="h-6 w-6"
                                 />
                             </div>

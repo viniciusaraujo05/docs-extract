@@ -53,7 +53,7 @@ class HandleInertiaRequests extends Middleware
         try {
             $seoContent = SeoHelper::getContent($locale);
             $structuredData = SeoHelper::generateStructuredData($locale);
-            $alternateLocales = SeoHelper::getAlternateLocales($locale);
+            $alternateLocales = SeoHelper::getAlternateLocales($locale, $request->path());
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('SEO Helper failed in HandleInertiaRequests', [
                 'error' => $e->getMessage(),

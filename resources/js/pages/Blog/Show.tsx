@@ -174,6 +174,8 @@ export default function Show({ post, latestPosts, locale }: Props) {
                                 <img
                                     src={post.cover_image_url}
                                     alt={post.translation?.title}
+                                    width={1280}
+                                    height={640}
                                     className="h-full w-full object-cover"
                                 />
                             </motion.div>
@@ -337,6 +339,8 @@ export default function Show({ post, latestPosts, locale }: Props) {
                                                                     .translation
                                                                     ?.title
                                                             }
+                                                            width={96}
+                                                            height={80}
                                                             className="h-full w-full object-cover transition-transform group-hover:scale-110"
                                                         />
                                                     )}

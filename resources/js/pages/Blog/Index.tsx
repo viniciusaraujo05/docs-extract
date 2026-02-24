@@ -76,6 +76,8 @@ export default function Index({ posts, locale }: Props) {
                                     <img
                                         src={featuredPost.cover_image_url}
                                         alt={featuredPost.translation?.title}
+                                        width={1280}
+                                        height={720}
                                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
                                 ) : (
@@ -138,6 +140,8 @@ export default function Index({ posts, locale }: Props) {
                                         <img
                                             src={post.cover_image_url}
                                             alt={post.translation?.title}
+                                            width={600}
+                                            height={400}
                                             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                                         />
                                     ) : (

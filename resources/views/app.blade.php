@@ -105,7 +105,7 @@
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
         {{-- Google Picker API for drive.file scope compliance --}}
-        <script src="https://apis.google.com/js/api.js"></script>
+        <script async defer src="https://apis.google.com/js/api.js"></script>
 
         {{-- Structured Data (JSON-LD) --}}
         @if($seoStructuredData)
@@ -115,7 +115,7 @@
         {{-- Analytics & Cookies (Production Only) --}}
         @production
             {{-- Google tag (gtag.js) --}}
-            <script async src="https://www.googletagmanager.com/gtag/js?id=G-5EFQBMVB3G"></script>
+            <script async defer src="https://www.googletagmanager.com/gtag/js?id=G-5EFQBMVB3G"></script>
             <script>
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
@@ -137,7 +137,7 @@
                     'wait_for_update': 500
                 });
             </script>
-            <script type="text/javascript" charset="UTF-8" src="//cdn.cookie-script.com/s/515ed2cba50c7a9fc9f575d03a7aa1df.js"></script>
+            <script async defer type="text/javascript" charset="UTF-8" src="//cdn.cookie-script.com/s/515ed2cba50c7a9fc9f575d03a7aa1df.js"></script>
 
             {{-- Apollo.io Website Tracker --}}
             <script>
