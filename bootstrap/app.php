@@ -88,7 +88,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Handle 404 errors with Inertia
         $exceptions->renderable(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, \Illuminate\Http\Request $request) {
             if (! $request->is('api/*') && ! $request->is('v1/*')) {
-                return inertia('errors/404');
+                return inertia('errors/404')->toResponse($request)->setStatusCode(404);
             }
         });
     })->create();
