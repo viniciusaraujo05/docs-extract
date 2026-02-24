@@ -8,18 +8,18 @@ class SeoHelper
     {
         $content = [
             'en' => [
-                'title' => 'PDF to Excel Converter & Invoice OCR | DocSet',
-                'description' => 'Turn PDFs into Excel in seconds. No coding required. Extract invoice data, receipts, and IDs automatically with our PDF to Excel converter and invoice OCR software.',
+                'title' => 'PDF to Excel & Invoice OCR | DOCSET',
+                'description' => 'Convert PDFs to Excel in seconds and extract invoice, receipt, and ID data automatically. No code required.',
                 'keywords' => 'invoice data entry automation, receipt scanner excel, PDF invoice to excel, automated invoice processing, expense receipt OCR, KYC document extraction, invoice OCR software, PDF to Excel converter, stop typing invoices, automate data entry, receipt scanner, ID verification OCR',
             ],
             'pt-BR' => [
-                'title' => 'Conversor PDF para Excel e OCR de Notas | DocSet',
-                'description' => 'Converta PDFs em Excel em segundos. Sem código. Extraia dados de notas fiscais, recibos e documentos automaticamente com nosso conversor PDF para Excel e software de OCR.',
+                'title' => 'Conversor PDF para Excel e OCR de Notas | DOCSET',
+                'description' => 'Converta PDFs em Excel em segundos e extraia dados de notas, recibos e documentos automaticamente. Sem código.',
                 'keywords' => 'automação nota fiscal, digitação automática nfe, PDF para Excel, OCR de recibos, extração de dados CNH, automação contas a pagar, parar de digitar notas fiscais, automatizar entrada de dados, scanner de recibos',
             ],
             'pt-PT' => [
-                'title' => 'Conversor PDF para Excel e OCR de Faturas | DocSet',
-                'description' => 'Converta PDFs em Excel em segundos. Sem código. Extraia dados de faturas, recibos e documentos automaticamente com nosso conversor PDF para Excel e software de OCR.',
+                'title' => 'Conversor PDF para Excel e OCR de Faturas | DOCSET',
+                'description' => 'Converta PDFs em Excel em segundos e extraia dados de faturas, recibos e documentos automaticamente. Sem código.',
                 'keywords' => 'automação faturas, digitalização faturas excel, PDF para Excel, OCR recibos, extração dados cartão cidadão, automação contas a pagar, parar de digitar faturas, automatizar introdução dados',
             ],
         ];
@@ -128,11 +128,10 @@ class SeoHelper
         $cleanPath = implode('/', $pathParts);
         $suffix = $cleanPath ? '/'.$cleanPath : '';
 
-        // Return all locales including x-default for proper hreflang
+        // Return supported locales (avoid duplicates for regional variants on same URL)
         return [
             ['locale' => 'en', 'url' => $siteUrl.'/en'.$suffix],
-            ['locale' => 'pt-BR', 'url' => $siteUrl.'/pt'.$suffix],
-            ['locale' => 'pt-PT', 'url' => $siteUrl.'/pt-pt'.$suffix],
+            ['locale' => 'pt', 'url' => $siteUrl.'/pt'.$suffix],
             ['locale' => 'x-default', 'url' => $siteUrl.'/en'.$suffix],
         ];
     }

@@ -42,18 +42,7 @@ Route::get('email/verify', function () {
 })->name('verification.notice');
 
 Route::get('/', function () {
-    $planService = app(\App\Services\StripePlanService::class);
-    // Get plans as array list (not object/associative array) to avoid .map() errors on frontend
-    $plans = array_values($planService->getAllPlans('en'));
-
-    return Inertia::render('welcome', [
-        'canRegister' => Features::enabled(Features::registration()),
-        'locale' => 'en',
-        'plans' => $plans,
-        'auth' => [
-            'user' => \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::user() : null,
-        ],
-    ]);
+    return redirect()->route('home.locale', ['locale' => 'en'], 301);
 })->name('home');
 
 // Landing page with locale

@@ -1,4 +1,3 @@
-import SEOHead from '@/components/seo/SEOHead';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,11 +22,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { setPortugueseVariant } from '@/i18n/config';
-import {
-    generateStructuredData,
-    getAlternateLocales,
-    getSEOContent,
-} from '@/utils/seo';
 import { router, usePage } from '@inertiajs/react';
 import { AnimatePresence, motion, useInView } from 'framer-motion';
 import {
@@ -399,21 +393,9 @@ export default function Welcome() {
     };
 
     const fullLocale = getFullLocale();
-    const seoContent = getSEOContent(fullLocale);
-    const structuredData = generateStructuredData(fullLocale);
-    const alternateLocales = getAlternateLocales(fullLocale);
 
     return (
         <div className="bg-black text-white antialiased">
-            <SEOHead
-                title={seoContent.title}
-                description={seoContent.description}
-                keywords={seoContent.keywords}
-                locale={fullLocale}
-                alternateLocales={alternateLocales}
-                structuredData={structuredData}
-                ogType="website"
-            />
             <Header
                 locale={getCurrentLocaleValue()}
                 onLocaleChange={handleLocaleChange}
@@ -795,19 +777,19 @@ function Hero({
 
     const copy = pt
         ? {
-              line1: 'Chega de digitar',
-              line2: 'PDFs',
-              line3: 'à mão.',
-              sub: 'Carregue qualquer PDF — o DocSet lê, monta a tabela e exporta para Excel ou JSON. Sem código. Sem developer. Em segundos.',
-              cta1: 'Criar conta grátis',
-              cta2: 'Ver em 30 segundos',
-              trust: 'Sem cartão de crédito. Cancele quando quiser.',
+          line1: 'Chega de digitar',
+          line2: 'PDFs',
+          line3: 'à mão.',
+          sub: 'Chega de digitar PDFs à mão — o DocSet lê qualquer PDF, monta a tabela e exporta para Excel ou JSON. Sem código. Em segundos.',
+          cta1: 'Criar conta grátis',
+          cta2: 'Ver em 30 segundos',
+          trust: 'Sem cartão de crédito. Cancele quando quiser.',
           }
         : {
               line1: 'Stop typing',
               line2: 'from PDFs',
               line3: 'by hand.',
-              sub: 'Upload any PDF — DocSet reads it, builds the table, and exports to Excel or JSON. No code. No developer. Done in seconds.',
+              sub: 'Stop typing from PDFs by hand — DocSet reads any PDF, builds the table, and exports to Excel or JSON. No code. Done in seconds.',
               cta1: 'Start for free',
               cta2: 'See it in 30s',
               trust: 'No credit card required. Cancel anytime.',

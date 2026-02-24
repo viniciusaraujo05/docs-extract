@@ -3,6 +3,7 @@
 use App\Http\Middleware\CheckUsageLimit;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\RedirectToCanonicalHost;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\RestrictApiDomain;
 use App\Http\Middleware\SetLocale;
@@ -45,6 +46,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+
+        $middleware->web(prepend: [
+            RedirectToCanonicalHost::class,
+        ]);
 
         $middleware->web(append: [
             SetLocale::class,
