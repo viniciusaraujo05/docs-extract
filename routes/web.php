@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\ApiClientController;
+use App\Http\Controllers\ApiDocsController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\OAuthController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SolutionPageController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SuperAdminController;
@@ -74,11 +76,28 @@ Route::get('/{locale}/terms', function ($locale) {
     ]);
 })->where(['locale' => 'pt|en'])->name('terms');
 
+// Public API docs (localized)
+Route::get('/{locale}/docs', function ($locale) {
+    return redirect()->route('docs.api.v1', ['locale' => $locale], 301);
+})->where(['locale' => 'en|pt|pt-br|pt-pt'])->name('docs.index');
+
+Route::get('/{locale}/docs/api-v1', [ApiDocsController::class, 'show'])
+    ->where(['locale' => 'en|pt|pt-br|pt-pt'])
+    ->name('docs.api.v1');
+
 // Blog public routes
 Route::prefix('{locale}')->where(['locale' => 'pt|en'])->group(function () {
     Route::get('blog', [\App\Http\Controllers\BlogController::class, 'index'])->name('blog.index');
     Route::get('blog/{slug}', [\App\Http\Controllers\BlogController::class, 'show'])->name('blog.show');
 });
+
+// SEO solution pages (localized)
+Route::get('{locale}/{slug}', [SolutionPageController::class, 'show'])
+    ->where([
+        'locale' => 'en|pt|pt-br|pt-pt',
+        'slug' => 'invoice-ocr|receipt-ocr|pdf-to-excel|ocr-api|invoice-parser',
+    ])
+    ->name('solutions.show');
 
 // Pages with locale prefix (auth required for dashboard access)
 // ONLY GET ROUTES (VIEWS) HERE. ACTIONS ARE IN API.PHP

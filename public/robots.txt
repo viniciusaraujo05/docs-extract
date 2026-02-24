@@ -16,8 +16,8 @@ Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /email/verify
 
-# Sitemap location (update with your actual domain)
-Sitemap: https://docset.com/sitemap.xml
+# Sitemap location
+Sitemap: https://docset.app/sitemap.xml
 
 # Crawl-delay for specific bots (optional)
 User-agent: Googlebot

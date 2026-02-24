@@ -354,6 +354,13 @@ export default function Welcome() {
         }
     }, [locale, ptVariant]);
 
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('demo') === '1') {
+            setShowDemo(true);
+        }
+    }, []);
+
     const handleLocaleChange = useCallback(
         (value: string) => {
             if (value === 'en') {
@@ -423,7 +430,7 @@ export default function Welcome() {
             />
             <FAQ locale={fullLocale} />
             <FinalCTA locale={fullLocale} localeShort={locale} />
-            <Footer locale={locale} />
+            <Footer locale={locale} localeVariant={fullLocale} />
             {showDemo && (
                 <DemoModal
                     onClose={() => setShowDemo(false)}
@@ -455,11 +462,13 @@ function Header({
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { t } = useTranslation();
+    const localeBase = locale.split('-')[0];
+    const isPt = locale.startsWith('pt');
 
     const headerText = {
         features: t('landing.nav.product'),
         pricing: t('landing.nav.pricing'),
-        api: 'API',
+        api: isPt ? 'Docs da API' : 'API Docs',
         login: t('Login'),
         startFree: t('Get Started'),
         dashboard: t('Dashboard'),
@@ -530,7 +539,7 @@ function Header({
                                 {headerText.pricing}
                             </a>
                             <a
-                                href="#api"
+                                href={`/${localeBase}/docs/api-v1`}
                                 className="text-gray-400 transition hover:text-white"
                             >
                                 {headerText.api}
@@ -684,7 +693,7 @@ function Header({
                                 {headerText.pricing}
                             </a>
                             <a
-                                href="#api"
+                                href={`/${localeBase}/docs/api-v1`}
                                 onClick={() => setMobileMenuOpen(false)}
                                 className="text-gray-400 transition hover:text-white"
                             >
@@ -2343,13 +2352,25 @@ function FinalCTA({
 }
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
-function Footer({ locale }: { locale: string }) {
+function Footer({
+    locale,
+    localeVariant,
+}: {
+    locale: string;
+    localeVariant: string;
+}) {
     const { t } = useTranslation();
+    const pt = localeVariant.startsWith('pt');
+    const solutionLocale = localeVariant.startsWith('pt-')
+        ? localeVariant.toLowerCase()
+        : locale === 'pt'
+          ? 'pt-pt'
+          : 'en';
 
     return (
         <footer className="border-t border-white/10 bg-zinc-950 px-4 py-10 md:px-6 md:py-12">
             <div className="mx-auto max-w-7xl">
-                <div className="mb-10 grid grid-cols-2 gap-6 md:grid-cols-4">
+                <div className="mb-10 grid grid-cols-2 gap-6 md:grid-cols-6">
                     <div className="col-span-2 md:col-span-1">
                         <div className="mb-4 flex items-center gap-2">
                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
@@ -2364,14 +2385,15 @@ function Footer({ locale }: { locale: string }) {
                             <span className="text-xl font-bold">DOCSET</span>
                         </div>
                         <p className="mb-6 text-sm text-gray-400">
-                            Turn PDFs into ready-to-use data. No manual typing
-                            needed.
+                            {pt
+                                ? 'Transforme PDFs em dados prontos para uso. Sem digitação manual.'
+                                : 'Turn PDFs into ready-to-use data. No manual typing needed.'}
                         </p>
                     </div>
 
                     <div>
                         <h3 className="mb-4 font-semibold text-white">
-                            Product
+                            {pt ? 'Produto' : 'Product'}
                         </h3>
                         <ul className="space-y-2 text-sm text-gray-400">
                             <li>
@@ -2379,7 +2401,7 @@ function Footer({ locale }: { locale: string }) {
                                     href="#features"
                                     className="transition hover:text-white"
                                 >
-                                    Features
+                                    {pt ? 'Funcionalidades' : 'Features'}
                                 </a>
                             </li>
                             <li>
@@ -2387,15 +2409,15 @@ function Footer({ locale }: { locale: string }) {
                                     href="#pricing"
                                     className="transition hover:text-white"
                                 >
-                                    Pricing
+                                    {pt ? 'Preços' : 'Pricing'}
                                 </a>
                             </li>
                             <li>
                                 <a
-                                    href="#api"
+                                    href={`/${locale}/docs/api-v1`}
                                     className="transition hover:text-white"
                                 >
-                                    API
+                                    {pt ? 'Docs da API' : 'API Docs'}
                                 </a>
                             </li>
                         </ul>
@@ -2403,7 +2425,7 @@ function Footer({ locale }: { locale: string }) {
 
                     <div>
                         <h3 className="mb-4 font-semibold text-white">
-                            Legal & Blog
+                            {pt ? 'Legal e Blog' : 'Legal & Blog'}
                         </h3>
                         <ul className="space-y-2 text-sm text-gray-400">
                             <li>
@@ -2434,11 +2456,61 @@ function Footer({ locale }: { locale: string }) {
                     </div>
 
                     <div>
-                        <h3 className="mb-4 font-semibold text-white">Trust</h3>
+                        <h3 className="mb-4 font-semibold text-white">
+                            {pt ? 'Soluções' : 'Solutions'}
+                        </h3>
+                        <ul className="space-y-2 text-sm text-gray-400">
+                            <li>
+                                <a
+                                    href={`/${solutionLocale}/invoice-ocr`}
+                                    className="transition hover:text-white"
+                                >
+                                    {pt ? 'OCR de Faturas/Notas' : 'Invoice OCR'}
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href={`/${solutionLocale}/receipt-ocr`}
+                                    className="transition hover:text-white"
+                                >
+                                    {pt ? 'OCR de Recibos' : 'Receipt OCR'}
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href={`/${solutionLocale}/pdf-to-excel`}
+                                    className="transition hover:text-white"
+                                >
+                                    {pt ? 'PDF para Excel' : 'PDF to Excel'}
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href={`/${solutionLocale}/ocr-api`}
+                                    className="transition hover:text-white"
+                                >
+                                    {pt ? 'API OCR' : 'OCR API'}
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href={`/${solutionLocale}/invoice-parser`}
+                                    className="transition hover:text-white"
+                                >
+                                    {pt ? 'Parser de Faturas/Notas' : 'Invoice Parser'}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 className="mb-4 font-semibold text-white">
+                            {pt ? 'Confiança' : 'Trust'}
+                        </h3>
                         <ul className="space-y-2 text-sm text-gray-400">
                             <li className="flex items-center gap-2">
                                 <Shield className="h-4 w-4 text-green-400" />
-                                GDPR Compliant
+                                {pt ? 'Conformidade GDPR' : 'GDPR Compliant'}
                             </li>
                             <li className="flex items-center gap-2">
                                 <Lock className="h-4 w-4 text-blue-400" />
@@ -2446,7 +2518,7 @@ function Footer({ locale }: { locale: string }) {
                             </li>
                             <li className="flex items-center gap-2">
                                 <Server className="h-4 w-4 text-purple-400" />
-                                EU Data Storage
+                                {pt ? 'Dados armazenados na UE' : 'EU Data Storage'}
                             </li>
                         </ul>
                     </div>
@@ -2454,12 +2526,13 @@ function Footer({ locale }: { locale: string }) {
 
                 <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
                     <p className="text-sm text-gray-500">
-                        © {new Date().getFullYear()} Docset. All rights
-                        reserved.
+                        {pt
+                            ? `© ${new Date().getFullYear()} Docset. Todos os direitos reservados.`
+                            : `© ${new Date().getFullYear()} Docset. All rights reserved.`}
                     </p>
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                         <div className="h-2 w-2 rounded-full bg-green-500" />
-                        <span>All systems operational</span>
+                        <span>{pt ? 'Todos os sistemas operando' : 'All systems operational'}</span>
                     </div>
                 </div>
             </div>

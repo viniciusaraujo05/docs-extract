@@ -7,6 +7,9 @@ interface BlogLayoutProps {
 }
 
 export function BlogLayout({ children, locale }: BlogLayoutProps) {
+    const solutionLocale = locale === 'pt' ? 'pt-pt' : 'en';
+    const pt = locale === 'pt';
+
     return (
         <div className="min-h-screen bg-zinc-950 font-sans text-zinc-50 antialiased selection:bg-indigo-500/30">
             {/* Header */}
@@ -27,7 +30,7 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
                             <span className="text-xl font-bold tracking-tight">
                                 DOCSET{' '}
                                 <span className="ml-1 font-medium text-zinc-500">
-                                    Blog
+                                    {pt ? 'Blog' : 'Blog'}
                                 </span>
                             </span>
                         </Link>
@@ -37,19 +40,19 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
                                 href={`/${locale}/blog`}
                                 className="text-zinc-300 transition-colors hover:text-white"
                             >
-                                All Posts
+                                {pt ? 'Todos os posts' : 'All Posts'}
                             </Link>
                             <Link
                                 href={`/${locale}/#features`}
                                 className="text-zinc-400 transition-colors hover:text-zinc-300"
                             >
-                                Features
+                                {pt ? 'Funcionalidades' : 'Features'}
                             </Link>
                             <Link
-                                href={`/${locale}/#api`}
+                                href={`/${locale}/docs/api-v1`}
                                 className="text-zinc-400 transition-colors hover:text-zinc-300"
                             >
-                                API
+                                {pt ? 'Docs da API' : 'API Docs'}
                             </Link>
                         </nav>
                     </div>
@@ -59,13 +62,13 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
                             href={`/${locale}/login`}
                             className="hidden text-sm font-medium text-zinc-400 transition-colors hover:text-white md:block"
                         >
-                            Log in
+                            {pt ? 'Entrar' : 'Log in'}
                         </Link>
                         <Link
                             href={`/${locale}/register`}
                             className="group flex h-9 items-center gap-2 rounded-full bg-white px-4 text-sm font-semibold text-zinc-950 transition-all hover:bg-zinc-200"
                         >
-                            Get Started
+                            {pt ? 'Começar grátis' : 'Get Started'}
                             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                         </Link>
                     </div>
@@ -78,7 +81,7 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
             {/* Footer */}
             <footer className="mt-20 border-t border-white/10 bg-zinc-950 px-6 py-12 md:py-16">
                 <div className="mx-auto max-w-7xl">
-                    <div className="grid gap-12 md:grid-cols-4 lg:grid-cols-5">
+                    <div className="grid gap-12 md:grid-cols-5 lg:grid-cols-6">
                         <div className="md:col-span-2 lg:col-span-2">
                             <div className="mb-6 flex items-center gap-3">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
@@ -93,8 +96,9 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
                                 </span>
                             </div>
                             <p className="mb-8 max-w-xs text-sm leading-relaxed text-zinc-400">
-                                Transform your unstructured PDF documents into
-                                clean, structured data automatically via API.
+                                {pt
+                                    ? 'Transforme documentos PDF não estruturados em dados limpos via API.'
+                                    : 'Transform your unstructured PDF documents into clean, structured data automatically via API.'}
                             </p>
                             <div className="flex items-center gap-4 text-zinc-400">
                                 <a
@@ -120,7 +124,7 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
 
                         <div>
                             <h3 className="mb-4 font-semibold text-white">
-                                Product
+                                {pt ? 'Produto' : 'Product'}
                             </h3>
                             <ul className="space-y-3 text-sm text-zinc-400">
                                 <li>
@@ -128,7 +132,7 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
                                         href={`/${locale}/#features`}
                                         className="transition-colors hover:text-white"
                                     >
-                                        Features
+                                        {pt ? 'Funcionalidades' : 'Features'}
                                     </Link>
                                 </li>
                                 <li>
@@ -136,7 +140,7 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
                                         href={`/${locale}/#pricing`}
                                         className="transition-colors hover:text-white"
                                     >
-                                        Pricing
+                                        {pt ? 'Preços' : 'Pricing'}
                                     </Link>
                                 </li>
                                 <li>
@@ -152,15 +156,15 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
 
                         <div>
                             <h3 className="mb-4 font-semibold text-white">
-                                Developers
+                                {pt ? 'Desenvolvedores' : 'Developers'}
                             </h3>
                             <ul className="space-y-3 text-sm text-zinc-400">
                                 <li>
                                     <Link
-                                        href={`/${locale}/#api`}
+                                        href={`/${locale}/docs/api-v1`}
                                         className="transition-colors hover:text-white"
                                     >
-                                        API Docs
+                                        {pt ? 'Docs da API' : 'API Docs'}
                                     </Link>
                                 </li>
                                 <li>
@@ -168,7 +172,7 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
                                         href="#"
                                         className="transition-colors hover:text-white"
                                     >
-                                        Webhooks
+                                        {pt ? 'Webhooks' : 'Webhooks'}
                                     </a>
                                 </li>
                                 <li>
@@ -176,7 +180,7 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
                                         href="#"
                                         className="transition-colors hover:text-white"
                                     >
-                                        Status
+                                        {pt ? 'Status' : 'Status'}
                                     </a>
                                 </li>
                             </ul>
@@ -184,7 +188,55 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
 
                         <div>
                             <h3 className="mb-4 font-semibold text-white">
-                                Legal
+                                {pt ? 'Soluções' : 'Solutions'}
+                            </h3>
+                            <ul className="space-y-3 text-sm text-zinc-400">
+                                <li>
+                                    <Link
+                                        href={`/${solutionLocale}/invoice-ocr`}
+                                        className="transition-colors hover:text-white"
+                                    >
+                                        {pt ? 'OCR de Faturas/Notas' : 'Invoice OCR'}
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href={`/${solutionLocale}/receipt-ocr`}
+                                        className="transition-colors hover:text-white"
+                                    >
+                                        {pt ? 'OCR de Recibos' : 'Receipt OCR'}
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href={`/${solutionLocale}/pdf-to-excel`}
+                                        className="transition-colors hover:text-white"
+                                    >
+                                        {pt ? 'PDF para Excel' : 'PDF to Excel'}
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href={`/${solutionLocale}/ocr-api`}
+                                        className="transition-colors hover:text-white"
+                                    >
+                                        {pt ? 'API OCR' : 'OCR API'}
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link
+                                        href={`/${solutionLocale}/invoice-parser`}
+                                        className="transition-colors hover:text-white"
+                                    >
+                                        {pt ? 'Parser de Faturas/Notas' : 'Invoice Parser'}
+                                    </Link>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3 className="mb-4 font-semibold text-white">
+                                {pt ? 'Legal' : 'Legal'}
                             </h3>
                             <ul className="space-y-3 text-sm text-zinc-400">
                                 <li>
@@ -192,7 +244,7 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
                                         href={`/${locale}/privacy`}
                                         className="transition-colors hover:text-white"
                                     >
-                                        Privacy Policy
+                                        {pt ? 'Política de Privacidade' : 'Privacy Policy'}
                                     </Link>
                                 </li>
                                 <li>
@@ -200,7 +252,7 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
                                         href={`/${locale}/terms`}
                                         className="transition-colors hover:text-white"
                                     >
-                                        Terms of Service
+                                        {pt ? 'Termos de Serviço' : 'Terms of Service'}
                                     </Link>
                                 </li>
                             </ul>
@@ -209,12 +261,13 @@ export function BlogLayout({ children, locale }: BlogLayoutProps) {
 
                     <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-sm text-zinc-500 md:flex-row">
                         <p>
-                            © {new Date().getFullYear()} Docset. All rights
-                            reserved.
+                            {pt
+                                ? `© ${new Date().getFullYear()} Docset. Todos os direitos reservados.`
+                                : `© ${new Date().getFullYear()} Docset. All rights reserved.`}
                         </p>
                         <div className="flex items-center gap-2">
                             <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                            <span>All systems operational</span>
+                            <span>{pt ? 'Todos os sistemas operando' : 'All systems operational'}</span>
                         </div>
                     </div>
                 </div>

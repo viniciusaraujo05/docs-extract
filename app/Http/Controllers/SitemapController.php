@@ -2,132 +2,95 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlogPost;
+use App\Services\SolutionPageService;
 use Illuminate\Http\Response;
 
 class SitemapController extends Controller
 {
+    public function __construct(private readonly SolutionPageService $solutionPageService) {}
+
     /**
      * Generate and return the sitemap.xml
      */
     public function index(): Response
     {
-        $baseUrl = config('app.url');
+        $baseUrl = rtrim((string) config('app.url'), '/');
         $lastmod = now()->toAtomString();
 
-        // Define all public pages with their priority and change frequency
-        $pages = [
-            // Homepage in both languages (highest priority)
-            [
-                'url' => '/',
-                'priority' => '1.0',
-                'changefreq' => 'daily',
-                'alternates' => true,
-                'images' => ['/docset.png'],
-            ],
-            [
-                'url' => '/en',
-                'priority' => '1.0',
-                'changefreq' => 'daily',
-                'alternates' => true,
-                'images' => ['/docset.png'],
-            ],
-            [
-                'url' => '/pt',
-                'priority' => '1.0',
-                'changefreq' => 'daily',
-                'alternates' => true,
-                'images' => ['/docset.png'],
-            ],
+        $pages = [];
+        $pairedPaths = [
+            ['path' => '', 'priority' => '1.0', 'changefreq' => 'daily', 'images' => ['/docset.png']],
+            ['path' => 'blog', 'priority' => '0.9', 'changefreq' => 'daily'],
+            ['path' => 'docs/api-v1', 'priority' => '0.8', 'changefreq' => 'weekly'],
+            ['path' => 'privacy', 'priority' => '0.5', 'changefreq' => 'monthly'],
+            ['path' => 'terms', 'priority' => '0.5', 'changefreq' => 'monthly'],
+        ];
 
-            // Landing page sections (important for SEO)
-            [
-                'url' => '/en#features',
-                'priority' => '0.9',
-                'changefreq' => 'weekly',
-                'alternates' => true,
-            ],
-            [
-                'url' => '/pt#features',
-                'priority' => '0.9',
-                'changefreq' => 'weekly',
-                'alternates' => true,
-            ],
-            [
-                'url' => '/en#pricing',
-                'priority' => '0.9',
-                'changefreq' => 'weekly',
-                'alternates' => true,
-            ],
-            [
-                'url' => '/pt#pricing',
-                'priority' => '0.9',
-                'changefreq' => 'weekly',
-                'alternates' => true,
-            ],
-            [
-                'url' => '/en#api',
-                'priority' => '0.8',
-                'changefreq' => 'weekly',
-                'alternates' => true,
-            ],
-            [
-                'url' => '/pt#api',
-                'priority' => '0.8',
-                'changefreq' => 'weekly',
-                'alternates' => true,
-            ],
+        foreach ($pairedPaths as $pairedPath) {
+            foreach (['en', 'pt'] as $locale) {
+                $suffix = $pairedPath['path'] === '' ? '' : '/'.$pairedPath['path'];
+                $url = '/'.$locale.$suffix;
+                $xDefault = '/en'.$suffix;
 
-            // Auth pages (medium priority for registration)
-            [
-                'url' => '/en/register',
-                'priority' => '0.8',
-                'changefreq' => 'monthly',
-                'alternates' => false,
-            ],
-            [
-                'url' => '/pt/register',
-                'priority' => '0.8',
-                'changefreq' => 'monthly',
-                'alternates' => false,
-            ],
-            [
-                'url' => '/en/login',
-                'priority' => '0.4',
-                'changefreq' => 'monthly',
-                'alternates' => false,
-            ],
-            [
-                'url' => '/pt/login',
-                'priority' => '0.4',
-                'changefreq' => 'monthly',
-                'alternates' => false,
-            ],
+                $pages[] = [
+                    'url' => $url,
+                    'priority' => $pairedPath['priority'],
+                    'changefreq' => $pairedPath['changefreq'],
+                    'lastmod' => $lastmod,
+                    'alternates' => [
+                        ['hreflang' => 'en', 'url' => $baseUrl.'/en'.$suffix],
+                        ['hreflang' => 'pt-BR', 'url' => $baseUrl.'/pt'.$suffix],
+                        ['hreflang' => 'pt-PT', 'url' => $baseUrl.'/pt'.$suffix],
+                        ['hreflang' => 'x-default', 'url' => $baseUrl.$xDefault],
+                    ],
+                    'images' => $pairedPath['images'] ?? null,
+                ];
+            }
+        }
 
-            // Legal pages (lower priority)
-            [
-                'url' => '/en/privacy',
-                'priority' => '0.5',
-                'changefreq' => 'monthly',
-                'alternates' => false,
-            ],
-            [
-                'url' => '/pt/privacy',
-                'priority' => '0.5',
-                'changefreq' => 'monthly',
-                'alternates' => false,
-            ],
-            [
-                'url' => '/en/terms',
-                'priority' => '0.5',
-                'changefreq' => 'monthly',
-                'alternates' => false,
-            ],
-            [
-                'url' => '/pt/terms',
-                'priority' => '0.5',
-                'changefreq' => 'monthly',
-                'alternates' => false,
-            ],
+        foreach ($this->solutionPageService->slugs() as $slug) {
+            foreach (['en', 'pt-br', 'pt-pt'] as $locale) {
+                $pages[] = [
+                    'url' => '/'.$locale.'/'.$slug,
+                    'priority' => '0.85',
+                    'changefreq' => 'weekly',
+                    'lastmod' => $lastmod,
+                    'alternates' => [
+                        ['hreflang' => 'en', 'url' => $baseUrl.'/en/'.$slug],
+                        ['hreflang' => 'pt-BR', 'url' => $baseUrl.'/pt-br/'.$slug],
+                        ['hreflang' => 'pt-PT', 'url' => $baseUrl.'/pt-pt/'.$slug],
+                        ['hreflang' => 'x-default', 'url' => $baseUrl.'/en/'.$slug],
+                    ],
+                ];
+            }
+        }
+
+        $this->appendBlogPostPages($pages, $baseUrl, $lastmod);
+
+        $pages[] = [
+            'url' => '/en/register',
+            'priority' => '0.8',
+            'changefreq' => 'monthly',
+            'lastmod' => $lastmod,
+        ];
+        $pages[] = [
+            'url' => '/pt/register',
+            'priority' => '0.8',
+            'changefreq' => 'monthly',
+            'lastmod' => $lastmod,
+        ];
+        $pages[] = [
+            'url' => '/en/login',
+            'priority' => '0.4',
+            'changefreq' => 'monthly',
+            'lastmod' => $lastmod,
+        ];
+        $pages[] = [
+            'url' => '/pt/login',
+            'priority' => '0.4',
+            'changefreq' => 'monthly',
+            'lastmod' => $lastmod,
         ];
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
@@ -136,18 +99,19 @@ class SitemapController extends Controller
         $xml .= '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">'."\n";
 
         foreach ($pages as $page) {
+            $pageLastmod = $page['lastmod'] ?? $lastmod;
+
             $xml .= "  <url>\n";
             $xml .= "    <loc>{$baseUrl}{$page['url']}</loc>\n";
-            $xml .= "    <lastmod>{$lastmod}</lastmod>\n";
+            $xml .= "    <lastmod>{$pageLastmod}</lastmod>\n";
             $xml .= "    <changefreq>{$page['changefreq']}</changefreq>\n";
             $xml .= "    <priority>{$page['priority']}</priority>\n";
 
-            // Add alternate language links for pages that support it
-            if ($page['alternates']) {
-                $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"{$baseUrl}/en\" />\n";
-                $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"pt-BR\" href=\"{$baseUrl}/pt\" />\n";
-                $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"pt-PT\" href=\"{$baseUrl}/pt\" />\n";
-                $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"{$baseUrl}/en\" />\n";
+            // Add alternate language links when provided
+            if (! empty($page['alternates'])) {
+                foreach ($page['alternates'] as $alternate) {
+                    $xml .= '    <xhtml:link rel="alternate" hreflang="'.$alternate['hreflang'].'" href="'.$alternate['url'].'" />'."\n";
+                }
             }
 
             // Add images if present
@@ -214,5 +178,70 @@ class SitemapController extends Controller
         return response($content, 200)
             ->header('Content-Type', 'text/plain')
             ->header('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $pages
+     */
+    private function appendBlogPostPages(array &$pages, string $baseUrl, string $fallbackLastmod): void
+    {
+        try {
+            $posts = BlogPost::query()
+                ->where('status', 'published')
+                ->with(['translations' => fn ($query) => $query->whereIn('locale', ['en', 'pt'])])
+                ->orderByDesc('published_at')
+                ->get();
+        } catch (\Throwable $exception) {
+            \Illuminate\Support\Facades\Log::warning('Skipping blog posts in sitemap: database unavailable.', [
+                'error' => $exception->getMessage(),
+            ]);
+
+            return;
+        }
+
+        foreach ($posts as $post) {
+            $translations = $post->translations->keyBy('locale');
+            $enTranslation = $translations->get('en');
+            $ptTranslation = $translations->get('pt');
+
+            if (! $enTranslation && ! $ptTranslation) {
+                continue;
+            }
+
+            $alternates = [];
+            if ($enTranslation) {
+                $alternates[] = ['hreflang' => 'en', 'url' => $baseUrl.'/en/blog/'.$enTranslation->slug];
+            }
+            if ($ptTranslation) {
+                $ptUrl = $baseUrl.'/pt/blog/'.$ptTranslation->slug;
+                $alternates[] = ['hreflang' => 'pt-BR', 'url' => $ptUrl];
+                $alternates[] = ['hreflang' => 'pt-PT', 'url' => $ptUrl];
+            }
+
+            $xDefaultUrl = $enTranslation
+                ? $baseUrl.'/en/blog/'.$enTranslation->slug
+                : $baseUrl.'/pt/blog/'.$ptTranslation->slug;
+            $alternates[] = ['hreflang' => 'x-default', 'url' => $xDefaultUrl];
+
+            if ($enTranslation) {
+                $pages[] = [
+                    'url' => '/en/blog/'.$enTranslation->slug,
+                    'priority' => '0.85',
+                    'changefreq' => 'daily',
+                    'lastmod' => ($enTranslation->updated_at ?? $post->updated_at ?? $post->published_at)?->toAtomString() ?? $fallbackLastmod,
+                    'alternates' => $alternates,
+                ];
+            }
+
+            if ($ptTranslation) {
+                $pages[] = [
+                    'url' => '/pt/blog/'.$ptTranslation->slug,
+                    'priority' => '0.85',
+                    'changefreq' => 'daily',
+                    'lastmod' => ($ptTranslation->updated_at ?? $post->updated_at ?? $post->published_at)?->toAtomString() ?? $fallbackLastmod,
+                    'alternates' => $alternates,
+                ];
+            }
+        }
     }
 }

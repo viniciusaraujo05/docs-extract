@@ -24,7 +24,12 @@ class SeoHelper
             ],
         ];
 
-        $localeKey = $locale === 'pt' ? 'pt-BR' : ($locale === 'pt-PT' ? 'pt-PT' : 'en');
+        $normalizedLocale = strtolower($locale);
+        $localeKey = match ($normalizedLocale) {
+            'pt', 'pt-br' => 'pt-BR',
+            'pt-pt', 'pt_pt' => 'pt-PT',
+            default => 'en',
+        };
 
         return $content[$localeKey] ?? $content['en'];
     }
@@ -33,7 +38,12 @@ class SeoHelper
     {
         return \Illuminate\Support\Facades\Cache::remember("seo_structured_data_{$locale}", now()->addDay(), function () use ($locale) {
             $siteUrl = config('app.url', 'https://docset.com');
-            $localeCode = $locale === 'pt' ? 'pt-BR' : ($locale === 'pt-PT' ? 'pt-PT' : 'en');
+            $normalizedLocale = strtolower($locale);
+            $localeCode = match ($normalizedLocale) {
+                'pt', 'pt-br' => 'pt-BR',
+                'pt-pt', 'pt_pt' => 'pt-PT',
+                default => 'en',
+            };
             $content = self::getContent($localeCode);
 
             $data = [
