@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowUpRight, Calendar, Loader2 } from 'lucide-react';
 import { useState } from 'react';
@@ -34,28 +34,6 @@ interface Props {
 }
 
 export default function Show({ post, latestPosts, locale }: Props) {
-    const title = post.translation?.meta_title || post.translation?.title;
-    const description =
-        post.translation?.meta_description || post.translation?.excerpt;
-    const url = typeof window !== 'undefined' ? window.location.href : '';
-
-    const schemaLd = {
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        mainEntityOfPage: {
-            '@type': 'WebPage',
-            '@id': url,
-        },
-        headline: title,
-        description: description,
-        image: post.cover_image_url,
-        author: {
-            '@type': 'Person',
-            name: post.author_name,
-        },
-        datePublished: post.published_at,
-    };
-
     const sidebarPosts =
         latestPosts?.data?.filter((p) => p.id !== post.id).slice(0, 3) || [];
 
@@ -96,25 +74,6 @@ export default function Show({ post, latestPosts, locale }: Props) {
 
     return (
         <BlogLayout locale={locale}>
-            <Head>
-                <title>{title}</title>
-                <meta name="description" content={description} />
-                <meta
-                    name="keywords"
-                    content={post.translation?.focus_keyword}
-                />
-                <meta property="og:title" content={title} />
-                <meta property="og:description" content={description} />
-                {post.cover_image_url && (
-                    <meta property="og:image" content={post.cover_image_url} />
-                )}
-                <meta property="og:type" content="article" />
-                <meta name="twitter:card" content="summary_large_image" />
-                <script type="application/ld+json">
-                    {JSON.stringify(schemaLd)}
-                </script>
-            </Head>
-
             <div className="mx-auto max-w-7xl px-6 py-12 lg:py-20">
                 <Link
                     href={`/${locale}/blog`}

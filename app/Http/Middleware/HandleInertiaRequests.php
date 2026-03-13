@@ -104,12 +104,13 @@ class HandleInertiaRequests extends Middleware
                 'title' => $seoContent['title'],
                 'description' => $seoContent['description'],
                 'keywords' => $seoContent['keywords'],
-                'locale' => $locale,
+                'locale' => SeoHelper::localeTag($locale),
                 'url' => $request->url(),
                 'canonical' => $request->url(),
                 'ogImage' => config('app.url').'/docset.png',
                 'structuredData' => $structuredData,
                 'alternateLocales' => $alternateLocales,
+                'robots' => 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
             ],
         ];
     }

@@ -4,6 +4,16 @@ namespace App\Helpers;
 
 class SeoHelper
 {
+    public static function localeTag(string $locale = 'en'): string
+    {
+        return match (strtolower($locale)) {
+            'pt-br' => 'pt-BR',
+            'pt-pt', 'pt_pt' => 'pt-PT',
+            'pt' => 'pt',
+            default => 'en',
+        };
+    }
+
     public static function getContent(string $locale = 'en'): array
     {
         $content = [
@@ -32,6 +42,34 @@ class SeoHelper
         };
 
         return $content[$localeKey] ?? $content['en'];
+    }
+
+    public static function buildLocalizedPageSeo(
+        string $locale,
+        string $path,
+        string $title,
+        string $description,
+        array $overrides = []
+    ): array {
+        $siteUrl = rtrim(config('app.url', 'https://docset.app'), '/');
+        $normalizedLocale = strtolower($locale);
+        $cleanPath = trim($path, '/');
+        $localizedPath = $normalizedLocale.($cleanPath !== '' ? '/'.$cleanPath : '');
+        $canonical = $siteUrl.'/'.$localizedPath;
+
+        return array_filter([
+            'title' => $title,
+            'description' => $description,
+            'keywords' => $overrides['keywords'] ?? null,
+            'locale' => self::localeTag($normalizedLocale),
+            'url' => $canonical,
+            'canonical' => $canonical,
+            'ogImage' => $overrides['ogImage'] ?? $siteUrl.'/docset.png',
+            'structuredData' => $overrides['structuredData'] ?? null,
+            'alternateLocales' => $overrides['alternateLocales']
+                ?? self::getAlternateLocales($normalizedLocale, $localizedPath),
+            'robots' => $overrides['robots'] ?? null,
+        ], static fn ($value) => $value !== null && $value !== '');
     }
 
     public static function generateStructuredData(string $locale = 'en'): string
@@ -144,5 +182,33 @@ class SeoHelper
             ['locale' => 'pt', 'url' => $siteUrl.'/pt'.$suffix],
             ['locale' => 'x-default', 'url' => $siteUrl.'/en'.$suffix],
         ];
+    }
+
+    /**
+     * @param  array<string, string>  $localePaths
+     * @return array<int, array{locale: string, url: string}>
+     */
+    public static function buildAlternateLocales(array $localePaths, string $defaultLocale = 'en'): array
+    {
+        $siteUrl = rtrim(config('app.url', 'https://docset.com'), '/');
+        $alternates = [];
+
+        foreach ($localePaths as $locale => $path) {
+            $cleanPath = trim($path, '/');
+            $alternates[] = [
+                'locale' => $locale,
+                'url' => $siteUrl.($cleanPath === '' ? '' : '/'.$cleanPath),
+            ];
+        }
+
+        if (! array_key_exists('x-default', $localePaths) && isset($localePaths[$defaultLocale])) {
+            $cleanPath = trim($localePaths[$defaultLocale], '/');
+            $alternates[] = [
+                'locale' => 'x-default',
+                'url' => $siteUrl.($cleanPath === '' ? '' : '/'.$cleanPath),
+            ];
+        }
+
+        return $alternates;
     }
 }

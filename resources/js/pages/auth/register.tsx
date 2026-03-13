@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Head, router, usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -167,8 +167,6 @@ export default function Register({ canRegister }: RegisterProps) {
 
     return (
         <>
-            <Head title="Register - DOCSET" />
-            
             <div className="min-h-screen flex bg-black text-white">
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}

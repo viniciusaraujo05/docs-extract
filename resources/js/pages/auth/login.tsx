@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Head, router, usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -92,8 +92,6 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
 
     return (
         <>
-            <Head title="Login - DOCSET" />
-            
             <div className="min-h-screen flex bg-black text-white">
                 <div className="flex-1 flex items-center justify-center p-6 lg:p-8 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-950/20 via-transparent to-blue-950/20" />

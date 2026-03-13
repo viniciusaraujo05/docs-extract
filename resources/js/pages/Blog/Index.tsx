@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
 import { BlogLayout } from './components/BlogLayout';
@@ -29,14 +29,6 @@ export default function Index({ posts, locale }: Props) {
 
     return (
         <BlogLayout locale={locale}>
-            <Head>
-                <title>Blog - Docset</title>
-                <meta
-                    name="description"
-                    content="Insights, product updates, and tutorials about data extraction."
-                />
-            </Head>
-
             <div className="mx-auto max-w-7xl px-6 py-20 lg:py-32">
                 <div className="mb-16 text-center lg:mb-24">
                     <motion.h1

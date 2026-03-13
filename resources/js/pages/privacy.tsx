@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Head, router, usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { useTranslation } from 'react-i18next';
 import { FileJson, Shield, Lock, Eye, Database, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,8 +17,6 @@ export default function Privacy() {
 
     return (
         <>
-            <Head title="Privacy Policy - DOCSET" />
-            
             <div className="min-h-screen bg-black text-white">
                 <header className="border-b border-white/10 bg-black/50 backdrop-blur-xl sticky top-0 z-50">
                     <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">

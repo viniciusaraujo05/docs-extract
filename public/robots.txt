@@ -15,6 +15,14 @@ Disallow: /register
 Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /email/verify
+Disallow: /en/login
+Disallow: /en/register
+Disallow: /en/forgot-password
+Disallow: /en/reset-password
+Disallow: /pt/login
+Disallow: /pt/register
+Disallow: /pt/forgot-password
+Disallow: /pt/reset-password
 
 # Sitemap location
 Sitemap: https://docset.app/sitemap.xml

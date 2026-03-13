@@ -40,8 +40,7 @@ class SitemapController extends Controller
                     'lastmod' => $lastmod,
                     'alternates' => [
                         ['hreflang' => 'en', 'url' => $baseUrl.'/en'.$suffix],
-                        ['hreflang' => 'pt-BR', 'url' => $baseUrl.'/pt'.$suffix],
-                        ['hreflang' => 'pt-PT', 'url' => $baseUrl.'/pt'.$suffix],
+                        ['hreflang' => 'pt', 'url' => $baseUrl.'/pt'.$suffix],
                         ['hreflang' => 'x-default', 'url' => $baseUrl.$xDefault],
                     ],
                     'images' => $pairedPath['images'] ?? null,
@@ -67,31 +66,6 @@ class SitemapController extends Controller
         }
 
         $this->appendBlogPostPages($pages, $baseUrl, $lastmod);
-
-        $pages[] = [
-            'url' => '/en/register',
-            'priority' => '0.8',
-            'changefreq' => 'monthly',
-            'lastmod' => $lastmod,
-        ];
-        $pages[] = [
-            'url' => '/pt/register',
-            'priority' => '0.8',
-            'changefreq' => 'monthly',
-            'lastmod' => $lastmod,
-        ];
-        $pages[] = [
-            'url' => '/en/login',
-            'priority' => '0.4',
-            'changefreq' => 'monthly',
-            'lastmod' => $lastmod,
-        ];
-        $pages[] = [
-            'url' => '/pt/login',
-            'priority' => '0.4',
-            'changefreq' => 'monthly',
-            'lastmod' => $lastmod,
-        ];
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'."\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'."\n";
@@ -214,8 +188,7 @@ class SitemapController extends Controller
             }
             if ($ptTranslation) {
                 $ptUrl = $baseUrl.'/pt/blog/'.$ptTranslation->slug;
-                $alternates[] = ['hreflang' => 'pt-BR', 'url' => $ptUrl];
-                $alternates[] = ['hreflang' => 'pt-PT', 'url' => $ptUrl];
+                $alternates[] = ['hreflang' => 'pt', 'url' => $ptUrl];
             }
 
             $xDefaultUrl = $enTranslation

@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers\SeoHelper;
 use App\Http\Controllers\ApiClientController;
 use App\Http\Controllers\ApiDocsController;
 use App\Http\Controllers\DocumentController;
@@ -52,6 +53,7 @@ Route::get('/{locale}', function ($locale) {
     $planService = app(\App\Services\StripePlanService::class);
     // Get plans as array list (not object/associative array) to avoid .map() errors on frontend
     $plans = array_values($planService->getAllPlans($locale === 'pt' ? 'pt-BR' : $locale));
+    $seoContent = SeoHelper::getContent($locale);
 
     return Inertia::render('welcome', [
         'canRegister' => Features::enabled(Features::registration()),
@@ -60,19 +62,49 @@ Route::get('/{locale}', function ($locale) {
         'auth' => [
             'user' => \Illuminate\Support\Facades\Auth::check() ? \Illuminate\Support\Facades\Auth::user() : null,
         ],
+        'seo' => SeoHelper::buildLocalizedPageSeo(
+            $locale,
+            '',
+            $seoContent['title'],
+            $seoContent['description'],
+            [
+                'keywords' => $seoContent['keywords'],
+                'structuredData' => SeoHelper::generateStructuredData($locale),
+            ]
+        ),
     ]);
 })->where(['locale' => 'pt|en'])->name('home.locale');
 
 // Privacy and Terms pages with locale
 Route::get('/{locale}/privacy', function ($locale) {
+    $isPt = $locale === 'pt';
+
     return Inertia::render('privacy', [
         'locale' => $locale,
+        'seo' => SeoHelper::buildLocalizedPageSeo(
+            $locale,
+            'privacy',
+            $isPt ? 'Política de Privacidade | DOCSET' : 'Privacy Policy | DOCSET',
+            $isPt
+                ? 'Saiba como a DOCSET recolhe, usa e protege dados de documentos, contas e integrações.'
+                : 'Learn how DOCSET collects, uses, and protects document, account, and integration data.'
+        ),
     ]);
 })->where(['locale' => 'pt|en'])->name('privacy');
 
 Route::get('/{locale}/terms', function ($locale) {
+    $isPt = $locale === 'pt';
+
     return Inertia::render('terms', [
         'locale' => $locale,
+        'seo' => SeoHelper::buildLocalizedPageSeo(
+            $locale,
+            'terms',
+            $isPt ? 'Termos de Serviço | DOCSET' : 'Terms of Service | DOCSET',
+            $isPt
+                ? 'Consulte os termos de utilização da DOCSET, incluindo contas, faturação e uso aceitável da plataforma.'
+                : 'Review DOCSET terms covering account usage, billing, and acceptable use of the platform.'
+        ),
     ]);
 })->where(['locale' => 'pt|en'])->name('terms');
 
@@ -186,6 +218,13 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
     Route::get('two-factor-challenge', function ($locale) {
         return Inertia::render('auth/two-factor-challenge', [
             'locale' => $locale,
+            'seo' => SeoHelper::buildLocalizedPageSeo(
+                $locale,
+                'two-factor-challenge',
+                'Two-Factor Authentication | DOCSET',
+                'Complete your secure DOCSET sign-in with two-factor authentication.',
+                ['robots' => 'noindex, nofollow']
+            ),
         ]);
     })->middleware(['guest'])->name('locale.two-factor.login');
 
@@ -195,27 +234,60 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
 
     // Login routes
     Route::get('login', function ($locale) {
+        $isPt = $locale === 'pt';
+
         return Inertia::render('auth/login', [
             'canRegister' => Features::enabled(Features::registration()),
             'canResetPassword' => Features::enabled(Features::resetPasswords()),
             'locale' => $locale,
             'status' => session('status'),
+            'seo' => SeoHelper::buildLocalizedPageSeo(
+                $locale,
+                'login',
+                $isPt ? 'Entrar na DOCSET' : 'Sign In to DOCSET',
+                $isPt
+                    ? 'Entre na sua conta DOCSET para gerir extrações, documentos e integrações.'
+                    : 'Sign in to your DOCSET account to manage extractions, documents, and integrations.',
+                ['robots' => 'noindex, nofollow']
+            ),
         ]);
     })->middleware('guest')->name('locale.login');
 
     // Password Reset GET routes
     Route::get('forgot-password', function ($locale) {
+        $isPt = $locale === 'pt';
+
         return Inertia::render('auth/forgot-password', [
             'status' => session('status'),
             'locale' => $locale,
+            'seo' => SeoHelper::buildLocalizedPageSeo(
+                $locale,
+                'forgot-password',
+                $isPt ? 'Recuperar palavra-passe | DOCSET' : 'Reset Password | DOCSET',
+                $isPt
+                    ? 'Peça um link seguro para redefinir a palavra-passe da sua conta DOCSET.'
+                    : 'Request a secure link to reset your DOCSET account password.',
+                ['robots' => 'noindex, nofollow']
+            ),
         ]);
     })->middleware('guest')->name('locale.password.request');
 
     Route::get('reset-password/{token}', function ($locale, $token) {
+        $isPt = $locale === 'pt';
+
         return Inertia::render('auth/reset-password', [
             'token' => $token,
             'email' => request('email'),
             'locale' => $locale,
+            'seo' => SeoHelper::buildLocalizedPageSeo(
+                $locale,
+                'reset-password',
+                $isPt ? 'Definir nova palavra-passe | DOCSET' : 'Choose a New Password | DOCSET',
+                $isPt
+                    ? 'Defina uma nova palavra-passe para voltar a entrar na sua conta DOCSET.'
+                    : 'Set a new password to regain access to your DOCSET account.',
+                ['robots' => 'noindex, nofollow']
+            ),
         ]);
     })->middleware('guest')->name('locale.password.reset');
 
@@ -237,9 +309,20 @@ Route::prefix('{locale}')->where(['locale' => 'pt|en'])->middleware('web')->grou
 
     // Register routes
     Route::get('register', function ($locale) {
+        $isPt = $locale === 'pt';
+
         return Inertia::render('auth/register', [
             'canRegister' => Features::enabled(Features::registration()),
             'locale' => $locale,
+            'seo' => SeoHelper::buildLocalizedPageSeo(
+                $locale,
+                'register',
+                $isPt ? 'Criar conta DOCSET' : 'Create Your DOCSET Account',
+                $isPt
+                    ? 'Crie a sua conta DOCSET para extrair dados de PDFs e imagens com exportação para Excel, JSON e API.'
+                    : 'Create your DOCSET account to extract data from PDFs and images with Excel, JSON, and API export.',
+                ['robots' => 'noindex, nofollow']
+            ),
         ]);
     })->middleware('guest')->name('locale.register');
 

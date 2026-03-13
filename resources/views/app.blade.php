@@ -15,6 +15,7 @@
             $seoLocale = $seo['locale'] ?? 'en';
             $seoStructuredData = $seo['structuredData'] ?? '';
             $seoAlternateLocales = $seo['alternateLocales'] ?? [];
+            $seoRobots = $seo['robots'] ?? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
         @endphp
         
         {{-- SEO Meta Tags --}}
@@ -22,9 +23,9 @@
         @if($seoKeywords)
         <meta name="keywords" content="{{ $seoKeywords }}">
         @endif
-        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-        <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-        <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+        <meta name="robots" content="{{ $seoRobots }}">
+        <meta name="googlebot" content="{{ $seoRobots }}">
+        <meta name="bingbot" content="{{ $seoRobots }}">
         <meta name="theme-color" content="#000000">
         <meta name="format-detection" content="telephone=no">
         <meta name="author" content="DOCSET">
