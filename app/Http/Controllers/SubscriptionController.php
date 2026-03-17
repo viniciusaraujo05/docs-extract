@@ -38,7 +38,7 @@ class SubscriptionController extends Controller
         Log::info('Checkout page accessed', [
             'price_id' => $priceId,
             'plan_name' => $planName,
-            'all_input' => $request->all(),
+            'user_id' => $request->user()?->id,
         ]);
 
         return Inertia::render('Subscription/Checkout', [

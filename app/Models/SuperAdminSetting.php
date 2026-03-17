@@ -16,7 +16,7 @@ class SuperAdminSetting extends Model
      */
     public static function hasPassword(): bool
     {
-        return self::where('key', 'password')->exists();
+        return self::getPassword() !== null;
     }
 
     /**
@@ -24,7 +24,21 @@ class SuperAdminSetting extends Model
      */
     public static function getPassword(): ?string
     {
+        $configuredHash = config('super_admin.password_hash');
+
+        if (is_string($configuredHash) && $configuredHash !== '') {
+            return $configuredHash;
+        }
+
         return self::where('key', 'password')->value('value');
+    }
+
+    /**
+     * Determine whether interactive setup is explicitly allowed.
+     */
+    public static function isSetupAllowed(): bool
+    {
+        return ! self::hasPassword() && (bool) config('super_admin.allow_local_setup', false);
     }
 
     /**

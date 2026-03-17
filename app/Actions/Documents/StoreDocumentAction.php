@@ -47,6 +47,14 @@ final readonly class StoreDocumentAction
             $this->documentRepository->delete($existingDocument);
         }
 
+        if ($documentTypeId !== null) {
+            $documentType = $this->documentTypeRepository->findById($documentTypeId);
+
+            if (! $documentType || $documentType->user_id !== $user->id) {
+                throw new \InvalidArgumentException('Invalid document type or you do not have permission to use it.');
+            }
+        }
+
         $pageCount = $this->pageCounter->count($file);
         $filePath = $this->storeFile($file, $user->id);
 

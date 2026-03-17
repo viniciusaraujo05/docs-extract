@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreDocumentRequest extends FormRequest
 {
@@ -13,10 +14,17 @@ class StoreDocumentRequest extends FormRequest
 
     public function rules(): array
     {
+        $userId = $this->user()?->id ?? 0;
+
         return [
             'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:5120'], // 5MB
             'type' => ['required', 'string', 'in:predefined,new_type'],
-            'document_type_id' => ['required_if:type,predefined', 'nullable', 'integer', 'exists:document_types,id'],
+            'document_type_id' => [
+                'required_if:type,predefined',
+                'nullable',
+                'integer',
+                Rule::exists('document_types', 'id')->where(fn ($query) => $query->where('user_id', $userId)),
+            ],
             'new_type_name' => ['required_if:type,new_type', 'nullable', 'string', 'max:255'],
             'schema' => ['required', 'string'],
             'extracted_data' => ['required', 'string'],

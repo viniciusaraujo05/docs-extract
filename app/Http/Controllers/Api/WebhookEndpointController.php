@@ -6,10 +6,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\WebhookEndpoint;
+use App\Services\WebhookUrlGuard;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class WebhookEndpointController extends Controller
 {
@@ -22,13 +24,21 @@ class WebhookEndpointController extends Controller
         return response()->json($webhooks);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, WebhookUrlGuard $webhookUrlGuard): RedirectResponse
     {
         $validated = $request->validate([
             'url' => 'required|url|max:255',
             'events' => 'nullable|array',
             'description' => 'nullable|string|max:255',
         ]);
+
+        try {
+            $webhookUrlGuard->assertCanBeStored($validated['url']);
+        } catch (\InvalidArgumentException $e) {
+            throw ValidationException::withMessages([
+                'url' => $e->getMessage(),
+            ]);
+        }
 
         $webhook = new WebhookEndpoint;
         $webhook->user_id = $request->user()->id;

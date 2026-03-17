@@ -89,7 +89,7 @@ interface PaginatedUsers {
 }
 
 interface PageProps {
-    mode: 'setup' | 'login' | 'dashboard';
+    mode: 'setup' | 'login' | 'dashboard' | 'disabled';
     stats?: DashboardStats;
     errors?: Record<string, string>;
 }
@@ -167,6 +167,25 @@ function SetupView() {
                         </Button>
                     </form>
                 </CardContent>
+            </Card>
+        </div>
+    );
+}
+
+function DisabledView() {
+    return (
+        <div className="min-h-screen bg-black flex items-center justify-center p-4">
+            <Card className="w-full max-w-md border-neutral-800 bg-neutral-950 shadow-2xl">
+                <CardHeader className="text-center space-y-3">
+                    <div className="mx-auto w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                        <Shield className="w-8 h-8 text-white" />
+                    </div>
+                    <CardTitle className="text-2xl text-white">Super Admin Disabled</CardTitle>
+                    <CardDescription className="text-neutral-500">
+                        Configure `SUPER_ADMIN_PASSWORD_HASH` or explicitly enable `SUPER_ADMIN_ALLOW_LOCAL_SETUP`
+                        before using this panel.
+                    </CardDescription>
+                </CardHeader>
             </Card>
         </div>
     );
@@ -661,6 +680,7 @@ export default function SuperAdmin() {
         <>
             <Head title="Super Admin" />
             {mode === 'setup' && <SetupView />}
+            {mode === 'disabled' && <DisabledView />}
             {mode === 'login' && <LoginView />}
             {mode === 'dashboard' && stats && <DashboardView stats={stats} />}
         </>

@@ -26,6 +26,10 @@ class WebhookEndpoint extends Model
         'is_active' => 'boolean',
     ];
 
+    protected $hidden = [
+        'secret',
+    ];
+
     /**
      * Bootstrap the model and its traits.
      */

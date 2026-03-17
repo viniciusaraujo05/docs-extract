@@ -18,6 +18,11 @@ class ConnectedAccount extends Model
         'expires_at',
     ];
 
+    protected $hidden = [
+        'token',
+        'refresh_token',
+    ];
+
     protected $casts = [
         'expires_at' => 'datetime',
     ];

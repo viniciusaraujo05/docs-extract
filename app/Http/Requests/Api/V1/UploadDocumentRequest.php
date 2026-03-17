@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UploadDocumentRequest extends FormRequest
 {
@@ -23,10 +24,16 @@ class UploadDocumentRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userId = auth('api')->user()?->user_id ?? 0;
+
         return [
             'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],
             'type' => ['required', 'string', 'in:invoice,receipt,custom'],
-            'document_type_id' => ['nullable', 'integer', 'exists:document_types,id'],
+            'document_type_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('document_types', 'id')->where(fn ($query) => $query->where('user_id', $userId)),
+            ],
             'schema' => ['nullable', 'json'],
         ];
     }

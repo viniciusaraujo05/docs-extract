@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ExtractDocumentRequest extends FormRequest
 {
@@ -23,9 +24,15 @@ class ExtractDocumentRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userId = auth('api')->user()?->user_id ?? 0;
+
         return [
             'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],
-            'document_type_id' => ['required', 'integer', 'exists:document_types,id'],
+            'document_type_id' => [
+                'required',
+                'integer',
+                Rule::exists('document_types', 'id')->where(fn ($query) => $query->where('user_id', $userId)),
+            ],
             'force_overwrite' => ['nullable', 'boolean'],
         ];
     }

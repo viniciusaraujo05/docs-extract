@@ -34,6 +34,14 @@ final readonly class StoreBatchDocumentsAction
         ?string $newTypeName,
         array $schema,
     ): DocumentBatch {
+        if ($documentTypeId !== null) {
+            $documentType = $this->documentTypeRepository->findById($documentTypeId);
+
+            if (! $documentType || $documentType->user_id !== $user->id) {
+                throw new \InvalidArgumentException('Invalid document type or you do not have permission to use it.');
+            }
+        }
+
         // Create new document type if needed
         if ($documentTypeId === null && ! empty($newTypeName) && isset($schema['fields'])) {
             $newDocumentType = $this->documentTypeRepository->create([

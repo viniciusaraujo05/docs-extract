@@ -27,7 +27,7 @@ class SuperAdminController extends Controller
 
         if (! $hasPassword) {
             return Inertia::render('super-admin', [
-                'mode' => 'setup',
+                'mode' => SuperAdminSetting::isSetupAllowed() ? 'setup' : 'disabled',
             ]);
         }
 
@@ -51,6 +51,10 @@ class SuperAdminController extends Controller
      */
     public function setup(Request $request): \Illuminate\Http\RedirectResponse
     {
+        if (! SuperAdminSetting::isSetupAllowed()) {
+            abort(403, 'Super admin setup is disabled.');
+        }
+
         if (SuperAdminSetting::hasPassword()) {
             return redirect('/admin-030399');
         }
@@ -60,6 +64,7 @@ class SuperAdminController extends Controller
         ]);
 
         SuperAdminSetting::setPassword($request->input('password'));
+        $request->session()->regenerate();
         $request->session()->put('super_admin_authenticated', true);
 
         return redirect('/admin-030399');
@@ -70,6 +75,12 @@ class SuperAdminController extends Controller
      */
     public function login(Request $request): \Illuminate\Http\RedirectResponse
     {
+        if (! SuperAdminSetting::hasPassword()) {
+            return redirect('/admin-030399')->withErrors([
+                'password' => 'Super admin access is not configured.',
+            ]);
+        }
+
         $request->validate([
             'password' => 'required|string',
         ]);
@@ -91,6 +102,7 @@ class SuperAdminController extends Controller
         }
 
         RateLimiter::clear($key);
+        $request->session()->regenerate();
         $request->session()->put('super_admin_authenticated', true);
 
         return redirect('/admin-030399');

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Models\WebhookEndpoint;
+use App\Services\WebhookUrlGuard;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -48,6 +49,19 @@ class SendWebhookJob implements ShouldQueue
     public function handle(): void
     {
         $startTime = now();
+
+        try {
+            app(WebhookUrlGuard::class)->assertCanBeDispatched($this->webhookEndpoint->url);
+        } catch (\InvalidArgumentException $e) {
+            Log::warning('[QUEUE] Webhook blocked by URL policy', [
+                'timestamp' => $startTime->toIso8601String(),
+                'webhook_id' => $this->webhookEndpoint->id,
+                'url' => $this->webhookEndpoint->url,
+                'reason' => $e->getMessage(),
+            ]);
+
+            return;
+        }
 
         Log::info('[QUEUE] Webhook job started', [
             'timestamp' => $startTime->toIso8601String(),

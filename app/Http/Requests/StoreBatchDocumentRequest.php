@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreBatchDocumentRequest extends FormRequest
 {
@@ -21,10 +22,16 @@ class StoreBatchDocumentRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userId = $this->user()?->id ?? 0;
+
         return [
             'files' => ['required', 'array', 'min:1', 'max:20'],
             'files.*' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg', 'max:10240'], // 10MB max per file
-            'document_type_id' => ['nullable', 'integer', 'exists:document_types,id'],
+            'document_type_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('document_types', 'id')->where(fn ($query) => $query->where('user_id', $userId)),
+            ],
             'new_type_name' => ['required_without:document_type_id', 'string', 'max:255'],
             'fields' => ['required', 'array'],
             'fields.*.name' => ['required', 'string'],

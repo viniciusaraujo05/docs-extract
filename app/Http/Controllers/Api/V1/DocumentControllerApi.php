@@ -74,6 +74,13 @@ final class DocumentControllerApi extends Controller
                 ),
                 HttpResponse::CREATED->value
             );
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(
+                HttpResponse::UNPROCESSABLE_ENTITY->json(
+                    message: $e->getMessage()
+                ),
+                HttpResponse::UNPROCESSABLE_ENTITY->value
+            );
         } catch (\Exception $e) {
             return response()->json(
                 HttpResponse::INTERNAL_SERVER_ERROR->json(

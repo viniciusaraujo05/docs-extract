@@ -50,7 +50,11 @@ class IntegrationController extends Controller
 
         // Store return URL if provided
         if ($request->has('return_to')) {
-            session(['oauth_return_to' => $request->input('return_to')]);
+            $returnTo = (string) $request->input('return_to');
+
+            if ($this->isSafeReturnUrl($returnTo, $request)) {
+                session(['oauth_return_to' => $returnTo]);
+            }
         }
 
         // Store locale for callback redirect
@@ -385,5 +389,26 @@ class IntegrationController extends Controller
         }
 
         return substr($local, 0, 1).'***@'.$domain;
+    }
+
+    private function isSafeReturnUrl(string $returnTo, Request $request): bool
+    {
+        if ($returnTo === '') {
+            return false;
+        }
+
+        if (str_starts_with($returnTo, '/') && ! str_starts_with($returnTo, '//')) {
+            return true;
+        }
+
+        $host = parse_url($returnTo, PHP_URL_HOST);
+        $scheme = parse_url($returnTo, PHP_URL_SCHEME);
+
+        if (! is_string($host) || ! is_string($scheme)) {
+            return false;
+        }
+
+        return in_array($scheme, ['http', 'https'], true)
+            && $host === $request->getHost();
     }
 }
