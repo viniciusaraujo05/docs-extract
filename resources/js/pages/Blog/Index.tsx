@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead';
 import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { ArrowUpRight } from 'lucide-react';
@@ -15,20 +16,40 @@ interface BlogPost {
     };
 }
 
+interface Seo {
+    title: string;
+    description: string;
+    keywords?: string;
+    locale?: string;
+    canonical?: string;
+    ogImage?: string;
+    alternateLocales?: Array<{ locale: string; url: string }>;
+}
+
 interface Props {
     posts: {
         data: BlogPost[];
         links: any[];
     };
     locale: string;
+    seo: Seo;
 }
 
-export default function Index({ posts, locale }: Props) {
+export default function Index({ posts, locale, seo }: Props) {
     const featuredPost = posts.data[0];
     const regularPosts = posts.data.slice(1);
 
     return (
         <BlogLayout locale={locale}>
+            <SEOHead
+                title={seo.title}
+                description={seo.description}
+                keywords={seo.keywords}
+                locale={seo.locale}
+                canonical={seo.canonical}
+                ogImage={seo.ogImage}
+                alternateLocales={seo.alternateLocales}
+            />
             <div className="mx-auto max-w-7xl px-6 py-20 lg:py-32">
                 <div className="mb-16 text-center lg:mb-24">
                     <motion.h1

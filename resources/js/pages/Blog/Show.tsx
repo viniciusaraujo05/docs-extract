@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead';
 import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowUpRight, Calendar, Loader2 } from 'lucide-react';
@@ -25,15 +26,27 @@ interface BlogPost {
     };
 }
 
+interface Seo {
+    title: string;
+    description: string;
+    keywords?: string;
+    locale?: string;
+    canonical?: string;
+    ogImage?: string;
+    structuredData?: string;
+    alternateLocales?: Array<{ locale: string; url: string }>;
+}
+
 interface Props {
     post: BlogPost;
     latestPosts?: {
         data: BlogPost[];
     };
     locale: string;
+    seo: Seo;
 }
 
-export default function Show({ post, latestPosts, locale }: Props) {
+export default function Show({ post, latestPosts, locale, seo }: Props) {
     const sidebarPosts =
         latestPosts?.data?.filter((p) => p.id !== post.id).slice(0, 3) || [];
 
@@ -72,8 +85,23 @@ export default function Show({ post, latestPosts, locale }: Props) {
         }
     };
 
+    const parsedStructuredData = seo.structuredData
+        ? JSON.parse(seo.structuredData)
+        : undefined;
+
     return (
         <BlogLayout locale={locale}>
+            <SEOHead
+                title={seo.title}
+                description={seo.description}
+                keywords={seo.keywords}
+                locale={seo.locale}
+                canonical={seo.canonical}
+                ogImage={seo.ogImage}
+                ogType="article"
+                structuredData={parsedStructuredData}
+                alternateLocales={seo.alternateLocales}
+            />
             <div className="mx-auto max-w-7xl px-6 py-12 lg:py-20">
                 <Link
                     href={`/${locale}/blog`}
