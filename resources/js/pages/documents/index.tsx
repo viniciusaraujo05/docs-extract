@@ -124,29 +124,33 @@ function DocumentCard({ document, isSelected, onSelect, onDelete, index, locale 
     const { t } = useTranslation();
     
     const statusConfig = {
-        pending: { label: t('Pending'), variant: 'secondary' as const, icon: Clock, color: 'text-amber-600 bg-amber-50 border-amber-200' },
-        processing: { label: t('Processing'), variant: 'default' as const, icon: Loader2, color: 'text-blue-600 bg-blue-50 border-blue-200' },
-        completed: { label: t('Completed'), variant: 'default' as const, icon: CheckCircle, color: 'text-green-600 bg-green-50 border-green-200' },
-        failed: { label: t('Failed'), variant: 'destructive' as const, icon: XCircle, color: 'text-red-600 bg-red-50 border-red-200' },
+        pending: { label: t('In queue'), variant: 'secondary' as const, icon: Clock, color: 'text-amber-600 bg-amber-50 border-amber-200' },
+        processing: { label: t('AI reading...'), variant: 'default' as const, icon: Loader2, color: 'text-blue-600 bg-blue-50 border-blue-200' },
+        completed: { label: t('Ready'), variant: 'default' as const, icon: CheckCircle, color: 'text-green-600 bg-green-50 border-green-200' },
+        failed: { label: t("Couldn't extract"), variant: 'destructive' as const, icon: XCircle, color: 'text-red-600 bg-red-50 border-red-200' },
     };
     
     const status = statusConfig[document.status];
     const StatusIcon = status.icon;
     const FileIcon = getFileIcon(document.mime_type);
 
+    // Extract first 3 fields from extracted data for the hover preview
+    const extractedEntries = document.extracted_data
+        ? Object.entries(document.extracted_data as Record<string, unknown>)
+              .filter(([, v]) => v !== null && v !== '' && !Array.isArray(v))
+              .slice(0, 3)
+        : [];
+
     const handleCardClick = (e: React.MouseEvent) => {
-        // Don't navigate if clicking on checkbox or buttons
         const target = e.target as HTMLElement;
-        if (target.closest('button') || target.closest('[role="checkbox"]')) {
-            return;
-        }
+        if (target.closest('button') || target.closest('[role="checkbox"]')) return;
         router.visit(`/${locale}/documents/${document.id}`);
     };
 
     return (
         <div 
             className={cn(
-                "group relative rounded-xl border bg-card p-4 transition-all duration-300 hover:shadow-lg hover:border-primary/30 cursor-pointer",
+                "group relative rounded-xl border bg-card p-4 transition-all duration-300 hover:shadow-lg hover:border-primary/30 hover:scale-[1.02] cursor-pointer",
                 "animate-in fade-in-0 slide-in-from-bottom-4",
                 isSelected && "ring-2 ring-primary border-primary bg-primary/5"
             )}
@@ -189,7 +193,7 @@ function DocumentCard({ document, isSelected, onSelect, onDelete, index, locale 
             </div>
 
             {/* File icon and info */}
-            <div className="flex flex-col items-center pt-6 pb-4">
+            <div className="flex flex-col items-center pt-6 pb-3">
                 <div className={cn(
                     "flex h-16 w-16 items-center justify-center rounded-2xl mb-4 transition-transform duration-300 group-hover:scale-110",
                     document.mime_type === 'application/pdf' 
@@ -212,6 +216,25 @@ function DocumentCard({ document, isSelected, onSelect, onDelete, index, locale 
                 )}
             </div>
 
+            {/* AI Data Preview — visible on hover for completed docs */}
+            {document.status === 'completed' && extractedEntries.length > 0 && (
+                <div className={cn(
+                    "mx-1 mb-2 rounded-lg bg-primary/5 border border-primary/10 p-2.5 space-y-1 transition-all duration-300",
+                    "opacity-0 group-hover:opacity-100 max-h-0 group-hover:max-h-24 overflow-hidden"
+                )}>
+                    {extractedEntries.map(([key, value]) => (
+                        <div key={key} className="flex items-center justify-between text-[11px]">
+                            <span className="text-muted-foreground capitalize truncate max-w-[80px]">
+                                {key.replace(/_/g, ' ')}
+                            </span>
+                            <span className="font-medium text-foreground truncate max-w-[90px] ml-2">
+                                {String(value)}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            )}
+
             {/* Meta info */}
             <div className="border-t pt-3 mt-2 text-xs text-muted-foreground">
                 <div className="flex items-center justify-between">
@@ -223,7 +246,7 @@ function DocumentCard({ document, isSelected, onSelect, onDelete, index, locale 
                 </div>
             </div>
 
-            {/* Actions - positioned above meta info */}
+            {/* Actions */}
             <div className={cn(
                 "absolute bottom-12 right-3 z-10 flex items-center gap-1 rounded-lg bg-background/95 backdrop-blur-sm border shadow-sm px-1 transition-all duration-200",
                 "opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0"
@@ -478,9 +501,9 @@ export default function DocumentsIndex({ documents, documentTypes = [], recentBa
                 {/* Header */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-in fade-in-0 slide-in-from-top-4 duration-500">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">{t('Documents')}</h1>
+                        <h1 className="text-2xl font-bold tracking-tight">{t('Your extracted data')}</h1>
                         <p className="text-muted-foreground">
-                            {t('Manage and view your processed documents')}
+                            {t('All your PDFs, turned into structured data')}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -553,13 +576,13 @@ export default function DocumentsIndex({ documents, documentTypes = [], recentBa
                         <Button variant="outline" size="sm" asChild className="hidden sm:flex">
                             <Link href={`/${locale}/document-types`}>
                                 <Settings2 className="mr-2 h-4 w-4" />
-                                {t('Models')}
+                                {t('Document types')}
                             </Link>
                         </Button>
                         <Button asChild className="shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all">
                             <Link href={`/${locale}/documents/create`}>
                                 <Plus className="mr-2 h-4 w-4" />
-                                {t('New Document')}
+                                {t('Extract data →')}
                             </Link>
                         </Button>
                     </div>
@@ -574,7 +597,7 @@ export default function DocumentsIndex({ documents, documentTypes = [], recentBa
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{documents.data.length}</p>
-                                <p className="text-xs text-muted-foreground">{t('Total')}</p>
+                                <p className="text-xs text-muted-foreground">{t('Processed')}</p>
                             </div>
                         </div>
                     </Card>
@@ -585,7 +608,7 @@ export default function DocumentsIndex({ documents, documentTypes = [], recentBa
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{documents.data.filter(d => d.status === 'completed').length}</p>
-                                <p className="text-xs text-muted-foreground">{t('Completed')}</p>
+                                <p className="text-xs text-muted-foreground">{t('Ready')}</p>
                             </div>
                         </div>
                     </Card>
@@ -596,7 +619,7 @@ export default function DocumentsIndex({ documents, documentTypes = [], recentBa
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{documents.data.filter(d => d.status === 'pending' || d.status === 'processing').length}</p>
-                                <p className="text-xs text-muted-foreground">{t('Pending')}</p>
+                                <p className="text-xs text-muted-foreground">{t('In queue')}</p>
                             </div>
                         </div>
                     </Card>
@@ -607,7 +630,7 @@ export default function DocumentsIndex({ documents, documentTypes = [], recentBa
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{types.length}</p>
-                                <p className="text-xs text-muted-foreground">{t('Models')}</p>
+                                <p className="text-xs text-muted-foreground">{t('Document types')}</p>
                             </div>
                         </div>
                     </Card>
@@ -743,16 +766,16 @@ export default function DocumentsIndex({ documents, documentTypes = [], recentBa
                 {/* Documents Grid */}
                 {filteredDocuments.length === 0 ? (
                     <Card className="flex flex-col items-center justify-center py-16 animate-in fade-in-0 zoom-in-95 duration-500">
-                        <div className="rounded-full bg-muted p-6 mb-4">
-                            <FileText className="h-12 w-12 text-muted-foreground/50" />
+                        <div className="rounded-full bg-primary/5 border-2 border-dashed border-primary/20 p-6 mb-4">
+                            <FileText className="h-12 w-12 text-primary/40" />
                         </div>
                         <h3 className="text-lg font-semibold mb-2">
-                            {hasActiveFilters ? t('No results') : t('No documents')}
+                            {hasActiveFilters ? t('No results') : t('Drop a PDF to get started')}
                         </h3>
                         <p className="text-muted-foreground text-center max-w-sm mb-6">
                             {hasActiveFilters 
                                 ? t('Try adjusting the filters to find what you\'re looking for.')
-                                : t('Start by uploading your first document to extract data.')}
+                                : t('Our AI reads your document and turns it into structured, usable data — in seconds.')}
                         </p>
                         {hasActiveFilters ? (
                             <Button variant="outline" onClick={clearFilters}>
@@ -760,10 +783,10 @@ export default function DocumentsIndex({ documents, documentTypes = [], recentBa
                                 {t('Clear filters')}
                             </Button>
                         ) : (
-                            <Button asChild>
+                            <Button asChild size="lg" className="shadow-lg shadow-primary/25">
                                 <Link href={`/${locale}/documents/create`}>
                                     <Plus className="mr-2 h-4 w-4" />
-                                    {t('Upload Document')}
+                                    {t('Extract your first document')}
                                 </Link>
                             </Button>
                         )}

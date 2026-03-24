@@ -19,6 +19,7 @@ import {
     RefreshCw,
     Save,
     XCircle,
+    Sparkles,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -77,6 +78,8 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
     const [isPolling, setIsPolling] = useState(document.status === 'processing' || document.status === 'pending');
     const [isSaving, setIsSaving] = useState(false);
     const [isZoomed, setIsZoomed] = useState(false);
+    const [showSuccessBanner, setShowSuccessBanner] = useState(false);
+    const [processingStep, setProcessingStep] = useState(0);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: t('Dashboard'), href: `/${locale}/dashboard` },
@@ -147,10 +150,49 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
         }
     }, [document.extracted_data, document.status]);
 
+    // Show success banner when arriving at a completed document
+    useEffect(() => {
+        if (document.status === 'completed' && document.extracted_data) {
+            const timer = setTimeout(() => setShowSuccessBanner(true), 200);
+            const hideTimer = setTimeout(() => setShowSuccessBanner(false), 5000);
+            return () => { clearTimeout(timer); clearTimeout(hideTimer); };
+        }
+    }, []);
+
+    // Cycle through processing step labels
+    const PROCESSING_STEPS = [
+        t('Reading your document...'),
+        t('Identifying fields...'),
+        t('Extracting values...'),
+    ];
+    useEffect(() => {
+        if (document.status !== 'processing' && document.status !== 'pending') return;
+        const timer = setInterval(() => {
+            setProcessingStep(prev => (prev + 1) % PROCESSING_STEPS.length);
+        }, 1800);
+        return () => clearInterval(timer);
+    }, [document.status]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={document.name} />
             <div className="flex h-full flex-1 flex-col gap-4 p-4">
+                {/* ✨ Success Banner */}
+                {showSuccessBanner && (
+                    <div className="flex items-center gap-3 rounded-xl bg-primary/5 border border-primary/20 px-4 py-3 animate-in slide-in-from-top-2 duration-500">
+                        <Sparkles className="h-5 w-5 text-primary flex-shrink-0" />
+                        <div className="flex-1">
+                            <p className="text-sm font-semibold text-primary">
+                                {t('Data extracted successfully')}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                                {schemaFields.length} {t('fields ready — review and save when you\'re done')}
+                            </p>
+                        </div>
+                        <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                    </div>
+                )}
+
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -261,14 +303,14 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle>{t('Extracted Data')}</CardTitle>
+                                    <CardTitle>{t("Here's what we found")}</CardTitle>
                                     <CardDescription>
                                         {document.status === 'completed'
-                                            ? t('Edit the fields below if necessary')
+                                            ? t('Review your data — edit anything that looks off')
                                             : document.status === 'processing'
-                                            ? t('Processing document...')
+                                            ? t('AI is reading your document...')
                                             : document.status === 'pending'
-                                            ? t('Waiting for processing...')
+                                            ? t('Waiting in queue...')
                                             : t('Processing failed')}
                                     </CardDescription>
                                 </div>
@@ -289,12 +331,20 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                         <CardContent className="flex-1">
                             {document.status === 'processing' || document.status === 'pending' ? (
                                 <div className="flex h-full flex-col items-center justify-center gap-4">
-                                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                                    <p className="text-muted-foreground">
-                                        {document.status === 'processing'
-                                            ? t('Extracting data from document...')
-                                            : t('In processing queue...')}
-                                    </p>
+                                    <div className="relative">
+                                        <div className="h-12 w-12 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                                        <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="text-sm font-semibold text-primary animate-in fade-in duration-300" key={processingStep}>
+                                            {PROCESSING_STEPS[processingStep]}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            {document.status === 'processing'
+                                                ? t('This usually takes a few seconds')
+                                                : t('In queue — will start shortly')}
+                                        </p>
+                                    </div>
                                 </div>
                             ) : document.status === 'failed' ? (
                                 <div className="flex h-full flex-col items-center justify-center gap-4">
@@ -361,9 +411,19 @@ export default function DocumentShow({ document, previewUrl }: DocumentShowProps
                                                 <Button
                                                     onClick={handleSave}
                                                     disabled={isSaving}
+                                                    className="shadow-md shadow-primary/20"
                                                 >
-                                                    <Save className="mr-2 h-4 w-4" />
-                                                    {t('Save Changes')}
+                                                    {isSaving ? (
+                                                        <>
+                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                            {t('Saving...')}
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Save className="mr-2 h-4 w-4" />
+                                                            {t('Save & done')}
+                                                        </>
+                                                    )}
                                                 </Button>
                                             </div>
                                         </>

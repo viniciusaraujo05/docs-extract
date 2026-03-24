@@ -70,6 +70,14 @@ final class DocumentController extends Controller
                         'name' => $doc->documentType->name,
                         'description' => $doc->documentType->description,
                     ] : null,
+                    // First 3 extracted fields for list preview (lightweight)
+                    'extracted_data' => $doc->extracted_data
+                        ? collect($doc->extracted_data)
+                            ->filter(fn ($v) => $v !== null && $v !== '' && ! is_array($v))
+                            ->take(3)
+                            ->toArray()
+                        : null,
+
                 ])->toArray(),
                 'current_page' => $paginator->currentPage(),
                 'last_page' => $paginator->lastPage(),

@@ -24,7 +24,7 @@ import {
     Image as ImageIcon,
     Copy,
 } from 'lucide-react';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
@@ -95,6 +95,22 @@ export function StepUpload({
     const [showNewType, setShowNewType] = useState(documentTypes.length === 0);
     const [showDrivePicker, setShowDrivePicker] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    // Smart loading messages cycling animation
+    const LOADING_MESSAGES = [
+        t('Reading your document...'),
+        t('Analyzing structure...'),
+        t('Detecting data patterns...'),
+        t('Almost there...'),
+    ];
+    const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
+    useEffect(() => {
+        if (!analyzing) { setLoadingMsgIdx(0); return; }
+        const timer = setInterval(() => {
+            setLoadingMsgIdx(prev => (prev + 1) % LOADING_MESSAGES.length);
+        }, 1400);
+        return () => clearInterval(timer);
+    }, [analyzing]);
 
     const handleDrag = useCallback((e: React.DragEvent) => {
         e.preventDefault();
@@ -196,13 +212,13 @@ export function StepUpload({
                 <div className="flex items-center justify-between">
                     <div className="flex-1">
                         <CardTitle className="flex items-center gap-2 text-xl">
-                            <Upload className="h-5 w-5" />
-                            {t('New Document')}{batchMode && 's'}
+                            <Upload className="h-5 w-5 text-primary" />
+                            {batchMode ? t('Upload documents') : t('Upload a document')}
                         </CardTitle>
                         <CardDescription>
                             {batchMode 
                                 ? t('Upload multiple files using the same template')
-                                : t('First select the template, then upload the document')}
+                                : t('Our AI reads your document and extracts the data you need')}
                         </CardDescription>
                     </div>
                     {hasTemplates && onBatchModeToggle && (
@@ -682,11 +698,16 @@ export function StepUpload({
 
                 {/* Resultado da análise */}
                 {isNewType && file && analysisCompleted && suggestedFieldsCount > 0 && (
-                    <div className="flex items-center justify-center gap-3 rounded-lg bg-green-50 dark:bg-green-950/30 p-4">
-                        <CheckCircle2 className="h-5 w-5 text-green-600" />
-                        <span className="text-sm font-medium text-green-700 dark:text-green-300">
-                            {t('Analysis complete!')} {suggestedFieldsCount} {t('fields detected.')}
-                        </span>
+                    <div className="flex items-center justify-center gap-3 rounded-xl bg-green-50 border border-green-200 p-4">
+                        <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                        <div>
+                            <p className="text-sm font-semibold text-green-700">
+                                ✨ {t('Fields detected!')}
+                            </p>
+                            <p className="text-xs text-green-600">
+                                {suggestedFieldsCount} {t('data points ready to extract — review in the next step')}
+                            </p>
+                        </div>
                     </div>
                 )}
 
@@ -712,11 +733,17 @@ export function StepUpload({
                 )}
 
                 {analyzing && (
-                    <div className="flex items-center justify-center gap-3 rounded-lg bg-primary/5 p-4">
-                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                        <span className="text-sm font-medium text-primary">
-                            {t('Analyzing document and detecting fields...')}
-                        </span>
+                    <div className="flex flex-col items-center justify-center gap-3 rounded-xl bg-primary/5 border border-primary/20 p-6">
+                        <div className="relative">
+                            <div className="h-10 w-10 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                            <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
+                        </div>
+                        <div className="text-center">
+                            <p className="text-sm font-semibold text-primary animate-in fade-in duration-300" key={loadingMsgIdx}>
+                                {LOADING_MESSAGES[loadingMsgIdx]}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">{t('This usually takes a few seconds')}</p>
+                        </div>
                     </div>
                 )}
 

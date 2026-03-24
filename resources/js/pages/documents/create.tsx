@@ -76,7 +76,7 @@ export default function DocumentsCreate({
         { title: t('New'), href: `/${locale}/documents/create` },
     ];
 
-    const WIZARD_STEPS = [t('Upload'), t('Define Fields'), t('Review & Save')];
+    const WIZARD_STEPS = [t('Upload'), t('Tell us what to extract'), t('Review your data')];
     
     // Estado do wizard
     const [step, setStep] = useState(1);
