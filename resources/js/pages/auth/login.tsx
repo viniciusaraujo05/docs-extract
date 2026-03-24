@@ -92,7 +92,7 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
 
     return (
         <>
-            <div className="min-h-screen flex bg-black text-white">
+            <div className="min-h-screen flex bg-background text-foreground">
                 <div className="flex-1 flex items-center justify-center p-6 lg:p-8 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-950/20 via-transparent to-blue-950/20" />
                     <div className="absolute inset-0">
@@ -132,7 +132,7 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                         <div className="mb-8">
                             {error && (
                                 <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm flex items-center gap-3">
-                                    <Shield className="h-5 w-5 text-red-400 shrink-0" />
+                                    <Shield className="h-5 w-5 text-red-600 shrink-0" />
                                     <span>{error}</span>
                                 </div>
                             )}
@@ -146,7 +146,7 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                                 onClick={() => router.visit(`/${locale}`)}
                             >
                                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center cursor-pointer">
-                                    <FileJson className="h-5 w-5 text-white" />
+                                    <FileJson className="h-5 w-5 text-foreground" />
                                 </div>
                                 <span className="font-bold text-lg cursor-pointer">DOCSET</span>
                             </motion.div>
@@ -154,65 +154,65 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                             <h2 className="text-4xl font-bold mb-3">
                                 {t('Welcome back')}
                             </h2>
-                            <p className="text-gray-400">
+                            <p className="text-muted-foreground">
                                 {t('Enter your credentials to access your account')}
                             </p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-sm font-medium text-gray-300">
+                                <Label htmlFor="email" className="text-sm font-medium text-muted-foreground">
                                     {t('Email Address')}
                                 </Label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                     <Input
                                         id="email"
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="you@example.com"
-                                        className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500"
+                                        className="pl-10 h-12 bg-muted border-border text-foreground placeholder:text-muted-foreground focus:border-blue-500"
                                         required
                                         autoComplete="email"
                                     />
                                 </div>
                                 {errors.email && (
-                                    <p className="text-sm text-red-400">{errors.email}</p>
+                                    <p className="text-sm text-red-600">{errors.email}</p>
                                 )}
                             </div>
 
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <Label htmlFor="password" className="text-sm font-medium text-gray-300">
+                                    <Label htmlFor="password" className="text-sm font-medium text-muted-foreground">
                                         {t('Password')}
                                     </Label>
                                     {canResetPassword && (
                                         <button
                                             type="button"
                                             onClick={() => router.visit(`/${locale}/forgot-password`)}
-                                            className="text-sm text-blue-400 hover:text-blue-300"
+                                            className="text-sm text-blue-600 hover:text-blue-700"
                                         >
                                             {t('Forgot password?')}
                                         </button>
                                     )}
                                 </div>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                     <Input
                                         id="password"
                                         type={showPassword ? 'text' : 'password'}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
-                                        className="pl-10 pr-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500"
+                                        className="pl-10 pr-10 h-12 bg-muted border-border text-foreground placeholder:text-muted-foreground focus:border-blue-500"
                                         required
                                         autoComplete="current-password"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-white"
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                                     >
                                         {showPassword ? (
                                             <EyeOff className="h-5 w-5" />
@@ -222,7 +222,7 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                                     </button>
                                 </div>
                                 {errors.password && (
-                                    <p className="text-sm text-red-400">{errors.password}</p>
+                                    <p className="text-sm text-red-600">{errors.password}</p>
                                 )}
                             </div>
 
@@ -231,11 +231,11 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                                     id="remember"
                                     checked={remember}
                                     onCheckedChange={(checked) => setRemember(checked as boolean)}
-                                    className="border-white/20"
+                                    className="border-border"
                                 />
                                 <Label
                                     htmlFor="remember"
-                                    className="text-sm font-normal cursor-pointer text-gray-300"
+                                    className="text-sm font-normal cursor-pointer text-muted-foreground"
                                 >
                                     {t('Remember me for 30 days')}
                                 </Label>
@@ -264,10 +264,10 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
 
                         <div className="relative my-8">
                             <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t border-white/10" />
+                                <span className="w-full border-t border-border" />
                             </div>
                             <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-black px-2 text-gray-400">
+                                <span className="bg-background px-2 text-muted-foreground">
                                     {t('Or continue with')}
                                 </span>
                             </div>
@@ -276,7 +276,7 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                         <div className="grid grid-cols-2 gap-4">
                             <Button
                                 variant="outline"
-                                className="bg-white/5 border-white/10 hover:bg-white/10 hover:text-white"
+                                className="bg-muted border-border hover:bg-muted hover:text-foreground"
                                 onClick={() => window.location.href = `/${locale}/auth/github`}
                             >
                                 <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -286,7 +286,7 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                             </Button>
                             <Button
                                 variant="outline"
-                                className="bg-white/5 border-white/10 hover:bg-white/10 hover:text-white"
+                                className="bg-muted border-border hover:bg-muted hover:text-foreground"
                                 onClick={() => window.location.href = `/${locale}/auth/google`}
                             >
                                 <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
@@ -298,11 +298,11 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
 
                         {canRegister && (
                             <div className="mt-6 text-center">
-                                <p className="text-sm text-gray-400">
+                                <p className="text-sm text-muted-foreground">
                                     {t("Don't have an account?")} {' '}
                                     <button
                                         onClick={() => router.visit(`/${locale}/register`)}
-                                        className="text-blue-400 hover:text-blue-300 font-semibold"
+                                        className="text-blue-600 hover:text-blue-700 font-semibold"
                                     >
                                         {t('Sign up for free')}
                                     </button>
@@ -313,7 +313,7 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                         <div className="mt-8 text-center">
                             <button
                                 onClick={() => router.visit(`/${locale}`)}
-                                className="text-sm text-gray-400 hover:text-white transition"
+                                className="text-sm text-muted-foreground hover:text-foreground transition"
                             >
                                 ← {t('Back to home')}
                             </button>
@@ -325,7 +325,7 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="hidden lg:flex flex-1 p-10 items-center justify-center relative overflow-hidden bg-zinc-950 border-l border-white/5"
+                    className="hidden lg:flex flex-1 p-10 items-center justify-center relative overflow-hidden bg-muted/30 border-l border-border"
                 >
                     {/* Fine grid background */}
                     <div className="absolute inset-0 opacity-[0.04]"
@@ -339,19 +339,19 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
                         >
-                            <h2 className="text-3xl font-bold mb-3 text-white leading-tight">
+                            <h2 className="text-3xl font-bold mb-3 text-foreground leading-tight">
                                 {locale === 'pt'
                                     ? 'Os seus documentos,\nprontos em minutos.'
                                     : 'Your documents,\ndone in minutes.'}
                             </h2>
-                            <p className="text-gray-400 mb-8 leading-relaxed">
+                            <p className="text-muted-foreground mb-8 leading-relaxed">
                                 {locale === 'pt'
                                     ? 'Carregue um PDF. Confirme os campos. Exporte para a sua folha de cálculo. Sem digitar nada.'
                                     : 'Upload a PDF. Check the fields. Export to your spreadsheet. No typing needed.'}
                             </p>
 
                             {/* Data transformation visual */}
-                            <div className="relative mb-8 rounded-xl overflow-hidden border border-white/8 bg-[#06090f]"
+                            <div className="relative mb-8 rounded-xl overflow-hidden border border-border bg-[#06090f]"
                                 style={{ background: "linear-gradient(135deg,#06090f 0%,#080d18 100%)" }}>
                                 {/* Fine grid */}
                                 <div className="absolute inset-0 opacity-[0.07]"
@@ -375,7 +375,7 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                                                 ))}
                                             </div>
                                         </div>
-                                        <span className="text-[10px] text-blue-400/60 font-mono tracking-wide">PDF</span>
+                                        <span className="text-[10px] text-blue-600/60 font-mono tracking-wide">PDF</span>
                                     </motion.div>
 
                                     {/* Animated pipeline */}
@@ -405,14 +405,14 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                                             {/* Header */}
                                             <div className="bg-blue-900/40 px-2 py-[3px] flex gap-1.5">
                                                 {['A','B','C'].map(c => (
-                                                    <div key={c} className="text-[7px] text-blue-300/60 font-mono w-6 text-center">{c}</div>
+                                                    <div key={c} className="text-[7px] text-blue-700/60 font-mono w-6 text-center">{c}</div>
                                                 ))}
                                             </div>
                                             {/* Rows */}
                                             {[0,1,2,3].map((row) => (
                                                 <motion.div
                                                     key={row}
-                                                    className="flex gap-1.5 px-2 py-[3px] border-t border-white/5"
+                                                    className="flex gap-1.5 px-2 py-[3px] border-t border-border"
                                                     animate={{ opacity: [0.4, 0.9, 0.4] }}
                                                     transition={{ duration: 2, delay: row * 0.3 + 0.8, repeat: Infinity }}
                                                 >
@@ -430,12 +430,12 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                             {/* Benefits */}
                             <div className="space-y-3">
                                 {(locale === 'pt' ? [
-                                    { text: 'Sem mais digitação manual de PDFs', color: 'text-blue-400' },
-                                    { text: 'Confirme antes de exportar — você decide', color: 'text-green-400' },
+                                    { text: 'Sem mais digitação manual de PDFs', color: 'text-blue-600' },
+                                    { text: 'Confirme antes de exportar — você decide', color: 'text-green-600' },
                                     { text: 'Gratuito para começar, sem cartão', color: 'text-emerald-400' },
                                 ] : [
-                                    { text: 'No more typing from PDFs by hand', color: 'text-blue-400' },
-                                    { text: 'Review before exporting — you stay in control', color: 'text-green-400' },
+                                    { text: 'No more typing from PDFs by hand', color: 'text-blue-600' },
+                                    { text: 'Review before exporting — you stay in control', color: 'text-green-600' },
                                     { text: 'Free to start, no credit card needed', color: 'text-emerald-400' },
                                 ]).map((item, i) => (
                                     <motion.div
@@ -443,7 +443,7 @@ export default function Login({ status, error, canResetPassword, canRegister }: 
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: 0.5 + i * 0.1 }}
-                                        className="flex items-center gap-3 text-sm text-gray-300"
+                                        className="flex items-center gap-3 text-sm text-muted-foreground"
                                     >
                                         <CheckCircle className={`h-4 w-4 shrink-0 ${item.color}`} />
                                         <span>{item.text}</span>

@@ -6,6 +6,7 @@ import { useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ExportDataButton } from '@/components/export-data-button';
 import { TableFieldViewer } from './TableFieldViewer';
 import { extractTableFields, aggregateTableRows, calculateAggregations } from '@/utils/tableFieldProcessor';
 import type { DocumentData, SchemaField } from '@/types/report';
@@ -26,14 +27,13 @@ export function TablesView({ documents, fields }: TablesViewProps) {
         return extractTableFields(documents, fields);
     }, [documents, fields]);
 
-    const handleExportAll = () => {
-        if (tableFields.length === 0) return;
-
-        const workbook = XLSX.utils.book_new();
-
+    const allTablesData = useMemo(() => {
+        const allRows: Record<string, unknown>[] = [];
+        
         tableFields.forEach((table) => {
-            const exportData = table.rows.map((row, index) => {
+            table.rows.forEach((row, index) => {
                 const exportRow: Record<string, unknown> = {
+                    'Tabela': table.label,
                     '#': index + 1,
                 };
 
@@ -42,36 +42,21 @@ export function TablesView({ documents, fields }: TablesViewProps) {
                     exportRow[column.label] = value !== null && value !== undefined ? String(value) : '';
                 });
 
-                return exportRow;
+                allRows.push(exportRow);
             });
 
-            // Add aggregations row
-            if (Object.keys(table.aggregations).length > 0) {
-                const totalsRow: Record<string, unknown> = {
-                    '#': 'TOTAL',
-                };
-
-                table.columns.forEach(column => {
-                    const agg = table.aggregations[column.name];
-                    if (agg && agg.sum !== undefined) {
-                        totalsRow[column.label] = agg.sum;
-                    } else {
-                        totalsRow[column.label] = '';
-                    }
-                });
-
-                exportData.push(totalsRow);
-            }
-
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const sheetName = table.label.substring(0, 31); // Excel limit
-            XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+            // Add separator / totals for each table if needed, 
+            // but for a flat export we just list them all.
         });
 
-        const filename = `Tables_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
-        XLSX.writeFile(workbook, filename);
+        return allRows;
+    }, [tableFields]);
 
-        toast.success(t('All tables exported successfully!'));
+    const handleExportAllExcel = () => {
+        if (tableFields.length === 0) return;
+        // Keep the multi-sheet XLSX logic as a fallback or dedicated action if needed?
+        // Actually ExportDataButton handles Excel as well (though single sheet XML).
+        // Let's stick to the consistent ExportDataButton first.
     };
 
     const totalRows = useMemo(() => {
@@ -144,10 +129,12 @@ export function TablesView({ documents, fields }: TablesViewProps) {
                             </div>
                         </div>
 
-                        <Button onClick={handleExportAll} size="sm">
-                            <Download className="mr-2 h-4 w-4" />
-                            {t('Export All Tables')}
-                        </Button>
+                        <ExportDataButton
+                            data={allTablesData}
+                            filename={`Full_Tables_Report_${new Date().toISOString().split('T')[0]}`}
+                            variant="default"
+                            size="sm"
+                        />
                     </div>
                 </CardContent>
             </Card>

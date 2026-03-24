@@ -22,7 +22,7 @@ createServer((page) =>
             i18n.changeLanguage(locale);
 
             return (
-                <ThemeProvider defaultTheme="dark" storageKey="docset-theme">
+                <ThemeProvider defaultTheme="light" storageKey="docset-theme">
                     <App {...props} />
                 </ThemeProvider>
             );

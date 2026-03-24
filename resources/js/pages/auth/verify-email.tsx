@@ -55,7 +55,7 @@ export default function VerifyEmail({ status }: VerifyEmailProps) {
         <>
             <Head title="Verify Email - DOCSET" />
             
-            <div className="min-h-screen flex bg-black text-white">
+            <div className="min-h-screen flex bg-background text-foreground">
                 <div className="flex-1 flex items-center justify-center p-6 lg:p-8 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-950/20 via-transparent to-blue-950/20" />
                     <div className="absolute inset-0">
@@ -101,24 +101,24 @@ export default function VerifyEmail({ status }: VerifyEmailProps) {
                                 onClick={() => router.visit(`/${locale}`)}
                             >
                                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center cursor-pointer">
-                                    <FileJson className="h-5 w-5 text-white" />
+                                    <FileJson className="h-5 w-5 text-foreground" />
                                 </div>
                                 <span className="font-bold text-lg cursor-pointer">DOCSET</span>
                             </motion.div>
 
                             <div className="flex items-center justify-center mb-6">
                                 <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center">
-                                    <Mail className="w-8 h-8 text-blue-400" />
+                                    <Mail className="w-8 h-8 text-blue-600" />
                                 </div>
                             </div>
 
                             <h2 className="text-4xl font-bold mb-3 text-center">
                                 {t('auth.verify_email.title')}
                             </h2>
-                            <p className="text-gray-400 text-center">
+                            <p className="text-muted-foreground text-center">
                                 {t('auth.verify_email.description')}
                             </p>
-                            <p className="text-gray-400 text-center mt-2">
+                            <p className="text-muted-foreground text-center mt-2">
                                 {t('auth.verify_email.link_sent')}
                             </p>
                         </div>
@@ -148,7 +148,7 @@ export default function VerifyEmail({ status }: VerifyEmailProps) {
                         <div className="mt-6 text-center">
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center justify-center gap-2 mx-auto text-sm text-gray-400 hover:text-white font-medium transition-colors"
+                                className="flex items-center justify-center gap-2 mx-auto text-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
                             >
                                 <LogOut className="h-4 w-4" />
                                 Logout
@@ -158,7 +158,7 @@ export default function VerifyEmail({ status }: VerifyEmailProps) {
                         <div className="mt-8 text-center">
                             <button
                                 onClick={() => router.visit(`/${locale}`)}
-                                className="text-sm text-gray-400 hover:text-white transition"
+                                className="text-sm text-muted-foreground hover:text-foreground transition"
                             >
                                 ← {t('Back to home')}
                             </button>
@@ -195,7 +195,7 @@ export default function VerifyEmail({ status }: VerifyEmailProps) {
                         ))}
                     </div>
 
-                    <div className="relative z-10 max-w-md text-white">
+                    <div className="relative z-10 max-w-md text-foreground">
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -219,9 +219,9 @@ export default function VerifyEmail({ status }: VerifyEmailProps) {
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: 0.6 + i * 0.1 }}
-                                        className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10"
+                                        className="flex items-center gap-3 bg-muted backdrop-blur-sm rounded-xl p-4 border border-border"
                                     >
-                                        <div className="bg-white/20 rounded-lg p-2">
+                                        <div className="bg-muted rounded-lg p-2">
                                             {benefit.icon}
                                         </div>
                                         <span className="font-medium text-lg">{benefit.text}</span>
@@ -236,11 +236,11 @@ export default function VerifyEmail({ status }: VerifyEmailProps) {
                                 className="mt-10 flex items-center gap-6 text-sm"
                             >
                                 <div className="flex items-center gap-2">
-                                    <CheckCircle className="h-5 w-5 text-green-400" />
+                                    <CheckCircle className="h-5 w-5 text-green-600" />
                                     <span>Instant activation</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <CheckCircle className="h-5 w-5 text-green-400" />
+                                    <CheckCircle className="h-5 w-5 text-green-600" />
                                     <span>Secure access</span>
                                 </div>
                             </motion.div>

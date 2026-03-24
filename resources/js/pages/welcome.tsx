@@ -64,13 +64,13 @@ function BrowserFrame({
 }) {
     return (
         <div
-            className={`overflow-hidden rounded-xl border border-white/10 shadow-2xl shadow-black/50 ${className}`}
+            className={`overflow-hidden rounded-xl border border-border shadow-2xl shadow-black/50 ${className}`}
         >
-            <div className="flex items-center gap-1.5 border-b border-white/10 bg-zinc-900 px-4 py-3">
+            <div className="flex items-center gap-1.5 border-b border-border bg-card px-4 py-3">
                 <div className="h-3 w-3 rounded-full bg-red-500/70" />
                 <div className="h-3 w-3 rounded-full bg-yellow-500/70" />
                 <div className="h-3 w-3 rounded-full bg-green-500/70" />
-                <div className="mx-4 flex-1 rounded bg-zinc-800 px-3 py-1 text-center text-xs text-gray-500">
+                <div className="mx-4 flex-1 rounded bg-muted px-3 py-1 text-center text-xs text-muted-foreground">
                     docset.app
                 </div>
             </div>
@@ -140,28 +140,28 @@ function HeroPdfAnimation() {
             transition={{ duration: 0.7, delay: 0.35, ease: 'easeOut' }}
             className="w-full"
         >
-            <div className="overflow-hidden rounded-xl border border-white/10 shadow-2xl shadow-black/50">
-                <div className="flex items-center gap-1.5 border-b border-white/10 bg-zinc-900 px-4 py-3">
+            <div className="overflow-hidden rounded-xl border border-border shadow-2xl shadow-black/50">
+                <div className="flex items-center gap-1.5 border-b border-border bg-card px-4 py-3">
                     <div className="h-3 w-3 rounded-full bg-red-500/70" />
                     <div className="h-3 w-3 rounded-full bg-yellow-500/70" />
                     <div className="h-3 w-3 rounded-full bg-green-500/70" />
-                    <div className="mx-4 flex-1 rounded bg-zinc-800 px-3 py-1 text-center text-xs text-gray-500">
+                    <div className="mx-4 flex-1 rounded bg-muted px-3 py-1 text-center text-xs text-muted-foreground">
                         docset.app
                     </div>
                 </div>
-                <div className="bg-zinc-950 p-4 md:p-5">
+                <div className="bg-muted/30 p-4 md:p-5">
                     <div className="mb-4 flex items-center gap-2">
-                        <div className="h-2.5 w-28 rounded-full bg-white/8" />
+                        <div className="h-2.5 w-28 rounded-full bg-muted" />
                         <div className="ml-auto h-6 w-20 rounded-md bg-blue-500/20" />
                     </div>
                     <div className="grid grid-cols-[1fr,24px,1fr] items-start gap-2">
                         {/* PDF panel */}
-                        <div className="relative overflow-hidden rounded-lg border border-white/10 bg-zinc-900 p-3">
-                            <div className="mb-2.5 flex items-center gap-2 border-b border-white/8 pb-2">
-                                <div className="flex h-6 w-6 items-center justify-center rounded bg-red-500/20">
-                                    <FileText className="h-3.5 w-3.5 text-red-400" />
+                        <div className="relative overflow-hidden rounded-lg border border-border bg-card p-3">
+                            <div className="mb-2.5 flex items-center gap-2 border-b border-border pb-2">
+                                <div className="flex h-6 w-6 items-center justify-center rounded bg-red-100">
+                                    <FileText className="h-3.5 w-3.5 text-red-600" />
                                 </div>
-                                <div className="h-1.5 w-20 rounded-full bg-white/20" />
+                                <div className="h-1.5 w-20 rounded-full bg-muted" />
                             </div>
                             <div className="space-y-1.5">
                                 {lineWidths.map((w, i) => {
@@ -174,7 +174,7 @@ function HeroPdfAnimation() {
                                     return (
                                         <div
                                             key={i}
-                                            className={`rounded-full transition-colors duration-150 ${active ? 'bg-blue-400/50' : scanned ? 'bg-white/15' : 'bg-white/6'}`}
+                                            className={`rounded-full transition-colors duration-150 ${active ? 'bg-blue-400/50' : scanned ? 'bg-background/10' : 'bg-muted'}`}
                                             style={{
                                                 height: '5px',
                                                 width: `${w}%`,
@@ -206,13 +206,13 @@ function HeroPdfAnimation() {
                                     ease: 'easeInOut',
                                 }}
                             >
-                                <ArrowRight className="h-4 w-4 text-blue-400" />
+                                <ArrowRight className="h-4 w-4 text-blue-600" />
                             </motion.div>
                         </div>
                         {/* Data panel */}
-                        <div className="rounded-lg border border-white/10 bg-zinc-900 p-3">
+                        <div className="rounded-lg border border-border bg-card p-3">
                             <div className="mb-2 flex items-center justify-between">
-                                <span className="text-[9px] font-semibold tracking-widest text-gray-500 uppercase">
+                                <span className="text-[9px] font-semibold tracking-widest text-muted-foreground uppercase">
                                     Extracted
                                 </span>
                                 <AnimatePresence>
@@ -221,10 +221,10 @@ function HeroPdfAnimation() {
                                             initial={{ opacity: 0, scale: 0.8 }}
                                             animate={{ opacity: 1, scale: 1 }}
                                             exit={{ opacity: 0 }}
-                                            className="flex items-center gap-1 rounded-full bg-green-500/15 px-1.5 py-0.5"
+                                            className="flex items-center gap-1 rounded-full bg-green-100 px-1.5 py-0.5"
                                         >
-                                            <CheckCircle className="h-2.5 w-2.5 text-green-400" />
-                                            <span className="text-[9px] text-green-400">
+                                            <CheckCircle className="h-2.5 w-2.5 text-green-600" />
+                                            <span className="text-[9px] text-green-600">
                                                 Done
                                             </span>
                                         </motion.div>
@@ -242,12 +242,12 @@ function HeroPdfAnimation() {
                                                 : { opacity: 0, x: 8 }
                                         }
                                         transition={{ duration: 0.25 }}
-                                        className="grid grid-cols-2 gap-1 rounded border border-white/5 bg-white/[0.04] px-2 py-1.5"
+                                        className="grid grid-cols-2 gap-1 rounded border border-border bg-muted px-2 py-1.5"
                                     >
-                                        <span className="truncate text-[9px] text-gray-500">
+                                        <span className="truncate text-[9px] text-muted-foreground">
                                             {field.label}
                                         </span>
-                                        <span className="truncate text-right font-mono text-[9px] text-blue-300">
+                                        <span className="truncate text-right font-mono text-[9px] text-blue-700">
                                             {field.value}
                                         </span>
                                     </motion.div>
@@ -263,8 +263,8 @@ function HeroPdfAnimation() {
                                 transition={{ duration: 0.3 }}
                                 className="mt-3 flex items-center justify-center gap-1.5 rounded border border-blue-500/20 bg-blue-500/10 py-1.5"
                             >
-                                <Download className="h-3 w-3 text-blue-400" />
-                                <span className="text-[9px] font-medium text-blue-300">
+                                <Download className="h-3 w-3 text-blue-600" />
+                                <span className="text-[9px] font-medium text-blue-700">
                                     Export Excel
                                 </span>
                             </motion.div>
@@ -309,16 +309,8 @@ export default function Welcome() {
     const [showDemo, setShowDemo] = useState(false);
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
-        if (savedTheme) {
-            setTheme(savedTheme);
-            document.documentElement.classList.toggle(
-                'dark',
-                savedTheme === 'dark',
-            );
-        } else {
-            document.documentElement.classList.add('dark');
-        }
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
 
         const currentUrlLocale = props.locale as 'pt' | 'en';
         const savedLocale = localStorage.getItem('selected-locale') as
@@ -342,11 +334,9 @@ export default function Welcome() {
     }, [props.locale]);
 
     const toggleTheme = useCallback(() => {
-        const newTheme = theme === 'light' ? 'dark' : 'light';
-        setTheme(newTheme);
-        localStorage.setItem('theme', newTheme);
-        document.documentElement.classList.toggle('dark', newTheme === 'dark');
-    }, [theme]);
+        // Theme toggle disabled to force light mode
+        setTheme('light');
+    }, []);
 
     useEffect(() => {
         if (locale === 'pt') {
@@ -402,7 +392,7 @@ export default function Welcome() {
     const fullLocale = getFullLocale();
 
     return (
-        <div className="bg-black text-white antialiased">
+        <div className="bg-background text-foreground antialiased">
             <Header
                 locale={getCurrentLocaleValue()}
                 onLocaleChange={handleLocaleChange}
@@ -500,7 +490,7 @@ function Header({
                 transition={{ duration: 0.4 }}
                 className={`fixed top-0 z-50 w-full transition-all duration-300 ${
                     scrolled
-                        ? 'border-b border-white/10 bg-black/80 backdrop-blur-xl'
+                        ? 'border-b border-border bg-background/80 backdrop-blur-xl'
                         : 'bg-transparent'
                 }`}
             >
@@ -513,7 +503,7 @@ function Header({
                                 router.visit(`/${locale.split('-')[0]}`)
                             }
                         >
-                            <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white/10">
+                            <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-muted">
                                 <img
                                     src="/docset.png"
                                     alt="Docset"
@@ -528,19 +518,19 @@ function Header({
                         <nav className="hidden gap-6 text-sm md:flex">
                             <a
                                 href="#features"
-                                className="text-gray-400 transition hover:text-white"
+                                className="text-muted-foreground transition hover:text-foreground"
                             >
                                 {headerText.features}
                             </a>
                             <a
                                 href="#pricing"
-                                className="text-gray-400 transition hover:text-white"
+                                className="text-muted-foreground transition hover:text-foreground"
                             >
                                 {headerText.pricing}
                             </a>
                             <a
                                 href={`/${localeBase}/docs/api-v1`}
-                                className="text-gray-400 transition hover:text-white"
+                                className="text-muted-foreground transition hover:text-foreground"
                             >
                                 {headerText.api}
                             </a>
@@ -553,7 +543,7 @@ function Header({
                                 value={locale}
                                 onValueChange={onLocaleChange}
                             >
-                                <SelectTrigger className="w-[140px] border-white/10 bg-white/5 text-white">
+                                <SelectTrigger className="w-[140px] border-border bg-muted text-foreground">
                                     <SelectValue>
                                         <span className="flex items-center gap-2">
                                             <span>{getLocaleFlag(locale)}</span>
@@ -567,10 +557,10 @@ function Header({
                                         </span>
                                     </SelectValue>
                                 </SelectTrigger>
-                                <SelectContent className="border-white/10 bg-zinc-900">
+                                <SelectContent className="border-border bg-card">
                                     <SelectItem
                                         value="en"
-                                        className="text-white"
+                                        className="text-foreground"
                                     >
                                         <span className="flex items-center gap-2">
                                             🇬🇧 <span>English</span>
@@ -578,7 +568,7 @@ function Header({
                                     </SelectItem>
                                     <SelectItem
                                         value="pt-BR"
-                                        className="text-white"
+                                        className="text-foreground"
                                     >
                                         <span className="flex items-center gap-2">
                                             🇧🇷 <span>Português (BR)</span>
@@ -586,7 +576,7 @@ function Header({
                                     </SelectItem>
                                     <SelectItem
                                         value="pt-PT"
-                                        className="text-white"
+                                        className="text-foreground"
                                     >
                                         <span className="flex items-center gap-2">
                                             🇵🇹 <span>Português (PT)</span>
@@ -615,7 +605,7 @@ function Header({
                                                 `/${locale.split('-')[0]}/login`,
                                             )
                                         }
-                                        className="text-white hover:bg-white/10"
+                                        className="text-foreground hover:bg-muted"
                                     >
                                         {headerText.login}
                                     </Button>
@@ -636,7 +626,7 @@ function Header({
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-white md:hidden"
+                            className="text-foreground md:hidden"
                             onClick={() => setMobileMenuOpen(true)}
                         >
                             <Menu className="h-6 w-6" />
@@ -651,11 +641,11 @@ function Header({
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: '100%' }}
                     transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                    className="fixed inset-0 z-[60] flex flex-col bg-zinc-950 md:hidden"
+                    className="fixed inset-0 z-[60] flex flex-col bg-muted/30 md:hidden"
                 >
-                    <div className="flex items-center justify-between border-b border-white/10 p-6">
+                    <div className="flex items-center justify-between border-b border-border p-6">
                         <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
                                 <img
                                     src="/docset.png"
                                     alt="Docset"
@@ -670,7 +660,7 @@ function Header({
                             variant="ghost"
                             size="icon"
                             onClick={() => setMobileMenuOpen(false)}
-                            className="text-white"
+                            className="text-foreground"
                         >
                             <X className="h-6 w-6" />
                         </Button>
@@ -681,29 +671,29 @@ function Header({
                             <a
                                 href="#features"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="text-gray-400 transition hover:text-white"
+                                className="text-muted-foreground transition hover:text-foreground"
                             >
                                 {headerText.features}
                             </a>
                             <a
                                 href="#pricing"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="text-gray-400 transition hover:text-white"
+                                className="text-muted-foreground transition hover:text-foreground"
                             >
                                 {headerText.pricing}
                             </a>
                             <a
                                 href={`/${localeBase}/docs/api-v1`}
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="text-gray-400 transition hover:text-white"
+                                className="text-muted-foreground transition hover:text-foreground"
                             >
                                 {headerText.api}
                             </a>
                         </nav>
 
-                        <div className="space-y-6 border-t border-white/10 pt-8">
+                        <div className="space-y-6 border-t border-border pt-8">
                             <div className="space-y-3">
-                                <p className="text-sm tracking-wider text-gray-500 uppercase">
+                                <p className="text-sm tracking-wider text-muted-foreground uppercase">
                                     Language
                                 </p>
                                 <div className="grid grid-cols-1 gap-2">
@@ -714,7 +704,7 @@ function Header({
                                                 onLocaleChange(loc);
                                                 setMobileMenuOpen(false);
                                             }}
-                                            className={`flex items-center gap-3 rounded-lg p-3 transition ${locale === loc ? 'bg-blue-500/10 text-blue-400' : 'text-gray-400 hover:bg-white/5'}`}
+                                            className={`flex items-center gap-3 rounded-lg p-3 transition ${locale === loc ? 'bg-blue-500/10 text-blue-600' : 'text-muted-foreground hover:bg-muted'}`}
                                         >
                                             <span className="text-xl">
                                                 {getLocaleFlag(loc)}
@@ -749,7 +739,7 @@ function Header({
                                                     `/${locale.split('-')[0]}/login`,
                                                 )
                                             }
-                                            className="h-12 w-full border-white/10 text-lg text-white hover:bg-white/5"
+                                            className="h-12 w-full border-border text-lg text-foreground hover:bg-muted"
                                         >
                                             {headerText.login}
                                         </Button>
@@ -805,9 +795,9 @@ function Hero({
           };
 
     return (
-        <section className="relative overflow-hidden bg-black pt-28 pb-16 md:pt-36 md:pb-24">
+        <section className="relative overflow-hidden bg-background pt-28 pb-16 md:pt-36 md:pb-24">
             {/* Subtle grid */}
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:48px_48px]" />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] bg-[size:48px_48px]" />
             {/* Static glow */}
             <div className="pointer-events-none absolute top-0 left-1/2 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-blue-500/6 blur-[140px]" />
 
@@ -829,7 +819,7 @@ function Hero({
                                 transition={{ duration: 0.5, delay: 0.1 }}
                             >
                                 <span
-                                    className="block text-4xl leading-none text-white/55 md:text-5xl lg:text-6xl"
+                                    className="block text-4xl leading-none text-foreground/80 md:text-5xl lg:text-6xl"
                                     style={{
                                         fontFamily: "'Caveat', cursive",
                                         fontWeight: 600,
@@ -845,7 +835,7 @@ function Hero({
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                                <span className="block text-4xl leading-none font-bold text-red-400/60 line-through decoration-red-400/60 decoration-[3px] md:text-5xl lg:text-6xl">
+                                <span className="block text-4xl leading-none font-bold text-red-600/80 line-through decoration-red-400/60 decoration-[3px] md:text-5xl lg:text-6xl">
                                     {copy.line2}
                                 </span>
                             </motion.div>
@@ -900,7 +890,7 @@ function Hero({
                             initial={{ opacity: 0, y: 16 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.4 }}
-                            className="mx-auto mb-8 max-w-lg text-base leading-relaxed text-gray-400 md:mx-0 md:text-lg"
+                            className="mx-auto mb-8 max-w-lg text-base leading-relaxed text-muted-foreground md:mx-0 md:text-lg"
                         >
                             {copy.sub}
                         </motion.p>
@@ -919,7 +909,7 @@ function Hero({
                                         `/${locale.split('-')[0]}/register`,
                                     )
                                 }
-                                className="h-12 w-full max-w-xs rounded-xl bg-white px-8 font-semibold text-black shadow-lg shadow-white/10 transition-all hover:scale-[1.02] hover:bg-gray-100 sm:h-14 sm:w-auto sm:max-w-none"
+                                className="h-12 w-full max-w-xs rounded-xl bg-white px-8 font-semibold text-black shadow-lg shadow-black/5 transition-all hover:scale-[1.02] hover:bg-gray-100 sm:h-14 sm:w-auto sm:max-w-none"
                             >
                                 {copy.cta1}
                                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -928,7 +918,7 @@ function Hero({
                                 size="lg"
                                 variant="outline"
                                 onClick={onOpenDemo}
-                                className="h-12 w-full max-w-xs rounded-xl border-white/20 bg-transparent px-8 font-semibold text-white hover:bg-white/5 sm:h-14 sm:w-auto sm:max-w-none"
+                                className="h-12 w-full max-w-xs rounded-xl border-border bg-transparent px-8 font-semibold text-foreground hover:bg-muted sm:h-14 sm:w-auto sm:max-w-none"
                             >
                                 <Play className="mr-2 h-4 w-4" />
                                 {copy.cta2}
@@ -982,7 +972,7 @@ function SocialProofStrip({ locale }: { locale: string }) {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="border-y border-white/5 bg-zinc-950 py-8"
+            className="border-y border-border bg-muted/30 py-8"
         >
             <div className="mx-auto max-w-5xl px-4">
                 <p className="mb-5 text-center text-xs tracking-widest text-gray-600 uppercase">
@@ -998,7 +988,7 @@ function SocialProofStrip({ locale }: { locale: string }) {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.3, delay: i * 0.08 }}
-                            className="flex items-center gap-2 text-gray-400"
+                            className="flex items-center gap-2 text-muted-foreground"
                         >
                             <span className="text-base">{role.icon}</span>
                             <span className="text-sm font-medium">
@@ -1037,7 +1027,7 @@ function TransformationDemo({ locale }: { locale: string }) {
     }, [isInView, fields.length]);
 
     return (
-        <section ref={ref} className="relative bg-zinc-950 py-20 md:py-28">
+        <section ref={ref} className="relative bg-muted/30 py-20 md:py-28">
             <div className="pointer-events-none absolute top-0 left-1/2 h-px w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
 
             <div className="mx-auto max-w-6xl px-4 md:px-6">
@@ -1048,12 +1038,12 @@ function TransformationDemo({ locale }: { locale: string }) {
                     transition={{ duration: 0.5 }}
                     className="mb-12 text-center"
                 >
-                    <h2 className="mb-3 text-2xl font-bold text-white md:text-3xl">
+                    <h2 className="mb-3 text-2xl font-bold text-foreground md:text-3xl">
                         {pt
                             ? 'O que levava 47 minutos agora leva 4 segundos'
                             : 'What took 47 minutes now takes 4 seconds'}
                     </h2>
-                    <p className="text-gray-400">
+                    <p className="text-muted-foreground">
                         {pt
                             ? 'Veja a transformação acontecendo em tempo real'
                             : 'Watch the transformation happen in real-time'}
@@ -1068,10 +1058,10 @@ function TransformationDemo({ locale }: { locale: string }) {
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className="relative"
                     >
-                        <div className="rounded-2xl border border-white/10 bg-zinc-900 p-5">
+                        <div className="rounded-2xl border border-border bg-card p-5">
                             <div className="mb-4 flex items-center gap-2">
-                                <FileText className="h-5 w-5 text-gray-400" />
-                                <span className="text-sm text-gray-400">
+                                <FileText className="h-5 w-5 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">
                                     invoice_2024.pdf
                                 </span>
                             </div>
@@ -1088,7 +1078,7 @@ function TransformationDemo({ locale }: { locale: string }) {
                                         className={`rounded-lg p-3 ring-1 transition-all duration-300 ${activeField === i ? 'ring-blue-500/50' : 'ring-transparent'}`}
                                     >
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs text-gray-500 uppercase">
+                                            <span className="text-xs text-muted-foreground uppercase">
                                                 {field.key.replace('_', ' ')}
                                             </span>
                                             {activeField === i && (
@@ -1108,7 +1098,7 @@ function TransformationDemo({ locale }: { locale: string }) {
                                 animate={{ x: [0, 8, 0] }}
                                 transition={{ duration: 1.5, repeat: Infinity }}
                             >
-                                <ArrowRight className="h-8 w-8 text-blue-400" />
+                                <ArrowRight className="h-8 w-8 text-blue-600" />
                             </motion.div>
                         </div>
                     </motion.div>
@@ -1119,10 +1109,10 @@ function TransformationDemo({ locale }: { locale: string }) {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: 0.3 }}
                     >
-                        <div className="rounded-2xl border border-emerald-500/20 bg-zinc-900 p-5">
+                        <div className="rounded-2xl border border-emerald-500/20 bg-card p-5">
                             <div className="mb-4 flex items-center gap-2">
                                 <FileJson className="h-5 w-5 text-emerald-400" />
-                                <span className="text-sm text-gray-400">
+                                <span className="text-sm text-muted-foreground">
                                     extracted_data.json
                                 </span>
                                 <Badge className="ml-auto bg-emerald-500/20 text-emerald-400">
@@ -1139,9 +1129,9 @@ function TransformationDemo({ locale }: { locale: string }) {
                                             x: activeField === i ? 4 : 0,
                                         }}
                                         transition={{ duration: 0.3 }}
-                                        className="flex items-center gap-3 rounded bg-white/5 px-3 py-2"
+                                        className="flex items-center gap-3 rounded bg-muted px-3 py-2"
                                     >
-                                        <span className="text-gray-500">
+                                        <span className="text-muted-foreground">
                                             "{field.key}":
                                         </span>
                                         <span className="text-emerald-400">
@@ -1197,7 +1187,7 @@ function TheNewStandard({ locale }: { locale: string }) {
     ];
 
     return (
-        <section ref={ref} className="relative bg-black py-20 md:py-28">
+        <section ref={ref} className="relative bg-background py-20 md:py-28">
             <div className="pointer-events-none absolute top-0 left-1/2 h-px w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
             <div className="mx-auto max-w-7xl px-4 md:px-6">
                 <motion.div
@@ -1207,12 +1197,12 @@ function TheNewStandard({ locale }: { locale: string }) {
                     transition={{ duration: 0.5 }}
                     className="mb-12 text-center"
                 >
-                    <h2 className="mb-3 text-2xl font-bold text-white md:text-3xl">
+                    <h2 className="mb-3 text-2xl font-bold text-foreground md:text-3xl">
                         {pt
                             ? 'O novo padrão para processamento de documentos'
                             : 'The new standard for document processing'}
                     </h2>
-                    <p className="text-gray-400">
+                    <p className="text-muted-foreground">
                         {pt
                             ? 'Velocidade, precisão e controle que você nunca experimentou'
                             : 'Speed, accuracy, and control you have never experienced'}
@@ -1228,12 +1218,12 @@ function TheNewStandard({ locale }: { locale: string }) {
                             viewport={{ once: true }}
                             transition={{ duration: 0.4, delay: i * 0.08 }}
                             whileHover={{ y: -4 }}
-                            className="group rounded-2xl border border-white/10 bg-white/[0.02] p-5 transition-all duration-300 hover:border-blue-500/30 hover:bg-white/[0.04]"
+                            className="group rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:border-blue-500/30 hover:bg-muted"
                         >
-                            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 transition-colors group-hover:bg-blue-500/20">
+                            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 transition-colors group-hover:bg-blue-500/20">
                                 <metric.icon className="h-5 w-5" />
                             </div>
-                            <div className="mb-2 text-3xl font-bold text-white">
+                            <div className="mb-2 text-3xl font-bold text-foreground">
                                 {metric.isInfinite ? (
                                     <span>∞</span>
                                 ) : (
@@ -1242,11 +1232,11 @@ function TheNewStandard({ locale }: { locale: string }) {
                                         isInView={isInView}
                                     />
                                 )}
-                                <span className="text-blue-400">
+                                <span className="text-blue-600">
                                     {metric.suffix}
                                 </span>
                             </div>
-                            <p className="text-xs text-gray-400 md:text-sm">
+                            <p className="text-xs text-muted-foreground md:text-sm">
                                 {metric.label}
                             </p>
                         </motion.div>
@@ -1318,21 +1308,21 @@ function UploadPreview() {
     }, []);
 
     return (
-        <div className="relative mx-auto mb-5 flex h-28 w-full max-w-[180px] flex-col items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-zinc-900">
+        <div className="relative mx-auto mb-5 flex h-28 w-full max-w-[180px] flex-col items-center justify-center overflow-hidden rounded-xl border border-border bg-card">
             <div
-                className={`absolute inset-3 rounded-lg border-2 border-dashed transition-colors duration-300 ${dropped ? 'border-blue-500/60 bg-blue-500/5' : 'border-white/10'}`}
+                className={`absolute inset-3 rounded-lg border-2 border-dashed transition-colors duration-300 ${dropped ? 'border-blue-500/60 bg-blue-50' : 'border-border'}`}
             />
             <motion.div
                 animate={{ y: pdfY, opacity: pdfY > -20 ? 1 : 0 }}
                 transition={{ duration: 0 }}
                 className="absolute z-10 flex flex-col items-center gap-1"
             >
-                <div className="flex h-9 w-7 flex-col overflow-hidden rounded-sm border border-red-400/50 bg-zinc-800 shadow-lg">
+                <div className="flex h-9 w-7 flex-col overflow-hidden rounded-sm border border-red-400/50 bg-muted shadow-lg">
                     <div className="h-2 bg-red-500/30" />
                     <div className="flex flex-1 flex-col gap-0.5 p-1">
-                        <div className="h-0.5 rounded-full bg-white/20" />
-                        <div className="h-0.5 rounded-full bg-white/15" />
-                        <div className="h-0.5 w-3/4 rounded-full bg-white/15" />
+                        <div className="h-0.5 rounded-full bg-muted" />
+                        <div className="h-0.5 rounded-full bg-background/10" />
+                        <div className="h-0.5 w-3/4 rounded-full bg-background/10" />
                     </div>
                 </div>
             </motion.div>
@@ -1342,8 +1332,8 @@ function UploadPreview() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="absolute bottom-4 flex items-center gap-1"
                 >
-                    <CheckCircle className="h-3 w-3 text-blue-400" />
-                    <span className="text-[9px] text-blue-300">
+                    <CheckCircle className="h-3 w-3 text-blue-600" />
+                    <span className="text-[9px] text-blue-700">
                         PDF uploaded
                     </span>
                 </motion.div>
@@ -1386,15 +1376,15 @@ function ExtractPreview() {
     }, []);
 
     return (
-        <div className="mx-auto mb-5 grid h-28 w-full max-w-[180px] grid-cols-[1fr,20px,1fr] items-center gap-1 overflow-hidden rounded-xl border border-white/10 bg-zinc-900 p-2">
-            <div className="relative space-y-1 overflow-hidden rounded-lg bg-zinc-800 p-2">
+        <div className="mx-auto mb-5 grid h-28 w-full max-w-[180px] grid-cols-[1fr,20px,1fr] items-center gap-1 overflow-hidden rounded-xl border border-border bg-card p-2">
+            <div className="relative space-y-1 overflow-hidden rounded-lg bg-muted p-2">
                 {lineW.map((w, i) => {
                     const pos = (i / lineW.length) * 100;
                     const active = Math.abs(scanY - pos) < 18;
                     return (
                         <div
                             key={i}
-                            className={`rounded-full transition-colors duration-100 ${active ? 'bg-blue-400/60' : 'bg-white/10'}`}
+                            className={`rounded-full transition-colors duration-100 ${active ? 'bg-blue-400/60' : 'bg-muted'}`}
                             style={{ height: '4px', width: `${w}%` }}
                         />
                     );
@@ -1408,14 +1398,14 @@ function ExtractPreview() {
                     }}
                 />
             </div>
-            <ArrowRight className="h-3 w-3 text-blue-400/70" />
-            <div className="space-y-1 rounded-lg bg-zinc-800 p-2">
+            <ArrowRight className="h-3 w-3 text-blue-600/70" />
+            <div className="space-y-1 rounded-lg bg-muted p-2">
                 {[0, 1, 2].map((i) => (
                     <motion.div
                         key={i}
                         animate={i < fields ? { opacity: 1 } : { opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="rounded bg-white/8 px-1.5 py-0.5"
+                        className="rounded bg-muted px-1.5 py-0.5"
                     >
                         <div className="h-1.5 w-full rounded-full bg-blue-300/40" />
                     </motion.div>
@@ -1441,7 +1431,7 @@ function ExportPreview() {
     }, []);
 
     return (
-        <div className="mx-auto mb-5 flex h-28 w-full max-w-[180px] flex-col justify-between overflow-hidden rounded-xl border border-white/10 bg-zinc-900 p-3">
+        <div className="mx-auto mb-5 flex h-28 w-full max-w-[180px] flex-col justify-between overflow-hidden rounded-xl border border-border bg-card p-3">
             <div className="space-y-1">
                 {[
                     ['Vendor', 'Acme Corp.'],
@@ -1450,10 +1440,10 @@ function ExportPreview() {
                 ].map(([k, v]) => (
                     <div
                         key={k}
-                        className="flex items-center justify-between rounded bg-white/5 px-2 py-0.5"
+                        className="flex items-center justify-between rounded bg-muted px-2 py-0.5"
                     >
-                        <span className="text-[8px] text-gray-500">{k}</span>
-                        <span className="font-mono text-[8px] text-gray-300">
+                        <span className="text-[8px] text-muted-foreground">{k}</span>
+                        <span className="font-mono text-[8px] text-muted-foreground">
                             {v}
                         </span>
                     </div>
@@ -1471,12 +1461,12 @@ function ExportPreview() {
                           : { scale: 1, backgroundColor: 'rgba(34,197,94,0.2)' }
                 }
                 transition={{ duration: 0.2 }}
-                className="flex items-center justify-center gap-1 rounded-md border border-white/10 py-1"
+                className="flex items-center justify-center gap-1 rounded-md border border-border py-1"
             >
                 {step < 2 ? (
                     <>
-                        <Download className="h-2.5 w-2.5 text-blue-400" />
-                        <span className="text-[9px] text-blue-300">
+                        <Download className="h-2.5 w-2.5 text-blue-600" />
+                        <span className="text-[9px] text-blue-700">
                             Export .xlsx
                         </span>
                     </>
@@ -1486,7 +1476,7 @@ function ExportPreview() {
                         animate={{ opacity: 1 }}
                         className="flex items-center gap-1"
                     >
-                        <CheckCircle className="h-2.5 w-2.5 text-green-400" />
+                        <CheckCircle className="h-2.5 w-2.5 text-green-600" />
                         <span className="text-[9px] text-green-300">
                             Downloaded!
                         </span>
@@ -1528,7 +1518,7 @@ function HowItWorks({ locale }: { locale: string }) {
     ];
 
     return (
-        <section id="features" className="relative bg-zinc-950 py-20 md:py-28">
+        <section id="features" className="relative bg-muted/30 py-20 md:py-28">
             <div className="pointer-events-none absolute top-0 left-1/2 h-px w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
             <div className="mx-auto max-w-5xl px-4 md:px-6">
                 <motion.div
@@ -1538,12 +1528,12 @@ function HowItWorks({ locale }: { locale: string }) {
                     transition={{ duration: 0.5 }}
                     className="mb-12 text-center"
                 >
-                    <h2 className="mb-3 text-2xl font-bold text-white md:text-3xl">
+                    <h2 className="mb-3 text-2xl font-bold text-foreground md:text-3xl">
                         {pt
                             ? 'Três passos. Sem curva de aprendizado.'
                             : 'Three steps. No learning curve.'}
                     </h2>
-                    <p className="text-gray-400">
+                    <p className="text-muted-foreground">
                         {pt
                             ? 'Simples o suficiente para usar hoje mesmo'
                             : 'Simple enough to use today, right now'}
@@ -1561,21 +1551,21 @@ function HowItWorks({ locale }: { locale: string }) {
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.4, delay: i * 0.12 }}
                                 whileHover={{ y: -4 }}
-                                className="relative rounded-2xl border border-white/5 bg-zinc-900/40 p-6 text-center"
+                                className="relative rounded-2xl border border-border bg-card/40 p-6 text-center"
                             >
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 text-6xl font-black text-white/4">
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 text-6xl font-black text-foreground/4">
                                     {step.num}
                                 </div>
                                 {i === 0 && <UploadPreview />}
                                 {i === 1 && <ExtractPreview />}
                                 {i === 2 && <ExportPreview />}
-                                <div className="relative z-10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-800 ring-1 ring-white/10">
-                                    <step.icon className="h-5 w-5 text-blue-400" />
+                                <div className="relative z-10 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-muted ring-1 ring-white/10">
+                                    <step.icon className="h-5 w-5 text-blue-600" />
                                 </div>
-                                <h3 className="mb-2 text-lg font-bold text-white">
+                                <h3 className="mb-2 text-lg font-bold text-foreground">
                                     {step.title}
                                 </h3>
-                                <p className="text-sm leading-relaxed text-gray-400">
+                                <p className="text-sm leading-relaxed text-muted-foreground">
                                     {step.desc}
                                 </p>
                             </motion.div>
@@ -1595,29 +1585,29 @@ function ProductShowcase({ locale }: { locale: string }) {
 
     const screenshots = [
         {
-            src: '/Screenshot%202026-02-04%20094931.png',
+            src: '/screenshot-2.png',
             alt: pt ? 'Dashboard DocSet' : 'DocSet Dashboard',
             label: 'Dashboard',
         },
         {
-            src: '/Screenshot%202026-02-04%20094945.png',
-            alt: pt ? 'Extração de documentos' : 'Document Extraction',
-            label: pt ? 'Extração' : 'Extraction',
+            src: '/screenshot-1.png',
+            alt: pt ? 'Upload de documentos' : 'Document Upload',
+            label: 'Upload',
         },
         {
-            src: '/Screenshot%202026-02-04%20095031.png',
-            alt: pt ? 'Templates' : 'Templates',
-            label: 'Templates',
+            src: '/screenshot-3.png',
+            alt: pt ? 'Definição de Campos' : 'Define Fields',
+            label: pt ? 'Campos' : 'Fields',
         },
         {
-            src: '/Screenshot%202026-02-04%20095315.png',
-            alt: pt ? 'Exportação' : 'Export',
-            label: pt ? 'Exportação' : 'Export',
+            src: '/screenshot-4.png',
+            alt: pt ? 'Revisão e Extração' : 'Review and Extract',
+            label: pt ? 'Extração' : 'Extract',
         },
         {
-            src: '/Screenshot%202026-02-04%20095346.png',
-            alt: 'API',
-            label: 'API',
+            src: '/screenshot-5.png',
+            alt: pt ? 'Relatórios Financeiros' : 'Financial Reports',
+            label: pt ? 'Relatórios' : 'Reports',
         },
     ];
 
@@ -1639,7 +1629,7 @@ function ProductShowcase({ locale }: { locale: string }) {
     };
 
     return (
-        <section className="relative bg-black py-20 md:py-28">
+        <section className="relative bg-background py-20 md:py-28">
             <div className="pointer-events-none absolute top-0 left-1/2 h-px w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
 
             <div className="mx-auto max-w-6xl px-4 md:px-6">
@@ -1650,13 +1640,13 @@ function ProductShowcase({ locale }: { locale: string }) {
                     transition={{ duration: 0.5 }}
                     className="mb-10 text-center"
                 >
-                    <span className="mb-4 inline-block rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-400">
+                    <span className="mb-4 inline-block rounded-full border border-border bg-muted px-3 py-1 text-xs text-muted-foreground">
                         {pt ? 'Plataforma' : 'Platform'}
                     </span>
-                    <h2 className="mt-4 mb-3 text-2xl font-bold text-white md:text-3xl">
+                    <h2 className="mt-4 mb-3 text-2xl font-bold text-foreground md:text-3xl">
                         {pt ? 'Veja o DocSet em ação' : 'See DocSet in action'}
                     </h2>
-                    <p className="text-gray-400">
+                    <p className="text-muted-foreground">
                         {pt
                             ? 'Uma plataforma poderosa, simples de usar'
                             : 'A powerful platform, simple to use'}
@@ -1686,13 +1676,13 @@ function ProductShowcase({ locale }: { locale: string }) {
 
                     <button
                         onClick={goPrev}
-                        className="absolute top-1/2 left-3 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/60 text-white backdrop-blur-sm transition hover:bg-white/15"
+                        className="absolute top-1/2 left-3 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/60 text-foreground backdrop-blur-sm transition hover:bg-background/10"
                     >
                         <ChevronLeft className="h-4 w-4" />
                     </button>
                     <button
                         onClick={goNext}
-                        className="absolute top-1/2 right-3 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/10 bg-black/60 text-white backdrop-blur-sm transition hover:bg-white/15"
+                        className="absolute top-1/2 right-3 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/60 text-foreground backdrop-blur-sm transition hover:bg-background/10"
                     >
                         <ChevronRight className="h-4 w-4" />
                     </button>
@@ -1710,7 +1700,7 @@ function ProductShowcase({ locale }: { locale: string }) {
                             className={`rounded-full transition-all duration-300 ${
                                 i === active
                                     ? 'h-1.5 w-6 bg-white'
-                                    : 'h-1.5 w-1.5 bg-white/25 hover:bg-white/50'
+                                    : 'h-1.5 w-1.5 bg-muted hover:bg-muted0'
                             }`}
                         />
                     ))}
@@ -1792,7 +1782,7 @@ function Integrations({ locale }: { locale: string }) {
     ];
 
     return (
-        <section id="api" className="relative bg-zinc-950 py-20 md:py-28">
+        <section id="api" className="relative bg-muted/30 py-20 md:py-28">
             <div className="pointer-events-none absolute top-0 left-1/2 h-px w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-blue-500/15 to-transparent" />
             <div className="mx-auto max-w-6xl px-4 md:px-6">
                 <motion.div
@@ -1802,16 +1792,16 @@ function Integrations({ locale }: { locale: string }) {
                     transition={{ duration: 0.5 }}
                     className="mb-12 text-center"
                 >
-                    <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-400">
+                    <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-xs text-muted-foreground">
                         <Link className="h-3.5 w-3.5" />
                         {pt ? 'Integrações' : 'Integrations'}
                     </span>
-                    <h2 className="mt-4 mb-3 text-2xl font-bold text-white md:text-3xl">
+                    <h2 className="mt-4 mb-3 text-2xl font-bold text-foreground md:text-3xl">
                         {pt
                             ? 'Conectado ao seu fluxo de trabalho'
                             : 'Connected to your workflow'}
                     </h2>
-                    <p className="text-gray-400">
+                    <p className="text-muted-foreground">
                         {pt
                             ? 'Configure uma vez, funcione para sempre'
                             : 'Set once, works forever'}
@@ -1827,12 +1817,12 @@ function Integrations({ locale }: { locale: string }) {
                             viewport={{ once: true }}
                             transition={{ duration: 0.4, delay: i * 0.1 }}
                             whileHover={{ y: -4 }}
-                            className="group rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.04] md:p-8"
+                            className="group rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:border-border hover:bg-muted md:p-8"
                         >
                             <div
                                 className={`mb-5 inline-flex rounded-2xl p-3 ${
                                     item.color === 'blue'
-                                        ? 'bg-blue-500/10 text-blue-400'
+                                        ? 'bg-blue-500/10 text-blue-600'
                                         : item.color === 'emerald'
                                           ? 'bg-emerald-500/10 text-emerald-400'
                                           : item.color === 'violet'
@@ -1842,20 +1832,20 @@ function Integrations({ locale }: { locale: string }) {
                             >
                                 <item.icon className="h-7 w-7" />
                             </div>
-                            <h3 className="mb-2 text-xl font-bold text-white">
+                            <h3 className="mb-2 text-xl font-bold text-foreground">
                                 {item.title}
                             </h3>
-                            <p className="mb-5 text-gray-400">{item.desc}</p>
+                            <p className="mb-5 text-muted-foreground">{item.desc}</p>
                             <ul className="space-y-2">
                                 {item.features.map((feature) => (
                                     <li
                                         key={feature}
-                                        className="flex items-center gap-2 text-sm text-gray-300"
+                                        className="flex items-center gap-2 text-sm text-muted-foreground"
                                     >
                                         <Check
                                             className={`h-4 w-4 ${
                                                 item.color === 'blue'
-                                                    ? 'text-blue-400'
+                                                    ? 'text-blue-600'
                                                     : item.color === 'emerald'
                                                       ? 'text-emerald-400'
                                                       : item.color === 'violet'
@@ -1892,7 +1882,7 @@ function SavingsCalculator({
     const savings = Math.round(((docCount * 5) / 60) * 25);
 
     return (
-        <section className="relative bg-black py-20 md:py-28">
+        <section className="relative bg-background py-20 md:py-28">
             <div className="pointer-events-none absolute top-0 left-1/2 h-px w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
 
             <div className="mx-auto max-w-3xl px-4 md:px-6">
@@ -1903,22 +1893,22 @@ function SavingsCalculator({
                     transition={{ duration: 0.5 }}
                     className="text-center"
                 >
-                    <h2 className="mb-3 text-2xl font-bold text-white md:text-3xl">
+                    <h2 className="mb-3 text-2xl font-bold text-foreground md:text-3xl">
                         {pt
                             ? 'Quanto os seus PDFs estão realmente a custar?'
                             : 'How much are your PDFs really costing you?'}
                     </h2>
-                    <p className="mb-10 text-gray-400">
+                    <p className="mb-10 text-muted-foreground">
                         {pt
                             ? 'Deslize para ver o impacto real no seu dia a dia'
                             : 'Slide to see the real impact on your daily work'}
                     </p>
 
                     {/* Slider */}
-                    <div className="mb-10 rounded-2xl border border-white/10 bg-white/[0.02] p-6 md:p-8">
-                        <label className="mb-3 block text-sm text-gray-400">
+                    <div className="mb-10 rounded-2xl border border-border bg-card p-6 md:p-8">
+                        <label className="mb-3 block text-sm text-muted-foreground">
                             {pt ? 'Documentos por mês' : 'Documents per month'}:{' '}
-                            <span className="font-semibold text-white">
+                            <span className="font-semibold text-foreground">
                                 {docCount}
                             </span>
                         </label>
@@ -1945,9 +1935,9 @@ function SavingsCalculator({
                         initial={{ opacity: 0.7, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.25 }}
-                        className="mb-8 rounded-2xl border border-blue-500/20 bg-blue-500/5 p-6 md:p-10"
+                        className="mb-8 rounded-2xl border border-blue-500/20 bg-blue-50 p-6 md:p-10"
                     >
-                        <p className="mb-6 text-sm text-gray-500">
+                        <p className="mb-6 text-sm text-muted-foreground">
                             {pt
                                 ? `Com ${docCount} documentos por mês…`
                                 : `With ${docCount} documents per month…`}
@@ -1955,20 +1945,20 @@ function SavingsCalculator({
 
                         <div className="grid grid-cols-2 gap-4 md:gap-8">
                             <div>
-                                <div className="text-4xl font-bold text-white md:text-5xl">
+                                <div className="text-4xl font-bold text-foreground md:text-5xl">
                                     {hours}h
                                 </div>
-                                <p className="mt-1 text-sm text-gray-400">
+                                <p className="mt-1 text-sm text-muted-foreground">
                                     {pt
                                         ? 'desperdiçadas a digitar'
                                         : 'wasted typing manually'}
                                 </p>
                             </div>
                             <div>
-                                <div className="text-4xl font-bold text-blue-400 md:text-5xl">
+                                <div className="text-4xl font-bold text-blue-600 md:text-5xl">
                                     €{savings}
                                 </div>
-                                <p className="mt-1 text-sm text-gray-400">
+                                <p className="mt-1 text-sm text-muted-foreground">
                                     {pt
                                         ? 'do seu tempo, todo mês'
                                         : 'of your time, every month'}
@@ -2036,7 +2026,7 @@ function Pricing({
     const plansData = plans || [];
 
     return (
-        <section id="pricing" className="relative bg-zinc-950 py-20 md:py-28">
+        <section id="pricing" className="relative bg-muted/30 py-20 md:py-28">
             <div className="pointer-events-none absolute top-0 left-1/2 h-px w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-blue-500/15 to-transparent" />
             <div className="mx-auto max-w-6xl px-4 md:px-6">
                 <motion.div
@@ -2046,10 +2036,10 @@ function Pricing({
                     transition={{ duration: 0.5 }}
                     className="mb-12 text-center"
                 >
-                    <h2 className="mb-3 text-2xl font-bold text-white md:text-3xl">
+                    <h2 className="mb-3 text-2xl font-bold text-foreground md:text-3xl">
                         {t('landing.pricing.title')}
                     </h2>
-                    <p className="text-gray-400">
+                    <p className="text-muted-foreground">
                         {t('landing.pricing.subtitle')}
                     </p>
                 </motion.div>
@@ -2059,7 +2049,7 @@ function Pricing({
                         ? Array.from({ length: 4 }).map((_, i) => (
                               <div
                                   key={i}
-                                  className="h-[400px] animate-pulse rounded-2xl bg-white/5"
+                                  className="h-[400px] animate-pulse rounded-2xl bg-muted"
                               />
                           ))
                         : plansData.map((plan, index) => {
@@ -2075,8 +2065,8 @@ function Pricing({
                                       whileHover={{ y: -4 }}
                                       className={`relative flex flex-col rounded-2xl border p-6 transition-all duration-300 ${
                                           recommended
-                                              ? 'border-blue-500/50 bg-blue-500/5 shadow-lg shadow-blue-500/10'
-                                              : 'border-white/10 bg-white/[0.02] hover:border-white/20'
+                                              ? 'border-blue-200 bg-blue-50 shadow-lg shadow-blue-500/10'
+                                              : 'border-border bg-card hover:border-border'
                                       }`}
                                   >
                                       {recommended && (
@@ -2089,16 +2079,16 @@ function Pricing({
                                           </div>
                                       )}
                                       <div className="mb-5">
-                                          <h3 className="mb-1.5 text-lg font-bold text-white">
+                                          <h3 className="mb-1.5 text-lg font-bold text-foreground">
                                               {plan.display_name || plan.name}
                                           </h3>
-                                          <p className="text-sm text-gray-400">
+                                          <p className="text-sm text-muted-foreground">
                                               {plan.tagline || plan.description}
                                           </p>
                                       </div>
                                       <div className="mb-5">
                                           <div className="flex items-baseline gap-1">
-                                              <span className="text-3xl font-bold text-white">
+                                              <span className="text-3xl font-bold text-foreground">
                                                   {plan.price === null ||
                                                   plan.price === 0 ||
                                                   parseFloat(
@@ -2123,7 +2113,7 @@ function Pricing({
                                                         ).format(plan.price)}
                                               </span>
                                               {plan.interval && (
-                                                  <span className="text-gray-500">
+                                                  <span className="text-muted-foreground">
                                                       /{t(plan.interval)}
                                                   </span>
                                               )}
@@ -2134,16 +2124,16 @@ function Pricing({
                                               (feature: string, i: number) => (
                                                   <div
                                                       key={i}
-                                                      className="flex items-start gap-2 text-sm text-gray-300"
+                                                      className="flex items-start gap-2 text-sm text-muted-foreground"
                                                   >
-                                                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-400" />
+                                                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
                                                       <span>{feature}</span>
                                                   </div>
                                               ),
                                           )}
                                       </div>
                                       <Button
-                                          className={`mt-auto w-full ${recommended ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-white text-black hover:bg-gray-100'}`}
+                                          className={`mt-auto w-full ${recommended ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}
                                           onClick={() => {
                                               if (isAuthenticated) {
                                                   router.visit(
@@ -2173,7 +2163,7 @@ function Pricing({
                               );
                           })}
                 </div>
-                <p className="mt-8 text-center text-sm text-gray-500">
+                <p className="mt-8 text-center text-sm text-muted-foreground">
                     {t('landing.pricing.disclaimer')}
                 </p>
             </div>
@@ -2233,7 +2223,7 @@ function FAQ({ locale }: { locale: string }) {
           ];
 
     return (
-        <section className="relative bg-zinc-950 py-20 md:py-28">
+        <section className="relative bg-muted/30 py-20 md:py-28">
             <div className="pointer-events-none absolute top-0 left-1/2 h-px w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
             <div className="mx-auto max-w-2xl px-4 md:px-6">
                 <motion.div
@@ -2243,12 +2233,12 @@ function FAQ({ locale }: { locale: string }) {
                     transition={{ duration: 0.5 }}
                     className="mb-10 text-center"
                 >
-                    <h2 className="mb-3 text-2xl font-bold text-white md:text-3xl">
+                    <h2 className="mb-3 text-2xl font-bold text-foreground md:text-3xl">
                         {pt
                             ? 'Perguntas frequentes'
                             : 'Frequently asked questions'}
                     </h2>
-                    <p className="text-gray-400">
+                    <p className="text-muted-foreground">
                         {pt
                             ? 'Respostas rápidas às dúvidas mais comuns'
                             : 'Quick answers to common questions'}
@@ -2270,16 +2260,16 @@ function FAQ({ locale }: { locale: string }) {
                                     setOpenItem(open ? i : null)
                                 }
                             >
-                                <CollapsibleTrigger className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/[0.02] px-5 py-4 text-left transition-all duration-200 hover:border-white/20 hover:bg-white/[0.04]">
-                                    <span className="font-medium text-white">
+                                <CollapsibleTrigger className="flex w-full items-center justify-between rounded-xl border border-border bg-card px-5 py-4 text-left transition-all duration-200 hover:border-border hover:bg-muted">
+                                    <span className="font-medium text-foreground">
                                         {faq.q}
                                     </span>
                                     <ChevronDown
-                                        className={`h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 ${openItem === i ? 'rotate-180' : ''}`}
+                                        className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${openItem === i ? 'rotate-180' : ''}`}
                                     />
                                 </CollapsibleTrigger>
                                 <CollapsibleContent className="overflow-hidden">
-                                    <div className="px-5 pt-2 pb-4 text-sm leading-relaxed text-gray-400">
+                                    <div className="px-5 pt-2 pb-4 text-sm leading-relaxed text-muted-foreground">
                                         {faq.a}
                                     </div>
                                 </CollapsibleContent>
@@ -2317,7 +2307,7 @@ function FinalCTA({
           };
 
     return (
-        <section className="relative overflow-hidden bg-black py-20 md:py-32">
+        <section className="relative overflow-hidden bg-background py-20 md:py-32">
             <div className="pointer-events-none absolute top-0 left-1/2 h-px w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-blue-500/15 to-transparent" />
             <div className="pointer-events-none absolute inset-0">
                 <div className="absolute top-1/2 left-1/2 h-[300px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/8 blur-[100px] md:h-[400px] md:w-[700px]" />
@@ -2330,16 +2320,16 @@ function FinalCTA({
                     viewport={{ once: true }}
                     transition={{ duration: 0.5 }}
                 >
-                    <h2 className="mb-5 text-3xl font-bold text-white md:text-4xl">
+                    <h2 className="mb-5 text-3xl font-bold text-foreground md:text-4xl">
                         {copy.title}
                     </h2>
-                    <p className="mb-8 text-base leading-relaxed text-gray-400 md:text-lg">
+                    <p className="mb-8 text-base leading-relaxed text-muted-foreground md:text-lg">
                         {copy.sub}
                     </p>
                     <Button
                         size="lg"
                         onClick={() => router.visit(`/${localeShort}/register`)}
-                        className="h-12 w-full rounded-xl bg-white px-8 font-semibold text-black shadow-lg shadow-white/10 hover:scale-[1.02] hover:bg-gray-100 sm:h-14 sm:w-auto"
+                        className="h-12 w-full rounded-xl bg-white px-8 font-semibold text-black shadow-lg shadow-black/5 hover:scale-[1.02] hover:bg-gray-100 sm:h-14 sm:w-auto"
                     >
                         {copy.cta}
                         <ArrowRight className="ml-2 h-5 w-5" />
@@ -2368,12 +2358,12 @@ function Footer({
           : 'en';
 
     return (
-        <footer className="border-t border-white/10 bg-zinc-950 px-4 py-10 md:px-6 md:py-12">
+        <footer className="border-t border-border bg-muted/30 px-4 py-10 md:px-6 md:py-12">
             <div className="mx-auto max-w-7xl">
                 <div className="mb-10 grid grid-cols-2 gap-6 md:grid-cols-6">
                     <div className="col-span-2 md:col-span-1">
                         <div className="mb-4 flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
                                 <img
                                     src="/docset.png"
                                     alt="Docset"
@@ -2384,7 +2374,7 @@ function Footer({
                             </div>
                             <span className="text-xl font-bold">DOCSET</span>
                         </div>
-                        <p className="mb-6 text-sm text-gray-400">
+                        <p className="mb-6 text-sm text-muted-foreground">
                             {pt
                                 ? 'Transforme PDFs em dados prontos para uso. Sem digitação manual.'
                                 : 'Turn PDFs into ready-to-use data. No manual typing needed.'}
@@ -2392,14 +2382,14 @@ function Footer({
                     </div>
 
                     <div>
-                        <h3 className="mb-4 font-semibold text-white">
+                        <h3 className="mb-4 font-semibold text-foreground">
                             {pt ? 'Produto' : 'Product'}
                         </h3>
-                        <ul className="space-y-2 text-sm text-gray-400">
+                        <ul className="space-y-2 text-sm text-muted-foreground">
                             <li>
                                 <a
                                     href="#features"
-                                    className="transition hover:text-white"
+                                    className="transition hover:text-foreground"
                                 >
                                     {pt ? 'Funcionalidades' : 'Features'}
                                 </a>
@@ -2407,7 +2397,7 @@ function Footer({
                             <li>
                                 <a
                                     href="#pricing"
-                                    className="transition hover:text-white"
+                                    className="transition hover:text-foreground"
                                 >
                                     {pt ? 'Preços' : 'Pricing'}
                                 </a>
@@ -2415,7 +2405,7 @@ function Footer({
                             <li>
                                 <a
                                     href={`/${locale}/docs/api-v1`}
-                                    className="transition hover:text-white"
+                                    className="transition hover:text-foreground"
                                 >
                                     {pt ? 'Docs da API' : 'API Docs'}
                                 </a>
@@ -2424,14 +2414,14 @@ function Footer({
                     </div>
 
                     <div>
-                        <h3 className="mb-4 font-semibold text-white">
+                        <h3 className="mb-4 font-semibold text-foreground">
                             {pt ? 'Legal e Blog' : 'Legal & Blog'}
                         </h3>
-                        <ul className="space-y-2 text-sm text-gray-400">
+                        <ul className="space-y-2 text-sm text-muted-foreground">
                             <li>
                                 <a
                                     href={`/${locale}/blog`}
-                                    className="transition hover:text-white"
+                                    className="transition hover:text-foreground"
                                 >
                                     Blog
                                 </a>
@@ -2439,7 +2429,7 @@ function Footer({
                             <li>
                                 <a
                                     href={`/${locale}/privacy`}
-                                    className="transition hover:text-white"
+                                    className="transition hover:text-foreground"
                                 >
                                     {t('Privacy Policy')}
                                 </a>
@@ -2447,7 +2437,7 @@ function Footer({
                             <li>
                                 <a
                                     href={`/${locale}/terms`}
-                                    className="transition hover:text-white"
+                                    className="transition hover:text-foreground"
                                 >
                                     {t('Terms of Service')}
                                 </a>
@@ -2456,14 +2446,14 @@ function Footer({
                     </div>
 
                     <div>
-                        <h3 className="mb-4 font-semibold text-white">
+                        <h3 className="mb-4 font-semibold text-foreground">
                             {pt ? 'Soluções' : 'Solutions'}
                         </h3>
-                        <ul className="space-y-2 text-sm text-gray-400">
+                        <ul className="space-y-2 text-sm text-muted-foreground">
                             <li>
                                 <a
                                     href={`/${solutionLocale}/invoice-ocr`}
-                                    className="transition hover:text-white"
+                                    className="transition hover:text-foreground"
                                 >
                                     {pt ? 'OCR de Faturas/Notas' : 'Invoice OCR'}
                                 </a>
@@ -2471,7 +2461,7 @@ function Footer({
                             <li>
                                 <a
                                     href={`/${solutionLocale}/receipt-ocr`}
-                                    className="transition hover:text-white"
+                                    className="transition hover:text-foreground"
                                 >
                                     {pt ? 'OCR de Recibos' : 'Receipt OCR'}
                                 </a>
@@ -2479,7 +2469,7 @@ function Footer({
                             <li>
                                 <a
                                     href={`/${solutionLocale}/pdf-to-excel`}
-                                    className="transition hover:text-white"
+                                    className="transition hover:text-foreground"
                                 >
                                     {pt ? 'PDF para Excel' : 'PDF to Excel'}
                                 </a>
@@ -2487,7 +2477,7 @@ function Footer({
                             <li>
                                 <a
                                     href={`/${solutionLocale}/ocr-api`}
-                                    className="transition hover:text-white"
+                                    className="transition hover:text-foreground"
                                 >
                                     {pt ? 'API OCR' : 'OCR API'}
                                 </a>
@@ -2495,7 +2485,7 @@ function Footer({
                             <li>
                                 <a
                                     href={`/${solutionLocale}/invoice-parser`}
-                                    className="transition hover:text-white"
+                                    className="transition hover:text-foreground"
                                 >
                                     {pt ? 'Parser de Faturas/Notas' : 'Invoice Parser'}
                                 </a>
@@ -2504,16 +2494,16 @@ function Footer({
                     </div>
 
                     <div>
-                        <h3 className="mb-4 font-semibold text-white">
+                        <h3 className="mb-4 font-semibold text-foreground">
                             {pt ? 'Confiança' : 'Trust'}
                         </h3>
-                        <ul className="space-y-2 text-sm text-gray-400">
+                        <ul className="space-y-2 text-sm text-muted-foreground">
                             <li className="flex items-center gap-2">
-                                <Shield className="h-4 w-4 text-green-400" />
+                                <Shield className="h-4 w-4 text-green-600" />
                                 {pt ? 'Conformidade GDPR' : 'GDPR Compliant'}
                             </li>
                             <li className="flex items-center gap-2">
-                                <Lock className="h-4 w-4 text-blue-400" />
+                                <Lock className="h-4 w-4 text-blue-600" />
                                 256-bit SSL
                             </li>
                             <li className="flex items-center gap-2">
@@ -2524,13 +2514,13 @@ function Footer({
                     </div>
                 </div>
 
-                <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
-                    <p className="text-sm text-gray-500">
+                <div className="flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
+                    <p className="text-sm text-muted-foreground">
                         {pt
                             ? `© ${new Date().getFullYear()} Docset. Todos os direitos reservados.`
                             : `© ${new Date().getFullYear()} Docset. All rights reserved.`}
                     </p>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <div className="h-2 w-2 rounded-full bg-green-500" />
                         <span>{pt ? 'Todos os sistemas operando' : 'All systems operational'}</span>
                     </div>
@@ -2648,12 +2638,12 @@ function DemoModal({
 
     return (
         <Dialog open={true} onOpenChange={onClose}>
-            <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto border-white/10 bg-zinc-900 text-white">
+            <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto border-border bg-card text-foreground">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold">
                         {t('Try DocSet Demo')}
                     </DialogTitle>
-                    <DialogDescription className="text-gray-400">
+                    <DialogDescription className="text-muted-foreground">
                         {t(
                             'Upload a document to see how DocSet extracts data automatically. This is a one-time free demo.',
                         )}
@@ -2662,7 +2652,7 @@ function DemoModal({
 
                 {!result ? (
                     <div className="space-y-6">
-                        <div className="rounded-xl border-2 border-dashed border-white/20 p-8 text-center transition-all hover:border-blue-500/50 md:p-12">
+                        <div className="rounded-xl border-2 border-dashed border-border p-8 text-center transition-all hover:border-blue-200 md:p-12">
                             <Upload className="mx-auto mb-4 h-12 w-12 text-gray-600 md:h-16 md:w-16" />
                             <Input
                                 type="file"
@@ -2673,15 +2663,15 @@ function DemoModal({
                             />
                             <Label
                                 htmlFor="demo-file"
-                                className="cursor-pointer text-lg font-semibold text-blue-400 hover:text-blue-300"
+                                className="cursor-pointer text-lg font-semibold text-blue-600 hover:text-blue-700"
                             >
                                 {t('Click to upload')}
                             </Label>
-                            <p className="mt-3 text-sm text-gray-400">
+                            <p className="mt-3 text-sm text-muted-foreground">
                                 {t('PDF, JPG, PNG (max 10MB)')}
                             </p>
                             {file && (
-                                <Badge className="mt-6 border-blue-500/30 bg-blue-500/20 px-4 py-2 text-sm text-blue-300">
+                                <Badge className="mt-6 border-blue-500/30 bg-blue-500/20 px-4 py-2 text-sm text-blue-700">
                                     <FileText className="mr-2 h-4 w-4" />
                                     {file.name} (
                                     {(file.size / 1024 / 1024).toFixed(2)} MB)
@@ -2689,7 +2679,7 @@ function DemoModal({
                             )}
                             {error && (
                                 <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-4">
-                                    <p className="text-sm font-medium text-red-400">
+                                    <p className="text-sm font-medium text-red-600">
                                         {error}
                                     </p>
                                 </div>
@@ -2720,10 +2710,10 @@ function DemoModal({
                             <div className="mb-6 flex items-center gap-3">
                                 <CheckCircle className="h-10 w-10 text-green-500" />
                                 <div>
-                                    <h3 className="text-xl font-bold text-green-400">
+                                    <h3 className="text-xl font-bold text-green-600">
                                         {t('Data Extracted Successfully!')}
                                     </h3>
-                                    <p className="text-sm text-gray-400">
+                                    <p className="text-sm text-muted-foreground">
                                         {t('landing.howItWorks.steps.2.desc')}
                                     </p>
                                 </div>
@@ -2732,9 +2722,9 @@ function DemoModal({
                                 {Object.entries(result).map(([key, value]) => (
                                     <div
                                         key={key}
-                                        className="flex flex-col rounded-lg border border-white/10 bg-white/5 p-4"
+                                        className="flex flex-col rounded-lg border border-border bg-muted p-4"
                                     >
-                                        <span className="mb-1 font-medium text-gray-300 capitalize">
+                                        <span className="mb-1 font-medium text-muted-foreground capitalize">
                                             {key.replace('_', ' ')}
                                         </span>
                                         <div className="w-full">
@@ -2743,7 +2733,7 @@ function DemoModal({
                                                     {value.map((item, idx) => (
                                                         <div
                                                             key={idx}
-                                                            className="rounded border border-white/5 bg-white/5 p-3 text-sm"
+                                                            className="rounded border border-border bg-muted p-3 text-sm"
                                                         >
                                                             {typeof item ===
                                                                 'object' &&
@@ -2762,7 +2752,7 @@ function DemoModal({
                                                                                 }
                                                                                 className="flex flex-col"
                                                                             >
-                                                                                <span className="text-xs text-gray-500 uppercase">
+                                                                                <span className="text-xs text-muted-foreground uppercase">
                                                                                     {
                                                                                         sk
                                                                                     }
@@ -2788,7 +2778,7 @@ function DemoModal({
                                                 </div>
                                             ) : typeof value === 'object' &&
                                               value !== null ? (
-                                                <div className="mt-2 rounded border border-white/5 bg-white/5 p-3 text-sm">
+                                                <div className="mt-2 rounded border border-border bg-muted p-3 text-sm">
                                                     <div className="grid grid-cols-2 gap-2">
                                                         {Object.entries(
                                                             value,
@@ -2797,7 +2787,7 @@ function DemoModal({
                                                                 key={sk}
                                                                 className="flex flex-col"
                                                             >
-                                                                <span className="text-xs text-gray-500 uppercase">
+                                                                <span className="text-xs text-muted-foreground uppercase">
                                                                     {sk}
                                                                 </span>
                                                                 <span className="text-sm text-gray-200">
@@ -2808,7 +2798,7 @@ function DemoModal({
                                                     </div>
                                                 </div>
                                             ) : (
-                                                <span className="block text-right font-bold text-white">
+                                                <span className="block text-right font-bold text-foreground">
                                                     {String(value)}
                                                 </span>
                                             )}
@@ -2819,10 +2809,10 @@ function DemoModal({
                         </div>
 
                         <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-6">
-                            <p className="mb-2 font-medium text-blue-300">
+                            <p className="mb-2 font-medium text-blue-700">
                                 {t('🎉 Demo completed!')}
                             </p>
-                            <p className="text-sm text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                                 {t(
                                     'Register now to unlock unlimited document processing with advanced features.',
                                 )}

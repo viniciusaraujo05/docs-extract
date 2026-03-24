@@ -55,7 +55,7 @@ export default function Index({ posts, locale, seo }: Props) {
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
+                        className="text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl"
                     >
                         Docset{' '}
                         <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
@@ -66,7 +66,7 @@ export default function Index({ posts, locale, seo }: Props) {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400"
+                        className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground"
                     >
                         Insights, product updates, and expert tips on how to
                         automate your document processing workflows.
@@ -82,7 +82,7 @@ export default function Index({ posts, locale, seo }: Props) {
                     >
                         <Link
                             href={`/${locale}/blog/${featuredPost.translation?.slug}`}
-                            className="group grid grid-cols-1 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/50 shadow-2xl transition-all hover:border-white/20 hover:bg-zinc-900 lg:grid-cols-2"
+                            className="group grid grid-cols-1 overflow-hidden rounded-3xl border border-border bg-card/50 shadow-2xl transition-all hover:border-border hover:bg-card lg:grid-cols-2"
                         >
                             <div className="relative aspect-[16/9] lg:aspect-auto">
                                 {featuredPost.cover_image_url ? (
@@ -98,8 +98,8 @@ export default function Index({ posts, locale, seo }: Props) {
                                 )}
                             </div>
                             <div className="flex flex-col justify-center p-8 lg:p-16">
-                                <div className="mb-6 flex items-center gap-4 text-sm font-medium text-zinc-400">
-                                    <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-indigo-400">
+                                <div className="mb-6 flex items-center gap-4 text-sm font-medium text-muted-foreground">
+                                    <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-indigo-600">
                                         Featured
                                     </span>
                                     <span>
@@ -112,22 +112,22 @@ export default function Index({ posts, locale, seo }: Props) {
                                         })}
                                     </span>
                                 </div>
-                                <h2 className="mb-4 text-3xl font-bold text-white transition-colors group-hover:text-indigo-400 sm:text-4xl">
+                                <h2 className="mb-4 text-3xl font-bold text-foreground transition-colors group-hover:text-indigo-600 sm:text-4xl">
                                     {featuredPost.translation?.title}
                                 </h2>
-                                <p className="mb-8 line-clamp-3 text-lg text-zinc-400">
+                                <p className="mb-8 line-clamp-3 text-lg text-muted-foreground">
                                     {featuredPost.translation?.excerpt}
                                 </p>
                                 <div className="mt-auto flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-zinc-800 font-bold text-zinc-400">
+                                        <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-muted font-bold text-muted-foreground">
                                             {featuredPost.author_name.charAt(0)}
                                         </div>
-                                        <div className="text-sm font-medium text-white">
+                                        <div className="text-sm font-medium text-foreground">
                                             {featuredPost.author_name}
                                         </div>
                                     </div>
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-white transition-colors group-hover:bg-white/10 group-hover:text-indigo-400">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-foreground transition-colors group-hover:bg-muted group-hover:text-indigo-600">
                                         <ArrowUpRight className="h-5 w-5" />
                                     </div>
                                 </div>
@@ -146,7 +146,7 @@ export default function Index({ posts, locale, seo }: Props) {
                         >
                             <Link
                                 href={`/${locale}/blog/${post.translation?.slug}`}
-                                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/30 transition-all hover:border-white/10 hover:bg-zinc-900/50 hover:shadow-xl"
+                                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card/30 transition-all hover:border-border hover:bg-card/50 hover:shadow-xl"
                             >
                                 <div className="relative aspect-[16/9] overflow-hidden">
                                     {post.cover_image_url ? (
@@ -162,7 +162,7 @@ export default function Index({ posts, locale, seo }: Props) {
                                     )}
                                 </div>
                                 <div className="flex flex-1 flex-col p-6">
-                                    <div className="mb-4 flex items-center gap-2 text-xs font-medium text-zinc-500">
+                                    <div className="mb-4 flex items-center gap-2 text-xs font-medium text-muted-foreground">
                                         <span>
                                             {new Date(
                                                 post.published_at,
@@ -173,17 +173,17 @@ export default function Index({ posts, locale, seo }: Props) {
                                             })}
                                         </span>
                                     </div>
-                                    <h2 className="mb-3 text-xl font-bold text-white transition-colors group-hover:text-indigo-400">
+                                    <h2 className="mb-3 text-xl font-bold text-foreground transition-colors group-hover:text-indigo-600">
                                         {post.translation?.title}
                                     </h2>
-                                    <p className="mb-6 line-clamp-3 text-sm text-zinc-400">
+                                    <p className="mb-6 line-clamp-3 text-sm text-muted-foreground">
                                         {post.translation?.excerpt}
                                     </p>
                                     <div className="mt-auto flex items-center justify-between">
-                                        <div className="text-sm font-medium text-zinc-300">
+                                        <div className="text-sm font-medium text-card-foreground">
                                             {post.author_name}
                                         </div>
-                                        <ArrowUpRight className="h-4 w-4 text-zinc-500 transition-colors group-hover:text-indigo-400" />
+                                        <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-indigo-600" />
                                     </div>
                                 </div>
                             </Link>
@@ -192,7 +192,7 @@ export default function Index({ posts, locale, seo }: Props) {
                 </div>
 
                 {posts.data.length === 0 && (
-                    <div className="rounded-2xl border border-dashed border-white/10 py-20 text-center text-zinc-500">
+                    <div className="rounded-2xl border border-dashed border-border py-20 text-center text-muted-foreground">
                         No articles published yet. Check back soon.
                     </div>
                 )}

@@ -113,21 +113,21 @@ function SetupView() {
     };
 
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center p-4">
-            <Card className="w-full max-w-md border-neutral-800 bg-neutral-950 shadow-2xl">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+            <Card className="w-full max-w-md border-border bg-background shadow-2xl">
                 <CardHeader className="text-center space-y-3">
-                    <div className="mx-auto w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                        <Shield className="w-8 h-8 text-white" />
+                    <div className="mx-auto w-16 h-16 rounded-2xl bg-muted border border-border flex items-center justify-center">
+                        <Shield className="w-8 h-8 text-foreground" />
                     </div>
-                    <CardTitle className="text-2xl text-white">Super Admin Setup</CardTitle>
-                    <CardDescription className="text-neutral-500">
+                    <CardTitle className="text-2xl text-foreground">Super Admin Setup</CardTitle>
+                    <CardDescription className="text-muted-foreground">
                         Define your admin password. This will be required for all future access.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="password" className="text-neutral-400">Password</Label>
+                            <Label htmlFor="password" className="text-muted-foreground">Password</Label>
                             <div className="relative">
                                 <Input
                                     id="password"
@@ -135,24 +135,24 @@ function SetupView() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Min. 6 characters"
-                                    className="bg-black border-neutral-800 text-white placeholder:text-neutral-600 pr-10 focus:border-neutral-600"
+                                    className="bg-background border-border text-foreground placeholder:text-neutral-600 pr-10 focus:border-neutral-600"
                                     required
                                     minLength={6}
                                 />
-                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition">
+                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition">
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="password_confirmation" className="text-neutral-400">Confirm Password</Label>
+                            <Label htmlFor="password_confirmation" className="text-muted-foreground">Confirm Password</Label>
                             <Input
                                 id="password_confirmation"
                                 type={showPassword ? 'text' : 'password'}
                                 value={passwordConfirmation}
                                 onChange={(e) => setPasswordConfirmation(e.target.value)}
                                 placeholder="Repeat password"
-                                className="bg-black border-neutral-800 text-white placeholder:text-neutral-600 focus:border-neutral-600"
+                                className="bg-background border-border text-foreground placeholder:text-neutral-600 focus:border-neutral-600"
                                 required
                                 minLength={6}
                             />
@@ -174,14 +174,14 @@ function SetupView() {
 
 function DisabledView() {
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center p-4">
-            <Card className="w-full max-w-md border-neutral-800 bg-neutral-950 shadow-2xl">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+            <Card className="w-full max-w-md border-border bg-background shadow-2xl">
                 <CardHeader className="text-center space-y-3">
-                    <div className="mx-auto w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                        <Shield className="w-8 h-8 text-white" />
+                    <div className="mx-auto w-16 h-16 rounded-2xl bg-muted border border-border flex items-center justify-center">
+                        <Shield className="w-8 h-8 text-foreground" />
                     </div>
-                    <CardTitle className="text-2xl text-white">Super Admin Disabled</CardTitle>
-                    <CardDescription className="text-neutral-500">
+                    <CardTitle className="text-2xl text-foreground">Super Admin Disabled</CardTitle>
+                    <CardDescription className="text-muted-foreground">
                         Configure `SUPER_ADMIN_PASSWORD_HASH` or explicitly enable `SUPER_ADMIN_ALLOW_LOCAL_SETUP`
                         before using this panel.
                     </CardDescription>
@@ -206,21 +206,21 @@ function LoginView() {
     };
 
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center p-4">
-            <Card className="w-full max-w-md border-neutral-800 bg-neutral-950 shadow-2xl">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+            <Card className="w-full max-w-md border-border bg-background shadow-2xl">
                 <CardHeader className="text-center space-y-3">
-                    <div className="mx-auto w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                        <Lock className="w-8 h-8 text-white" />
+                    <div className="mx-auto w-16 h-16 rounded-2xl bg-muted border border-border flex items-center justify-center">
+                        <Lock className="w-8 h-8 text-foreground" />
                     </div>
-                    <CardTitle className="text-2xl text-white">Super Admin</CardTitle>
-                    <CardDescription className="text-neutral-500">
+                    <CardTitle className="text-2xl text-foreground">Super Admin</CardTitle>
+                    <CardDescription className="text-muted-foreground">
                         Enter your admin password to continue.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="login-password" className="text-neutral-400">Password</Label>
+                            <Label htmlFor="login-password" className="text-muted-foreground">Password</Label>
                             <div className="relative">
                                 <Input
                                     id="login-password"
@@ -228,11 +228,11 @@ function LoginView() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Enter password"
-                                    className="bg-black border-neutral-800 text-white placeholder:text-neutral-600 pr-10 focus:border-neutral-600"
+                                    className="bg-background border-border text-foreground placeholder:text-neutral-600 pr-10 focus:border-neutral-600"
                                     required
                                     autoFocus
                                 />
-                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition">
+                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition">
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
                             </div>
@@ -315,20 +315,20 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
     };
 
     return (
-        <div className="min-h-screen bg-black text-white">
+        <div className="min-h-screen bg-background text-foreground">
             {/* Header */}
-            <header className="sticky top-0 z-40 border-b border-neutral-900 bg-black/90 backdrop-blur-sm">
+            <header className="sticky top-0 z-40 border-b border-neutral-900 bg-background/90 backdrop-blur-sm">
                 <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                            <Shield className="w-5 h-5 text-white" />
+                        <div className="w-10 h-10 rounded-xl bg-muted border border-border flex items-center justify-center">
+                            <Shield className="w-5 h-5 text-foreground" />
                         </div>
                         <div>
-                            <h1 className="text-lg font-bold text-white">Super Admin</h1>
+                            <h1 className="text-lg font-bold text-foreground">Super Admin</h1>
                             <p className="text-xs text-neutral-600">DOCSET Internal</p>
                         </div>
                     </div>
-                    <Badge variant="outline" className="border-neutral-800 text-neutral-500 text-xs font-mono">
+                    <Badge variant="outline" className="border-border text-muted-foreground text-xs font-mono">
                         admin-030399
                     </Badge>
                 </div>
@@ -352,8 +352,8 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                         onClick={() => setActiveTab('users')}
                         className={`px-4 py-2.5 text-sm font-medium transition-all border-b-2 ${
                             activeTab === 'users'
-                                ? 'text-white border-white'
-                                : 'text-neutral-600 border-transparent hover:text-neutral-400'
+                                ? 'text-foreground border-white'
+                                : 'text-neutral-600 border-transparent hover:text-muted-foreground'
                         }`}
                     >
                         Users ({stats.total_users})
@@ -362,8 +362,8 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                         onClick={() => setActiveTab('demos')}
                         className={`px-4 py-2.5 text-sm font-medium transition-all border-b-2 ${
                             activeTab === 'demos'
-                                ? 'text-white border-white'
-                                : 'text-neutral-600 border-transparent hover:text-neutral-400'
+                                ? 'text-foreground border-white'
+                                : 'text-neutral-600 border-transparent hover:text-muted-foreground'
                         }`}
                     >
                         Demo Usage ({stats.total_demo_usages})
@@ -374,7 +374,7 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                 {activeTab === 'users' && (
                     <div className="space-y-4">
                         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-                            <p className="text-sm text-neutral-500">Click a user for details</p>
+                            <p className="text-sm text-muted-foreground">Click a user for details</p>
                             <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
                                 <div className="relative flex-1 md:w-64">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-600" />
@@ -382,10 +382,10 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                         placeholder="Search name or email..."
-                                        className="pl-9 bg-neutral-950 border-neutral-800 text-white text-sm placeholder:text-neutral-600 focus:border-neutral-600"
+                                        className="pl-9 bg-background border-border text-foreground text-sm placeholder:text-neutral-600 focus:border-neutral-600"
                                     />
                                 </div>
-                                <Button type="submit" size="sm" variant="outline" className="border-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-900">
+                                <Button type="submit" size="sm" variant="outline" className="border-border text-muted-foreground hover:text-foreground hover:bg-card">
                                     Search
                                 </Button>
                             </form>
@@ -398,14 +398,14 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                                 <div className="border border-neutral-900 rounded-lg overflow-hidden">
                                     <Table>
                                         <TableHeader>
-                                            <TableRow className="border-neutral-900 bg-neutral-950 hover:bg-neutral-950">
-                                                <TableHead className="text-neutral-500 text-xs uppercase tracking-wider">Name</TableHead>
-                                                <TableHead className="text-neutral-500 text-xs uppercase tracking-wider">Email</TableHead>
-                                                <TableHead className="text-neutral-500 text-xs uppercase tracking-wider text-center">Docs</TableHead>
-                                                <TableHead className="text-neutral-500 text-xs uppercase tracking-wider text-center">Stripe</TableHead>
-                                                <TableHead className="text-neutral-500 text-xs uppercase tracking-wider text-center">Verified</TableHead>
-                                                <TableHead className="text-neutral-500 text-xs uppercase tracking-wider">Period Usage</TableHead>
-                                                <TableHead className="text-neutral-500 text-xs uppercase tracking-wider text-right">Joined</TableHead>
+                                            <TableRow className="border-neutral-900 bg-background hover:bg-background">
+                                                <TableHead className="text-muted-foreground text-xs uppercase tracking-wider">Name</TableHead>
+                                                <TableHead className="text-muted-foreground text-xs uppercase tracking-wider">Email</TableHead>
+                                                <TableHead className="text-muted-foreground text-xs uppercase tracking-wider text-center">Docs</TableHead>
+                                                <TableHead className="text-muted-foreground text-xs uppercase tracking-wider text-center">Stripe</TableHead>
+                                                <TableHead className="text-muted-foreground text-xs uppercase tracking-wider text-center">Verified</TableHead>
+                                                <TableHead className="text-muted-foreground text-xs uppercase tracking-wider">Period Usage</TableHead>
+                                                <TableHead className="text-muted-foreground text-xs uppercase tracking-wider text-right">Joined</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -413,11 +413,11 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                                                 <TableRow
                                                     key={user.id}
                                                     onClick={() => fetchUserDetail(user.id)}
-                                                    className="border-neutral-900/60 cursor-pointer hover:bg-neutral-950 transition"
+                                                    className="border-neutral-900/60 cursor-pointer hover:bg-background transition"
                                                 >
-                                                    <TableCell className="text-white font-medium text-sm">{user.name}</TableCell>
-                                                    <TableCell className="text-neutral-400 text-sm">{user.email}</TableCell>
-                                                    <TableCell className="text-center text-sm text-neutral-300">{user.documents_count}</TableCell>
+                                                    <TableCell className="text-foreground font-medium text-sm">{user.name}</TableCell>
+                                                    <TableCell className="text-muted-foreground text-sm">{user.email}</TableCell>
+                                                    <TableCell className="text-center text-sm text-muted-foreground">{user.documents_count}</TableCell>
                                                     <TableCell className="text-center">
                                                         {user.has_stripe
                                                             ? <CheckCircle2 className="w-4 h-4 text-emerald-500 mx-auto" />
@@ -431,16 +431,16 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                                                     <TableCell>
                                                         {user.usage ? (
                                                             <div className="flex gap-3 text-xs font-mono">
-                                                                <span className="text-neutral-500">D:<span className="text-neutral-300">{user.usage.documents_count}</span></span>
-                                                                <span className="text-neutral-500">M:<span className="text-neutral-300">{user.usage.models_count}</span></span>
-                                                                <span className="text-neutral-500">A:<span className="text-neutral-300">{user.usage.api_requests_count}</span></span>
-                                                                <span className="text-neutral-500">R:<span className="text-neutral-300">{user.usage.reports_count}</span></span>
+                                                                <span className="text-muted-foreground">D:<span className="text-muted-foreground">{user.usage.documents_count}</span></span>
+                                                                <span className="text-muted-foreground">M:<span className="text-muted-foreground">{user.usage.models_count}</span></span>
+                                                                <span className="text-muted-foreground">A:<span className="text-muted-foreground">{user.usage.api_requests_count}</span></span>
+                                                                <span className="text-muted-foreground">R:<span className="text-muted-foreground">{user.usage.reports_count}</span></span>
                                                             </div>
                                                         ) : (
                                                             <span className="text-neutral-700 text-xs">—</span>
                                                         )}
                                                     </TableCell>
-                                                    <TableCell className="text-neutral-500 text-sm text-right">{formatDate(user.created_at)}</TableCell>
+                                                    <TableCell className="text-muted-foreground text-sm text-right">{formatDate(user.created_at)}</TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -453,10 +453,10 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                                             Page {users.current_page}/{users.last_page} · {users.total} users
                                         </span>
                                         <div className="flex gap-2">
-                                            <Button size="sm" variant="outline" disabled={users.current_page <= 1} onClick={() => goToPage(users.current_page - 1)} className="border-neutral-800 text-neutral-400 hover:bg-neutral-900">
+                                            <Button size="sm" variant="outline" disabled={users.current_page <= 1} onClick={() => goToPage(users.current_page - 1)} className="border-border text-muted-foreground hover:bg-card">
                                                 <ChevronLeft className="w-4 h-4" />
                                             </Button>
-                                            <Button size="sm" variant="outline" disabled={users.current_page >= users.last_page} onClick={() => goToPage(users.current_page + 1)} className="border-neutral-800 text-neutral-400 hover:bg-neutral-900">
+                                            <Button size="sm" variant="outline" disabled={users.current_page >= users.last_page} onClick={() => goToPage(users.current_page + 1)} className="border-border text-muted-foreground hover:bg-card">
                                                 <ChevronRight className="w-4 h-4" />
                                             </Button>
                                         </div>
@@ -472,15 +472,15 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                     <div className="space-y-6">
                         {/* Success/Failed summary */}
                         <div className="flex gap-4 text-sm">
-                            <span className="text-neutral-500">Total: <span className="text-white font-semibold">{stats.total_demo_usages}</span></span>
-                            <span className="text-neutral-500">Success: <span className="text-emerald-500 font-semibold">{stats.demo_success}</span></span>
-                            <span className="text-neutral-500">Failed: <span className="text-red-500 font-semibold">{stats.demo_failed}</span></span>
+                            <span className="text-muted-foreground">Total: <span className="text-foreground font-semibold">{stats.total_demo_usages}</span></span>
+                            <span className="text-muted-foreground">Success: <span className="text-emerald-500 font-semibold">{stats.demo_success}</span></span>
+                            <span className="text-muted-foreground">Failed: <span className="text-red-500 font-semibold">{stats.demo_failed}</span></span>
                         </div>
 
                         {/* Mini chart — Demo usage per day */}
                         {stats.demo_per_day.length > 0 && (
                             <div>
-                                <h3 className="text-xs font-medium text-neutral-500 mb-2 uppercase tracking-wider">Last 30 days</h3>
+                                <h3 className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">Last 30 days</h3>
                                 <div className="flex items-end gap-[2px] h-20">
                                     {stats.demo_per_day.map((d) => {
                                         const max = Math.max(...stats.demo_per_day.map(x => x.count));
@@ -488,11 +488,11 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                                         return (
                                             <div
                                                 key={d.date}
-                                                className="flex-1 bg-white/10 hover:bg-white/25 rounded-sm transition-all group relative"
+                                                className="flex-1 bg-muted hover:bg-muted rounded-sm transition-all group relative"
                                                 style={{ height: `${Math.max(pct, 4)}%` }}
                                                 title={`${d.date}: ${d.count}`}
                                             >
-                                                <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-neutral-900 border border-neutral-800 text-white text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-10">
+                                                <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-card border border-border text-foreground text-[10px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-10">
                                                     {d.date}: {d.count}
                                                 </div>
                                             </div>
@@ -506,13 +506,13 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                         <div className="border border-neutral-900 rounded-lg overflow-hidden">
                             <Table>
                                 <TableHeader>
-                                    <TableRow className="border-neutral-900 bg-neutral-950 hover:bg-neutral-950">
-                                        <TableHead className="text-neutral-500 text-xs uppercase tracking-wider">IP</TableHead>
-                                        <TableHead className="text-neutral-500 text-xs uppercase tracking-wider">Filename</TableHead>
-                                        <TableHead className="text-neutral-500 text-xs uppercase tracking-wider">Type</TableHead>
-                                        <TableHead className="text-neutral-500 text-xs uppercase tracking-wider text-right">Size</TableHead>
-                                        <TableHead className="text-neutral-500 text-xs uppercase tracking-wider text-center">Status</TableHead>
-                                        <TableHead className="text-neutral-500 text-xs uppercase tracking-wider text-right">Date</TableHead>
+                                    <TableRow className="border-neutral-900 bg-background hover:bg-background">
+                                        <TableHead className="text-muted-foreground text-xs uppercase tracking-wider">IP</TableHead>
+                                        <TableHead className="text-muted-foreground text-xs uppercase tracking-wider">Filename</TableHead>
+                                        <TableHead className="text-muted-foreground text-xs uppercase tracking-wider">Type</TableHead>
+                                        <TableHead className="text-muted-foreground text-xs uppercase tracking-wider text-right">Size</TableHead>
+                                        <TableHead className="text-muted-foreground text-xs uppercase tracking-wider text-center">Status</TableHead>
+                                        <TableHead className="text-muted-foreground text-xs uppercase tracking-wider text-right">Date</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -524,17 +524,17 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                                         </TableRow>
                                     ) : (
                                         stats.recent_demos.map((demo) => (
-                                            <TableRow key={demo.id} className="border-neutral-900/60 hover:bg-neutral-950">
-                                                <TableCell className="text-neutral-400 font-mono text-sm">{demo.ip_address}</TableCell>
-                                                <TableCell className="text-white text-sm max-w-[200px] truncate">{demo.filename || '-'}</TableCell>
-                                                <TableCell className="text-neutral-400 text-sm">{demo.mime_type?.split('/')[1] || '-'}</TableCell>
-                                                <TableCell className="text-neutral-500 text-sm text-right">{formatSize(demo.file_size)}</TableCell>
+                                            <TableRow key={demo.id} className="border-neutral-900/60 hover:bg-background">
+                                                <TableCell className="text-muted-foreground font-mono text-sm">{demo.ip_address}</TableCell>
+                                                <TableCell className="text-foreground text-sm max-w-[200px] truncate">{demo.filename || '-'}</TableCell>
+                                                <TableCell className="text-muted-foreground text-sm">{demo.mime_type?.split('/')[1] || '-'}</TableCell>
+                                                <TableCell className="text-muted-foreground text-sm text-right">{formatSize(demo.file_size)}</TableCell>
                                                 <TableCell className="text-center">
                                                     {demo.success
                                                         ? <span className="text-emerald-500 text-xs font-medium">OK</span>
                                                         : <span className="text-red-500 text-xs font-medium">FAIL</span>}
                                                 </TableCell>
-                                                <TableCell className="text-neutral-500 text-sm text-right">{formatDateTime(demo.created_at)}</TableCell>
+                                                <TableCell className="text-muted-foreground text-sm text-right">{formatDateTime(demo.created_at)}</TableCell>
                                             </TableRow>
                                         ))
                                     )}
@@ -547,10 +547,10 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
 
             {/* User Detail Modal */}
             <Dialog open={showUserModal} onOpenChange={setShowUserModal}>
-                <DialogContent className="max-w-2xl bg-neutral-950 border-neutral-800 text-white max-h-[85vh] overflow-y-auto">
+                <DialogContent className="max-w-2xl bg-background border-border text-foreground max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle className="text-white">User Details</DialogTitle>
-                        <DialogDescription className="text-neutral-500">
+                        <DialogTitle className="text-foreground">User Details</DialogTitle>
+                        <DialogDescription className="text-muted-foreground">
                             Full information and usage history
                         </DialogDescription>
                     </DialogHeader>
@@ -569,7 +569,7 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                             </div>
 
                             {selectedUser.subscription && (
-                                <div className="border border-neutral-800 rounded-lg p-3 space-y-2">
+                                <div className="border border-border rounded-lg p-3 space-y-2">
                                     <h4 className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Subscription</h4>
                                     <div className="grid grid-cols-3 gap-2 text-sm">
                                         <InfoItem label="Stripe Sub ID" value={selectedUser.subscription.stripe_id} small />
@@ -580,26 +580,26 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                             )}
 
                             {selectedUser.usage_history.length > 0 && (
-                                <div className="border border-neutral-800 rounded-lg p-3 space-y-2">
+                                <div className="border border-border rounded-lg p-3 space-y-2">
                                     <h4 className="text-xs font-semibold text-blue-500 uppercase tracking-wider">Usage History</h4>
                                     <Table>
                                         <TableHeader>
-                                            <TableRow className="border-neutral-800 hover:bg-transparent">
-                                                <TableHead className="text-neutral-500 text-xs">Period</TableHead>
-                                                <TableHead className="text-neutral-500 text-xs text-center">Docs</TableHead>
-                                                <TableHead className="text-neutral-500 text-xs text-center">Models</TableHead>
-                                                <TableHead className="text-neutral-500 text-xs text-center">API</TableHead>
-                                                <TableHead className="text-neutral-500 text-xs text-center">Reports</TableHead>
+                                            <TableRow className="border-border hover:bg-transparent">
+                                                <TableHead className="text-muted-foreground text-xs">Period</TableHead>
+                                                <TableHead className="text-muted-foreground text-xs text-center">Docs</TableHead>
+                                                <TableHead className="text-muted-foreground text-xs text-center">Models</TableHead>
+                                                <TableHead className="text-muted-foreground text-xs text-center">API</TableHead>
+                                                <TableHead className="text-muted-foreground text-xs text-center">Reports</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {selectedUser.usage_history.map((u, i) => (
-                                                <TableRow key={i} className="border-neutral-800/60">
-                                                    <TableCell className="text-white text-sm font-mono">{u.billing_period}</TableCell>
-                                                    <TableCell className="text-center text-sm text-neutral-400">{u.documents_count}</TableCell>
-                                                    <TableCell className="text-center text-sm text-neutral-400">{u.models_count}</TableCell>
-                                                    <TableCell className="text-center text-sm text-neutral-400">{u.api_requests_count}</TableCell>
-                                                    <TableCell className="text-center text-sm text-neutral-400">{u.reports_count}</TableCell>
+                                                <TableRow key={i} className="border-border/60">
+                                                    <TableCell className="text-foreground text-sm font-mono">{u.billing_period}</TableCell>
+                                                    <TableCell className="text-center text-sm text-muted-foreground">{u.documents_count}</TableCell>
+                                                    <TableCell className="text-center text-sm text-muted-foreground">{u.models_count}</TableCell>
+                                                    <TableCell className="text-center text-sm text-muted-foreground">{u.api_requests_count}</TableCell>
+                                                    <TableCell className="text-center text-sm text-muted-foreground">{u.reports_count}</TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -608,30 +608,30 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
                             )}
 
                             {selectedUser.recent_documents.length > 0 && (
-                                <div className="border border-neutral-800 rounded-lg p-3 space-y-2">
+                                <div className="border border-border rounded-lg p-3 space-y-2">
                                     <h4 className="text-xs font-semibold text-amber-500 uppercase tracking-wider">Recent Documents</h4>
                                     <Table>
                                         <TableHeader>
-                                            <TableRow className="border-neutral-800 hover:bg-transparent">
-                                                <TableHead className="text-neutral-500 text-xs">Name</TableHead>
-                                                <TableHead className="text-neutral-500 text-xs text-center">Status</TableHead>
-                                                <TableHead className="text-neutral-500 text-xs text-right">Date</TableHead>
+                                            <TableRow className="border-border hover:bg-transparent">
+                                                <TableHead className="text-muted-foreground text-xs">Name</TableHead>
+                                                <TableHead className="text-muted-foreground text-xs text-center">Status</TableHead>
+                                                <TableHead className="text-muted-foreground text-xs text-right">Date</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {selectedUser.recent_documents.map((doc) => (
-                                                <TableRow key={doc.id} className="border-neutral-800/60">
-                                                    <TableCell className="text-white text-sm max-w-[250px] truncate">{doc.original_filename || doc.name}</TableCell>
+                                                <TableRow key={doc.id} className="border-border/60">
+                                                    <TableCell className="text-foreground text-sm max-w-[250px] truncate">{doc.original_filename || doc.name}</TableCell>
                                                     <TableCell className="text-center">
                                                         <span className={`text-xs font-medium ${
                                                             doc.status === 'completed' ? 'text-emerald-500' :
                                                             doc.status === 'failed' ? 'text-red-500' :
-                                                            'text-neutral-500'
+                                                            'text-muted-foreground'
                                                         }`}>
                                                             {doc.status}
                                                         </span>
                                                     </TableCell>
-                                                    <TableCell className="text-neutral-500 text-sm text-right">{formatDate(doc.created_at)}</TableCell>
+                                                    <TableCell className="text-muted-foreground text-sm text-right">{formatDate(doc.created_at)}</TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -650,11 +650,11 @@ function DashboardView({ stats }: { stats: DashboardStats }) {
 
 function StatsCard({ label, value, icon, accent }: { label: string; value: number; icon: React.ReactNode; accent?: string }) {
     return (
-        <div className="border border-neutral-900 rounded-lg p-4 bg-neutral-950">
+        <div className="border border-neutral-900 rounded-lg p-4 bg-background">
             <div className="flex items-center justify-between">
                 <div>
                     <p className="text-xs text-neutral-600 uppercase tracking-wider">{label}</p>
-                    <p className={`text-2xl font-bold mt-1 ${accent || 'text-white'}`}>{value.toLocaleString()}</p>
+                    <p className={`text-2xl font-bold mt-1 ${accent || 'text-foreground'}`}>{value.toLocaleString()}</p>
                 </div>
                 <div className="text-neutral-700">{icon}</div>
             </div>
@@ -666,7 +666,7 @@ function InfoItem({ label, value, small }: { label: string; value: string; small
     return (
         <div>
             <p className={`text-neutral-600 ${small ? 'text-[10px]' : 'text-xs'} uppercase tracking-wider`}>{label}</p>
-            <p className={`text-neutral-300 ${small ? 'text-xs' : 'text-sm'} break-all`}>{value}</p>
+            <p className={`text-muted-foreground ${small ? 'text-xs' : 'text-sm'} break-all`}>{value}</p>
         </div>
     );
 }

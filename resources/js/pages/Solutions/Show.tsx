@@ -167,17 +167,17 @@ function CTASection({
     copy: ReturnType<typeof getCopy>;
 }) {
     return (
-        <section className="rounded-2xl border border-white/10 bg-zinc-900/70 p-6 md:p-8">
-            <p className="text-xs font-semibold tracking-wide text-blue-300 uppercase">
+        <section className="rounded-2xl border border-border bg-card/70 p-6 md:p-8">
+            <p className="text-xs font-semibold tracking-wide text-blue-700 uppercase">
                 {copy.ctaEyebrow}
             </p>
-            <h2 className="mt-2 text-2xl font-bold text-white md:text-3xl">
+            <h2 className="mt-2 text-2xl font-bold text-foreground md:text-3xl">
                 {copy.ctaTitle}
             </h2>
-            <p className="mt-3 max-w-3xl text-zinc-300">{copy.ctaText}</p>
+            <p className="mt-3 max-w-3xl text-card-foreground">{copy.ctaText}</p>
             <div className="mt-6 flex flex-wrap gap-3">
                 <Link href={`/${appLocale}/register`}>
-                    <Button className="bg-white font-semibold text-zinc-950 hover:bg-zinc-200">
+                    <Button className="bg-primary font-semibold text-primary-foreground hover:bg-primary/90">
                         {copy.ctaPrimary}
                         <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
@@ -185,7 +185,7 @@ function CTASection({
                 <Link href={`/${appLocale}/docs/api-v1`}>
                     <Button
                         variant="outline"
-                        className="border-white/15 text-white hover:bg-white/10"
+                        className="border-input text-foreground hover:bg-muted"
                     >
                         {copy.ctaDocs}
                     </Button>
@@ -193,7 +193,7 @@ function CTASection({
                 <Link href={`/${appLocale}/#pricing`}>
                     <Button
                         variant="outline"
-                        className="border-white/15 text-white hover:bg-white/10"
+                        className="border-input text-foreground hover:bg-muted"
                     >
                         {copy.ctaPricing}
                     </Button>
@@ -201,7 +201,7 @@ function CTASection({
                 <Link href={`/${appLocale}?demo=1`}>
                     <Button
                         variant="outline"
-                        className="border-white/15 text-white hover:bg-white/10"
+                        className="border-input text-foreground hover:bg-muted"
                     >
                         {copy.ctaUpload}
                     </Button>
@@ -259,7 +259,7 @@ export default function Show({ locale, page }: SolutionProps) {
     }));
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100">
+        <div className="min-h-screen bg-muted/30 text-foreground">
             <SEOHead
                 title={page.title}
                 description={page.description}
@@ -274,7 +274,7 @@ export default function Show({ locale, page }: SolutionProps) {
                 ]}
             />
 
-            <header className="sticky top-0 z-40 border-b border-white/10 bg-zinc-950/90 backdrop-blur">
+            <header className="sticky top-0 z-40 border-b border-border bg-muted/30/90 backdrop-blur">
                 <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
                     <Link href={`/${appLocale}`} className="flex items-center gap-3">
                         <img
@@ -284,17 +284,17 @@ export default function Show({ locale, page }: SolutionProps) {
                         />
                         <span className="text-lg font-bold">DOCSET</span>
                     </Link>
-                    <nav className="hidden items-center gap-5 text-sm text-zinc-300 md:flex">
-                        <Link href={`/${appLocale}/blog`} className="hover:text-white">
+                    <nav className="hidden items-center gap-5 text-sm text-card-foreground md:flex">
+                        <Link href={`/${appLocale}/blog`} className="hover:text-foreground">
                             {copy.navBlog}
                         </Link>
-                        <Link href={`/${appLocale}/docs/api-v1`} className="hover:text-white">
+                        <Link href={`/${appLocale}/docs/api-v1`} className="hover:text-foreground">
                             {copy.navDocs}
                         </Link>
-                        <Link href={`/${appLocale}/#pricing`} className="hover:text-white">
+                        <Link href={`/${appLocale}/#pricing`} className="hover:text-foreground">
                             {copy.navPricing}
                         </Link>
-                        <Link href={`/${appLocale}/register`} className="hover:text-white">
+                        <Link href={`/${appLocale}/register`} className="hover:text-foreground">
                             {copy.navStart}
                         </Link>
                     </nav>
@@ -302,12 +302,12 @@ export default function Show({ locale, page }: SolutionProps) {
             </header>
 
             <main className="mx-auto max-w-6xl space-y-12 px-4 py-10 md:py-14">
-                <article className="rounded-2xl border border-white/10 bg-zinc-900/50 p-6 md:p-10">
-                    <p className="text-sm text-blue-300">{copy.topLabel}</p>
-                    <h1 className="mt-2 text-3xl font-bold text-white md:text-4xl">
+                <article className="rounded-2xl border border-border bg-card/50 p-6 md:p-10">
+                    <p className="text-sm text-blue-700">{copy.topLabel}</p>
+                    <h1 className="mt-2 text-3xl font-bold text-foreground md:text-4xl">
                         {page.h1}
                     </h1>
-                    <div className="mt-5 space-y-4 text-zinc-300">
+                    <div className="mt-5 space-y-4 text-card-foreground">
                         {page.intro.map((paragraph) => (
                             <p key={paragraph}>{paragraph}</p>
                         ))}
@@ -317,13 +317,13 @@ export default function Show({ locale, page }: SolutionProps) {
                 <CTASection appLocale={appLocale} copy={copy} />
 
                 <section
-                    className="space-y-3 rounded-2xl border border-white/10 bg-zinc-900/40 p-6 md:p-8"
+                    className="space-y-3 rounded-2xl border border-border bg-card/40 p-6 md:p-8"
                     aria-labelledby="what-it-is"
                 >
-                    <h2 id="what-it-is" className="text-2xl font-semibold text-white">
+                    <h2 id="what-it-is" className="text-2xl font-semibold text-foreground">
                         {copy.whatIs}
                     </h2>
-                    <div className="space-y-4 text-zinc-300">
+                    <div className="space-y-4 text-card-foreground">
                         {page.whatIs.map((paragraph) => (
                             <p key={paragraph}>{paragraph}</p>
                         ))}
@@ -331,24 +331,24 @@ export default function Show({ locale, page }: SolutionProps) {
                 </section>
 
                 <section
-                    className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 md:p-8"
+                    className="rounded-2xl border border-border bg-card/40 p-6 md:p-8"
                     aria-labelledby="what-you-can-extract"
                 >
                     <h2
                         id="what-you-can-extract"
-                        className="text-2xl font-semibold text-white"
+                        className="text-2xl font-semibold text-foreground"
                     >
                         {copy.whatExtract}
                     </h2>
-                    <p className="mt-3 text-zinc-300">{copy.whatExtractText}</p>
+                    <p className="mt-3 text-card-foreground">{copy.whatExtractText}</p>
                     <ul className="mt-5 grid gap-3 md:grid-cols-2">
                         {page.extractFields.map((item) => (
                             <li
                                 key={item.field}
-                                className="rounded-lg border border-white/10 bg-zinc-950/50 p-4"
+                                className="rounded-lg border border-border bg-muted/30/50 p-4"
                             >
-                                <p className="font-medium text-white">{item.field}</p>
-                                <p className="mt-1 text-sm text-zinc-400">
+                                <p className="font-medium text-foreground">{item.field}</p>
+                                <p className="mt-1 text-sm text-muted-foreground">
                                     {copy.fieldExampleLabel}: {item.example}
                                 </p>
                             </li>
@@ -357,40 +357,40 @@ export default function Show({ locale, page }: SolutionProps) {
                 </section>
 
                 <section
-                    className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 md:p-8"
+                    className="rounded-2xl border border-border bg-card/40 p-6 md:p-8"
                     aria-labelledby="how-it-works"
                 >
-                    <h2 id="how-it-works" className="text-2xl font-semibold text-white">
+                    <h2 id="how-it-works" className="text-2xl font-semibold text-foreground">
                         {copy.howWorks}
                     </h2>
-                    <p className="mt-3 text-zinc-300">{copy.howWorksText}</p>
+                    <p className="mt-3 text-card-foreground">{copy.howWorksText}</p>
                     <ol className="mt-5 space-y-4">
                         {page.steps.map((step, index) => (
                             <li
                                 key={step.title}
-                                className="rounded-lg border border-white/10 bg-zinc-950/50 p-4"
+                                className="rounded-lg border border-border bg-muted/30/50 p-4"
                             >
-                                <p className="font-semibold text-white">
+                                <p className="font-semibold text-foreground">
                                     {index + 1}. {step.title}
                                 </p>
-                                <p className="mt-2 text-zinc-300">{step.description}</p>
+                                <p className="mt-2 text-card-foreground">{step.description}</p>
                             </li>
                         ))}
                     </ol>
                 </section>
 
                 <section
-                    className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 md:p-8"
+                    className="rounded-2xl border border-border bg-card/40 p-6 md:p-8"
                     aria-labelledby="common-use-cases"
                 >
-                    <h2 id="common-use-cases" className="text-2xl font-semibold text-white">
+                    <h2 id="common-use-cases" className="text-2xl font-semibold text-foreground">
                         {copy.useCases}
                     </h2>
-                    <p className="mt-3 text-zinc-300">{copy.useCasesText}</p>
+                    <p className="mt-3 text-card-foreground">{copy.useCasesText}</p>
                     <ul className="mt-5 space-y-3">
                         {page.useCases.map((item) => (
-                            <li key={item} className="flex items-start gap-3 text-zinc-300">
-                                <CheckCircle2 className="mt-0.5 h-5 w-5 text-green-400" />
+                            <li key={item} className="flex items-start gap-3 text-card-foreground">
+                                <CheckCircle2 className="mt-0.5 h-5 w-5 text-green-600" />
                                 <span>{item}</span>
                             </li>
                         ))}
@@ -398,38 +398,38 @@ export default function Show({ locale, page }: SolutionProps) {
                 </section>
 
                 <section
-                    className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 md:p-8"
+                    className="rounded-2xl border border-border bg-card/40 p-6 md:p-8"
                     aria-labelledby="example-output"
                 >
-                    <h2 id="example-output" className="text-2xl font-semibold text-white">
+                    <h2 id="example-output" className="text-2xl font-semibold text-foreground">
                         {copy.example}
                     </h2>
-                    <p className="mt-3 text-zinc-300">{copy.exampleText}</p>
-                    <pre className="mt-5 overflow-x-auto rounded-lg border border-white/10 bg-zinc-950 p-4 text-xs text-zinc-200 md:text-sm">
+                    <p className="mt-3 text-card-foreground">{copy.exampleText}</p>
+                    <pre className="mt-5 overflow-x-auto rounded-lg border border-border bg-muted/30 p-4 text-xs text-card-foreground md:text-sm">
                         <code>{JSON.stringify(page.example.json, null, 2)}</code>
                     </pre>
-                    <ul className="mt-4 space-y-2 text-zinc-300">
+                    <ul className="mt-4 space-y-2 text-card-foreground">
                         {page.example.excelMapping.map((map) => (
                             <li key={map}>{map}</li>
                         ))}
                     </ul>
-                    <p className="mt-4 text-sm text-zinc-400">{page.example.note}</p>
+                    <p className="mt-4 text-sm text-muted-foreground">{page.example.note}</p>
                 </section>
 
                 <section
-                    className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 md:p-8"
+                    className="rounded-2xl border border-border bg-card/40 p-6 md:p-8"
                     aria-labelledby="security-compliance"
                 >
                     <h2
                         id="security-compliance"
-                        className="text-2xl font-semibold text-white"
+                        className="text-2xl font-semibold text-foreground"
                     >
                         {copy.security}
                     </h2>
-                    <p className="mt-3 text-zinc-300">{copy.securityText}</p>
+                    <p className="mt-3 text-card-foreground">{copy.securityText}</p>
                     <ul className="mt-4 space-y-3">
                         {page.security.map((line) => (
-                            <li key={line} className="text-zinc-300">
+                            <li key={line} className="text-card-foreground">
                                 {line}
                             </li>
                         ))}
@@ -437,39 +437,39 @@ export default function Show({ locale, page }: SolutionProps) {
                 </section>
 
                 <section
-                    className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 md:p-8"
+                    className="rounded-2xl border border-border bg-card/40 p-6 md:p-8"
                     aria-labelledby="faq"
                 >
-                    <h2 id="faq" className="text-2xl font-semibold text-white">
+                    <h2 id="faq" className="text-2xl font-semibold text-foreground">
                         {copy.faq}
                     </h2>
-                    <p className="mt-3 text-zinc-300">{copy.faqText}</p>
+                    <p className="mt-3 text-card-foreground">{copy.faqText}</p>
                     <div className="mt-5 space-y-4">
                         {page.faqs.map((faq) => (
                             <article
                                 key={faq.q}
-                                className="rounded-lg border border-white/10 bg-zinc-950/50 p-4"
+                                className="rounded-lg border border-border bg-muted/30/50 p-4"
                             >
-                                <h3 className="text-lg font-medium text-white">{faq.q}</h3>
-                                <p className="mt-2 text-zinc-300">{faq.a}</p>
+                                <h3 className="text-lg font-medium text-foreground">{faq.q}</h3>
+                                <p className="mt-2 text-card-foreground">{faq.a}</p>
                             </article>
                         ))}
                     </div>
                 </section>
 
                 <section
-                    className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 md:p-8"
+                    className="rounded-2xl border border-border bg-card/40 p-6 md:p-8"
                     aria-labelledby="learn-more"
                 >
-                    <h2 id="learn-more" className="text-2xl font-semibold text-white">
+                    <h2 id="learn-more" className="text-2xl font-semibold text-foreground">
                         {copy.learnMore}
                     </h2>
-                    <p className="mt-3 text-zinc-300">{copy.learnMoreText}</p>
-                    <ul className="mt-4 space-y-2 text-zinc-300">
+                    <p className="mt-3 text-card-foreground">{copy.learnMoreText}</p>
+                    <ul className="mt-4 space-y-2 text-card-foreground">
                         <li>
                             <Link
                                 href={`/${appLocale}/#pricing`}
-                                className="text-blue-300 hover:text-blue-200"
+                                className="text-blue-700 hover:text-blue-700"
                             >
                                 {copy.learnPricing}
                             </Link>
@@ -477,7 +477,7 @@ export default function Show({ locale, page }: SolutionProps) {
                         <li>
                             <Link
                                 href={`/${appLocale}/blog`}
-                                className="text-blue-300 hover:text-blue-200"
+                                className="text-blue-700 hover:text-blue-700"
                             >
                                 {copy.learnBlog}
                             </Link>
@@ -485,7 +485,7 @@ export default function Show({ locale, page }: SolutionProps) {
                         <li>
                             <Link
                                 href={`/${appLocale}/docs/api-v1`}
-                                className="text-blue-300 hover:text-blue-200"
+                                className="text-blue-700 hover:text-blue-700"
                             >
                                 {copy.learnDocs}
                             </Link>
@@ -493,7 +493,7 @@ export default function Show({ locale, page }: SolutionProps) {
                         <li>
                             <Link
                                 href={`/${appLocale}/settings/integrations`}
-                                className="text-blue-300 hover:text-blue-200"
+                                className="text-blue-700 hover:text-blue-700"
                             >
                                 {copy.learnIntegrations}
                             </Link>
@@ -501,7 +501,7 @@ export default function Show({ locale, page }: SolutionProps) {
                         <li>
                             <Link
                                 href={`/${appLocale}/register`}
-                                className="text-blue-300 hover:text-blue-200"
+                                className="text-blue-700 hover:text-blue-700"
                             >
                                 {copy.learnStart}
                             </Link>
@@ -509,7 +509,7 @@ export default function Show({ locale, page }: SolutionProps) {
                         <li>
                             <Link
                                 href={`/${appLocale}/login`}
-                                className="text-blue-300 hover:text-blue-200"
+                                className="text-blue-700 hover:text-blue-700"
                             >
                                 {copy.learnLogin}
                             </Link>
@@ -520,22 +520,22 @@ export default function Show({ locale, page }: SolutionProps) {
                 <CTASection appLocale={appLocale} copy={copy} />
             </main>
 
-            <footer className="border-t border-white/10 bg-zinc-950 px-4 py-10">
+            <footer className="border-t border-border bg-muted/30 px-4 py-10">
                 <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-4">
                     <div className="md:col-span-2">
-                        <p className="text-lg font-semibold text-white">DOCSET</p>
-                        <p className="mt-2 max-w-xl text-sm text-zinc-400">
+                        <p className="text-lg font-semibold text-foreground">DOCSET</p>
+                        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
                             {copy.footerTagline}
                         </p>
                     </div>
                     <div>
-                        <p className="text-sm font-semibold text-white">
+                        <p className="text-sm font-semibold text-foreground">
                             {copy.footerSolutions}
                         </p>
-                        <ul className="mt-3 space-y-2 text-sm text-zinc-300">
+                        <ul className="mt-3 space-y-2 text-sm text-card-foreground">
                             {solutionLinks.map((item) => (
                                 <li key={item.href}>
-                                    <Link href={item.href} className="hover:text-white">
+                                    <Link href={item.href} className="hover:text-foreground">
                                         {item.label}
                                     </Link>
                                 </li>
@@ -543,22 +543,22 @@ export default function Show({ locale, page }: SolutionProps) {
                         </ul>
                     </div>
                     <div>
-                        <p className="text-sm font-semibold text-white">
+                        <p className="text-sm font-semibold text-foreground">
                             {copy.footerProduct}
                         </p>
-                        <ul className="mt-3 space-y-2 text-sm text-zinc-300">
+                        <ul className="mt-3 space-y-2 text-sm text-card-foreground">
                             <li>
-                                <Link href={`/${appLocale}/#pricing`} className="hover:text-white">
+                                <Link href={`/${appLocale}/#pricing`} className="hover:text-foreground">
                                     {copy.ctaPricing}
                                 </Link>
                             </li>
                             <li>
-                                <Link href={`/${appLocale}/register`} className="hover:text-white">
+                                <Link href={`/${appLocale}/register`} className="hover:text-foreground">
                                     {copy.ctaPrimary}
                                 </Link>
                             </li>
                             <li>
-                                <Link href={`/${appLocale}/blog`} className="hover:text-white">
+                                <Link href={`/${appLocale}/blog`} className="hover:text-foreground">
                                     {copy.navBlog}
                                 </Link>
                             </li>

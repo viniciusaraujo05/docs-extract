@@ -2,8 +2,9 @@
  * TableFieldViewer - Component to display and interact with a single table field
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { ExportDataButton } from '@/components/export-data-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -32,8 +33,8 @@ export function TableFieldViewer({ tableData, defaultExpanded = false, variant =
     const { t } = useTranslation();
     const [expanded, setExpanded] = useState(defaultExpanded);
 
-    const handleExport = () => {
-        const exportData = tableData.rows.map((row, index) => {
+    const exportData = useMemo(() => {
+        const rows = tableData.rows.map((row, index) => {
             const exportRow: Record<string, unknown> = {
                 '#': index + 1,
             };
@@ -62,18 +63,11 @@ export function TableFieldViewer({ tableData, defaultExpanded = false, variant =
                 }
             });
 
-            exportData.push(totalsRow);
+            rows.push(totalsRow);
         }
-
-        const worksheet = XLSX.utils.json_to_sheet(exportData);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, tableData.label.substring(0, 31));
-
-        const filename = `${tableData.label.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
-        XLSX.writeFile(workbook, filename);
-
-        toast.success(t('Table exported successfully!'));
-    };
+        
+        return rows;
+    }, [tableData]);
 
     const hasNumericAggregations = tableData.columns.some(
         col => col.type === 'number' && tableData.aggregations[col.name]?.sum !== undefined
@@ -108,17 +102,12 @@ export function TableFieldViewer({ tableData, defaultExpanded = false, variant =
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button
+                        <ExportDataButton
+                            data={exportData}
+                            filename={`${tableData.label.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}`}
                             variant="outline"
                             size="sm"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleExport();
-                            }}
-                        >
-                            <Download className="mr-2 h-4 w-4" />
-                            {t('Export')}
-                        </Button>
+                        />
                         {expanded ? (
                             <ChevronUp className="h-5 w-5 text-muted-foreground" />
                         ) : (

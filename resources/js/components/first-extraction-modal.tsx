@@ -50,36 +50,36 @@ export function FirstExtractionModal({ locale = 'en', isOpen: controlledOpen, on
 
     return (
         <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
-            <DialogContent className="sm:max-w-md border-0 p-0 overflow-hidden bg-white dark:bg-zinc-950 shadow-2xl">
-                <div className="relative h-32 bg-zinc-950 flex items-center justify-center overflow-hidden border-b border-white/5">
+            <DialogContent className="sm:max-w-md border-0 p-0 overflow-hidden bg-white dark:bg-muted/30 shadow-2xl">
+                <div className="relative h-32 bg-muted/30 flex items-center justify-center overflow-hidden border-b border-border">
                     <div className="absolute inset-0 bg-blue-500/10 radial-gradient-center"></div>
-                    <div className="relative bg-white/5 backdrop-blur-md p-4 rounded-full border border-white/10 shadow-lg animate-in zoom-in duration-500">
-                        <FileUp className="h-8 w-8 text-blue-400 drop-shadow-md" />
+                    <div className="relative bg-muted backdrop-blur-md p-4 rounded-full border border-border shadow-lg animate-in zoom-in duration-500">
+                        <FileUp className="h-8 w-8 text-blue-600 drop-shadow-md" />
                     </div>
                 </div>
 
-                <div className="px-6 py-6 space-y-4 bg-zinc-950">
+                <div className="px-6 py-6 space-y-4 bg-muted/30">
                     <DialogHeader>
-                        <DialogTitle className="text-center text-2xl font-bold text-white">
+                        <DialogTitle className="text-center text-2xl font-bold text-foreground">
                             {t('onboarding.first_extraction.title')}
                         </DialogTitle>
-                        <DialogDescription className="text-center text-base text-zinc-400 pt-2">
+                        <DialogDescription className="text-center text-base text-muted-foreground pt-2">
                              {t('onboarding.first_extraction.description')}
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="grid grid-cols-2 gap-4 py-2">
-                        <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-zinc-900 border border-white/10">
-                             <div className="p-2 rounded-full bg-blue-500/10 text-blue-400">
+                        <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-card border border-border">
+                             <div className="p-2 rounded-full bg-blue-500/10 text-blue-600">
                                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
                              </div>
-                             <span className="text-xs font-medium text-center text-zinc-300">{t('Upload PDF/Image')}</span>
+                             <span className="text-xs font-medium text-center text-card-foreground">{t('Upload PDF/Image')}</span>
                         </div>
-                        <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-zinc-900 border border-white/10">
+                        <div className="flex flex-col items-center gap-2 p-3 rounded-lg bg-card border border-border">
                              <div className="p-2 rounded-full bg-emerald-500/10 text-emerald-400">
                                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                              </div>
-                             <span className="text-xs font-medium text-center text-zinc-300">{t('Extract Data')}</span>
+                             <span className="text-xs font-medium text-center text-card-foreground">{t('Extract Data')}</span>
                         </div>
                     </div>
 
@@ -94,7 +94,7 @@ export function FirstExtractionModal({ locale = 'en', isOpen: controlledOpen, on
                         <Button
                             variant="ghost"
                             onClick={handleClose}
-                            className="w-full text-zinc-500 hover:text-white hover:bg-white/5"
+                            className="w-full text-muted-foreground hover:text-foreground hover:bg-muted"
                         >
                             {t('onboarding.first_extraction.later')}
                         </Button>

@@ -167,12 +167,12 @@ export default function Register({ canRegister }: RegisterProps) {
 
     return (
         <>
-            <div className="min-h-screen flex bg-black text-white">
+            <div className="min-h-screen flex bg-background text-foreground">
                 <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="hidden lg:flex flex-1 p-10 items-center justify-center relative overflow-hidden bg-zinc-950 border-r border-white/5"
+                    className="hidden lg:flex flex-1 p-10 items-center justify-center relative overflow-hidden bg-muted/30 border-r border-border"
                 >
                     {/* Fine grid background */}
                     <div className="absolute inset-0 opacity-[0.04]"
@@ -186,19 +186,19 @@ export default function Register({ canRegister }: RegisterProps) {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
                         >
-                            <h2 className="text-3xl font-bold mb-3 text-white leading-tight">
+                            <h2 className="text-3xl font-bold mb-3 text-foreground leading-tight">
                                 {locale === 'pt'
                                     ? 'O seu primeiro PDF,\npronto em minutos.'
                                     : 'Your first PDF,\nprocessed in minutes.'}
                             </h2>
-                            <p className="text-gray-400 mb-8 leading-relaxed">
+                            <p className="text-muted-foreground mb-8 leading-relaxed">
                                 {locale === 'pt'
                                     ? 'Sem configurações complexas. Carregue, confirme os campos e exporte — tudo num só lugar.'
                                     : 'No complex setup. Upload, check the fields, and export — all in one place.'}
                             </p>
 
                             {/* Data transformation visual */}
-                            <div className="relative mb-8 rounded-xl overflow-hidden border border-white/8 bg-[#06090f]"
+                            <div className="relative mb-8 rounded-xl overflow-hidden border border-border bg-[#06090f]"
                                 style={{ background: "linear-gradient(135deg,#06090f 0%,#080d18 100%)" }}>
                                 {/* Fine grid */}
                                 <div className="absolute inset-0 opacity-[0.07]"
@@ -222,7 +222,7 @@ export default function Register({ canRegister }: RegisterProps) {
                                                 ))}
                                             </div>
                                         </div>
-                                        <span className="text-[10px] text-blue-400/60 font-mono tracking-wide">PDF</span>
+                                        <span className="text-[10px] text-blue-600/60 font-mono tracking-wide">PDF</span>
                                     </motion.div>
 
                                     {/* Animated pipeline */}
@@ -251,14 +251,14 @@ export default function Register({ canRegister }: RegisterProps) {
                                             {/* Header */}
                                             <div className="bg-blue-900/40 px-2 py-[3px] flex gap-1.5">
                                                 {['A','B','C'].map(c => (
-                                                    <div key={c} className="text-[7px] text-blue-300/60 font-mono w-6 text-center">{c}</div>
+                                                    <div key={c} className="text-[7px] text-blue-700/60 font-mono w-6 text-center">{c}</div>
                                                 ))}
                                             </div>
                                             {/* Rows */}
                                             {[0,1,2,3].map((row) => (
                                                 <motion.div
                                                     key={row}
-                                                    className="flex gap-1.5 px-2 py-[3px] border-t border-white/5"
+                                                    className="flex gap-1.5 px-2 py-[3px] border-t border-border"
                                                     animate={{ opacity: [0.4, 0.9, 0.4] }}
                                                     transition={{ duration: 2, delay: row * 0.3 + 0.8, repeat: Infinity }}
                                                 >
@@ -276,13 +276,13 @@ export default function Register({ canRegister }: RegisterProps) {
                             {/* Benefits */}
                             <div className="space-y-3">
                                 {(locale === 'pt' ? [
-                                    { text: 'Funciona com faturas, recibos e contratos', color: 'text-blue-400' },
-                                    { text: 'Confirme antes de exportar — você controla', color: 'text-green-400' },
+                                    { text: 'Funciona com faturas, recibos e contratos', color: 'text-blue-600' },
+                                    { text: 'Confirme antes de exportar — você controla', color: 'text-green-600' },
                                     { text: 'Exporta para Sheets, CSV, JSON e mais', color: 'text-emerald-400' },
                                     { text: 'Plano gratuito disponível, sem cartão', color: 'text-cyan-400' },
                                 ] : [
-                                    { text: 'Works with invoices, receipts & contracts', color: 'text-blue-400' },
-                                    { text: 'Review before exporting — you stay in control', color: 'text-green-400' },
+                                    { text: 'Works with invoices, receipts & contracts', color: 'text-blue-600' },
+                                    { text: 'Review before exporting — you stay in control', color: 'text-green-600' },
                                     { text: 'Export to Sheets, CSV, JSON and more', color: 'text-emerald-400' },
                                     { text: 'Free plan available, no credit card', color: 'text-cyan-400' },
                                 ]).map((item, i) => (
@@ -291,7 +291,7 @@ export default function Register({ canRegister }: RegisterProps) {
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: 0.4 + i * 0.1 }}
-                                        className="flex items-center gap-3 text-sm text-gray-300"
+                                        className="flex items-center gap-3 text-sm text-muted-foreground"
                                     >
                                         <CheckCircle className={`h-4 w-4 shrink-0 ${item.color}`} />
                                         <span>{item.text}</span>
@@ -347,7 +347,7 @@ export default function Register({ canRegister }: RegisterProps) {
                                 onClick={() => router.visit(`/${locale}`)}
                             >
                                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center cursor-pointer">
-                                    <FileJson className="h-5 w-5 text-white" />
+                                    <FileJson className="h-5 w-5 text-foreground" />
                                 </div>
                                 <span className="font-bold text-lg cursor-pointer">DOCSET</span>
                             </motion.div>
@@ -355,76 +355,76 @@ export default function Register({ canRegister }: RegisterProps) {
                             <h2 className="text-4xl font-bold mb-3">
                                 {t('Create your account')}
                             </h2>
-                            <p className="text-gray-400">
+                            <p className="text-muted-foreground">
                                 {t('Start extracting data from documents in minutes')}
                             </p>
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <div className="space-y-2">
-                                <Label htmlFor="name" className="text-sm font-medium text-gray-300">
+                                <Label htmlFor="name" className="text-sm font-medium text-muted-foreground">
                                     {t('Full Name')}
                                 </Label>
                                 <div className="relative">
-                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+                                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                     <Input
                                         id="name"
                                         type="text"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                         placeholder="John Doe"
-                                        className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500"
+                                        className="pl-10 h-12 bg-muted border-border text-foreground placeholder:text-muted-foreground focus:border-blue-500"
                                         required
                                         autoComplete="name"
                                     />
                                 </div>
                                 {errors.name && (
-                                    <p className="text-sm text-red-400">{errors.name}</p>
+                                    <p className="text-sm text-red-600">{errors.name}</p>
                                 )}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-sm font-medium text-gray-300">
+                                <Label htmlFor="email" className="text-sm font-medium text-muted-foreground">
                                     {t('Email Address')}
                                 </Label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                     <Input
                                         id="email"
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="you@example.com"
-                                        className="pl-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500"
+                                        className="pl-10 h-12 bg-muted border-border text-foreground placeholder:text-muted-foreground focus:border-blue-500"
                                         required
                                         autoComplete="email"
                                     />
                                 </div>
                                 {errors.email && (
-                                    <p className="text-sm text-red-400">{errors.email}</p>
+                                    <p className="text-sm text-red-600">{errors.email}</p>
                                 )}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="password" className="text-sm font-medium text-gray-300">
+                                <Label htmlFor="password" className="text-sm font-medium text-muted-foreground">
                                     {t('Password')}
                                 </Label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                     <Input
                                         id="password"
                                         type={showPassword ? 'text' : 'password'}
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
-                                        className="pl-10 pr-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500"
+                                        className="pl-10 pr-10 h-12 bg-muted border-border text-foreground placeholder:text-muted-foreground focus:border-blue-500"
                                         required
                                         autoComplete="new-password"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-white"
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                                     >
                                         {showPassword ? (
                                             <EyeOff className="h-5 w-5" />
@@ -435,43 +435,43 @@ export default function Register({ canRegister }: RegisterProps) {
                                 </div>
                                 {password && (
                                     <div className="space-y-1">
-                                        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                                        <div className="h-2 bg-muted rounded-full overflow-hidden">
                                             <motion.div
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${passwordStrength}%` }}
                                                 className={`h-full ${getPasswordStrengthColor()} transition-all`}
                                             />
                                         </div>
-                                        <p className="text-xs text-gray-400">
-                                            Password strength: <span className={passwordStrength >= 75 ? 'text-green-400' : 'text-gray-300'}>{getPasswordStrengthText()}</span>
+                                        <p className="text-xs text-muted-foreground">
+                                            Password strength: <span className={passwordStrength >= 75 ? 'text-green-600' : 'text-muted-foreground'}>{getPasswordStrengthText()}</span>
                                         </p>
                                     </div>
                                 )}
                                 {errors.password && (
-                                    <p className="text-sm text-red-400">{errors.password}</p>
+                                    <p className="text-sm text-red-600">{errors.password}</p>
                                 )}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="password_confirmation" className="text-sm font-medium text-gray-300">
+                                <Label htmlFor="password_confirmation" className="text-sm font-medium text-muted-foreground">
                                     {t('Confirm Password')}
                                 </Label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                     <Input
                                         id="password_confirmation"
                                         type={showPasswordConfirmation ? 'text' : 'password'}
                                         value={passwordConfirmation}
                                         onChange={(e) => setPasswordConfirmation(e.target.value)}
                                         placeholder="••••••••"
-                                        className="pl-10 pr-10 h-12 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-blue-500"
+                                        className="pl-10 pr-10 h-12 bg-muted border-border text-foreground placeholder:text-muted-foreground focus:border-blue-500"
                                         required
                                         autoComplete="new-password"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPasswordConfirmation(!showPasswordConfirmation)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-white"
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                                     >
                                         {showPasswordConfirmation ? (
                                             <EyeOff className="h-5 w-5" />
@@ -502,13 +502,13 @@ export default function Register({ canRegister }: RegisterProps) {
                                 </Button>
                             </motion.div>
 
-                            <p className="text-xs text-center text-gray-400">
+                            <p className="text-xs text-center text-muted-foreground">
                                 By creating an account, you agree to our{' '}
-                                <a href={`/${locale}/terms`} className="text-blue-400 hover:text-blue-300">
+                                <a href={`/${locale}/terms`} className="text-blue-600 hover:text-blue-700">
                                     Terms of Service
                                 </a>{' '}
                                 and{' '}
-                                <a href={`/${locale}/privacy`} className="text-blue-400 hover:text-blue-300">
+                                <a href={`/${locale}/privacy`} className="text-blue-600 hover:text-blue-700">
                                     Privacy Policy
                                 </a>
                             </p>
@@ -516,10 +516,10 @@ export default function Register({ canRegister }: RegisterProps) {
 
                         <div className="relative my-8">
                             <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t border-white/10" />
+                                <span className="w-full border-t border-border" />
                             </div>
                             <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-black px-2 text-gray-400">
+                                <span className="bg-background px-2 text-muted-foreground">
                                     {t('Or continue with')}
                                 </span>
                             </div>
@@ -528,7 +528,7 @@ export default function Register({ canRegister }: RegisterProps) {
                         <div className="grid grid-cols-2 gap-4">
                             <Button
                                 variant="outline"
-                                className="bg-white/5 border-white/10 hover:bg-white/10 hover:text-white"
+                                className="bg-muted border-border hover:bg-muted hover:text-foreground"
                                 onClick={() => window.location.href = `/${locale}/auth/github`}
                             >
                                 <svg className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -538,7 +538,7 @@ export default function Register({ canRegister }: RegisterProps) {
                             </Button>
                             <Button
                                 variant="outline"
-                                className="bg-white/5 border-white/10 hover:bg-white/10 hover:text-white"
+                                className="bg-muted border-border hover:bg-muted hover:text-foreground"
                                 onClick={() => window.location.href = `/${locale}/auth/google`}
                             >
                                 <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
@@ -549,11 +549,11 @@ export default function Register({ canRegister }: RegisterProps) {
                         </div>
 
                         <div className="mt-6 text-center">
-                            <p className="text-sm text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                                 {t('Already have an account?')} {' '}
                                 <button
                                     onClick={() => router.visit(`/${locale}/login`)}
-                                    className="text-blue-400 hover:text-blue-300 font-semibold"
+                                    className="text-blue-600 hover:text-blue-700 font-semibold"
                                 >
                                     {t('Sign in')}
                                 </button>
@@ -563,7 +563,7 @@ export default function Register({ canRegister }: RegisterProps) {
                         <div className="mt-8 text-center">
                             <button
                                 onClick={() => router.visit(`/${locale}`)}
-                                className="text-sm text-gray-400 hover:text-white transition"
+                                className="text-sm text-muted-foreground hover:text-foreground transition"
                             >
                                 ← {t('Back to home')}
                             </button>

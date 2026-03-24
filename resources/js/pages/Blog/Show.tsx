@@ -105,7 +105,7 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
             <div className="mx-auto max-w-7xl px-6 py-12 lg:py-20">
                 <Link
                     href={`/${locale}/blog`}
-                    className="mb-12 inline-flex items-center gap-2 text-sm font-medium text-zinc-400 transition-colors hover:text-white"
+                    className="mb-12 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
                     <ArrowLeft className="h-4 w-4" />
                     Back to Blog
@@ -119,25 +119,25 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
                             animate={{ opacity: 1, y: 0 }}
                             className="mb-12"
                         >
-                            <h1 className="mb-8 text-4xl leading-tight font-extrabold text-white md:text-5xl lg:text-6xl">
+                            <h1 className="mb-8 text-4xl leading-tight font-extrabold text-foreground md:text-5xl lg:text-6xl">
                                 {post.translation?.title}
                             </h1>
 
-                            <div className="flex flex-wrap items-center gap-6 border-y border-white/10 py-6 text-sm font-medium text-zinc-400">
+                            <div className="flex flex-wrap items-center gap-6 border-y border-border py-6 text-sm font-medium text-muted-foreground">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-white">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-foreground">
                                         {post.author_name.charAt(0)}
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-white">
+                                        <span className="text-foreground">
                                             {post.author_name}
                                         </span>
                                         <span className="text-xs">Author</span>
                                     </div>
                                 </div>
-                                <div className="hidden h-10 w-px bg-white/10 sm:block"></div>
+                                <div className="hidden h-10 w-px bg-muted sm:block"></div>
                                 <div className="flex items-center gap-2">
-                                    <Calendar className="h-5 w-5 text-indigo-400" />
+                                    <Calendar className="h-5 w-5 text-indigo-600" />
                                     <span>
                                         {new Date(
                                             post.published_at,
@@ -156,7 +156,7 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="mb-16 aspect-[2/1] w-full overflow-hidden rounded-3xl border border-white/10 shadow-2xl"
+                                className="mb-16 aspect-[2/1] w-full overflow-hidden rounded-3xl border border-border shadow-2xl"
                             >
                                 <img
                                     src={post.cover_image_url}
@@ -172,7 +172,7 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="prose prose-lg max-w-none prose-invert md:prose-xl prose-headings:font-bold prose-headings:tracking-tight prose-h2:mt-16 prose-h2:mb-6 prose-h2:text-white prose-h3:text-zinc-200 prose-p:mb-8 prose-p:leading-relaxed prose-p:text-zinc-300 prose-a:text-indigo-400 prose-a:no-underline hover:prose-a:text-indigo-300 hover:prose-a:underline prose-blockquote:rounded-r-xl prose-blockquote:border-l-indigo-500 prose-blockquote:bg-white/5 prose-blockquote:px-6 prose-blockquote:py-1 prose-blockquote:text-zinc-300 prose-blockquote:not-italic prose-strong:font-semibold prose-strong:text-white prose-code:rounded-md prose-code:bg-indigo-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-indigo-300 prose-code:before:content-none prose-code:after:content-none prose-pre:rounded-xl prose-pre:border prose-pre:border-white/10 prose-pre:bg-zinc-900 prose-pre:p-0 prose-ul:text-zinc-300 prose-li:my-2"
+                            className="prose prose-lg max-w-none md:prose-xl prose-headings:font-bold prose-headings:tracking-tight prose-h2:mt-16 prose-h2:mb-6 prose-h2:text-foreground prose-h3:text-foreground prose-p:mb-8 prose-p:leading-relaxed prose-p:text-muted-foreground prose-a:text-indigo-600 prose-a:no-underline hover:prose-a:text-indigo-700 hover:prose-a:underline prose-blockquote:rounded-r-xl prose-blockquote:border-l-indigo-500 prose-blockquote:bg-muted prose-blockquote:px-6 prose-blockquote:py-1 prose-blockquote:text-foreground prose-blockquote:not-italic prose-strong:font-semibold prose-strong:text-foreground prose-code:rounded-md prose-code:bg-indigo-500/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-indigo-700 prose-code:before:content-none prose-code:after:content-none prose-pre:rounded-xl prose-pre:border prose-pre:border-border prose-pre:bg-muted/50 prose-pre:p-0 prose-ul:text-muted-foreground prose-li:my-2"
                         >
                             <ReactMarkdown
                                 remarkPlugins={[remarkGfm]}
@@ -188,8 +188,8 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
                                             className || '',
                                         );
                                         return !inline && match ? (
-                                            <div className="my-8 overflow-hidden rounded-xl border border-white/10 shadow-2xl">
-                                                <div className="border-b border-white/10 bg-zinc-950 px-4 py-2 text-xs font-semibold tracking-wider text-zinc-500 uppercase">
+                                            <div className="my-8 overflow-hidden rounded-xl border border-border shadow-2xl">
+                                                <div className="border-b border-border bg-muted/30 px-4 py-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                                     {match[1]}
                                                 </div>
                                                 <SyntaxHighlighter
@@ -223,13 +223,13 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
                             </ReactMarkdown>
                         </motion.div>
 
-                        <div className="mt-20 flex flex-col items-center justify-between gap-6 border-t border-white/10 pt-10 sm:flex-row">
+                        <div className="mt-20 flex flex-col items-center justify-between gap-6 border-t border-border pt-10 sm:flex-row">
                             <div className="flex items-center gap-4">
-                                <span className="font-medium text-zinc-400">
+                                <span className="font-medium text-muted-foreground">
                                     Share this article:
                                 </span>
                                 <div className="flex gap-2">
-                                    <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-white transition-colors hover:bg-indigo-500 hover:text-white">
+                                    <button className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-indigo-500 hover:text-white">
                                         <svg
                                             className="h-4 w-4"
                                             fill="currentColor"
@@ -239,7 +239,7 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
                                             <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
                                         </svg>
                                     </button>
-                                    <button className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-white transition-colors hover:bg-blue-600 hover:text-white">
+                                    <button className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-blue-600 hover:text-white">
                                         <svg
                                             className="h-4 w-4"
                                             fill="currentColor"
@@ -262,11 +262,11 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
                     <aside className="lg:col-span-4">
                         <div className="sticky top-32 space-y-10">
                             {/* Newsletter CTA */}
-                            <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 p-8">
-                                <h3 className="mb-2 text-xl font-bold text-white">
+                            <div className="rounded-3xl border border-border bg-gradient-to-br from-indigo-500/10 to-purple-500/10 p-8">
+                                <h3 className="mb-2 text-xl font-bold text-foreground">
                                     Subscribe to our newsletter
                                 </h3>
-                                <p className="mb-6 text-sm text-zinc-400">
+                                <p className="mb-6 text-sm text-muted-foreground">
                                     Get the latest product updates and tutorials
                                     delivered directly to your inbox.
                                 </p>
@@ -283,12 +283,12 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
                                         }
                                         disabled={subscribing}
                                         placeholder="Your email address"
-                                        className="w-full rounded-xl border border-white/10 bg-zinc-900 px-4 py-3 text-white placeholder:text-zinc-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none disabled:opacity-50"
+                                        className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-indigo-500/50 focus:outline-none disabled:opacity-50"
                                     />
                                     <button
                                         type="submit"
                                         disabled={subscribing || !email}
-                                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 font-semibold text-zinc-950 transition-colors hover:bg-zinc-200 disabled:opacity-50"
+                                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                                     >
                                         {subscribing ? (
                                             <>
@@ -305,7 +305,7 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
                             {/* Related Posts */}
                             {sidebarPosts.length > 0 && (
                                 <div>
-                                    <h3 className="mb-6 text-lg font-bold text-white">
+                                    <h3 className="mb-6 text-lg font-bold text-foreground">
                                         Recent Articles
                                     </h3>
                                     <div className="space-y-6">
@@ -315,7 +315,7 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
                                                 href={`/${locale}/blog/${sidebarPost.translation?.slug}`}
                                                 className="group flex items-start gap-4"
                                             >
-                                                <div className="h-20 w-24 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-zinc-900">
+                                                <div className="h-20 w-24 shrink-0 overflow-hidden rounded-lg border border-border bg-card">
                                                     {sidebarPost.cover_image_url && (
                                                         <img
                                                             src={
@@ -333,14 +333,14 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
                                                     )}
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <h4 className="mb-2 line-clamp-2 text-sm font-semibold text-zinc-200 transition-colors group-hover:text-indigo-400">
+                                                    <h4 className="mb-2 line-clamp-2 text-sm font-semibold text-foreground transition-colors group-hover:text-indigo-600">
                                                         {
                                                             sidebarPost
                                                                 .translation
                                                                 ?.title
                                                         }
                                                     </h4>
-                                                    <span className="text-xs font-medium text-zinc-500">
+                                                    <span className="text-xs font-medium text-muted-foreground">
                                                         {new Date(
                                                             sidebarPost.published_at,
                                                         ).toLocaleDateString(
@@ -360,8 +360,8 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
                             )}
 
                             {/* Call to action for the product */}
-                            <div className="rounded-3xl border border-white/10 bg-zinc-900 p-8 text-center">
-                                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400">
+                            <div className="rounded-3xl border border-border bg-muted/50 p-8 text-center">
+                                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-600">
                                     <svg
                                         className="h-6 w-6"
                                         fill="none"
@@ -376,16 +376,16 @@ export default function Show({ post, latestPosts, locale, seo }: Props) {
                                         />
                                     </svg>
                                 </div>
-                                <h3 className="mb-3 text-xl font-bold text-white">
+                                <h3 className="mb-3 text-xl font-bold text-foreground">
                                     Extract data from PDFs automatically
                                 </h3>
-                                <p className="mb-6 text-sm text-zinc-400">
+                                <p className="mb-6 text-sm text-muted-foreground">
                                     Docset turns unstructured documents into
                                     JSON ready for your API.
                                 </p>
                                 <Link
                                     href={`/${locale}/register`}
-                                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-indigo-700"
+                                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                                 >
                                     Start Free Trial
                                     <ArrowUpRight className="h-4 w-4" />

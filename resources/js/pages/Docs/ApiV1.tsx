@@ -224,7 +224,7 @@ export default function ApiV1({ locale, markdown, lastUpdated }: ApiV1DocsProps)
             return (
                 <h2
                     id={id}
-                    className="scroll-mt-28 border-b border-white/10 pb-2 text-2xl font-semibold text-white"
+                    className="scroll-mt-28 border-b border-border pb-2 text-2xl font-semibold text-foreground"
                     {...props}
                 >
                     {children}
@@ -237,7 +237,7 @@ export default function ApiV1({ locale, markdown, lastUpdated }: ApiV1DocsProps)
             return (
                 <h3
                     id={id}
-                    className="scroll-mt-28 text-xl font-semibold text-zinc-100"
+                    className="scroll-mt-28 text-xl font-semibold text-foreground"
                     {...props}
                 >
                     {children}
@@ -247,7 +247,7 @@ export default function ApiV1({ locale, markdown, lastUpdated }: ApiV1DocsProps)
         code: ({ className, children, ...props }) => {
             return (
                 <code
-                    className={className ?? 'rounded bg-zinc-800 px-1.5 py-0.5 text-blue-200'}
+                    className={className ?? 'rounded bg-muted px-1.5 py-0.5 text-blue-700'}
                     {...props}
                 >
                     {children}
@@ -257,7 +257,7 @@ export default function ApiV1({ locale, markdown, lastUpdated }: ApiV1DocsProps)
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100">
+        <div className="min-h-screen bg-muted/30 text-foreground">
             <SEOHead
                 title={copy.title}
                 description={copy.description}
@@ -272,20 +272,20 @@ export default function ApiV1({ locale, markdown, lastUpdated }: ApiV1DocsProps)
                 ]}
             />
 
-            <header className="sticky top-0 z-40 border-b border-white/10 bg-zinc-950/90 backdrop-blur">
+            <header className="sticky top-0 z-40 border-b border-border bg-muted/30/90 backdrop-blur">
                 <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
                     <Link href={`/${appLocale}`} className="flex items-center gap-3">
                         <img src="/docset.png" alt="Docset" className="h-8 w-8 rounded-md" />
                         <span className="text-lg font-bold">DOCSET</span>
                     </Link>
-                    <nav className="hidden items-center gap-5 text-sm text-zinc-300 md:flex">
-                        <Link href={`/${appLocale}/blog`} className="hover:text-white">
+                    <nav className="hidden items-center gap-5 text-sm text-card-foreground md:flex">
+                        <Link href={`/${appLocale}/blog`} className="hover:text-foreground">
                             {copy.navBlog}
                         </Link>
-                        <Link href={`/${appLocale}/#pricing`} className="hover:text-white">
+                        <Link href={`/${appLocale}/#pricing`} className="hover:text-foreground">
                             {copy.navPricing}
                         </Link>
-                        <Link href={`/${appLocale}/register`} className="hover:text-white">
+                        <Link href={`/${appLocale}/register`} className="hover:text-foreground">
                             {copy.navStart}
                         </Link>
                     </nav>
@@ -293,19 +293,19 @@ export default function ApiV1({ locale, markdown, lastUpdated }: ApiV1DocsProps)
             </header>
 
             <main className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-10">
-                <section className="rounded-2xl border border-white/10 bg-zinc-900/60 p-6 md:p-8">
-                    <p className="text-sm text-blue-300">{copy.topTag}</p>
-                    <h1 className="mt-2 text-3xl font-bold text-white md:text-4xl">{copy.h1}</h1>
-                    <p className="mt-4 max-w-3xl text-zinc-300">{copy.intro}</p>
-                    <p className="mt-3 text-sm text-zinc-400">
+                <section className="rounded-2xl border border-border bg-card/60 p-6 md:p-8">
+                    <p className="text-sm text-blue-700">{copy.topTag}</p>
+                    <h1 className="mt-2 text-3xl font-bold text-foreground md:text-4xl">{copy.h1}</h1>
+                    <p className="mt-4 max-w-3xl text-card-foreground">{copy.intro}</p>
+                    <p className="mt-3 text-sm text-muted-foreground">
                         {copy.updated}: {lastUpdated}
                     </p>
                 </section>
 
                 <div className="mt-6 grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
                     <aside className="lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)] lg:overflow-y-auto">
-                        <div className="rounded-2xl border border-white/10 bg-zinc-900/50 p-4">
-                            <p className="mb-3 text-xs font-semibold tracking-wide text-zinc-400 uppercase">
+                        <div className="rounded-2xl border border-border bg-card/50 p-4">
+                            <p className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                                 {copy.navSections}
                             </p>
                             <nav aria-label={copy.navSections}>
@@ -318,8 +318,8 @@ export default function ApiV1({ locale, markdown, lastUpdated }: ApiV1DocsProps)
                                                     item.level === 3 ? 'ml-3 text-xs' : 'text-sm font-medium'
                                                 } ${
                                                     activeId === item.id
-                                                        ? 'bg-blue-500/15 text-blue-200'
-                                                        : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'
+                                                        ? 'bg-blue-100 text-blue-700'
+                                                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                                                 }`}
                                             >
                                                 {item.title}
@@ -334,31 +334,31 @@ export default function ApiV1({ locale, markdown, lastUpdated }: ApiV1DocsProps)
                     <div className="space-y-6">
                         <section
                             id="introduction"
-                            className="scroll-mt-28 rounded-2xl border border-white/10 bg-zinc-900/50 p-6 md:p-8"
+                            className="scroll-mt-28 rounded-2xl border border-border bg-card/50 p-6 md:p-8"
                         >
-                            <h2 className="text-2xl font-semibold text-white">{copy.introSection}</h2>
-                            <p className="mt-3 text-zinc-300">{copy.introText}</p>
+                            <h2 className="text-2xl font-semibold text-foreground">{copy.introSection}</h2>
+                            <p className="mt-3 text-card-foreground">{copy.introText}</p>
 
                             <div className="mt-5 grid gap-4 md:grid-cols-2">
-                                <div className="rounded-lg border border-white/10 bg-zinc-950/70 p-4">
-                                    <p className="text-xs font-medium tracking-wide text-zinc-400 uppercase">
+                                <div className="rounded-lg border border-border bg-muted/30/70 p-4">
+                                    <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
                                         JWT API
                                     </p>
-                                    <code className="mt-2 block text-sm text-blue-200">
+                                    <code className="mt-2 block text-sm text-blue-700">
                                         https://api.docset.app/v1
                                     </code>
                                 </div>
                             </div>
 
-                            <div className="mt-5 rounded-lg border border-white/10 bg-zinc-950/70 p-4">
-                                <h3 className="text-base font-semibold text-white">{copy.authTitle}</h3>
-                                <p className="mt-2 text-sm text-zinc-300">{copy.authText}</p>
+                            <div className="mt-5 rounded-lg border border-border bg-muted/30/70 p-4">
+                                <h3 className="text-base font-semibold text-foreground">{copy.authTitle}</h3>
+                                <p className="mt-2 text-sm text-card-foreground">{copy.authText}</p>
                             </div>
 
-                            <div className="mt-5 rounded-lg border border-white/10 bg-zinc-950/70 p-4">
-                                <h3 className="text-base font-semibold text-white">{copy.quickStart}</h3>
-                                <p className="mt-2 text-sm text-zinc-300">{copy.quickStartText}</p>
-                                <pre className="mt-3 overflow-x-auto rounded border border-white/10 bg-black p-3 text-xs text-zinc-200">
+                            <div className="mt-5 rounded-lg border border-border bg-muted/30/70 p-4">
+                                <h3 className="text-base font-semibold text-foreground">{copy.quickStart}</h3>
+                                <p className="mt-2 text-sm text-card-foreground">{copy.quickStartText}</p>
+                                <pre className="mt-3 overflow-x-auto rounded border border-border bg-background p-3 text-xs text-card-foreground">
                                     <code>{`curl -X POST https://api.docset.app/v1/auth/token \\
   -H "Accept: application/json" \\
   -H "Content-Type: application/json" \\
@@ -367,25 +367,25 @@ export default function ApiV1({ locale, markdown, lastUpdated }: ApiV1DocsProps)
                             </div>
                         </section>
 
-                        <section className="rounded-2xl border border-white/10 bg-zinc-900/40 p-6 md:p-8">
-                            <article className="prose prose-invert max-w-none prose-headings:text-white prose-a:text-blue-300 prose-code:text-blue-200 prose-pre:border prose-pre:border-white/10 prose-pre:bg-zinc-950 prose-strong:text-white prose-li:text-zinc-300 prose-p:text-zinc-300">
+                        <section className="rounded-2xl border border-border bg-card/40 p-6 md:p-8">
+                            <article className="prose max-w-none prose-headings:text-foreground prose-a:text-blue-700 prose-code:text-blue-700 prose-pre:border prose-pre:border-border prose-pre:bg-muted/30 prose-strong:text-foreground prose-li:text-card-foreground prose-p:text-card-foreground">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                     {markdown}
                                 </ReactMarkdown>
                             </article>
                         </section>
 
-                        <section className="rounded-2xl border border-white/10 bg-zinc-900/70 p-6 md:p-8">
-                            <h2 className="text-2xl font-bold text-white md:text-3xl">{copy.ctaTitle}</h2>
-                            <p className="mt-3 max-w-3xl text-zinc-300">{copy.ctaText}</p>
+                        <section className="rounded-2xl border border-border bg-card/70 p-6 md:p-8">
+                            <h2 className="text-2xl font-bold text-foreground md:text-3xl">{copy.ctaTitle}</h2>
+                            <p className="mt-3 max-w-3xl text-card-foreground">{copy.ctaText}</p>
                             <div className="mt-6 flex flex-wrap gap-3">
                                 <Link href={`/${appLocale}/register`}>
-                                    <Button className="bg-white font-semibold text-zinc-950 hover:bg-zinc-200">
+                                    <Button className="bg-primary font-semibold text-primary-foreground hover:bg-primary/90">
                                         {copy.ctaPrimary}
                                     </Button>
                                 </Link>
                                 <Link href={`/${appLocale}/#pricing`}>
-                                    <Button variant="outline" className="border-white/15 text-white hover:bg-white/10">
+                                    <Button variant="outline" className="border-input text-foreground hover:bg-muted">
                                         {copy.ctaSecondary}
                                     </Button>
                                 </Link>
